@@ -150,7 +150,10 @@ func (c *SchemaCache) loadAndDiscover(ctx context.Context, uris []string) ([]str
 }
 
 func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error) {
-	parsed, _ := url.Parse(raw)
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return nil, fmt.Errorf("parse schema URI %s: %w", raw, err)
+	}
 	switch parsed.Scheme {
 	case "file":
 		path, err := filePathFromURL(parsed)
@@ -166,7 +169,10 @@ func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error)
 		if !remoteFetchEnabled(c.cfg.Schema) {
 			return nil, fmt.Errorf("remote schema fetching disabled for %s", raw)
 		}
-		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, raw, nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, raw, nil)
+		if err != nil {
+			return nil, fmt.Errorf("build request for schema %s: %w", raw, err)
+		}
 		req.Header.Set("User-Agent", "dollarlint")
 		resp, err := c.client.Do(req)
 		if err != nil {

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 
 	"github.com/pelletier/go-toml/v2"
 	"gopkg.in/yaml.v3"
@@ -196,6 +197,9 @@ func tomlSchemaDirective(raw []byte) string {
 			continue
 		}
 		if schema, ok := strings.CutPrefix(trimmed, "#:schema"); ok {
+			if schema != "" && !unicode.IsSpace(rune(schema[0])) {
+				return ""
+			}
 			return strings.TrimSpace(schema)
 		}
 		return ""

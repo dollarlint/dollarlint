@@ -199,6 +199,7 @@ func collectValidationIssues(document *Document, err *jsonschema.ValidationError
 		InstanceLocation: instanceLocation(err.InstanceLocation),
 		Message:          validationMessage(err),
 	}
+	applyIssuePosition(document, &base)
 	switch typed := err.ErrorKind.(type) {
 	case *kind.Required:
 		for _, missing := range typed.Missing {
@@ -211,12 +212,31 @@ func collectValidationIssues(document *Document, err *jsonschema.ValidationError
 		for _, property := range typed.Properties {
 			issue := base
 			issue.Property = property
+			issue.InstanceLocation = joinPointer(issue.InstanceLocation, property)
+			applyIssuePosition(document, &issue)
 			issue.Message = fmt.Sprintf("additional property %q not allowed", property)
 			*issues = append(*issues, issue)
 		}
 	default:
 		*issues = append(*issues, base)
 	}
+}
+
+func applyIssuePosition(document *Document, issue *Issue) {
+	if issue.Line > 0 && issue.Column > 0 {
+		return
+	}
+	pointer := issue.InstanceLocation
+	if pointer == "" {
+		pointer = "/"
+	}
+	if pos, ok := document.SourceMap.Position(pointer); ok {
+		issue.Line = pos.Line
+		issue.Column = pos.Column
+		return
+	}
+	issue.Line = 1
+	issue.Column = 1
 }
 
 func keywordName(err *jsonschema.ValidationError) string {

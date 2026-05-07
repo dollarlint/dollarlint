@@ -21,6 +21,14 @@ func TestExecuteExitCodes(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
+	if code := Execute([]string{dir, "--sarif"}, &stdout, &stderr); code != 1 {
+		t.Fatalf("sarif run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"version": "2.1.0"`) || !strings.Contains(stdout.String(), `"startLine"`) {
+		t.Fatalf("sarif output mismatch: %s", stdout.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
 	if code := Execute([]string{filepath.Join(dir, "missing")}, &stdout, &stderr); code != 2 {
 		t.Fatalf("fatal run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}

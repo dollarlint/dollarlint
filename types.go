@@ -42,6 +42,7 @@ type TimeoutConfig struct {
 
 type OutputConfig struct {
 	JSON        bool `json:"json,omitempty" yaml:"json,omitempty" toml:"json,omitempty"`
+	SARIF       bool `json:"sarif,omitempty" yaml:"sarif,omitempty" toml:"sarif,omitempty"`
 	ShowSkipped bool `json:"showSkipped,omitempty" yaml:"showSkipped,omitempty" toml:"showSkipped,omitempty"`
 }
 
@@ -93,6 +94,8 @@ type Issue struct {
 	KeywordLocation  string `json:"keywordLocation,omitempty"`
 	Property         string `json:"property,omitempty"`
 	InstanceLocation string `json:"instanceLocation,omitempty"`
+	Line             int    `json:"line,omitempty"`
+	Column           int    `json:"column,omitempty"`
 	Message          string `json:"message"`
 	Ignored          bool   `json:"ignored,omitempty"`
 	IgnoreReason     string `json:"ignoreReason,omitempty"`

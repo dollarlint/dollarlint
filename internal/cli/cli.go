@@ -31,6 +31,7 @@ func Execute(args []string, stdout, stderr io.Writer) int {
 func NewRootCommand(stdout io.Writer) *cobra.Command {
 	var configPath string
 	var jsonOutput bool
+	var sarifOutput bool
 	var showSkipped bool
 	var includes []string
 	var excludes []string
@@ -86,12 +87,19 @@ func NewRootCommand(stdout io.Writer) *cobra.Command {
 				}
 			}
 			cfg.Output.JSON = cfg.Output.JSON || jsonOutput
+			cfg.Output.SARIF = cfg.Output.SARIF || sarifOutput
 			cfg.Output.ShowSkipped = cfg.Output.ShowSkipped || showSkipped
 			result, err := dollarlint.Lint(context.Background(), dollarlint.Options{Root: root, Config: cfg})
 			if err != nil {
 				return err
 			}
-			if cfg.Output.JSON {
+			if cfg.Output.SARIF {
+				data, err := dollarlint.FormatSARIF(result)
+				if err != nil {
+					return err
+				}
+				fmt.Fprintln(stdout, string(data))
+			} else if cfg.Output.JSON {
 				data, err := dollarlint.FormatJSON(result)
 				if err != nil {
 					return err
@@ -108,6 +116,7 @@ func NewRootCommand(stdout io.Writer) *cobra.Command {
 	}
 	cmd.Flags().StringVar(&configPath, "config", "", "Path to a dollarlint config file")
 	cmd.Flags().BoolVar(&jsonOutput, "json", false, "Write machine-readable JSON output")
+	cmd.Flags().BoolVar(&sarifOutput, "sarif", false, "Write SARIF 2.1.0 output")
 	cmd.Flags().BoolVar(&showSkipped, "show-skipped", false, "Show files skipped because they do not declare a schema")
 	cmd.Flags().StringArrayVar(&includes, "include", nil, "Glob to include during discovery; repeatable")
 	cmd.Flags().StringArrayVar(&excludes, "exclude", nil, "Glob to exclude during discovery; repeatable")

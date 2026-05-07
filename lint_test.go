@@ -213,4 +213,9 @@ func TestValidateDocumentNonValidationError(t *testing.T) {
 	if len(issues) != 1 || issues[0].Message != "plain" {
 		t.Fatalf("issuesFromSchemaError = %+v", issues)
 	}
+	issue = Issue{}
+	applyIssuePosition(&Document{SourceMap: SourceMap{"/": {Line: 9, Column: 2}}}, &issue)
+	if issue.Line != 9 || issue.Column != 2 {
+		t.Fatalf("empty pointer position = %+v", issue)
+	}
 }

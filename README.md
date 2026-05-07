@@ -15,6 +15,7 @@ go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
 ```sh
 dollarlint .
 dollarlint ./config --json
+dollarlint ./config --sarif > dollarlint.sarif
 dollarlint . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
 ```
 
@@ -88,10 +89,23 @@ ignore:
 
 output:
   json: false
+  sarif: false
   showSkipped: false
 ```
 
 By default, remote `http(s)` schema fetching is enabled. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
+
+## SARIF
+
+Use `--sarif` to emit SARIF 2.1.0 for GitHub code scanning and similar tools.
+
+`dollarlint` tracks line and column locations for JSON, YAML, and TOML files:
+
+- JSON positions are derived from a token walk over the source.
+- YAML positions come from `yaml.Node` line/column metadata.
+- TOML positions come from the `go-toml` AST byte ranges.
+
+When a validation issue points to something missing, such as a `required` property, SARIF falls back to the nearest parent object location.
 
 ## Go SDK
 

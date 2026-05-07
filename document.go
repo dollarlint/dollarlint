@@ -25,6 +25,7 @@ type Document struct {
 	Data         any
 	Schema       string
 	SchemaSource string
+	SourceMap    SourceMap
 }
 
 func ParseDocument(file DiscoveredFile) (*Document, error) {
@@ -40,6 +41,7 @@ func ParseDocument(file DiscoveredFile) (*Document, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse %s: %w", file.Path, err)
 	}
+	sourceMap, _ := buildSourceMap(raw, format)
 	schema, source := extractSchema(raw, data, format)
 	return &Document{
 		Path:         file.Path,
@@ -48,6 +50,7 @@ func ParseDocument(file DiscoveredFile) (*Document, error) {
 		Data:         data,
 		Schema:       schema,
 		SchemaSource: source,
+		SourceMap:    sourceMap,
 	}, nil
 }
 

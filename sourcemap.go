@@ -9,7 +9,6 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/pelletier/go-toml/v2/unstable"
 	"gopkg.in/yaml.v3"
 )
 
@@ -48,6 +47,25 @@ func buildSourceMap(raw []byte, format string) (SourceMap, error) {
 	default:
 		return nil, fmt.Errorf("unsupported source map format %s", format)
 	}
+}
+
+func safeBuildSourceMap(raw []byte, format string) (sourceMap SourceMap) {
+	return safeSourceMap(func() (SourceMap, error) {
+		return buildSourceMap(raw, format)
+	})
+}
+
+func safeSourceMap(build func() (SourceMap, error)) (sourceMap SourceMap) {
+	defer func() {
+		if recover() != nil {
+			sourceMap = nil
+		}
+	}()
+	sourceMap, err := build()
+	if err != nil {
+		return nil
+	}
+	return sourceMap
 }
 
 func buildJSONSourceMap(raw []byte) (SourceMap, error) {
@@ -165,86 +183,231 @@ func walkYAMLNode(node *yaml.Node, sourceMap SourceMap, pointer string) {
 }
 
 func buildTOMLSourceMap(raw []byte) (SourceMap, error) {
-	var parser unstable.Parser
-	parser.Reset(raw)
 	sourceMap := SourceMap{"/": {Line: 1, Column: 1}}
 	var currentTable []string
-	for parser.NextExpression() {
-		expr := parser.Expression()
-		switch expr.Kind {
-		case unstable.Table, unstable.ArrayTable:
-			currentTable = tomlKeyParts(expr)
-			setSourcePosition(sourceMap, pointerFromParts(currentTable), tomlKeyPosition(&parser, expr))
-		case unstable.KeyValue:
-			walkTOMLKeyValue(&parser, expr, currentTable, sourceMap)
+	for i, line := range strings.Split(string(raw), "\n") {
+		lineNo := i + 1
+		body := trimTOMLComment(line)
+		trimmed := strings.TrimSpace(body)
+		if trimmed == "" {
+			continue
 		}
-	}
-	if err := parser.Error(); err != nil {
-		return nil, err
+		if table, col, ok := parseTOMLTable(trimmed, line); ok {
+			currentTable = table
+			setSourcePosition(sourceMap, pointerFromParts(table), SourcePosition{Line: lineNo, Column: col})
+			continue
+		}
+		key, value, valueCol, ok := splitTOMLKeyValue(body)
+		if !ok {
+			continue
+		}
+		keyParts := append(append([]string(nil), currentTable...), splitTOMLKey(key)...)
+		pointer := pointerFromParts(keyParts)
+		setSourcePosition(sourceMap, pointer, SourcePosition{Line: lineNo, Column: valueCol})
+		scanTOMLValuePositions(sourceMap, keyParts, value, lineNo, valueCol)
 	}
 	return sourceMap, nil
 }
 
-func walkTOMLKeyValue(parser *unstable.Parser, node *unstable.Node, prefix []string, sourceMap SourceMap) {
-	keyParts := append(append([]string(nil), prefix...), tomlKeyParts(node)...)
-	pointer := pointerFromParts(keyParts)
-	value := node.Value()
-	setSourcePosition(sourceMap, pointer, tomlBestPosition(parser, value, node))
-	walkTOMLValue(parser, value, keyParts, sourceMap)
+func parseTOMLTable(trimmed, original string) ([]string, int, bool) {
+	arrayTable := strings.HasPrefix(trimmed, "[[")
+	if !strings.HasPrefix(trimmed, "[") {
+		return nil, 0, false
+	}
+	prefix := "["
+	suffix := "]"
+	if arrayTable {
+		prefix = "[["
+		suffix = "]]"
+	}
+	if !strings.HasSuffix(trimmed, suffix) {
+		return nil, 0, false
+	}
+	name := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(trimmed, prefix), suffix))
+	if name == "" {
+		return nil, 0, false
+	}
+	col := strings.Index(original, name) + 1
+	if col <= 0 {
+		col = 1
+	}
+	return splitTOMLKey(name), col, true
 }
 
-func walkTOMLValue(parser *unstable.Parser, node *unstable.Node, parts []string, sourceMap SourceMap) {
-	if node == nil {
-		return
+func splitTOMLKeyValue(line string) (string, string, int, bool) {
+	eq := indexTOMLTopLevel(line, '=')
+	if eq < 0 {
+		return "", "", 0, false
 	}
-	switch node.Kind {
-	case unstable.Array:
-		it := node.Children()
-		index := 0
-		for it.Next() {
-			child := it.Node()
-			childParts := append(append([]string(nil), parts...), strconv.Itoa(index))
-			setSourcePosition(sourceMap, pointerFromParts(childParts), tomlNodePosition(parser, child))
-			walkTOMLValue(parser, child, childParts, sourceMap)
-			index++
+	key := strings.TrimSpace(line[:eq])
+	valueStart := eq + 1
+	for valueStart < len(line) && unicode.IsSpace(rune(line[valueStart])) {
+		valueStart++
+	}
+	if key == "" || valueStart >= len(line) {
+		return "", "", 0, false
+	}
+	return key, line[valueStart:], valueStart + 1, true
+}
+
+func scanTOMLValuePositions(sourceMap SourceMap, parts []string, value string, line, column int) {
+	value = strings.TrimSpace(value)
+	switch {
+	case strings.HasPrefix(value, "["):
+		for i, offset := range tomlArrayElementOffsets(value) {
+			childParts := append(append([]string(nil), parts...), strconv.Itoa(i))
+			setSourcePosition(sourceMap, pointerFromParts(childParts), SourcePosition{Line: line, Column: column + offset})
 		}
-	case unstable.InlineTable:
-		it := node.Children()
-		for it.Next() {
-			walkTOMLKeyValue(parser, it.Node(), parts, sourceMap)
+	case strings.HasPrefix(value, "{"):
+		for _, kv := range tomlInlineTableEntries(value) {
+			childParts := append(append([]string(nil), parts...), splitTOMLKey(kv.key)...)
+			setSourcePosition(sourceMap, pointerFromParts(childParts), SourcePosition{Line: line, Column: column + kv.valueOffset})
 		}
 	}
 }
 
-func tomlKeyParts(node *unstable.Node) []string {
+func trimTOMLComment(line string) string {
+	inString := false
+	var quote byte
+	escaped := false
+	for i := 0; i < len(line); i++ {
+		ch := line[i]
+		if inString {
+			if escaped {
+				escaped = false
+				continue
+			}
+			if ch == '\\' && quote == '"' {
+				escaped = true
+				continue
+			}
+			if ch == quote {
+				inString = false
+			}
+			continue
+		}
+		if ch == '"' || ch == '\'' {
+			inString = true
+			quote = ch
+			continue
+		}
+		if ch == '#' {
+			return line[:i]
+		}
+	}
+	return line
+}
+
+func splitTOMLKey(key string) []string {
 	var parts []string
-	it := node.Key()
-	for it.Next() {
-		parts = append(parts, string(it.Node().Data))
+	for _, part := range splitTOMLTopLevel(key, '.') {
+		part = strings.TrimSpace(part)
+		part = strings.Trim(part, `"'`)
+		if part != "" {
+			parts = append(parts, part)
+		}
 	}
 	return parts
 }
 
-func tomlKeyPosition(parser *unstable.Parser, node *unstable.Node) SourcePosition {
-	it := node.Key()
-	it.Next()
-	return tomlNodePosition(parser, it.Node())
+func tomlArrayElementOffsets(value string) []int {
+	inner := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(value, "["), "]"))
+	if inner == "" {
+		return nil
+	}
+	var offsets []int
+	base := strings.Index(value, inner)
+	for _, part := range splitTOMLTopLevel(inner, ',') {
+		trimmed := strings.TrimLeftFunc(part, unicode.IsSpace)
+		if trimmed == "" {
+			base += len(part) + 1
+			continue
+		}
+		offsets = append(offsets, base+len(part)-len(trimmed))
+		base += len(part) + 1
+	}
+	return offsets
 }
 
-func tomlBestPosition(parser *unstable.Parser, preferred, fallback *unstable.Node) SourcePosition {
-	pos := tomlNodePosition(parser, preferred)
-	if pos.Line != 1 || pos.Column != 1 || preferred == nil || preferred.Raw.Length > 0 {
-		return pos
-	}
-	return tomlNodePosition(parser, fallback)
+type tomlInlineEntry struct {
+	key         string
+	valueOffset int
 }
 
-func tomlNodePosition(parser *unstable.Parser, node *unstable.Node) SourcePosition {
-	if node == nil {
-		return SourcePosition{Line: 1, Column: 1}
+func tomlInlineTableEntries(value string) []tomlInlineEntry {
+	inner := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(value, "{"), "}"))
+	if inner == "" {
+		return nil
 	}
-	shape := parser.Shape(node.Raw)
-	return SourcePosition{Line: shape.Start.Line, Column: shape.Start.Column}
+	base := strings.Index(value, inner)
+	var entries []tomlInlineEntry
+	for _, part := range splitTOMLTopLevel(inner, ',') {
+		eq := indexTOMLTopLevel(part, '=')
+		if eq < 0 {
+			base += len(part) + 1
+			continue
+		}
+		key := strings.TrimSpace(part[:eq])
+		valueStart := eq + 1
+		for valueStart < len(part) && unicode.IsSpace(rune(part[valueStart])) {
+			valueStart++
+		}
+		if key != "" && valueStart < len(part) {
+			entries = append(entries, tomlInlineEntry{key: key, valueOffset: base + valueStart})
+		}
+		base += len(part) + 1
+	}
+	return entries
+}
+
+func indexTOMLTopLevel(value string, needle rune) int {
+	parts := splitTOMLTopLevel(value, needle)
+	if len(parts) <= 1 {
+		return -1
+	}
+	return len(parts[0])
+}
+
+func splitTOMLTopLevel(value string, sep rune) []string {
+	var parts []string
+	start := 0
+	depth := 0
+	inString := false
+	var quote rune
+	escaped := false
+	for i, ch := range value {
+		if inString {
+			if escaped {
+				escaped = false
+				continue
+			}
+			if ch == '\\' && quote == '"' {
+				escaped = true
+				continue
+			}
+			if ch == quote {
+				inString = false
+			}
+			continue
+		}
+		switch ch {
+		case '"', '\'':
+			inString = true
+			quote = ch
+		case '[', '{':
+			depth++
+		case ']', '}':
+			if depth > 0 {
+				depth--
+			}
+		default:
+			if ch == sep && depth == 0 {
+				parts = append(parts, value[start:i])
+				start = i + len(string(ch))
+			}
+		}
+	}
+	return append(parts, value[start:])
 }
 
 func setSourcePosition(sourceMap SourceMap, pointer string, position SourcePosition) {

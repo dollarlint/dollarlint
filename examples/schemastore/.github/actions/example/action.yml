@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-action.json
+name: Example dollarlint action
+description: Composite action example that validates schema-declared source files.
+inputs:
+  path:
+    description: Directory or file to validate.
+    required: false
+    default: .
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: go run ./cmd/dollarlint "${{ inputs.path }}"

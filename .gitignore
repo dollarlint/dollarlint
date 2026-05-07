@@ -2,3 +2,6 @@ coverage.out
 coverage.html
 dist/
 dollarlint
+node_modules/
+website/.astro/
+website/dist/

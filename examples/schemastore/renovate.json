@@ -1,0 +1,12 @@
+{
+  "$schema": "https://www.schemastore.org/renovate.json",
+  "extends": ["config:recommended"],
+  "labels": ["dependencies"],
+  "schedule": ["before 5am on monday"],
+  "packageRules": [
+    {
+      "matchManagers": ["gomod"],
+      "groupName": "Go modules"
+    }
+  ]
+}

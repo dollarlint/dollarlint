@@ -1,0 +1,7 @@
+{
+  "$schema": "./widget.schema.json",
+  "name": "json widget",
+  "count": 3,
+  "enabled": true,
+  "tags": ["json", "valid"]
+}

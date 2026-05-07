@@ -14,9 +14,12 @@ go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
 
 ```sh
 dollarlint .
+dollarlint ./config --locations
+dollarlint ./config --verbose
 dollarlint ./config --json
 dollarlint ./config --sarif > dollarlint.sarif
 dollarlint . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
+dollarlint ./examples/schemastore --locations
 ```
 
 Exit codes:
@@ -91,21 +94,56 @@ output:
   json: false
   sarif: false
   showSkipped: false
+  verbose: false
+  quiet: false
+  locations: false
 ```
 
 By default, remote `http(s)` schema fetching is enabled. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
+
+## Examples
+
+The `examples/` directory includes a small local schema demo and a `examples/schemastore/` suite that validates common config files against remote schemas from `https://www.schemastore.org`.
+
+```sh
+dollarlint ./examples/schemastore --locations
+```
+
+## Text Output
+
+Default text output is grouped by file:
+
+```text
+dollarlint found 2 issues in 1 file after 47ms
+
+settings.json
+  /name   type      got number, want string
+  /count  minimum   minimum: got 0, want 1
+
+Summary: 4 discovered, 3 validated, 1 skipped, 2 issues in 47ms
+```
+
+Use `--locations` to opt into line/column source mapping for text and JSON output:
+
+```text
+settings.json
+  3:11  type      got number, want string  /name
+  4:12  minimum   minimum: got 0, want 1   /count
+```
+
+Use `--verbose` to show schema URI and keyword metadata under each issue. Use `--quiet` for terse success output.
 
 ## SARIF
 
 Use `--sarif` to emit SARIF 2.1.0 for GitHub code scanning and similar tools.
 
-`dollarlint` tracks line and column locations for JSON, YAML, and TOML files:
+`dollarlint` builds source-location maps only for SARIF runs or when `--locations` is requested, keeping ordinary text and JSON validation on the simpler validation path. SARIF locations are best-effort:
 
 - JSON positions are derived from a token walk over the source.
 - YAML positions come from `yaml.Node` line/column metadata.
-- TOML positions come from the `go-toml` AST byte ranges.
+- TOML positions come from a conservative line scanner for common keys, tables, arrays, and inline tables.
 
-When a validation issue points to something missing, such as a `required` property, SARIF falls back to the nearest parent object location.
+When a validation issue points to something missing, such as a `required` property, SARIF falls back to the nearest parent object location. If source mapping fails for any reason, validation still succeeds and SARIF falls back to file-level results.
 
 ## Go SDK
 

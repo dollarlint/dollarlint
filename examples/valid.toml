@@ -1,0 +1,5 @@
+#:schema ./widget.schema.json
+name = "toml widget"
+count = 5
+enabled = true
+tags = ["toml", "valid"]

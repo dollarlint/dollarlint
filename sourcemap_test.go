@@ -3,6 +3,8 @@ package dollarlint
 import (
 	"bytes"
 	"encoding/json"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -46,9 +48,9 @@ func TestSourceMapTOMLPositions(t *testing.T) {
 	assertPosition(t, sourceMap, "/server", 1, 2)
 	assertPosition(t, sourceMap, "/server/name", 2, 8)
 	assertPosition(t, sourceMap, "/server/ports/1", 3, 13)
-	assertPosition(t, sourceMap, "/server/inline/enabled", 4, 12)
-	if _, err := buildTOMLSourceMap([]byte("=")); err == nil {
-		t.Fatalf("expected bad toml source map error")
+	assertPosition(t, sourceMap, "/server/inline/enabled", 4, 22)
+	if sourceMap := safeBuildSourceMap([]byte("="), DocumentFormatTOML); sourceMap == nil {
+		t.Fatalf("best-effort toml source map should still return root")
 	}
 }
 
@@ -76,13 +78,23 @@ func TestSourceMapHelpers(t *testing.T) {
 	if _, err := buildSourceMap(nil, "nope"); err == nil {
 		t.Fatalf("expected unsupported source map format")
 	}
+	if _, err := buildSourceMap([]byte(`{"ok": true}`), DocumentFormatJSON); err != nil {
+		t.Fatalf("buildSourceMap json: %v", err)
+	}
+	if _, err := buildSourceMap([]byte(`ok: true`), DocumentFormatYAML); err != nil {
+		t.Fatalf("buildSourceMap yaml: %v", err)
+	}
+	if sourceMap := safeBuildSourceMap(nil, "nope"); sourceMap != nil {
+		t.Fatalf("unsupported safe source map should degrade to nil")
+	}
+	if sourceMap := safeSourceMap(func() (SourceMap, error) {
+		panic("boom")
+	}); sourceMap != nil {
+		t.Fatalf("panic should degrade to nil source map")
+	}
 	setSourcePosition(sourceMap, "/zero", SourcePosition{})
 	assertPosition(t, sourceMap, "/zero", 1, 1)
-	if pos := tomlNodePosition(nil, nil); pos.Line != 1 || pos.Column != 1 {
-		t.Fatalf("nil toml node position = %+v", pos)
-	}
 	walkYAMLNode(nil, sourceMap, "/nil")
-	walkTOMLValue(nil, nil, nil, sourceMap)
 	if tokenStartOffset([]byte("x"), 5, true) != 0 {
 		t.Fatalf("tokenStartOffset should clamp end")
 	}
@@ -92,6 +104,78 @@ func TestSourceMapHelpers(t *testing.T) {
 	if tokenStartOffset(nil, 0, json.Delim('{')) != 0 {
 		t.Fatalf("empty delimiter start should be zero")
 	}
+}
+
+func TestAttachSourceMap(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "doc.json")
+	writeFile(t, path, `{"name": "ok"}`)
+	document := &Document{Path: path, Format: DocumentFormatJSON}
+	AttachSourceMap(document)
+	assertPosition(t, document.SourceMap, "/name", 1, 10)
+	existing := document.SourceMap
+	AttachSourceMap(document)
+	if len(document.SourceMap) != len(existing) {
+		t.Fatalf("existing source map should be left alone")
+	}
+	AttachSourceMap(nil)
+	missing := &Document{Path: filepath.Join(dir, "missing.json"), Format: DocumentFormatJSON}
+	AttachSourceMap(missing)
+	if missing.SourceMap != nil {
+		t.Fatalf("missing file should not attach source map")
+	}
+}
+
+func TestTOMLScannerEdges(t *testing.T) {
+	sourceMap, err := buildTOMLSourceMap([]byte("[[servers]] # comment\nempty = []\ninline = {}\nquoted = \"# not comment\"\narr = [ , \"x\" ]\ninvalid-inline = { nope }\n\"dotted.key\" = 1\n"))
+	if err != nil {
+		t.Fatalf("buildTOMLSourceMap edges: %v", err)
+	}
+	assertPosition(t, sourceMap, "/servers", 1, 3)
+	assertPosition(t, sourceMap, "/servers/quoted", 4, 10)
+	assertPosition(t, sourceMap, "/servers/arr/0", 5, 11)
+	assertPosition(t, sourceMap, "/servers/dotted.key", 7, 16)
+	if table, _, ok := parseTOMLTable("[missing", "[missing"); ok || table != nil {
+		t.Fatalf("malformed table should not parse")
+	}
+	if table, _, ok := parseTOMLTable("[]", "[]"); ok || table != nil {
+		t.Fatalf("empty table should not parse")
+	}
+	if table, col, ok := parseTOMLTable("[missing]", "[]"); !ok || table[0] != "missing" || col != 1 {
+		t.Fatalf("table fallback column = %v %d %v", table, col, ok)
+	}
+	if _, _, _, ok := splitTOMLKeyValue("not a kv"); ok {
+		t.Fatalf("line without equals should not parse as key-value")
+	}
+	if comment := trimTOMLComment(`name = "escaped \" # still string" # comment`); strings.Contains(comment, "comment") {
+		t.Fatalf("escaped string comment trim = %q", comment)
+	}
+	if parts := splitTOMLTopLevel(`"a\".b".c`, '.'); len(parts) != 2 {
+		t.Fatalf("escaped split parts = %+v", parts)
+	}
+	if entries := tomlInlineTableEntries("{}"); entries != nil {
+		t.Fatalf("empty inline table entries = %+v", entries)
+	}
+	if offsets := tomlArrayElementOffsets("[]"); offsets != nil {
+		t.Fatalf("empty array offsets = %+v", offsets)
+	}
+	if indexTOMLTopLevel("abc", '=') != -1 {
+		t.Fatalf("missing top-level separator should be -1")
+	}
+}
+
+func FuzzSafeBuildSourceMap(f *testing.F) {
+	f.Add(DocumentFormatJSON, []byte(`{"name":"ok"}`))
+	f.Add(DocumentFormatYAML, []byte("name: ok\n"))
+	f.Add(DocumentFormatTOML, []byte("name = \"ok\"\n"))
+	f.Fuzz(func(t *testing.T, format string, raw []byte) {
+		switch format {
+		case DocumentFormatJSON, DocumentFormatYAML, DocumentFormatTOML:
+			_ = safeBuildSourceMap(raw, format)
+		default:
+			_ = safeBuildSourceMap(raw, DocumentFormatJSON)
+		}
+	})
 }
 
 func TestJSONWalkerErrorBranches(t *testing.T) {

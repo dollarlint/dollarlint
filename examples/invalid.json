@@ -1,0 +1,6 @@
+{
+  "$schema": "./widget.schema.json",
+  "name": 42,
+  "count": 0,
+  "extra": "not allowed"
+}

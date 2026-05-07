@@ -1,0 +1,5 @@
+# yaml-language-server: $schema=./widget.schema.json
+name: yaml widget
+count: many
+enabled: true
+extra: not allowed

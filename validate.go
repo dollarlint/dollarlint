@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/santhosh-tekuri/jsonschema/v6/kind"
@@ -21,6 +22,7 @@ func (l compilerLoader) Load(url string) (any, error) {
 }
 
 func Lint(ctx context.Context, opts Options) (Result, error) {
+	start := time.Now()
 	cfg := opts.Config
 	cfg.ApplyDefaults()
 	root := opts.Root
@@ -71,6 +73,9 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		document.Schema = resolved
 		fileResult.Schema = resolved
 		fileResult.Status = StatusValidated
+		if cfg.Output.SARIF || cfg.Output.Locations {
+			AttachSourceMap(document)
+		}
 		fileIndexes[document.RelativePath] = len(result.Files)
 		result.Files = append(result.Files, fileResult)
 		documents = append(documents, document)
@@ -96,6 +101,8 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 			result.Summary.Failed++
 		}
 	}
+	result.Summary.Duration = NewDuration(time.Since(start))
+	result.Summary.DurationNanos = result.Summary.Duration.Nanoseconds()
 	return result, nil
 }
 
@@ -213,6 +220,8 @@ func collectValidationIssues(document *Document, err *jsonschema.ValidationError
 			issue := base
 			issue.Property = property
 			issue.InstanceLocation = joinPointer(issue.InstanceLocation, property)
+			issue.Line = 0
+			issue.Column = 0
 			applyIssuePosition(document, &issue)
 			issue.Message = fmt.Sprintf("additional property %q not allowed", property)
 			*issues = append(*issues, issue)
@@ -233,10 +242,7 @@ func applyIssuePosition(document *Document, issue *Issue) {
 	if pos, ok := document.SourceMap.Position(pointer); ok {
 		issue.Line = pos.Line
 		issue.Column = pos.Column
-		return
 	}
-	issue.Line = 1
-	issue.Column = 1
 }
 
 func keywordName(err *jsonschema.ValidationError) string {

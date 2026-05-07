@@ -46,6 +46,9 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	if result.Summary.Ignored != 1 || result.Summary.Issues != 3 || !result.HasIssues() {
 		t.Fatalf("issue counts = %+v issues=%+v", result.Summary, result.Issues)
 	}
+	if result.Summary.Duration.Duration <= 0 || result.Summary.DurationNanos <= 0 {
+		t.Fatalf("duration was not recorded: %+v", result.Summary)
+	}
 	var sawRequired, sawType, sawIgnored bool
 	for _, issue := range result.Issues {
 		switch {
@@ -60,8 +63,8 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	if !sawRequired || !sawType || !sawIgnored {
 		t.Fatalf("missing expected issues: %+v", result.Issues)
 	}
-	text := FormatText(result, true)
-	if !strings.Contains(text, "dollarlint: 5 discovered") || !strings.Contains(text, "skipped: skip.yaml") {
+	text := FormatText(result, OutputConfig{ShowSkipped: true})
+	if !strings.Contains(text, "dollarlint found 3 issues in 2 files") || !strings.Contains(text, "skipped: skip.yaml") {
 		t.Fatalf("text output = %s", text)
 	}
 	data, err := FormatJSON(result)
@@ -71,6 +74,28 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	var decoded Result
 	if err := json.Unmarshal(data, &decoded); err != nil {
 		t.Fatalf("json output invalid: %v", err)
+	}
+}
+
+func TestLintOnlyBuildsSourceLocationsForSARIF(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["name"],"properties":{"$schema":{"type":"string"},"name":{"type":"string"}}}`)
+	writeFile(t, filepath.Join(dir, "bad.json"), `{"$schema":"./schema.json"}`)
+	result, err := Lint(context.Background(), Options{Root: dir, Config: DefaultConfig()})
+	if err != nil {
+		t.Fatalf("Lint without sarif: %v", err)
+	}
+	if len(result.Issues) != 1 || result.Issues[0].Line != 0 || result.Issues[0].Column != 0 {
+		t.Fatalf("non-SARIF issue should not have source location: %+v", result.Issues)
+	}
+	cfg := DefaultConfig()
+	cfg.Output.SARIF = true
+	result, err = Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint with sarif: %v", err)
+	}
+	if len(result.Issues) != 1 || result.Issues[0].Line == 0 || result.Issues[0].Column == 0 {
+		t.Fatalf("SARIF issue should have source location: %+v", result.Issues)
 	}
 }
 
@@ -217,5 +242,9 @@ func TestValidateDocumentNonValidationError(t *testing.T) {
 	applyIssuePosition(&Document{SourceMap: SourceMap{"/": {Line: 9, Column: 2}}}, &issue)
 	if issue.Line != 9 || issue.Column != 2 {
 		t.Fatalf("empty pointer position = %+v", issue)
+	}
+	applyIssuePosition(&Document{}, &issue)
+	if issue.Line != 9 || issue.Column != 2 {
+		t.Fatalf("existing position should not be overwritten: %+v", issue)
 	}
 }

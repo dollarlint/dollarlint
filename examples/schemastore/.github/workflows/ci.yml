@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
+name: Example CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  dollarlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+      - run: go test ./...
+      - run: go run ./cmd/dollarlint ./examples/schemastore

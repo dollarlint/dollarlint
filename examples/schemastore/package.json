@@ -1,0 +1,13 @@
+{
+  "$schema": "https://www.schemastore.org/package.json",
+  "name": "dollarlint-schemastore-package-example",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "lint:schemas": "dollarlint ."
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

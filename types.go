@@ -44,6 +44,9 @@ type OutputConfig struct {
 	JSON        bool `json:"json,omitempty" yaml:"json,omitempty" toml:"json,omitempty"`
 	SARIF       bool `json:"sarif,omitempty" yaml:"sarif,omitempty" toml:"sarif,omitempty"`
 	ShowSkipped bool `json:"showSkipped,omitempty" yaml:"showSkipped,omitempty" toml:"showSkipped,omitempty"`
+	Verbose     bool `json:"verbose,omitempty" yaml:"verbose,omitempty" toml:"verbose,omitempty"`
+	Quiet       bool `json:"quiet,omitempty" yaml:"quiet,omitempty" toml:"quiet,omitempty"`
+	Locations   bool `json:"locations,omitempty" yaml:"locations,omitempty" toml:"locations,omitempty"`
 }
 
 type IgnoreRule struct {
@@ -66,12 +69,14 @@ type Result struct {
 }
 
 type Summary struct {
-	Discovered int `json:"discovered"`
-	Validated  int `json:"validated"`
-	Skipped    int `json:"skipped"`
-	Failed     int `json:"failed"`
-	Issues     int `json:"issues"`
-	Ignored    int `json:"ignored"`
+	Discovered    int      `json:"discovered"`
+	Validated     int      `json:"validated"`
+	Skipped       int      `json:"skipped"`
+	Failed        int      `json:"failed"`
+	Issues        int      `json:"issues"`
+	Ignored       int      `json:"ignored"`
+	Duration      Duration `json:"duration,omitempty"`
+	DurationNanos int64    `json:"durationNanos,omitempty"`
 }
 
 type FileResult struct {

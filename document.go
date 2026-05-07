@@ -41,7 +41,6 @@ func ParseDocument(file DiscoveredFile) (*Document, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse %s: %w", file.Path, err)
 	}
-	sourceMap, _ := buildSourceMap(raw, format)
 	schema, source := extractSchema(raw, data, format)
 	return &Document{
 		Path:         file.Path,
@@ -50,8 +49,18 @@ func ParseDocument(file DiscoveredFile) (*Document, error) {
 		Data:         data,
 		Schema:       schema,
 		SchemaSource: source,
-		SourceMap:    sourceMap,
 	}, nil
+}
+
+func AttachSourceMap(document *Document) {
+	if document == nil || document.SourceMap != nil {
+		return
+	}
+	raw, err := os.ReadFile(document.Path)
+	if err != nil {
+		return
+	}
+	document.SourceMap = safeBuildSourceMap(raw, document.Format)
 }
 
 func formatForPath(path string) (string, error) {

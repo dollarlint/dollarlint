@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=./widget.schema.json
+name: yaml widget
+count: 2
+enabled: true
+tags:
+  - yaml
+  - valid

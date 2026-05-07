@@ -1,0 +1,115 @@
+:root {
+  --sl-font: ui-sans-serif, "Avenir Next", "Segoe UI", sans-serif;
+  --sl-font-mono: "SFMono-Regular", "Cascadia Code", "Liberation Mono", monospace;
+  --sl-color-accent-low: #dbe7ce;
+  --sl-color-accent: #3d6f3e;
+  --sl-color-accent-high: #123b2a;
+  --sl-color-white: #fffdf6;
+  --sl-color-gray-1: #f7f1df;
+  --sl-color-gray-2: #eee4c8;
+  --sl-color-gray-3: #d5c8a4;
+  --sl-color-gray-4: #9e987f;
+  --sl-color-gray-5: #66664f;
+  --sl-color-gray-6: #454733;
+  --sl-color-black: #172118;
+  --dollar-gold: #d0aa45;
+  --dollar-ink: #123b2a;
+  --dollar-paper: #f7f1df;
+  --dollar-mint: #edf7e8;
+}
+
+:root[data-theme="dark"] {
+  --sl-color-accent-low: #193826;
+  --sl-color-accent: #8fbc7b;
+  --sl-color-accent-high: #dff4ce;
+  --sl-color-white: #fbfff7;
+  --sl-color-gray-1: #eaf1df;
+  --sl-color-gray-2: #c7d3bb;
+  --sl-color-gray-3: #9cad90;
+  --sl-color-gray-4: #66755d;
+  --sl-color-gray-5: #3d4d37;
+  --sl-color-gray-6: #263525;
+  --sl-color-black: #0b1510;
+  --dollar-gold: #d6b35b;
+  --dollar-ink: #dff4ce;
+  --dollar-paper: #10251b;
+  --dollar-mint: #193826;
+}
+
+body {
+  background:
+    radial-gradient(circle at 18% 12%, color-mix(in srgb, var(--sl-color-accent-low), transparent 38%), transparent 24rem),
+    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--dollar-gold), transparent 72%), transparent 18rem),
+    var(--sl-color-bg);
+}
+
+.site-title {
+  letter-spacing: -0.04em;
+}
+
+.hero {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: -2.5rem -1rem auto;
+  z-index: -1;
+  min-height: 24rem;
+  border-radius: 2rem;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--sl-color-accent-low), transparent 18%), transparent 55%),
+    repeating-linear-gradient(115deg, transparent 0 17px, color-mix(in srgb, var(--sl-color-accent), transparent 91%) 17px 18px);
+  mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+.hero h1 {
+  max-width: 12ch;
+  letter-spacing: -0.07em;
+}
+
+.hero .tagline {
+  max-width: 48rem;
+}
+
+.sl-markdown-content .signal-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  margin-block: 2rem;
+}
+
+.sl-markdown-content .signal-card {
+  border: 1px solid color-mix(in srgb, var(--sl-color-accent), transparent 76%);
+  border-radius: 1.25rem;
+  padding: 1.1rem;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--sl-color-bg-nav), transparent 10%), transparent),
+    color-mix(in srgb, var(--sl-color-bg), var(--dollar-paper) 18%);
+  box-shadow: 0 24px 80px color-mix(in srgb, var(--sl-color-black), transparent 92%);
+}
+
+.sl-markdown-content .signal-card strong {
+  color: var(--sl-color-accent-high);
+  display: block;
+  font-size: 1.05rem;
+  margin-bottom: 0.35rem;
+}
+
+.sl-markdown-content .command-strip {
+  border: 1px solid color-mix(in srgb, var(--dollar-gold), transparent 52%);
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  background: color-mix(in srgb, var(--dollar-gold), transparent 90%);
+  color: var(--dollar-ink);
+  font-family: var(--sl-font-mono);
+}
+
+.sl-markdown-content .money-note {
+  border-left: 0.35rem solid var(--dollar-gold);
+  border-radius: 0.8rem;
+  padding: 1rem 1.1rem;
+  background: color-mix(in srgb, var(--sl-color-accent-low), transparent 45%);
+}

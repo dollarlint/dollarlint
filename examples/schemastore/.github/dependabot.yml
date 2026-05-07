@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://www.schemastore.org/dependabot-2.0.json
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - go
+  - package-ecosystem: npm
+    directory: /website
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - website

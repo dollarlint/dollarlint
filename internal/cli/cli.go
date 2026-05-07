@@ -33,6 +33,9 @@ func NewRootCommand(stdout io.Writer) *cobra.Command {
 	var jsonOutput bool
 	var sarifOutput bool
 	var showSkipped bool
+	var verbose bool
+	var quiet bool
+	var locations bool
 	var includes []string
 	var excludes []string
 	var associations []string
@@ -89,6 +92,9 @@ func NewRootCommand(stdout io.Writer) *cobra.Command {
 			cfg.Output.JSON = cfg.Output.JSON || jsonOutput
 			cfg.Output.SARIF = cfg.Output.SARIF || sarifOutput
 			cfg.Output.ShowSkipped = cfg.Output.ShowSkipped || showSkipped
+			cfg.Output.Verbose = cfg.Output.Verbose || verbose
+			cfg.Output.Quiet = cfg.Output.Quiet || quiet
+			cfg.Output.Locations = cfg.Output.Locations || locations
 			result, err := dollarlint.Lint(context.Background(), dollarlint.Options{Root: root, Config: cfg})
 			if err != nil {
 				return err
@@ -106,7 +112,7 @@ func NewRootCommand(stdout io.Writer) *cobra.Command {
 				}
 				fmt.Fprintln(stdout, string(data))
 			} else {
-				fmt.Fprint(stdout, dollarlint.FormatText(result, cfg.Output.ShowSkipped))
+				fmt.Fprint(stdout, dollarlint.FormatText(result, cfg.Output))
 			}
 			if result.HasIssues() {
 				return errIssues
@@ -118,6 +124,9 @@ func NewRootCommand(stdout io.Writer) *cobra.Command {
 	cmd.Flags().BoolVar(&jsonOutput, "json", false, "Write machine-readable JSON output")
 	cmd.Flags().BoolVar(&sarifOutput, "sarif", false, "Write SARIF 2.1.0 output")
 	cmd.Flags().BoolVar(&showSkipped, "show-skipped", false, "Show files skipped because they do not declare a schema")
+	cmd.Flags().BoolVar(&verbose, "verbose", false, "Show expanded issue metadata in text output")
+	cmd.Flags().BoolVar(&quiet, "quiet", false, "Use terse text output")
+	cmd.Flags().BoolVar(&locations, "locations", false, "Include line and column locations in text and JSON output")
 	cmd.Flags().StringArrayVar(&includes, "include", nil, "Glob to include during discovery; repeatable")
 	cmd.Flags().StringArrayVar(&excludes, "exclude", nil, "Glob to exclude during discovery; repeatable")
 	cmd.Flags().StringArrayVar(&associations, "schema", nil, "Associate a file glob with a schema as glob=uri; repeatable")

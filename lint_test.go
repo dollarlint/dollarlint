@@ -1,0 +1,216 @@
+package dollarlint
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/santhosh-tekuri/jsonschema/v6"
+	"github.com/santhosh-tekuri/jsonschema/v6/kind"
+)
+
+func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "schema.json"), `{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["name"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {"type": "string"},
+    "name": {"type": "string"},
+    "count": {"type": "integer"}
+  }
+}`)
+	writeFile(t, filepath.Join(dir, "valid.json"), `{"$schema":"./schema.json","name":"ok","count":1}`)
+	writeFile(t, filepath.Join(dir, "invalid.json"), `{"$schema":"./schema.json","count":"no","extra":true}`)
+	writeFile(t, filepath.Join(dir, "skip.yaml"), `name: no schema`)
+	writeFile(t, filepath.Join(dir, "associated.toml"), `name = 42`)
+	cfg := DefaultConfig()
+	cfg.Schema.Associations = []SchemaAssociation{{File: "*.toml", Schema: "./schema.json"}}
+	cfg.Ignore = []IgnoreRule{{File: "invalid.json", Keyword: "additionalProperties", Property: "extra", Reason: "known extra"}}
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if result.Summary.Discovered != 5 || result.Summary.Validated != 4 || result.Summary.Skipped != 1 {
+		t.Fatalf("summary counts = %+v", result.Summary)
+	}
+	if result.Summary.Ignored != 1 || result.Summary.Issues != 3 || !result.HasIssues() {
+		t.Fatalf("issue counts = %+v issues=%+v", result.Summary, result.Issues)
+	}
+	var sawRequired, sawType, sawIgnored bool
+	for _, issue := range result.Issues {
+		switch {
+		case issue.Keyword == "required" && issue.Property == "name":
+			sawRequired = true
+		case issue.Keyword == "type" && issue.Property == "count":
+			sawType = true
+		case issue.Ignored && issue.Property == "extra":
+			sawIgnored = true
+		}
+	}
+	if !sawRequired || !sawType || !sawIgnored {
+		t.Fatalf("missing expected issues: %+v", result.Issues)
+	}
+	text := FormatText(result, true)
+	if !strings.Contains(text, "dollarlint: 5 discovered") || !strings.Contains(text, "skipped: skip.yaml") {
+		t.Fatalf("text output = %s", text)
+	}
+	data, err := FormatJSON(result)
+	if err != nil {
+		t.Fatalf("FormatJSON: %v", err)
+	}
+	var decoded Result
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("json output invalid: %v", err)
+	}
+}
+
+func TestLintParseSchemaAndPrimeErrors(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "bad.json"), `{`)
+	writeFile(t, filepath.Join(dir, "bad-schema.json"), `{"$schema":"./missing.json"}`)
+	writeFile(t, filepath.Join(dir, "invalid-schema.json"), `{"$schema":"./schema.json","name":"ok"}`)
+	writeFile(t, filepath.Join(dir, "schema.json"), `{"type": 42}`)
+	result, err := Lint(context.Background(), Options{Root: dir, Config: DefaultConfig()})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if result.Summary.Issues == 0 {
+		t.Fatalf("expected parse/schema issues")
+	}
+	var parseIssue, compileIssue bool
+	for _, issue := range result.Issues {
+		if strings.Contains(issue.Message, "parse") {
+			parseIssue = true
+		}
+		if strings.Contains(issue.Message, "compile schema") {
+			compileIssue = true
+		}
+	}
+	if !parseIssue || !compileIssue {
+		t.Fatalf("issues = %+v", result.Issues)
+	}
+}
+
+func TestLintRootAndDiscoveryErrorEdges(t *testing.T) {
+	result, err := Lint(context.Background(), Options{Config: Config{Discovery: DiscoveryConfig{Include: []string{"*.nothing"}}}})
+	if err != nil {
+		t.Fatalf("Lint default root: %v", err)
+	}
+	if result.Root != "." {
+		t.Fatalf("default root = %q", result.Root)
+	}
+	_, err = Lint(context.Background(), Options{Root: filepath.Join(t.TempDir(), "missing"), Config: DefaultConfig()})
+	if err == nil {
+		t.Fatalf("expected discovery error")
+	}
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "bad-uri.json"), `{"$schema":"%zz"}`)
+	result, err = Lint(context.Background(), Options{Root: dir, Config: DefaultConfig()})
+	if err != nil {
+		t.Fatalf("Lint bad URI: %v", err)
+	}
+	if result.Summary.Failed != 1 || result.Summary.Issues != 1 {
+		t.Fatalf("bad URI result = %+v", result)
+	}
+}
+
+func TestCompileSchemaTimeout(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(50 * time.Millisecond)
+		w.Write([]byte(`{"type":"string"}`))
+	}))
+	defer server.Close()
+	dir := t.TempDir()
+	schemaPath := filepath.Join(dir, "schema.json")
+	writeFile(t, schemaPath, `{"$ref":`+strconv.Quote(server.URL+`/slow.json`)+`}`)
+	schemaURL, err := fileURL(schemaPath)
+	if err != nil {
+		t.Fatalf("fileURL: %v", err)
+	}
+	cfg := DefaultConfig()
+	cfg.Timeouts.Compile = NewDuration(time.Millisecond)
+	cfg.Timeouts.Fetch = NewDuration(time.Second)
+	cache := NewSchemaCache(cfg)
+	_, err = compileSchema(context.Background(), cache, cfg, schemaURL.String())
+	if err == nil {
+		t.Fatalf("expected compile timeout")
+	}
+}
+
+func TestValidationIssueHelpers(t *testing.T) {
+	doc := &Document{Path: "/tmp/file.json", RelativePath: "file.json", Schema: "file:///tmp/schema.json"}
+	err := &jsonschema.ValidationError{
+		SchemaURL:        "file:///tmp/schema.json",
+		InstanceLocation: []string{"name"},
+		ErrorKind:        &kind.PropertyNames{Property: "bad"},
+	}
+	issues := issuesFromValidationError(doc, err)
+	if len(issues) != 1 || issues[0].Property != "bad" || issues[0].InstanceLocation != "/name" {
+		t.Fatalf("property issue = %+v", issues)
+	}
+	noKind := &jsonschema.ValidationError{}
+	if keywordName(noKind) != "" || keywordLocation(noKind) != "" {
+		t.Fatalf("expected empty keyword helpers")
+	}
+	if instanceLocation(nil) != "/" {
+		t.Fatalf("root instance location mismatch")
+	}
+	if validationMessage(noKind) == "" {
+		t.Fatalf("expected fallback validation message")
+	}
+	dep := propertyFromKind(&kind.Dependency{Prop: "a"})
+	depReq := propertyFromKind(&kind.DependentRequired{Prop: "b"})
+	if dep != "a" || depReq != "b" || propertyFromKind(nil) != "" {
+		t.Fatalf("dependency properties = %q %q", dep, depReq)
+	}
+}
+
+func TestIgnoreMatching(t *testing.T) {
+	issue := Issue{RelativePath: "nested/file.json", Keyword: "type", KeywordLocation: "/properties/name/type", Property: "name", InstanceLocation: "/name"}
+	if !ignoreMatches(issue, IgnoreRule{File: "**/*.json", Keyword: "/properties/name/type", Property: "/name"}) {
+		t.Fatalf("expected ignore by keyword location and instance pointer")
+	}
+	if ignoreMatches(issue, IgnoreRule{File: "*.yaml"}) {
+		t.Fatalf("unexpected file match")
+	}
+	if ignoreMatches(issue, IgnoreRule{Keyword: "required"}) {
+		t.Fatalf("unexpected keyword match")
+	}
+	if ignoreMatches(issue, IgnoreRule{Property: "/other"}) {
+		t.Fatalf("unexpected property pointer match")
+	}
+	applyIgnore(&issue, []IgnoreRule{{Property: "na*"}})
+	if !issue.Ignored || issue.IgnoreReason != "matched ignore rule" {
+		t.Fatalf("applyIgnore = %+v", issue)
+	}
+}
+
+func TestApplySchemaAssociationSkipsIncompleteRules(t *testing.T) {
+	doc := &Document{RelativePath: "file.json"}
+	applySchemaAssociation(doc, []SchemaAssociation{{File: ""}, {File: "*.yaml", Schema: "schema.json"}})
+	if doc.Schema != "" {
+		t.Fatalf("unexpected association = %+v", doc)
+	}
+}
+
+func TestValidateDocumentNonValidationError(t *testing.T) {
+	err := errors.New("plain")
+	issue := issueForError(DiscoveredFile{Path: "/tmp/a.json", RelativePath: "a.json"}, "schema", err)
+	if issue.Message != "plain" || issue.Schema != "schema" {
+		t.Fatalf("issueForError = %+v", issue)
+	}
+	issues := issuesFromSchemaError(&Document{Path: "/tmp/a.json", RelativePath: "a.json", Schema: "schema"}, err)
+	if len(issues) != 1 || issues[0].Message != "plain" {
+		t.Fatalf("issuesFromSchemaError = %+v", issues)
+	}
+}

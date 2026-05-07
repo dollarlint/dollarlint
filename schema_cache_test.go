@@ -1,0 +1,156 @@
+package dollarlint
+
+import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+)
+
+func TestSchemaCacheLoadsLocalAndPrimesReferences(t *testing.T) {
+	dir := t.TempDir()
+	rootSchema := filepath.Join(dir, "root.json")
+	childSchema := filepath.Join(dir, "child.json")
+	writeFile(t, rootSchema, `{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {"child": {"$ref": "./child.json"}}
+}`)
+	writeFile(t, childSchema, `{"type":"string"}`)
+	rootURL, err := fileURL(rootSchema)
+	if err != nil {
+		t.Fatalf("fileURL: %v", err)
+	}
+	cfg := DefaultConfig()
+	cache := NewSchemaCache(cfg)
+	if err := cache.Prime(context.Background(), []string{rootURL.String()}); err != nil {
+		t.Fatalf("Prime: %v", err)
+	}
+	childURL, err := fileURL(childSchema)
+	if err != nil {
+		t.Fatalf("fileURL child: %v", err)
+	}
+	if _, err := cache.Load(childURL.String()); err != nil {
+		t.Fatalf("child should be cached/loadable: %v", err)
+	}
+	refs, err := discoverSchemaReferences(map[string]any{"$ref": "./child.json#/defs/x"}, rootURL.String())
+	if err != nil {
+		t.Fatalf("discover refs: %v", err)
+	}
+	if len(refs) != 1 || !strings.HasSuffix(refs[0], "/child.json") {
+		t.Fatalf("refs = %+v", refs)
+	}
+}
+
+func TestSchemaCacheRemoteFetch(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/missing.json" {
+			http.Error(w, "nope", http.StatusNotFound)
+			return
+		}
+		if r.Header.Get("User-Agent") != "dollarlint" {
+			t.Fatalf("missing user agent")
+		}
+		w.Write([]byte(`{"type":"object"}`))
+	}))
+	defer server.Close()
+	cache := NewSchemaCache(DefaultConfig())
+	if _, err := cache.Load(server.URL + "/schema.json"); err != nil {
+		t.Fatalf("remote load: %v", err)
+	}
+	if _, err := cache.Load(server.URL + "/missing.json"); err == nil {
+		t.Fatalf("expected non-2xx error")
+	}
+	cfg := DefaultConfig()
+	disabled := false
+	cfg.Schema.FetchRemote = &disabled
+	cache = NewSchemaCache(cfg)
+	if _, err := cache.Load(server.URL + "/schema.json"); err == nil {
+		t.Fatalf("expected remote disabled error")
+	}
+}
+
+func TestSchemaCacheDepthAndLoadErrors(t *testing.T) {
+	dir := t.TempDir()
+	rootSchema := filepath.Join(dir, "root.json")
+	childSchema := filepath.Join(dir, "child.json")
+	writeFile(t, rootSchema, `{"$ref":"./child.json"}`)
+	writeFile(t, childSchema, `{"$ref":"./grandchild.json"}`)
+	rootURL, err := fileURL(rootSchema)
+	if err != nil {
+		t.Fatalf("fileURL: %v", err)
+	}
+	cfg := DefaultConfig()
+	cfg.Schema.MaxDepth = 0
+	cache := NewSchemaCache(cfg)
+	if err := cache.Prime(context.Background(), []string{rootURL.String()}); err == nil {
+		t.Fatalf("expected depth error")
+	}
+	if _, err := cache.Load("ftp://example.com/schema.json"); err == nil {
+		t.Fatalf("expected unsupported scheme")
+	}
+	empty := "file://"
+	if _, err := cache.Load(empty); err == nil {
+		t.Fatalf("expected empty file URL path")
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := cache.Prime(ctx, []string{rootURL.String()}); err == nil {
+		t.Fatalf("expected canceled prime")
+	}
+}
+
+func TestDecodeSchemaDocumentFallbacks(t *testing.T) {
+	if value, err := decodeSchemaDocument([]byte("type: object"), "schema.yaml"); err != nil {
+		t.Fatalf("yaml schema: %v", err)
+	} else if value.(map[string]any)["type"] != "object" {
+		t.Fatalf("yaml value = %+v", value)
+	}
+	if value, err := decodeSchemaDocument([]byte(`type = "object"`), "schema.toml"); err != nil {
+		t.Fatalf("toml schema: %v", err)
+	} else if value.(map[string]any)["type"] != "object" {
+		t.Fatalf("toml value = %+v", value)
+	}
+	if _, err := decodeSchemaDocument([]byte(":"), "schema.json"); err == nil {
+		t.Fatalf("expected invalid schema document")
+	}
+	if _, err := filePathFromURL(&url.URL{}); err == nil {
+		t.Fatalf("expected empty path")
+	}
+}
+
+func TestSchemaReferencesRespectIDAndSkipFragments(t *testing.T) {
+	doc := map[string]any{
+		"$id": "https://example.com/schemas/root.json",
+		"$defs": map[string]any{
+			"local": map[string]any{"$ref": "#/$defs/local"},
+			"next":  map[string]any{"$dynamicRef": "next.json#/defs/root"},
+		},
+		"items": []any{map[string]any{"$recursiveRef": ""}},
+	}
+	refs, err := discoverSchemaReferences(doc, "file:///tmp/root.json")
+	if err != nil {
+		t.Fatalf("discover refs: %v", err)
+	}
+	if len(refs) != 1 || refs[0] != "https://example.com/schemas/next.json" {
+		t.Fatalf("refs = %+v", refs)
+	}
+}
+
+func TestSchemaCacheFetchTimeout(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(50 * time.Millisecond)
+		w.Write([]byte(`{"type":"object"}`))
+	}))
+	defer server.Close()
+	cfg := DefaultConfig()
+	cfg.Timeouts.Fetch = NewDuration(time.Nanosecond)
+	cache := NewSchemaCache(cfg)
+	if _, err := cache.Load(server.URL + "/slow.json"); err == nil {
+		t.Fatalf("expected fetch timeout")
+	}
+}

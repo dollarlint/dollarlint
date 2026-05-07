@@ -1,0 +1,59 @@
+package cli
+
+import (
+	"bytes"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func TestExecuteExitCodes(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["name"],"properties":{"$schema":{"type":"string"},"name":{"type":"string"}}}`)
+	writeFile(t, filepath.Join(dir, "bad.json"), `{"$schema":"./schema.json"}`)
+	var stdout, stderr bytes.Buffer
+	if code := Execute([]string{dir, "--json"}, &stdout, &stderr); code != 1 {
+		t.Fatalf("invalid run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"issues": 1`) {
+		t.Fatalf("json output missing issue count: %s", stdout.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{filepath.Join(dir, "missing")}, &stdout, &stderr); code != 2 {
+		t.Fatalf("fatal run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+}
+
+func TestExecuteSuccessAndHelpers(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "plain.json"), `{}`)
+	var stdout, stderr bytes.Buffer
+	if code := Execute([]string{dir, "--show-skipped"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("success exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "skipped: plain.json") {
+		t.Fatalf("text output = %s", stdout.String())
+	}
+	if _, err := parseAssociation("nope"); err == nil {
+		t.Fatalf("expected association parse error")
+	}
+	association, err := parseAssociation("*.json=./schema.json")
+	if err != nil {
+		t.Fatalf("parseAssociation: %v", err)
+	}
+	if association.File != "*.json" || association.Schema != "./schema.json" {
+		t.Fatalf("association = %+v", association)
+	}
+}
+
+func writeFile(t *testing.T, path, content string) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+}

@@ -8,6 +8,12 @@ const (
 	StatusError     = "error"
 )
 
+const (
+	SchemaStoreFailureWarn  = "warn"
+	SchemaStoreFailureError = "error"
+	SchemaStoreFailureSkip  = "skip"
+)
+
 type Config struct {
 	Version   int             `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
 	Discovery DiscoveryConfig `json:"discovery,omitempty" yaml:"discovery,omitempty" toml:"discovery,omitempty"`
@@ -40,6 +46,7 @@ type SchemaConfig struct {
 type SchemaStoreConfig struct {
 	Enabled bool   `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
 	URL     string `json:"url,omitempty" yaml:"url,omitempty" toml:"url,omitempty"`
+	Failure string `json:"failure,omitempty" yaml:"failure,omitempty" toml:"failure,omitempty"`
 	Strict  bool   `json:"strict,omitempty" yaml:"strict,omitempty" toml:"strict,omitempty"`
 }
 
@@ -81,10 +88,11 @@ type Options struct {
 }
 
 type Result struct {
-	Root    string       `json:"root"`
-	Summary Summary      `json:"summary"`
-	Files   []FileResult `json:"files"`
-	Issues  []Issue      `json:"issues,omitempty"`
+	Root     string       `json:"root"`
+	Summary  Summary      `json:"summary"`
+	Files    []FileResult `json:"files"`
+	Issues   []Issue      `json:"issues,omitempty"`
+	Warnings []Warning    `json:"warnings,omitempty"`
 }
 
 type Summary struct {
@@ -94,6 +102,7 @@ type Summary struct {
 	Failed        int      `json:"failed"`
 	Issues        int      `json:"issues"`
 	Ignored       int      `json:"ignored"`
+	Warnings      int      `json:"warnings"`
 	Duration      Duration `json:"duration,omitempty"`
 	DurationNanos int64    `json:"durationNanos,omitempty"`
 }
@@ -125,8 +134,18 @@ type Issue struct {
 	IgnoreReason     string `json:"ignoreReason,omitempty"`
 }
 
+type Warning struct {
+	Kind    string `json:"kind"`
+	Source  string `json:"source,omitempty"`
+	Message string `json:"message"`
+}
+
 func (r Result) HasIssues() bool {
 	return r.Summary.Issues > 0
+}
+
+func (r Result) HasWarnings() bool {
+	return r.Summary.Warnings > 0
 }
 
 func NewDuration(d time.Duration) Duration {

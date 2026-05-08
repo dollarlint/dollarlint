@@ -26,7 +26,7 @@ func FormatJSON(result Result) ([]byte, error) {
 
 func FormatText(result Result, output OutputConfig) string {
 	if output.Quiet && !result.HasIssues() {
-		return textStyleSuccess.Render(fmt.Sprintf("dollarlint passed in %s", formatElapsed(result.Summary.Duration.Duration))) + "\n"
+		return textStyleSuccess.Render(passHeadline(result)) + "\n"
 	}
 	var builder strings.Builder
 	if result.HasIssues() {
@@ -40,24 +40,38 @@ func FormatText(result Result, output OutputConfig) string {
 		if result.Summary.Ignored > 0 {
 			headline += fmt.Sprintf(" (%d ignored)", result.Summary.Ignored)
 		}
+		if result.HasWarnings() {
+			headline += fmt.Sprintf(" (%d warning%s)", result.Summary.Warnings, plural(result.Summary.Warnings))
+		}
 		builder.WriteString(textStyleError.Render(headline))
 		builder.WriteString("\n")
 		writeGroupedIssues(&builder, result, output)
 	} else {
-		headline := fmt.Sprintf("dollarlint passed in %s: %d discovered, %d validated, %d skipped",
-			formatElapsed(result.Summary.Duration.Duration),
-			result.Summary.Discovered,
-			result.Summary.Validated,
-			result.Summary.Skipped,
-		)
-		builder.WriteString(textStyleSuccess.Render(headline))
+		builder.WriteString(textStyleSuccess.Render(passHeadline(result)))
 		builder.WriteString("\n")
 	}
 	if !output.Quiet {
+		writeWarnings(&builder, result)
 		writeSkipped(&builder, result, output.ShowSkipped)
 		writeSummary(&builder, result)
 	}
 	return builder.String()
+}
+
+func passHeadline(result Result) string {
+	headline := "dollarlint passed"
+	if result.HasWarnings() {
+		headline += fmt.Sprintf(" with %d warning%s", result.Summary.Warnings, plural(result.Summary.Warnings))
+	}
+	headline += fmt.Sprintf(" in %s", formatElapsed(result.Summary.Duration.Duration))
+	if result.Summary.Discovered > 0 || result.Summary.Validated > 0 || result.Summary.Skipped > 0 {
+		headline += fmt.Sprintf(": %d discovered, %d validated, %d skipped",
+			result.Summary.Discovered,
+			result.Summary.Validated,
+			result.Summary.Skipped,
+		)
+	}
+	return headline
 }
 
 func writeGroupedIssues(builder *strings.Builder, result Result, output OutputConfig) {
@@ -130,6 +144,20 @@ func writeSkipped(builder *strings.Builder, result Result, showSkipped bool) {
 	}
 }
 
+func writeWarnings(builder *strings.Builder, result Result) {
+	if !result.HasWarnings() {
+		return
+	}
+	builder.WriteString("\nwarnings\n")
+	for _, warning := range result.Warnings {
+		kind := warning.Kind
+		if warning.Source != "" {
+			kind = warning.Source
+		}
+		fmt.Fprintf(builder, "  %s  %s\n", textStyleKeyword.Render(kind), warning.Message)
+	}
+}
+
 func writeSummary(builder *strings.Builder, result Result) {
 	summary := fmt.Sprintf("Summary: %d discovered, %d validated, %d skipped, %d issue%s",
 		result.Summary.Discovered,
@@ -140,6 +168,9 @@ func writeSummary(builder *strings.Builder, result Result) {
 	)
 	if result.Summary.Ignored > 0 {
 		summary += fmt.Sprintf(", %d ignored", result.Summary.Ignored)
+	}
+	if result.Summary.Warnings > 0 {
+		summary += fmt.Sprintf(", %d warning%s", result.Summary.Warnings, plural(result.Summary.Warnings))
 	}
 	summary += fmt.Sprintf(" in %s", formatElapsed(result.Summary.Duration.Duration))
 	builder.WriteString("\n")

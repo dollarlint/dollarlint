@@ -19,6 +19,8 @@ Summary: 4 discovered, 3 validated, 1 skipped, 2 issues in 47ms
 
 Use `--verbose` for schema URI, keyword location, and property details under each issue.
 
+Warnings, such as an unavailable optional SchemaStore catalog, are reported separately from validation issues. They do not make the run fail unless the related policy is configured as `error`.
+
 When the terminal supports color, text output uses subtle Lip Gloss styling for headings, file names, keywords, pointers, and summaries. JSON and SARIF output are never styled.
 
 ## Locations
@@ -41,7 +43,7 @@ Use `--json` for machine-readable results:
 dollarlint . --json
 ```
 
-The JSON summary includes discovery counts, issue counts, ignored issue counts, elapsed duration, and nanosecond duration for precise automation.
+The JSON summary includes discovery counts, issue counts, warning counts, ignored issue counts, elapsed duration, and nanosecond duration for precise automation.
 
 ## SARIF
 
@@ -57,4 +59,4 @@ SARIF locations are best effort:
 - YAML positions come from parser node metadata.
 - TOML positions come from a conservative source scanner for common tables and keys.
 
-If source mapping cannot resolve a location, validation still succeeds and SARIF falls back to a file-level result.
+If source mapping cannot resolve a location, validation still succeeds and SARIF falls back to a file-level result. Run-level warnings are emitted as SARIF warning results without file locations.

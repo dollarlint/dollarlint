@@ -1,9 +1,7 @@
 package cli
 
 import (
-	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -13,21 +11,24 @@ import (
 	"text/template"
 
 	"github.com/agorischek/dollarlint"
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
 type initOptions struct {
-	output            string
-	force             bool
-	defaults          bool
-	fetchRemote       bool
-	fetchRetries      int
-	schemaStore       bool
-	schemaStoreStrict bool
+	output             string
+	force              bool
+	defaults           bool
+	fetchRemote        bool
+	fetchRetries       int
+	schemaStore        bool
+	schemaStoreFailure string
+	schemaStoreStrict  bool
 }
 
 type initTemplateData struct {
 	SchemaStoreEnabled bool
+	SchemaStoreFailure string
 	SchemaStoreStrict  bool
 	SchemaStoreURL     string
 	FetchRemote        bool
@@ -36,10 +37,11 @@ type initTemplateData struct {
 
 func defaultInitOptions() initOptions {
 	return initOptions{
-		output:       ".dollarlint.toml",
-		fetchRemote:  true,
-		fetchRetries: defaultFetchRetries,
-		schemaStore:  true,
+		output:             ".dollarlint.toml",
+		fetchRemote:        true,
+		fetchRetries:       defaultFetchRetries,
+		schemaStore:        true,
+		schemaStoreFailure: dollarlint.SchemaStoreFailureWarn,
 	}
 }
 
@@ -60,6 +62,7 @@ func newInitCommand(stdin io.Reader, stdout io.Writer) *cobra.Command {
 	cmd.Flags().BoolVar(&opts.fetchRemote, "fetch-remote", opts.fetchRemote, "Allow fetching http(s) schemas in the generated config")
 	cmd.Flags().IntVar(&opts.fetchRetries, "fetch-retries", opts.fetchRetries, "Retries for transient remote schema fetch failures in the generated config")
 	cmd.Flags().BoolVar(&opts.schemaStore, "schema-store", opts.schemaStore, "Enable SchemaStore catalog filename matching in the generated config")
+	cmd.Flags().StringVar(&opts.schemaStoreFailure, "schema-store-failure", opts.schemaStoreFailure, "SchemaStore catalog failure policy in the generated config: warn, error, or skip")
 	cmd.Flags().BoolVar(&opts.schemaStoreStrict, "schema-store-strict", false, "Fail validation when the SchemaStore catalog cannot be loaded")
 	return cmd
 }
@@ -70,16 +73,15 @@ func runInit(cmd *cobra.Command, stdin io.Reader, stdout io.Writer, args []strin
 		root = args[0]
 	}
 	interactive := isInteractiveIO(stdin, stdout)
-	var promptReader *bufio.Reader
-	if interactive {
-		promptReader = bufio.NewReader(stdin)
-	}
 	if !opts.defaults && interactive {
-		if err := interviewInit(promptReader, stdout, &opts); err != nil {
+		if err := interviewInit(asReadCloser(stdin), asWriteCloser(stdout), &opts); err != nil {
 			return err
 		}
 	} else if !opts.defaults && !interactive {
 		fmt.Fprintln(stdout, "No interactive terminal detected; using init defaults. Pass --defaults to silence this message.")
+	}
+	if err := normalizeInitOptions(&opts); err != nil {
+		return err
 	}
 	target := opts.output
 	if !filepath.IsAbs(target) {
@@ -98,7 +100,7 @@ func runInit(cmd *cobra.Command, stdin io.Reader, stdout io.Writer, args []strin
 	if !opts.force {
 		if _, err := os.Stat(target); err == nil {
 			if !opts.defaults && interactive {
-				overwrite, promptErr := promptConfirm(promptReader, stdout, "Overwrite existing .dollarlint.toml?", false)
+				overwrite, promptErr := promptConfirm(asReadCloser(stdin), asWriteCloser(stdout), "Overwrite existing .dollarlint.toml?", false)
 				if promptErr != nil {
 					return promptErr
 				}
@@ -140,82 +142,173 @@ func isTerminalFile(file *os.File) bool {
 	return err == nil && info.Mode()&os.ModeCharDevice != 0
 }
 
-func interviewInit(reader *bufio.Reader, stdout io.Writer, opts *initOptions) error {
-	fetchRemote, err := promptConfirm(reader, stdout, "Allow remote http(s) schema fetching?", opts.fetchRemote)
+type initPrompter interface {
+	Confirm(question string, defaultValue bool) (bool, error)
+	NonNegativeInt(question string, defaultValue int) (int, error)
+	SchemaStoreFailure(defaultValue string) (string, error)
+}
+
+type promptuiPrompter struct {
+	stdin  io.ReadCloser
+	stdout io.WriteCloser
+}
+
+func (p promptuiPrompter) Confirm(question string, defaultValue bool) (bool, error) {
+	return promptConfirm(p.stdin, p.stdout, question, defaultValue)
+}
+
+func (p promptuiPrompter) NonNegativeInt(question string, defaultValue int) (int, error) {
+	return promptNonNegativeInt(p.stdin, p.stdout, question, defaultValue)
+}
+
+func (p promptuiPrompter) SchemaStoreFailure(defaultValue string) (string, error) {
+	return promptSchemaStoreFailure(p.stdin, p.stdout, defaultValue)
+}
+
+func interviewInit(stdin io.ReadCloser, stdout io.WriteCloser, opts *initOptions) error {
+	return interviewInitWithPrompter(promptuiPrompter{stdin: stdin, stdout: stdout}, opts)
+}
+
+func interviewInitWithPrompter(prompter initPrompter, opts *initOptions) error {
+	fetchRemote, err := prompter.Confirm("Allow remote http(s) schema fetching?", opts.fetchRemote)
 	if err != nil {
 		return err
 	}
 	opts.fetchRemote = fetchRemote
-	retries, err := promptNonNegativeInt(reader, stdout, "Retries for transient schema fetch failures", opts.fetchRetries)
+	retries, err := prompter.NonNegativeInt("Retries for transient schema fetch failures", opts.fetchRetries)
 	if err != nil {
 		return err
 	}
 	opts.fetchRetries = retries
-	schemaStore, err := promptConfirm(reader, stdout, "Enable SchemaStore filename matching?", opts.schemaStore)
+	schemaStore, err := prompter.Confirm("Enable SchemaStore filename matching?", opts.schemaStore)
 	if err != nil {
 		return err
 	}
 	opts.schemaStore = schemaStore
 	if opts.schemaStore {
-		strict, err := promptConfirm(reader, stdout, "Fail if the SchemaStore catalog cannot be loaded?", opts.schemaStoreStrict)
+		failure, err := prompter.SchemaStoreFailure(opts.schemaStoreFailure)
 		if err != nil {
 			return err
 		}
-		opts.schemaStoreStrict = strict
+		opts.schemaStoreFailure = failure
 	}
 	return nil
 }
 
-func promptConfirm(reader *bufio.Reader, stdout io.Writer, question string, defaultValue bool) (bool, error) {
-	suffix := "[y/N]"
+func promptConfirm(stdin io.ReadCloser, stdout io.WriteCloser, question string, defaultValue bool) (bool, error) {
+	prompt := promptui.Prompt{
+		Label:   question,
+		Default: "n",
+		Stdin:   stdin,
+		Stdout:  stdout,
+		Validate: func(input string) error {
+			switch strings.ToLower(strings.TrimSpace(input)) {
+			case "", "y", "yes", "n", "no":
+				return nil
+			default:
+				return fmt.Errorf("please answer y or n")
+			}
+		},
+	}
 	if defaultValue {
-		suffix = "[Y/n]"
+		prompt.Default = "y"
 	}
-	for {
-		answer, err := promptLine(reader, stdout, fmt.Sprintf("%s %s", question, suffix))
-		if err != nil {
-			return false, err
-		}
-		switch strings.ToLower(answer) {
-		case "":
-			return defaultValue, nil
-		case "y", "yes":
-			return true, nil
-		case "n", "no":
-			return false, nil
-		default:
-			fmt.Fprintln(stdout, "Please answer y or n.")
-		}
-	}
-}
-
-func promptNonNegativeInt(reader *bufio.Reader, stdout io.Writer, question string, defaultValue int) (int, error) {
-	for {
-		answer, err := promptLine(reader, stdout, fmt.Sprintf("%s [%d]", question, defaultValue))
-		if err != nil {
-			return 0, err
-		}
-		if answer == "" {
-			return defaultValue, nil
-		}
-		value, err := strconv.Atoi(answer)
-		if err == nil && value >= 0 {
-			return value, nil
-		}
-		fmt.Fprintln(stdout, "Please enter a non-negative integer.")
-	}
-}
-
-func promptLine(reader *bufio.Reader, stdout io.Writer, prompt string) (string, error) {
-	fmt.Fprintf(stdout, "%s: ", prompt)
-	line, err := reader.ReadString('\n')
+	answer, err := prompt.Run()
 	if err != nil {
-		if errors.Is(err, io.EOF) && line != "" {
-			return strings.TrimSpace(line), nil
-		}
-		return "", err
+		return false, err
 	}
-	return strings.TrimSpace(line), nil
+	switch strings.ToLower(strings.TrimSpace(answer)) {
+	case "":
+		return defaultValue, nil
+	case "y", "yes":
+		return true, nil
+	default:
+		return false, nil
+	}
+}
+
+func promptNonNegativeInt(stdin io.ReadCloser, stdout io.WriteCloser, question string, defaultValue int) (int, error) {
+	prompt := promptui.Prompt{
+		Label:     question,
+		Default:   strconv.Itoa(defaultValue),
+		AllowEdit: true,
+		Stdin:     stdin,
+		Stdout:    stdout,
+		Validate: func(input string) error {
+			value, err := strconv.Atoi(strings.TrimSpace(input))
+			if err != nil || value < 0 {
+				return fmt.Errorf("please enter a non-negative integer")
+			}
+			return nil
+		},
+	}
+	answer, err := prompt.Run()
+	if err != nil {
+		return 0, err
+	}
+	return strconv.Atoi(strings.TrimSpace(answer))
+}
+
+func promptSchemaStoreFailure(stdin io.ReadCloser, stdout io.WriteCloser, defaultValue string) (string, error) {
+	items := []string{
+		dollarlint.SchemaStoreFailureWarn,
+		dollarlint.SchemaStoreFailureError,
+		dollarlint.SchemaStoreFailureSkip,
+	}
+	cursor := 0
+	for i, item := range items {
+		if item == defaultValue {
+			cursor = i
+			break
+		}
+	}
+	prompt := promptui.Select{
+		Label:     "SchemaStore catalog failure policy",
+		Items:     items,
+		CursorPos: cursor,
+		Size:      len(items),
+		Stdin:     stdin,
+		Stdout:    stdout,
+		Templates: &promptui.SelectTemplates{
+			Label:    "{{ . }}",
+			Active:   "> {{ . }}",
+			Inactive: "  {{ . }}",
+			Selected: "{{ . }}",
+			Details:  "warn: continue with a warning\nerror: fail the run\nskip: silently skip SchemaStore inference",
+		},
+	}
+	_, value, err := prompt.Run()
+	return value, err
+}
+
+type readCloser struct {
+	io.Reader
+}
+
+func (readCloser) Close() error {
+	return nil
+}
+
+type writeCloser struct {
+	io.Writer
+}
+
+func (writeCloser) Close() error {
+	return nil
+}
+
+func asReadCloser(reader io.Reader) io.ReadCloser {
+	if closer, ok := reader.(io.ReadCloser); ok {
+		return closer
+	}
+	return readCloser{Reader: reader}
+}
+
+func asWriteCloser(writer io.Writer) io.WriteCloser {
+	if closer, ok := writer.(io.WriteCloser); ok {
+		return closer
+	}
+	return writeCloser{Writer: writer}
 }
 
 func enabledWord(enabled bool) string {
@@ -232,9 +325,25 @@ func validateInitOutputPath(target string) error {
 	return nil
 }
 
+func normalizeInitOptions(opts *initOptions) error {
+	if opts.schemaStoreStrict {
+		opts.schemaStoreFailure = dollarlint.SchemaStoreFailureError
+	}
+	switch opts.schemaStoreFailure {
+	case dollarlint.SchemaStoreFailureWarn, dollarlint.SchemaStoreFailureError, dollarlint.SchemaStoreFailureSkip:
+		return nil
+	default:
+		return fmt.Errorf("unsupported schema-store-failure %q; expected warn, error, or skip", opts.schemaStoreFailure)
+	}
+}
+
 func renderStarterConfig(opts initOptions) ([]byte, error) {
+	if err := normalizeInitOptions(&opts); err != nil {
+		return nil, err
+	}
 	data := initTemplateData{
 		SchemaStoreEnabled: opts.schemaStore,
+		SchemaStoreFailure: opts.schemaStoreFailure,
 		SchemaStoreStrict:  opts.schemaStoreStrict,
 		SchemaStoreURL:     dollarlint.DefaultConfig().Schema.SchemaStore.URL,
 		FetchRemote:        opts.fetchRemote,
@@ -276,6 +385,7 @@ retryMaxWait = "2s"
 [schema.schemaStore]
 enabled = {{ .SchemaStoreEnabled }}
 url = "{{ .SchemaStoreURL }}"
+failure = "{{ .SchemaStoreFailure }}"
 strict = {{ .SchemaStoreStrict }}
 
 # [[schema.associations]]

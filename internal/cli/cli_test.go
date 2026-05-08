@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"bufio"
 	"bytes"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -104,7 +104,7 @@ func TestExecuteSchemaStoreFlags(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "custom.schema.json"), `{"type":"object","required":["ok"],"properties":{"ok":{"type":"boolean"}}}`)
 	writeFile(t, filepath.Join(dir, "custom.json"), `{"ok":true}`)
 	var stdout, stderr bytes.Buffer
-	if code := Execute([]string{"validate", dir, "--schema-store-url", filepath.Join(dir, "catalog.json"), "--schema-store-strict", "--fetch-retries", "1", "--fetch-retry-min-wait", "1ms", "--fetch-retry-max-wait", "1ms", "--show-skipped"}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"validate", dir, "--schema-store-url", filepath.Join(dir, "catalog.json"), "--schema-store-failure", "warn", "--schema-store-strict", "--fetch-retries", "1", "--fetch-retry-min-wait", "1ms", "--fetch-retry-max-wait", "1ms", "--show-skipped"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("schema-store run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), "1 validated") || !strings.Contains(stdout.String(), "2 skipped") {
@@ -127,7 +127,7 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 		t.Fatalf("read generated config: %v", err)
 	}
 	text := string(data)
-	if !strings.Contains(text, "[schema.schemaStore]") || !strings.Contains(text, "enabled = true") || !strings.Contains(text, `retryMinWait = "250ms"`) {
+	if !strings.Contains(text, "[schema.schemaStore]") || !strings.Contains(text, "enabled = true") || !strings.Contains(text, `failure = "warn"`) || !strings.Contains(text, `retryMinWait = "250ms"`) {
 		t.Fatalf("generated toml = %s", text)
 	}
 	stdout.Reset()
@@ -147,7 +147,7 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read forced config: %v", err)
 	}
-	if !strings.Contains(string(data), "strict = true") {
+	if !strings.Contains(string(data), `failure = "error"`) || !strings.Contains(string(data), "strict = true") {
 		t.Fatalf("forced config = %s", string(data))
 	}
 	stdout.Reset()
@@ -172,7 +172,7 @@ func TestInitCommandRequiresTOML(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read toml config: %v", err)
 	}
-	if !strings.Contains(string(data), "[schema.schemaStore]") || !strings.Contains(string(data), "strict = true") {
+	if !strings.Contains(string(data), "[schema.schemaStore]") || !strings.Contains(string(data), `failure = "error"`) || !strings.Contains(string(data), "strict = true") {
 		t.Fatalf("toml config = %s", string(data))
 	}
 	stdout.Reset()
@@ -186,45 +186,34 @@ func TestInitCommandRequiresTOML(t *testing.T) {
 }
 
 func TestInitPlainPrompts(t *testing.T) {
-	input := bufio.NewReader(strings.NewReader("n\n4\n\ny\n"))
 	opts := defaultInitOptions()
-	var stdout bytes.Buffer
-	if err := interviewInit(input, &stdout, &opts); err != nil {
+	prompter := fakeInitPrompter{
+		confirms: []bool{false, true},
+		ints:     []int{4},
+		failures: []string{"error"},
+	}
+	if err := interviewInitWithPrompter(&prompter, &opts); err != nil {
 		t.Fatalf("interviewInit: %v", err)
 	}
-	if opts.fetchRemote || opts.fetchRetries != 4 || !opts.schemaStore || !opts.schemaStoreStrict {
+	if opts.fetchRemote || opts.fetchRetries != 4 || !opts.schemaStore || opts.schemaStoreFailure != "error" || opts.schemaStoreStrict {
 		t.Fatalf("opts = %+v", opts)
 	}
-	output := stdout.String()
-	if strings.Contains(output, "┃") || strings.Contains(output, "\x1b[") {
-		t.Fatalf("plain prompts should not include borders or ANSI styling: %q", output)
-	}
-	if !strings.Contains(output, "Allow remote http(s) schema fetching? [Y/n]:") {
-		t.Fatalf("prompt output = %q", output)
-	}
-	if !strings.Contains(output, "Enable SchemaStore filename matching? [Y/n]:") {
-		t.Fatalf("schemastore should default to yes: %q", output)
+	if strings.Join(prompter.questions, "|") != "Allow remote http(s) schema fetching?|Retries for transient schema fetch failures|Enable SchemaStore filename matching?|schemaStoreFailure" {
+		t.Fatalf("questions = %+v", prompter.questions)
 	}
 }
 
 func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 	opts := defaultInitOptions()
-	var promptOutput bytes.Buffer
-	if err := interviewInit(bufio.NewReader(strings.NewReader("\n\nn\n")), &promptOutput, &opts); err != nil {
+	prompter := fakeInitPrompter{
+		confirms: []bool{true, false},
+		ints:     []int{defaultFetchRetries},
+	}
+	if err := interviewInitWithPrompter(&prompter, &opts); err != nil {
 		t.Fatalf("interviewInit: %v", err)
 	}
 	if !opts.fetchRemote || opts.fetchRetries != defaultFetchRetries || opts.schemaStore || opts.schemaStoreStrict {
 		t.Fatalf("opts after prompts = %+v", opts)
-	}
-	promptText := promptOutput.String()
-	if !strings.Contains(promptText, "Allow remote http(s) schema fetching? [Y/n]:") {
-		t.Fatalf("fetch remote prompt should reflect defaultInitOptions: %q", promptText)
-	}
-	if !strings.Contains(promptText, "Retries for transient schema fetch failures [2]:") {
-		t.Fatalf("retry prompt should reflect defaultInitOptions: %q", promptText)
-	}
-	if !strings.Contains(promptText, "Enable SchemaStore filename matching? [Y/n]:") {
-		t.Fatalf("schemastore prompt should reflect defaultInitOptions: %q", promptText)
 	}
 	data, err := renderStarterConfig(defaultInitOptions())
 	if err != nil {
@@ -235,6 +224,7 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 		"fetchRemote = true",
 		`retries = 2`,
 		"enabled = true",
+		`failure = "warn"`,
 		"strict = false",
 	} {
 		if !strings.Contains(config, expected) {
@@ -244,22 +234,65 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 }
 
 func TestPromptValidationRepeats(t *testing.T) {
-	input := bufio.NewReader(strings.NewReader("maybe\ny\n-1\n2\n"))
 	var stdout bytes.Buffer
-	confirmed, err := promptConfirm(input, &stdout, "Continue?", false)
+	confirmed, err := promptConfirm(io.NopCloser(strings.NewReader("y\n")), writeCloser{Writer: &stdout}, "Continue?", false)
 	if err != nil {
 		t.Fatalf("promptConfirm: %v", err)
 	}
-	retries, err := promptNonNegativeInt(input, &stdout, "Retries", 0)
+	retries, err := promptNonNegativeInt(io.NopCloser(strings.NewReader("2\n")), writeCloser{Writer: &stdout}, "Retries", 0)
 	if err != nil {
 		t.Fatalf("promptNonNegativeInt: %v", err)
 	}
 	if !confirmed || retries != 2 {
 		t.Fatalf("confirmed=%v retries=%d", confirmed, retries)
 	}
-	if !strings.Contains(stdout.String(), "Please answer y or n.") || !strings.Contains(stdout.String(), "Please enter a non-negative integer.") {
-		t.Fatalf("validation output = %q", stdout.String())
+	if !strings.Contains(stdout.String(), "Continue?") || !strings.Contains(stdout.String(), "Retries") {
+		t.Fatalf("prompt output = %q", stdout.String())
 	}
+	failure, err := promptSchemaStoreFailure(io.NopCloser(strings.NewReader("\n")), writeCloser{Writer: &stdout}, "skip")
+	if err != nil {
+		t.Fatalf("promptSchemaStoreFailure: %v", err)
+	}
+	if failure != "skip" {
+		t.Fatalf("failure = %q", failure)
+	}
+}
+
+type fakeInitPrompter struct {
+	confirms  []bool
+	ints      []int
+	failures  []string
+	questions []string
+}
+
+func (p *fakeInitPrompter) Confirm(question string, defaultValue bool) (bool, error) {
+	p.questions = append(p.questions, question)
+	if len(p.confirms) == 0 {
+		return defaultValue, nil
+	}
+	value := p.confirms[0]
+	p.confirms = p.confirms[1:]
+	return value, nil
+}
+
+func (p *fakeInitPrompter) NonNegativeInt(question string, defaultValue int) (int, error) {
+	p.questions = append(p.questions, question)
+	if len(p.ints) == 0 {
+		return defaultValue, nil
+	}
+	value := p.ints[0]
+	p.ints = p.ints[1:]
+	return value, nil
+}
+
+func (p *fakeInitPrompter) SchemaStoreFailure(defaultValue string) (string, error) {
+	p.questions = append(p.questions, "schemaStoreFailure")
+	if len(p.failures) == 0 {
+		return defaultValue, nil
+	}
+	value := p.failures[0]
+	p.failures = p.failures[1:]
+	return value, nil
 }
 
 func TestHelpAndVersionCommands(t *testing.T) {

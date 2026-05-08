@@ -18,28 +18,29 @@ var version = "dev"
 const defaultFetchRetries = 2
 
 type validateOptions struct {
-	configPath        *string
-	jsonOutput        bool
-	sarifOutput       bool
-	showSkipped       bool
-	verbose           bool
-	quiet             bool
-	locations         bool
-	includes          []string
-	excludes          []string
-	associations      []string
-	schemaStore       bool
-	schemaStoreURL    string
-	schemaStoreStrict bool
-	maxDepth          int
-	fetchRemote       bool
-	fetchRetries      int
-	fetchRetryMinWait string
-	fetchRetryMaxWait string
-	allowedDomains    []string
-	blockedDomains    []string
-	fetchTimeout      string
-	compileTimeout    string
+	configPath         *string
+	jsonOutput         bool
+	sarifOutput        bool
+	showSkipped        bool
+	verbose            bool
+	quiet              bool
+	locations          bool
+	includes           []string
+	excludes           []string
+	associations       []string
+	schemaStore        bool
+	schemaStoreURL     string
+	schemaStoreStrict  bool
+	schemaStoreFailure string
+	maxDepth           int
+	fetchRemote        bool
+	fetchRetries       int
+	fetchRetryMinWait  string
+	fetchRetryMaxWait  string
+	allowedDomains     []string
+	blockedDomains     []string
+	fetchTimeout       string
+	compileTimeout     string
 }
 
 func Execute(args []string, stdout, stderr io.Writer) int {
@@ -142,6 +143,7 @@ func addValidateFlags(cmd *cobra.Command, opts *validateOptions) {
 	cmd.Flags().StringArrayVar(&opts.associations, "schema", nil, "Associate a file glob with a schema as glob=uri; repeatable")
 	cmd.Flags().BoolVar(&opts.schemaStore, "schema-store", false, "Match conventional filenames using the SchemaStore catalog")
 	cmd.Flags().StringVar(&opts.schemaStoreURL, "schema-store-url", "", "SchemaStore catalog URL or local path")
+	cmd.Flags().StringVar(&opts.schemaStoreFailure, "schema-store-failure", "", "SchemaStore catalog failure policy: warn, error, or skip")
 	cmd.Flags().BoolVar(&opts.schemaStoreStrict, "schema-store-strict", false, "Fail when the SchemaStore catalog cannot be loaded")
 	cmd.Flags().IntVar(&opts.maxDepth, "max-depth", 0, "Maximum external schema reference depth")
 	cmd.Flags().BoolVar(&opts.fetchRemote, "fetch-remote", true, "Allow fetching http(s) schemas")
@@ -184,6 +186,9 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 		cfg.Schema.SchemaStore.Enabled = true
 		cfg.Schema.SchemaStore.URL = opts.schemaStoreURL
 		cfg.Schema.SchemaStoreCatalogURL = opts.schemaStoreURL
+	}
+	if opts.schemaStoreFailure != "" {
+		cfg.Schema.SchemaStore.Failure = opts.schemaStoreFailure
 	}
 	if cmd.Flags().Changed("schema-store-strict") {
 		cfg.Schema.SchemaStore.Strict = opts.schemaStoreStrict

@@ -22,6 +22,7 @@ dollarlint validate ./config --json
 dollarlint validate ./config --sarif > dollarlint.sarif
 dollarlint validate . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
 dollarlint validate . --schema-store
+dollarlint validate . --schema-store --schema-store-failure error
 dollarlint validate ./examples/schemastore --locations
 ```
 
@@ -85,6 +86,7 @@ retryMaxWait = "2s"
 [schema.schemaStore]
 enabled = false
 url = "https://www.schemastore.org/api/json/catalog.json"
+failure = "warn"
 strict = false
 
 [[schema.associations]]
@@ -112,7 +114,9 @@ locations = false
 
 By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schema.allowedDomains` can restrict remote schemas to specific hosts, and `schema.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
 
-SchemaStore catalog matching is configurable with `schema.schemaStore`. When enabled, files without an explicit schema can be matched by conventional filename using the SchemaStore catalog or a local SchemaStore-shaped catalog. If the catalog cannot be loaded, dollarlint skips SchemaStore matching and still validates explicit schemas; set `schema.schemaStore.strict = true` to fail instead. Precedence is explicit in-file schema, then config associations, then SchemaStore matches, then skipped. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
+SchemaStore catalog matching is configurable with `schema.schemaStore`. When enabled, files without an explicit schema can be matched by conventional filename using the SchemaStore catalog or a local SchemaStore-shaped catalog. Precedence is explicit in-file schema, then config associations, then SchemaStore matches, then skipped.
+
+SchemaStore catalog failures are modeled separately from validation issues. By default `schema.schemaStore.failure = "warn"` records a warning, skips SchemaStore inference, still validates explicit/configured schemas, and exits `0` unless validation issues are found. Use `"error"` when catalog availability should fail the run with exit `2`, or `"skip"` to keep the old silent fallback. `schema.schemaStore.strict = true` remains supported as a legacy alias for `"error"`. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
 
 Azure Resource Manager deployment schemas from `schema.management.azure.com` are pruned to the resource provider schemas used by the template before compilation. This avoids compiling the full Azure provider catalog for ordinary ARM templates. Set `schema.azureResourcePruning = false` to disable this Azure-specific optimization.
 

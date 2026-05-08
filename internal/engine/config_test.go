@@ -99,6 +99,7 @@ retryMaxWait = "1s"
 [schema.schemaStore]
 enabled = true
 url = "./catalog.json"
+failure = "skip"
 strict = true
 
 [timeouts]
@@ -118,7 +119,7 @@ keyword = "type"
 	if remoteFetchEnabled(cfg.Schema) || cfg.Schema.MaxDepth != 3 || cfg.Timeouts.Fetch.Duration != 2*time.Second {
 		t.Fatalf("toml cfg not decoded/defaulted: %+v", cfg)
 	}
-	if !cfg.Schema.SchemaStore.Enabled || cfg.Schema.SchemaStore.URL != "./catalog.json" || !cfg.Schema.SchemaStore.Strict {
+	if !cfg.Schema.SchemaStore.Enabled || cfg.Schema.SchemaStore.URL != "./catalog.json" || cfg.Schema.SchemaStore.Failure != "skip" || !cfg.Schema.SchemaStore.Strict {
 		t.Fatalf("schemaStore not decoded: %+v", cfg.Schema.SchemaStore)
 	}
 	if fetchRetries(cfg.Schema.Fetch) != 4 || cfg.Schema.Fetch.RetryMinWait.Duration != 100*time.Millisecond || cfg.Schema.Fetch.RetryMaxWait.Duration != time.Second {
@@ -155,6 +156,18 @@ schema = "./schema.json"
 	if fetchRetries(cfg.Schema.Fetch) != 2 {
 		t.Fatalf("fetch retry default = %+v", cfg.Schema.Fetch)
 	}
+	if mode, err := schemaStoreFailureMode(cfg.Schema); err != nil || mode != SchemaStoreFailureWarn {
+		t.Fatalf("schemaStore failure default = %q, %v", mode, err)
+	}
+	if mode, err := schemaStoreFailureMode(SchemaConfig{SchemaStore: SchemaStoreConfig{Failure: SchemaStoreFailureSkip}}); err != nil || mode != SchemaStoreFailureSkip {
+		t.Fatalf("schemaStore failure skip = %q, %v", mode, err)
+	}
+	if mode, err := schemaStoreFailureMode(SchemaConfig{SchemaStore: SchemaStoreConfig{Failure: SchemaStoreFailureWarn, Strict: true}}); err != nil || mode != SchemaStoreFailureError {
+		t.Fatalf("schemaStore strict mode = %q, %v", mode, err)
+	}
+	if _, err := schemaStoreFailureMode(SchemaConfig{SchemaStore: SchemaStoreConfig{Failure: "explode"}}); err == nil {
+		t.Fatalf("expected invalid schemaStore failure mode error")
+	}
 	if fetchRetries(FetchConfig{}) != 0 {
 		t.Fatalf("nil fetch retries should resolve to zero")
 	}
@@ -175,6 +188,13 @@ func TestLoadConfigErrors(t *testing.T) {
 	dir := t.TempDir()
 	if _, _, err := LoadConfig(dir, ".dollarlint.toml"); err == nil {
 		t.Fatalf("expected missing explicit config error")
+	}
+	dirConfigRoot := filepath.Join(t.TempDir(), "dir-config")
+	if err := os.MkdirAll(filepath.Join(dirConfigRoot, ".dollarlint.toml"), 0o755); err != nil {
+		t.Fatalf("mkdir dir config: %v", err)
+	}
+	if _, _, err := LoadConfig(dirConfigRoot, ""); err == nil || !strings.Contains(err.Error(), "read config") {
+		t.Fatalf("expected directory config read error, got %v", err)
 	}
 	badTOML := filepath.Join(dir, ".dollarlint.toml")
 	writeFile(t, badTOML, "[schema")

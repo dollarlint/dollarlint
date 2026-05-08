@@ -43,6 +43,7 @@ retryMaxWait = "2s"
 [schema.schemaStore]
 enabled = false
 url = "https://www.schemastore.org/api/json/catalog.json"
+failure = "warn"
 strict = false
 
 [[schema.associations]]
@@ -90,7 +91,13 @@ The matching precedence is explicit in-file schema, then config-level schema ass
 
 Use `schema.schemaStore.url` to point at a local or mirrored catalog for hermetic CI.
 
-By default, SchemaStore catalog failures are non-fatal: dollarlint skips catalog matching and still validates files with explicit schemas or config associations. Set `schema.schemaStore.strict` to `true` when catalog availability should fail the run.
+Use `schema.schemaStore.failure` to decide what happens when the catalog cannot be loaded:
+
+- `warn` records a warning, skips SchemaStore inference, and still validates explicit/configured schemas.
+- `error` fails the run with exit code `2`.
+- `skip` silently skips SchemaStore inference.
+
+`schema.schemaStore.strict = true` remains supported as a legacy alias for `failure = "error"`.
 
 `schema.maxDepth` limits nested schema references, and recursion is detected so cyclical references do not spin forever.
 

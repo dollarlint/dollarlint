@@ -43,7 +43,7 @@ type sarifResult struct {
 	RuleID       string             `json:"ruleId"`
 	Level        string             `json:"level"`
 	Message      sarifMessage       `json:"message"`
-	Locations    []sarifLocation    `json:"locations"`
+	Locations    []sarifLocation    `json:"locations,omitempty"`
 	Properties   sarifProperties    `json:"properties,omitempty"`
 	Suppressions []sarifSuppression `json:"suppressions,omitempty"`
 }
@@ -76,6 +76,8 @@ type sarifProperties struct {
 	KeywordLocation  string `json:"keywordLocation,omitempty"`
 	Property         string `json:"property,omitempty"`
 	InstanceLocation string `json:"instanceLocation,omitempty"`
+	WarningKind      string `json:"warningKind,omitempty"`
+	WarningSource    string `json:"warningSource,omitempty"`
 }
 
 type sarifSuppression struct {
@@ -97,29 +99,49 @@ func FormatSARIF(result Result) ([]byte, error) {
 			Tool: sarifTool{Driver: sarifDriver{
 				Name:           "dollarlint",
 				InformationURI: "https://github.com/agorischek/dollarlint",
-				Rules:          sarifRules(result.Issues),
+				Rules:          sarifRules(result),
 			}},
-			Results: sarifResults(result.Issues),
+			Results: sarifResults(result),
 		}},
 	}
 	return json.MarshalIndent(log, "", "  ")
 }
 
-func sarifRules(issues []Issue) []sarifRule {
+func sarifRules(result Result) []sarifRule {
 	seen := map[string]Issue{}
-	for _, issue := range issues {
+	for _, issue := range result.Issues {
 		ruleID := sarifRuleID(issue)
 		if _, ok := seen[ruleID]; !ok {
 			seen[ruleID] = issue
+		}
+	}
+	warnings := map[string]Warning{}
+	for _, warning := range result.Warnings {
+		ruleID := sarifWarningRuleID(warning)
+		if _, ok := warnings[ruleID]; !ok {
+			warnings[ruleID] = warning
 		}
 	}
 	ids := make([]string, 0, len(seen))
 	for id := range seen {
 		ids = append(ids, id)
 	}
+	for id := range warnings {
+		ids = append(ids, id)
+	}
 	sort.Strings(ids)
 	rules := make([]sarifRule, 0, len(ids))
 	for _, id := range ids {
+		if warning, ok := warnings[id]; ok {
+			rules = append(rules, sarifRule{
+				ID:   id,
+				Name: id,
+				ShortDescription: sarifMessage{
+					Text: sarifWarningDescription(warning),
+				},
+			})
+			continue
+		}
 		issue := seen[id]
 		rules = append(rules, sarifRule{
 			ID:   id,
@@ -133,9 +155,9 @@ func sarifRules(issues []Issue) []sarifRule {
 	return rules
 }
 
-func sarifResults(issues []Issue) []sarifResult {
-	results := make([]sarifResult, 0, len(issues))
-	for _, issue := range issues {
+func sarifResults(result Result) []sarifResult {
+	results := make([]sarifResult, 0, len(result.Issues)+len(result.Warnings))
+	for _, issue := range result.Issues {
 		result := sarifResult{
 			RuleID:  sarifRuleID(issue),
 			Level:   sarifLevel(issue),
@@ -164,6 +186,17 @@ func sarifResults(issues []Issue) []sarifResult {
 		}
 		results = append(results, result)
 	}
+	for _, warning := range result.Warnings {
+		results = append(results, sarifResult{
+			RuleID:  sarifWarningRuleID(warning),
+			Level:   "warning",
+			Message: sarifMessage{Text: warning.Message},
+			Properties: sarifProperties{
+				WarningKind:   warning.Kind,
+				WarningSource: warning.Source,
+			},
+		})
+	}
 	return results
 }
 
@@ -186,6 +219,20 @@ func sarifLevel(issue Issue) string {
 		return "none"
 	}
 	return "error"
+}
+
+func sarifWarningRuleID(warning Warning) string {
+	if warning.Kind != "" {
+		return "dollarlint.warning." + warning.Kind
+	}
+	return "dollarlint.warning"
+}
+
+func sarifWarningDescription(warning Warning) string {
+	if warning.Source != "" {
+		return "dollarlint " + warning.Source + " warning"
+	}
+	return "dollarlint warning"
 }
 
 func sarifIssueRegion(issue Issue) *sarifRegion {

@@ -35,9 +35,12 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 	}
 	result := Result{Root: root}
 	cache := NewSchemaCache(cfg)
-	schemaStoreCatalog, err := loadSchemaStoreCatalog(ctx, cache, cfg)
+	schemaStoreCatalog, warning, err := loadSchemaStoreCatalog(ctx, cache, cfg)
 	if err != nil {
 		return Result{}, err
+	}
+	if warning != nil {
+		addWarning(&result, *warning)
 	}
 	documents := make([]*Document, 0, len(files))
 	validatedDocuments := make([]*Document, 0, len(files))
@@ -112,6 +115,11 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 	result.Summary.Duration = NewDuration(time.Since(start))
 	result.Summary.DurationNanos = result.Summary.Duration.Nanoseconds()
 	return result, nil
+}
+
+func addWarning(result *Result, warning Warning) {
+	result.Warnings = append(result.Warnings, warning)
+	result.Summary.Warnings++
 }
 
 func applySchemaAssociation(document *Document, associations []SchemaAssociation, source string) {

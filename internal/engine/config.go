@@ -95,6 +95,9 @@ func (c *Config) ApplyDefaults() {
 	if c.Schema.FetchSchemaStore != nil && *c.Schema.FetchSchemaStore {
 		c.Schema.SchemaStore.Enabled = true
 	}
+	if c.Schema.SchemaStore.Failure == "" {
+		c.Schema.SchemaStore.Failure = SchemaStoreFailureWarn
+	}
 	if c.Schema.Fetch.Retries == nil {
 		c.Schema.Fetch.Retries = defaults.Schema.Fetch.Retries
 	}
@@ -184,6 +187,22 @@ func schemaStoreEnabled(cfg SchemaConfig) bool {
 		return true
 	}
 	return cfg.FetchSchemaStore != nil && *cfg.FetchSchemaStore
+}
+
+func schemaStoreFailureMode(cfg SchemaConfig) (string, error) {
+	if cfg.SchemaStore.Strict {
+		return SchemaStoreFailureError, nil
+	}
+	mode := cfg.SchemaStore.Failure
+	if mode == "" {
+		mode = SchemaStoreFailureWarn
+	}
+	switch mode {
+	case SchemaStoreFailureWarn, SchemaStoreFailureError, SchemaStoreFailureSkip:
+		return mode, nil
+	default:
+		return "", fmt.Errorf("unsupported schemaStore failure policy %q; expected warn, error, or skip", mode)
+	}
 }
 
 func azureResourcePruningEnabled(cfg SchemaConfig) bool {

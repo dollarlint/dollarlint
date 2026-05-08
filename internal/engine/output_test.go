@@ -23,17 +23,23 @@ func TestFormatTextGroupedDefault(t *testing.T) {
 
 func TestFormatTextLocationsVerboseSkippedAndQuiet(t *testing.T) {
 	result := textFixtureResult()
+	result.Warnings = []Warning{{Kind: "schemaStoreCatalogUnavailable", Source: "schemastore", Message: "catalog unavailable"}}
+	result.Summary.Warnings = 1
 	text := FormatText(result, OutputConfig{Locations: true, Verbose: true, ShowSkipped: true})
 	assertContains(t, text, "2:7       type")
 	assertContains(t, text, "3:10      minimum")
 	assertContains(t, text, "location: /name")
 	assertContains(t, text, "schema: file:///schema.json")
+	assertContains(t, text, "warnings")
+	assertContains(t, text, "catalog unavailable")
+	assertContains(t, text, "1 warning")
 	assertContains(t, text, "skipped: skipped.json (no schema)")
 	locationOnly := FormatText(result, OutputConfig{Locations: true})
 	assertContains(t, locationOnly, "2:7       type")
 	assertContains(t, locationOnly, "got number, want string  /name")
 	quiet := FormatText(result, OutputConfig{Quiet: true})
 	assertContains(t, quiet, "dollarlint found 5 issues in 2 files after 123ms")
+	assertContains(t, quiet, "1 warning")
 	if strings.Contains(quiet, "Summary:") {
 		t.Fatalf("quiet output should omit summary:\n%s", quiet)
 	}
@@ -43,6 +49,9 @@ func TestFormatTextLocationsVerboseSkippedAndQuiet(t *testing.T) {
 	}
 	passed = FormatText(Result{Summary: Summary{Discovered: 1, Validated: 1, Duration: NewDuration(123 * time.Millisecond)}}, OutputConfig{})
 	assertContains(t, passed, "dollarlint passed in 123ms: 1 discovered, 1 validated, 0 skipped")
+	passed = FormatText(Result{Summary: Summary{Warnings: 1, Duration: NewDuration(123 * time.Millisecond)}, Warnings: []Warning{{Kind: "x", Message: "careful"}}}, OutputConfig{})
+	assertContains(t, passed, "dollarlint passed with 1 warning in 123ms")
+	assertContains(t, passed, "careful")
 }
 
 func TestTextHelpers(t *testing.T) {

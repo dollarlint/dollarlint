@@ -72,5 +72,5 @@ dollarlint validate ./config --json
 dollarlint validate ./config --sarif > dollarlint.sarif
 dollarlint validate . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
 dollarlint validate . --schema-store
-dollarlint validate . --schema-store --schema-store-strict --fetch-retries 4
+dollarlint validate . --schema-store --schema-store-failure error --fetch-retries 4
 ```

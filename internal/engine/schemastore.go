@@ -18,9 +18,9 @@ type schemaStoreEntry struct {
 	URL       string   `json:"url"`
 }
 
-func loadSchemaStoreCatalog(ctx context.Context, cache *SchemaCache, cfg Config) (*schemaStoreCatalog, error) {
+func loadSchemaStoreCatalog(ctx context.Context, cache *SchemaCache, cfg Config) (*schemaStoreCatalog, *Warning, error) {
 	if !schemaStoreEnabled(cfg.Schema) {
-		return nil, nil
+		return nil, nil, nil
 	}
 	catalogURL := cfg.Schema.SchemaStore.URL
 	if catalogURL == "" {
@@ -34,11 +34,11 @@ func loadSchemaStoreCatalog(ctx context.Context, cache *SchemaCache, cfg Config)
 	}
 	resolved, err := resolveCatalogURI(catalogURL)
 	if err != nil {
-		return nil, err
+		return schemaStoreCatalogError(cfg, "parse schemastore catalog URL %q: %v", catalogURL, err)
 	}
 	doc, err := cache.LoadContext(ctx, resolved)
 	if err != nil {
-		return schemaStoreCatalogError(cfg, "load schemastore catalog %s: %w", catalogURL, err)
+		return schemaStoreCatalogError(cfg, "load schemastore catalog %s: %v", catalogURL, err)
 	}
 	baseURL, _ := url.Parse(resolved)
 	raw, ok := doc.(map[string]any)
@@ -61,14 +61,27 @@ func loadSchemaStoreCatalog(ctx context.Context, cache *SchemaCache, cfg Config)
 		}
 		catalog.Schemas = append(catalog.Schemas, entry)
 	}
-	return catalog, nil
+	return catalog, nil, nil
 }
 
-func schemaStoreCatalogError(cfg Config, format string, args ...any) (*schemaStoreCatalog, error) {
-	if !cfg.Schema.SchemaStore.Strict {
-		return nil, nil
+func schemaStoreCatalogError(cfg Config, format string, args ...any) (*schemaStoreCatalog, *Warning, error) {
+	message := fmt.Sprintf(format, args...)
+	mode, err := schemaStoreFailureMode(cfg.Schema)
+	if err != nil {
+		return nil, nil, err
 	}
-	return nil, fmt.Errorf(format, args...)
+	switch mode {
+	case SchemaStoreFailureError:
+		return nil, nil, fmt.Errorf("%s", message)
+	case SchemaStoreFailureSkip:
+		return nil, nil, nil
+	default:
+		return nil, &Warning{
+			Kind:    "schemaStoreCatalogUnavailable",
+			Source:  "schemastore",
+			Message: message,
+		}, nil
+	}
 }
 
 func resolveCatalogEntryURL(baseURL *url.URL, raw string) string {

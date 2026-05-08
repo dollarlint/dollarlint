@@ -37,7 +37,7 @@ reason = "fixture intentionally keeps the old shape"`;
         </tr>
       </thead>
       <tbody>
-        <tr><td><code>file</code></td><td>A discovered file path relative to the validation root, using the same glob style as discovery.</td></tr>
+        <tr><td><code>file</code></td><td>A discovered file path relative to the validation root, using the same glob style as discovery. A pattern without a slash can match a basename at any depth.</td></tr>
         <tr><td><code>keyword</code></td><td>Either the JSON Schema keyword name, such as <code>required</code> or <code>type</code>, or the full keyword location.</td></tr>
         <tr><td><code>property</code></td><td>The affected property name, the instance pointer such as <code>/name</code>, or a glob when matching a bare property name.</td></tr>
         <tr><td><code>reason</code></td><td>Human context for the report. If omitted, dollarlint records that the issue matched an ignore rule.</td></tr>

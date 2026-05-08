@@ -25,7 +25,7 @@ const checkoutConfig = `{
 }`;
 
 const validateArguments = `{
-  "path": "examples/basics"
+  "include": ["examples/basics/invalid.json"]
 }`;
 ---
 
@@ -51,14 +51,14 @@ const validateArguments = `{
     <CodeBlock code={checkoutConfig} language="json" />
 
     <h2>Use the validate tool</h2>
-    <p>The server exposes a single <code>validate</code> tool. It validates JSON, YAML, and TOML files under a path using your dollarlint config, then returns the same result shape as <code>dollarlint validate --format json</code>, wrapped with a boolean <code>ok</code> field.</p>
+    <p>The server exposes a single <code>validate</code> tool. It validates JSON, YAML, and TOML files using your dollarlint config, then returns the same result shape as <code>dollarlint validate --format json</code>, wrapped with a boolean <code>ok</code> field.</p>
     <CodeBlock code={validateArguments} language="json" />
 
-    <p>The only tool argument is <code>path</code>, an optional file or directory to validate. When omitted, dollarlint validates the client-provided working directory. Source locations are included automatically so agents can point fixes at the right line and column.</p>
+    <p>The only tool argument is <code>include</code>, an optional array of file or glob patterns relative to the server working directory. When omitted, dollarlint uses configured discovery. Source locations are included automatically so agents can point fixes at the right line and column.</p>
 
     <p>Validation issues are not MCP transport errors. A successful tool call can still return <code>"ok": false</code> when files fail schema validation.</p>
 
     <h2>Configuration</h2>
-    <p>Keep schema associations, discovery rules, fetch policy, excludes, and output preferences in <code>.dollarlint.toml</code>. If an MCP client needs a non-default config file, launch the server with the global <code>--config</code> flag in its command arguments.</p>
+    <p>Keep schema associations, discovery rules, fetch policy, excludes, and output preferences in <code>.dollarlint.toml</code>. The <code>include</code> argument only narrows a tool call; it does not move the validation root. If an MCP client needs a non-default config file, launch the server with the global <code>--config</code> flag in its command arguments.</p>
   </article>
 </DocsLayout>

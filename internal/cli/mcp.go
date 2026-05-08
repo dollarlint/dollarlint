@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 
 	"github.com/agorischek/dollarlint"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -21,7 +20,7 @@ type mcpServer struct {
 }
 
 type mcpValidateArguments struct {
-	Path string `json:"path,omitempty"`
+	Include []string `json:"include,omitempty"`
 }
 
 type mcpValidateResponse struct {
@@ -84,10 +83,7 @@ func (s mcpServer) handleValidateTool(ctx context.Context, request mcp.CallToolR
 }
 
 func (s mcpServer) validate(ctx context.Context, args mcpValidateArguments) (mcpValidateResponse, error) {
-	root := strings.TrimSpace(args.Path)
-	if root == "" {
-		root = "."
-	}
+	root := "."
 	configPath := ""
 	if s.configPath != nil {
 		configPath = *s.configPath
@@ -95,6 +91,9 @@ func (s mcpServer) validate(ctx context.Context, args mcpValidateArguments) (mcp
 	cfg, _, err := dollarlint.LoadConfig(root, configPath)
 	if err != nil {
 		return mcpValidateResponse{}, err
+	}
+	if len(args.Include) > 0 {
+		cfg.Discovery.Include = args.Include
 	}
 	cfg.Output.Locations = true
 	result, err := dollarlint.Lint(ctx, dollarlint.Options{Root: root, Config: cfg, SourceLocations: true})
@@ -130,10 +129,10 @@ func validateToolInputSchema() map[string]any {
 		"type":                 "object",
 		"additionalProperties": false,
 		"properties": map[string]any{
-			"path": map[string]any{
-				"type":        "string",
-				"description": "File or directory to validate. Defaults to current directory.",
-				"default":     ".",
+			"include": map[string]any{
+				"type":        "array",
+				"description": "File or glob patterns to validate, relative to server cwd. Omit for config discovery.",
+				"items":       map[string]any{"type": "string"},
 			},
 		},
 	}

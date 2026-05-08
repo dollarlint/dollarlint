@@ -44,7 +44,7 @@ schema = "./schemas/settings.schema.json"`;
     <h2>Config associations</h2>
     <p>When you can't — or don't want to — add a declaration to each file, associations let you cover them from your config instead.</p>
     <CodeBlock code={association} language="toml" />
-    <p>Association globs are matched against each discovered file's path relative to the validation root.</p>
+    <p>Association globs are matched against each discovered file's path relative to the validation root. Like discovery globs, a pattern without a slash can match a basename at any depth.</p>
 
     <div class="note">
       <p>Precedence order: in-file declaration first, then config association, then dollarlint's built-in <code>.dollarlint.toml</code> association, then catalog match. If none of those hit, the file gets skipped unless <code>schemas.requireCoverage = true</code>.</p>

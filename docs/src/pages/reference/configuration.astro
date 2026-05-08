@@ -84,7 +84,8 @@ reason = "legacy fixture kept for compatibility"`;
     <p>Format and output file are per-run choices — use <code>--format</code> and <code>--output</code> on <code>dollarlint validate</code> whenever you need JSON, SARIF, or a file artifact.</p>
 
     <h2>Discovery</h2>
-    <p>Leave <code>include</code> unset to use the built-in JSON, YAML, YML, and TOML discovery defaults. Set it only when you want to replace that default set with custom globs. A glob without a slash can match a basename at any depth.</p>
+    <p>Leave <code>include</code> unset to use the built-in JSON, YAML, YML, and TOML discovery defaults. Set it only when you want to replace that default set with custom discovery globs.</p>
+    <p>Discovery, exclude, association, and ignore-file globs are matched against slash-separated paths relative to the validation root. A glob without a slash matches basenames at any depth, so <code>*.json</code> matches both <code>package.json</code> and <code>config/settings.json</code>. Use slashes when you want to match a particular relative path shape.</p>
     <table>
       <thead>
         <tr>
@@ -93,8 +94,8 @@ reason = "legacy fixture kept for compatibility"`;
         </tr>
       </thead>
       <tbody>
-        <tr><td><code>include</code></td><td>Optional replacement file globs to consider during discovery. Repeatable CLI includes replace config includes for that run.</td></tr>
-        <tr><td><code>extendExclude</code></td><td>Additional file and directory globs to ignore, on top of the built-in default excludes.</td></tr>
+        <tr><td><code>include</code></td><td>Optional replacement discovery globs to consider. Repeatable CLI includes replace config includes for that run.</td></tr>
+        <tr><td><code>extendExclude</code></td><td>Additional discovery globs to ignore, on top of the built-in default excludes.</td></tr>
         <tr><td><code>useDefaultExcludes</code></td><td>Skip common VCS, dependency, generated, cache, and virtual environment directories.</td></tr>
         <tr><td><code>respectGitIgnore</code></td><td>Apply the root <code>.gitignore</code> during directory discovery.</td></tr>
         <tr><td><code>forceExclude</code></td><td>Apply excludes even to explicitly passed files. By default, explicit file targets bypass excludes.</td></tr>
@@ -121,7 +122,7 @@ reason = "legacy fixture kept for compatibility"`;
     <h2>Associations</h2>
     <p>Associations map discovered files to schemas when the file does not declare one itself. dollarlint also has a built-in association for <code>.dollarlint.toml</code>, backed by the embedded config schema; explicit in-file declarations and user associations still win.</p>
     <CodeBlock code={associationConfig} language="toml" />
-    <p>Association globs are matched against paths relative to the validation root. In-file declarations win over associations.</p>
+    <p>Association globs are matched against paths relative to the validation root and use the same basename-any-depth behavior as discovery globs. In-file declarations win over associations.</p>
 
     <h2>Fetch and compile</h2>
     <table>

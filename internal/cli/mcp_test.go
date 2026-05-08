@@ -14,11 +14,12 @@ func TestServeMCPValidateTool(t *testing.T) {
 	dir := t.TempDir()
 	writeMCPTestFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["name"],"properties":{"$schema":{"type":"string"},"name":{"type":"string"}}}`)
 	writeMCPTestFile(t, filepath.Join(dir, "bad.json"), `{"$schema":"./schema.json"}`)
+	t.Chdir(dir)
 	input := strings.Join([]string{
 		`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"dev"}}}`,
 		`{"jsonrpc":"2.0","method":"notifications/initialized"}`,
 		`{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}`,
-		`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"validate","arguments":{"path":` + quoteJSON(t, dir) + `}}}`,
+		`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"validate","arguments":{"include":["bad.json"]}}}`,
 		"",
 	}, "\n")
 	var stdout, stderr bytes.Buffer
@@ -43,7 +44,7 @@ func TestServeMCPValidateTool(t *testing.T) {
 	}
 	inputSchema := tools[0].(map[string]any)["inputSchema"].(map[string]any)
 	properties := inputSchema["properties"].(map[string]any)
-	if len(properties) != 1 || properties["path"] == nil {
+	if len(properties) != 1 || properties["include"] == nil {
 		t.Fatalf("input schema properties = %+v", properties)
 	}
 	callResult := responses[2]["result"].(map[string]any)
@@ -97,15 +98,6 @@ func readMCPResponses(t *testing.T, output string) []map[string]any {
 		t.Fatalf("scan responses: %v", err)
 	}
 	return responses
-}
-
-func quoteJSON(t *testing.T, value string) string {
-	t.Helper()
-	data, err := json.Marshal(value)
-	if err != nil {
-		t.Fatalf("marshal json string: %v", err)
-	}
-	return string(data)
 }
 
 func writeMCPTestFile(t *testing.T, path, content string) {

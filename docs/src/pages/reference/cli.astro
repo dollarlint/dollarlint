@@ -89,11 +89,11 @@ const mcpConfig = `{
         <tr><td><code>--quiet</code></td><td>Use terse success text output and omit the summary details from failing text output.</td></tr>
         <tr><td><code>--show-skipped</code></td><td>Show files skipped because they do not declare or match a schema.</td></tr>
         <tr><td><code>--include</code></td><td>Set discovery include globs. Repeatable; when provided, replaces config includes for this run. A glob without a slash can match a basename at any depth.</td></tr>
-        <tr><td><code>--extend-exclude</code></td><td>Add a discovery exclude glob on top of config and built-in default excludes. Repeatable.</td></tr>
+        <tr><td><code>--extend-exclude</code></td><td>Add a discovery exclude glob on top of config and built-in default excludes. Repeatable. A glob without a slash can match a basename at any depth.</td></tr>
         <tr><td><code>--no-default-excludes</code></td><td>Disable built-in discovery excludes.</td></tr>
         <tr><td><code>--no-gitignore</code></td><td>Do not apply root <code>.gitignore</code> patterns during discovery.</td></tr>
         <tr><td><code>--force-exclude</code></td><td>Apply excludes even to explicitly passed files.</td></tr>
-        <tr><td><code>--schema</code></td><td>Associate a file glob with a schema as <code>glob=uri</code>. Repeatable.</td></tr>
+        <tr><td><code>--schema</code></td><td>Associate a file glob with a schema as <code>glob=uri</code>. Repeatable. Association globs use the same slashless-basename behavior as discovery globs.</td></tr>
         <tr><td><code>--schema-store</code></td><td>Match conventional filenames using the SchemaStore catalog.</td></tr>
         <tr><td><code>--schema-store-url</code></td><td>Use a SchemaStore-format catalog URL or local path and enable catalog matching.</td></tr>
         <tr><td><code>--schema-store-failure</code></td><td>Set catalog failure policy to <code>warn</code>, <code>error</code>, or <code>skip</code>.</td></tr>
@@ -129,6 +129,6 @@ const mcpConfig = `{
     <h2>MCP server</h2>
     <p><code>dollarlint serve mcp</code> starts a stdio MCP server. It is meant to be launched by an MCP client, not run directly in a terminal session.</p>
     <pre><code>{mcpConfig}</code></pre>
-    <p>The server exposes one tool, <code>validate</code>, with one optional argument: <code>path</code>. It loads project config the same way <code>dollarlint validate</code> does, includes source locations automatically, and returns structured JSON with <code>ok</code>, <code>message</code>, and the regular dollarlint <code>result</code> payload.</p>
+    <p>The server exposes one tool, <code>validate</code>, with one optional argument: <code>include</code>. Pass file or glob patterns relative to the server working directory to narrow validation for a tool call, or omit it to use configured discovery. The tool includes source locations automatically and returns structured JSON with <code>ok</code>, <code>message</code>, and the regular dollarlint <code>result</code> payload.</p>
   </article>
 </DocsLayout>

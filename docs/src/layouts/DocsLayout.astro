@@ -98,13 +98,17 @@ const slogans = [
         const menu = document.querySelector("[data-mobile-menu]");
         const menuButton = document.querySelector("[data-mobile-menu-button]");
         const menuPanel = document.querySelector("[data-mobile-menu-panel]");
+        const sidebar = document.querySelector(".sidebar");
         const closeMenu = () => {
           menu?.removeAttribute("data-open");
           document.documentElement.removeAttribute("data-menu-open");
+          document.documentElement.style.removeProperty("--mobile-menu-top");
           menuButton?.setAttribute("aria-expanded", "false");
           menuPanel?.setAttribute("hidden", "");
         };
         const openMenu = () => {
+          const menuTop = sidebar?.getBoundingClientRect().bottom ?? 0;
+          document.documentElement.style.setProperty("--mobile-menu-top", `${menuTop}px`);
           menu?.setAttribute("data-open", "true");
           document.documentElement.setAttribute("data-menu-open", "true");
           menuButton?.setAttribute("aria-expanded", "true");
@@ -139,7 +143,7 @@ const slogans = [
     <link rel="icon" href="/favicon.svg" />
     <title>{title}</title>
   </head>
-  <body>
+  <body class:list={[current === "/" && "is-home"]}>
     <div class="site-shell">
       <aside class="sidebar" aria-label="Documentation">
         <div class="sidebar-header">

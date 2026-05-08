@@ -82,7 +82,7 @@ import DocsLayout from "../layouts/DocsLayout.astro";
         </p>
       </div>
       <div class="command">
-        <code>dollarlint validate ./config --locations</code>
+        <code>dollarlint validate ./config <span class="no-break">--locations</span></code>
         <p>
           Get the exact line and column — no more hunting for where the bill
           comes due.
@@ -90,7 +90,7 @@ import DocsLayout from "../layouts/DocsLayout.astro";
       </div>
       <div class="command">
         <code
-          >dollarlint validate . --format sarif --output dollarlint.sarif</code
+          >dollarlint validate . <span class="no-break">--format</span> sarif <span class="no-break">--output</span> dollarlint.sarif</code
         >
         <p>Generate a CI-friendly code scanning artifact.</p>
       </div>

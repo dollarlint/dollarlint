@@ -165,7 +165,9 @@ body::before {
       90deg,
       transparent 0 8%,
       var(--security-thread) 8% 8.4%,
-      transparent 8.4%
+      transparent 8.4% 91.6%,
+      var(--security-thread) 91.6% 92%,
+      transparent 92%
     ),
     repeating-linear-gradient(
       0deg,
@@ -173,6 +175,21 @@ body::before {
       transparent 1px 9px
     );
   opacity: 0.7;
+}
+
+body.is-home::before {
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0 8%,
+      var(--security-thread) 8% 8.4%,
+      transparent 8.4%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      var(--microprint) 0 1px,
+      transparent 1px 9px
+    );
 }
 
 a {
@@ -893,6 +910,10 @@ tr:last-child td {
   font-weight: 700;
 }
 
+.no-break {
+  white-space: nowrap;
+}
+
 .command p {
   margin: 12px 0 0;
   color: var(--ink-soft);
@@ -1010,18 +1031,17 @@ tr:last-child td {
 
   .mobile-menu-panel {
     position: fixed;
-    top: 79px;
+    top: var(--mobile-menu-top, 108px);
     right: 0;
     bottom: 0;
     left: 0;
     z-index: 40;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
-    height: calc(100dvh - 79px);
+    height: calc(100dvh - var(--mobile-menu-top, 108px));
     max-height: none;
     overflow: hidden;
     border: 0;
-    border-top: 1px solid var(--rule);
     border-radius: 0;
     background: var(--menu-bg);
     box-shadow: none;

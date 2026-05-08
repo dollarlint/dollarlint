@@ -69,6 +69,14 @@ version: 1
 schema:
   fetchRemote: false
   fetchSchemaStore: false
+  fetch:
+    retries: 4
+    retryMinWait: 100ms
+    retryMaxWait: 1s
+  schemaStore:
+    enabled: true
+    url: ./catalog.json
+    strict: true
   allowedDomains:
     - schemas.example.com
   blockedDomains:
@@ -87,8 +95,14 @@ ignore:
 	if filepath.Base(path) != ".dollarlint.yaml" {
 		t.Fatalf("path = %s", path)
 	}
-	if remoteFetchEnabled(cfg.Schema) || schemaStoreFetchEnabled(cfg.Schema) || cfg.Schema.MaxDepth != 3 || cfg.Timeouts.Fetch.Duration != 2*time.Second {
+	if remoteFetchEnabled(cfg.Schema) || cfg.Schema.MaxDepth != 3 || cfg.Timeouts.Fetch.Duration != 2*time.Second {
 		t.Fatalf("yaml cfg not decoded/defaulted: %+v", cfg)
+	}
+	if !cfg.Schema.SchemaStore.Enabled || cfg.Schema.SchemaStore.URL != "./catalog.json" || !cfg.Schema.SchemaStore.Strict {
+		t.Fatalf("schemaStore not decoded: %+v", cfg.Schema.SchemaStore)
+	}
+	if fetchRetries(cfg.Schema.Fetch) != 4 || cfg.Schema.Fetch.RetryMinWait.Duration != 100*time.Millisecond || cfg.Schema.Fetch.RetryMaxWait.Duration != time.Second {
+		t.Fatalf("fetch resilience config not decoded: %+v", cfg.Schema.Fetch)
 	}
 	if len(cfg.Schema.AllowedDomains) != 1 || cfg.Schema.AllowedDomains[0] != "schemas.example.com" || len(cfg.Schema.BlockedDomains) != 1 {
 		t.Fatalf("domain policy not decoded: %+v", cfg.Schema)
@@ -120,6 +134,26 @@ schema = "./schema.json"
 	}
 	if !cfg.Output.JSON {
 		t.Fatalf("json output config not decoded")
+	}
+	if cfg.Schema.SchemaStore.URL != defaultSchemaStoreCatalogURL {
+		t.Fatalf("schemaStore default URL = %q", cfg.Schema.SchemaStore.URL)
+	}
+	if fetchRetries(cfg.Schema.Fetch) != 2 {
+		t.Fatalf("fetch retry default = %+v", cfg.Schema.Fetch)
+	}
+	if fetchRetries(FetchConfig{}) != 0 {
+		t.Fatalf("nil fetch retries should resolve to zero")
+	}
+	negativeRetries := -1
+	if fetchRetries(FetchConfig{Retries: &negativeRetries}) != 0 {
+		t.Fatalf("negative fetch retries should resolve to zero")
+	}
+	legacy := Config{Schema: SchemaConfig{SchemaStoreCatalogURL: "./legacy-catalog.json"}}
+	legacyEnabled := true
+	legacy.Schema.FetchSchemaStore = &legacyEnabled
+	legacy.ApplyDefaults()
+	if legacy.Schema.SchemaStore.URL != "./legacy-catalog.json" || !legacy.Schema.SchemaStore.Enabled {
+		t.Fatalf("legacy schemastore config not defaulted: %+v", legacy.Schema)
 	}
 }
 

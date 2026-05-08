@@ -25,6 +25,8 @@ type DiscoveryConfig struct {
 
 type SchemaConfig struct {
 	Associations          []SchemaAssociation `json:"associations,omitempty" yaml:"associations,omitempty" toml:"associations,omitempty"`
+	SchemaStore           SchemaStoreConfig   `json:"schemaStore,omitempty" yaml:"schemaStore,omitempty" toml:"schemaStore,omitempty"`
+	Fetch                 FetchConfig         `json:"fetch,omitempty" yaml:"fetch,omitempty" toml:"fetch,omitempty"`
 	MaxDepth              int                 `json:"maxDepth,omitempty" yaml:"maxDepth,omitempty" toml:"maxDepth,omitempty"`
 	FetchRemote           *bool               `json:"fetchRemote,omitempty" yaml:"fetchRemote,omitempty" toml:"fetchRemote,omitempty"`
 	FetchSchemaStore      *bool               `json:"fetchSchemaStore,omitempty" yaml:"fetchSchemaStore,omitempty" toml:"fetchSchemaStore,omitempty"`
@@ -32,6 +34,18 @@ type SchemaConfig struct {
 	AllowedDomains        []string            `json:"allowedDomains,omitempty" yaml:"allowedDomains,omitempty" toml:"allowedDomains,omitempty"`
 	BlockedDomains        []string            `json:"blockedDomains,omitempty" yaml:"blockedDomains,omitempty" toml:"blockedDomains,omitempty"`
 	Concurrency           int                 `json:"concurrency,omitempty" yaml:"concurrency,omitempty" toml:"concurrency,omitempty"`
+}
+
+type SchemaStoreConfig struct {
+	Enabled bool   `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
+	URL     string `json:"url,omitempty" yaml:"url,omitempty" toml:"url,omitempty"`
+	Strict  bool   `json:"strict,omitempty" yaml:"strict,omitempty" toml:"strict,omitempty"`
+}
+
+type FetchConfig struct {
+	Retries      *int     `json:"retries,omitempty" yaml:"retries,omitempty" toml:"retries,omitempty"`
+	RetryMinWait Duration `json:"retryMinWait,omitempty" yaml:"retryMinWait,omitempty" toml:"retryMinWait,omitempty"`
+	RetryMaxWait Duration `json:"retryMaxWait,omitempty" yaml:"retryMaxWait,omitempty" toml:"retryMaxWait,omitempty"`
 }
 
 type SchemaAssociation struct {

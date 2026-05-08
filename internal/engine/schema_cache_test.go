@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -72,6 +73,47 @@ func TestSchemaCacheRemoteFetch(t *testing.T) {
 	cache = NewSchemaCache(cfg)
 	if _, err := cache.Load(server.URL + "/schema.json"); err == nil {
 		t.Fatalf("expected remote disabled error")
+	}
+}
+
+func TestSchemaCacheRetriesTransientRemoteFetchFailures(t *testing.T) {
+	var attempts int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		count := atomic.AddInt32(&attempts, 1)
+		if count == 1 {
+			http.Error(w, "try again", http.StatusServiceUnavailable)
+			return
+		}
+		w.Write([]byte(`{"type":"object"}`))
+	}))
+	defer server.Close()
+
+	cfg := DefaultConfig()
+	cfg.Schema.Fetch.RetryMinWait = NewDuration(time.Millisecond)
+	cfg.Schema.Fetch.RetryMaxWait = NewDuration(time.Millisecond)
+	cache := NewSchemaCache(cfg)
+	if _, err := cache.Load(server.URL + "/schema.json"); err != nil {
+		t.Fatalf("remote load after retry: %v", err)
+	}
+	if attempts != 2 {
+		t.Fatalf("attempts = %d", attempts)
+	}
+}
+
+func TestSchemaCacheDoesNotRetryDeterministicHTTPFailures(t *testing.T) {
+	var attempts int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&attempts, 1)
+		http.Error(w, "missing", http.StatusNotFound)
+	}))
+	defer server.Close()
+
+	cache := NewSchemaCache(DefaultConfig())
+	if _, err := cache.Load(server.URL + "/missing.json"); err == nil {
+		t.Fatalf("expected non-retryable 404 error")
+	}
+	if attempts != 1 {
+		t.Fatalf("attempts = %d", attempts)
 	}
 }
 
@@ -183,6 +225,8 @@ func TestSchemaCacheFetchTimeout(t *testing.T) {
 	}))
 	defer server.Close()
 	cfg := DefaultConfig()
+	zeroRetries := 0
+	cfg.Schema.Fetch.Retries = &zeroRetries
 	cfg.Timeouts.Fetch = NewDuration(time.Nanosecond)
 	cache := NewSchemaCache(cfg)
 	if _, err := cache.Load(server.URL + "/slow.json"); err == nil {

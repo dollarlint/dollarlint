@@ -14,6 +14,17 @@ description: Configure discovery, schema loading, ignore rules, output, and time
 - `dollarlint.toml`
 - `dollarlint.json`
 
+Create a starter config with:
+
+```sh
+dollarlint init
+dollarlint init ./packages/api --schema-store
+dollarlint init --output dollarlint.toml --format toml
+dollarlint init --defaults --schema-store
+```
+
+`init` starts a short terminal interview by default. Use `--defaults` to skip prompts and accept defaults plus any provided flags. It will not overwrite an existing config unless you confirm overwrite or pass `--force`.
+
 ## Full example
 
 ```yaml
@@ -35,7 +46,14 @@ discovery:
 
 schema:
   fetchRemote: true
-  fetchSchemaStore: true
+  fetch:
+    retries: 2
+    retryMinWait: 250ms
+    retryMaxWait: 2s
+  schemaStore:
+    enabled: false
+    url: https://www.schemastore.org/api/json/catalog.json
+    strict: false
   allowedDomains:
     - "www.schemastore.org"
     - "raw.githubusercontent.com"
@@ -74,13 +92,23 @@ Use `discovery.include` and `discovery.exclude` to decide which files are consid
 
 Remote `http(s)` schema fetching is enabled by default. Set `schema.fetchRemote` to `false` when you need fully offline or hermetic validation.
 
+Use `schema.fetch` to tune resilience for remote schemas. dollarlint retries transient network failures, `408`, `425`, `429`, and retryable `5xx` responses with bounded backoff.
+
 Use `schema.allowedDomains` to restrict remote schema fetching to specific hosts. Leave it empty to allow any host. Use `schema.blockedDomains` to deny specific hosts; blocked domains win over allowed domains. Entries are exact hosts such as `www.schemastore.org` or wildcard hosts such as `*.example.com`.
 
 The CLI accepts repeatable `--allow-domain` and `--block-domain` flags for one-off runs.
 
-`schema.maxDepth` limits nested schema references, and recursion is detected so cyclical references do not spin forever.
+## SchemaStore catalog matching
 
-SchemaStore catalog fetching is enabled by default and can be disabled with `schema.fetchSchemaStore: false`. Domain policy applies to the catalog too, so excluding `www.schemastore.org` skips the default lookup.
+Set `schema.schemaStore.enabled` to `true` to match conventional filenames using the SchemaStore catalog when a file does not declare its own schema.
+
+The matching precedence is explicit in-file schema, then config-level schema associations, then SchemaStore filename matches, then skipped.
+
+Use `schema.schemaStore.url` to point at a local or mirrored catalog for hermetic CI.
+
+By default, SchemaStore catalog failures are non-fatal: dollarlint skips catalog matching and still validates files with explicit schemas or config associations. Set `schema.schemaStore.strict` to `true` when catalog availability should fail the run.
+
+`schema.maxDepth` limits nested schema references, and recursion is detected so cyclical references do not spin forever.
 
 ## Ignore rules
 

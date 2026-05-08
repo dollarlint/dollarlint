@@ -71,7 +71,10 @@ func normalizeDomainPattern(raw string) (string, error) {
 	}
 	if strings.HasPrefix(value, "*.") {
 		suffix := strings.TrimPrefix(value, "*.")
-		if suffix == "" || strings.ContainsAny(suffix, "/\\") {
+		if host, _, err := net.SplitHostPort(suffix); err == nil {
+			suffix = strings.Trim(host, "[]")
+		}
+		if suffix == "" || hasInvalidDomainChars(suffix) {
 			return "", fmt.Errorf("invalid schema domain %q", raw)
 		}
 		return "*." + suffix, nil
@@ -80,7 +83,7 @@ func normalizeDomainPattern(raw string) (string, error) {
 	if host, _, err := net.SplitHostPort(value); err == nil {
 		value = strings.Trim(host, "[]")
 	}
-	if value == "" || strings.ContainsAny(value, "/\\") {
+	if value == "" || hasInvalidDomainChars(value) {
 		return "", fmt.Errorf("invalid schema domain %q", raw)
 	}
 	return value, nil
@@ -106,4 +109,8 @@ func countNonEmptyDomains(domains []string) int {
 		}
 	}
 	return count
+}
+
+func hasInvalidDomainChars(value string) bool {
+	return strings.ContainsAny(value, "/\\ \t\r\n")
 }

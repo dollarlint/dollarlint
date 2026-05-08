@@ -19,6 +19,8 @@ Summary: 4 discovered, 3 validated, 1 skipped, 2 issues in 47ms
 
 Use `--verbose` for schema URI, keyword location, and property details under each issue.
 
+When the terminal supports color, text output uses subtle Lip Gloss styling for headings, file names, keywords, pointers, and summaries. JSON and SARIF output are never styled.
+
 ## Locations
 
 Use `--locations` to include best-effort line and column positions:

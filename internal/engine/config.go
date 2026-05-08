@@ -26,7 +26,7 @@ var defaultConfigFiles = []string{
 
 func DefaultConfig() Config {
 	fetchRemote := true
-	fetchSchemaStore := true
+	retries := 2
 	return Config{
 		Version: 1,
 		Discovery: DiscoveryConfig{
@@ -56,11 +56,17 @@ func DefaultConfig() Config {
 			},
 		},
 		Schema: SchemaConfig{
-			MaxDepth:              8,
-			FetchRemote:           &fetchRemote,
-			FetchSchemaStore:      &fetchSchemaStore,
-			SchemaStoreCatalogURL: defaultSchemaStoreCatalogURL,
-			Concurrency:           runtime.GOMAXPROCS(0),
+			SchemaStore: SchemaStoreConfig{
+				URL: defaultSchemaStoreCatalogURL,
+			},
+			Fetch: FetchConfig{
+				Retries:      &retries,
+				RetryMinWait: NewDuration(250 * time.Millisecond),
+				RetryMaxWait: NewDuration(2 * time.Second),
+			},
+			MaxDepth:    8,
+			FetchRemote: &fetchRemote,
+			Concurrency: runtime.GOMAXPROCS(0),
 		},
 		Timeouts: TimeoutConfig{
 			Fetch:   NewDuration(10 * time.Second),
@@ -86,11 +92,26 @@ func (c *Config) ApplyDefaults() {
 	if c.Schema.FetchRemote == nil {
 		c.Schema.FetchRemote = defaults.Schema.FetchRemote
 	}
-	if c.Schema.FetchSchemaStore == nil {
-		c.Schema.FetchSchemaStore = defaults.Schema.FetchSchemaStore
+	if c.Schema.SchemaStoreCatalogURL != "" && c.Schema.SchemaStore.URL == "" {
+		c.Schema.SchemaStore.URL = c.Schema.SchemaStoreCatalogURL
+	}
+	if c.Schema.SchemaStore.URL == "" {
+		c.Schema.SchemaStore.URL = defaults.Schema.SchemaStore.URL
 	}
 	if c.Schema.SchemaStoreCatalogURL == "" {
-		c.Schema.SchemaStoreCatalogURL = defaults.Schema.SchemaStoreCatalogURL
+		c.Schema.SchemaStoreCatalogURL = c.Schema.SchemaStore.URL
+	}
+	if c.Schema.FetchSchemaStore != nil && *c.Schema.FetchSchemaStore {
+		c.Schema.SchemaStore.Enabled = true
+	}
+	if c.Schema.Fetch.Retries == nil {
+		c.Schema.Fetch.Retries = defaults.Schema.Fetch.Retries
+	}
+	if c.Schema.Fetch.RetryMinWait.Duration == 0 {
+		c.Schema.Fetch.RetryMinWait = defaults.Schema.Fetch.RetryMinWait
+	}
+	if c.Schema.Fetch.RetryMaxWait.Duration == 0 {
+		c.Schema.Fetch.RetryMaxWait = defaults.Schema.Fetch.RetryMaxWait
 	}
 	if c.Schema.Concurrency <= 0 {
 		c.Schema.Concurrency = defaults.Schema.Concurrency
@@ -170,9 +191,19 @@ func remoteFetchEnabled(cfg SchemaConfig) bool {
 	return cfg.FetchRemote == nil || *cfg.FetchRemote
 }
 
-func schemaStoreFetchEnabled(cfg SchemaConfig) bool {
-	if !remoteFetchEnabled(cfg) || (cfg.FetchSchemaStore != nil && !*cfg.FetchSchemaStore) {
-		return false
+func schemaStoreEnabled(cfg SchemaConfig) bool {
+	if cfg.SchemaStore.Enabled {
+		return true
 	}
-	return checkRemoteDomainPolicy(cfg.SchemaStoreCatalogURL, cfg) == nil
+	return cfg.FetchSchemaStore != nil && *cfg.FetchSchemaStore
+}
+
+func fetchRetries(cfg FetchConfig) int {
+	if cfg.Retries == nil {
+		return 0
+	}
+	if *cfg.Retries < 0 {
+		return 0
+	}
+	return *cfg.Retries
 }

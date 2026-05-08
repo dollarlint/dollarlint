@@ -35,9 +35,12 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 	}
 	result := Result{Root: root}
 	cache := NewSchemaCache(cfg)
+	schemaStoreCatalog, err := loadSchemaStoreCatalog(ctx, cache, cfg)
+	if err != nil {
+		return Result{}, err
+	}
 	documents := make([]*Document, 0, len(files))
 	validatedDocuments := make([]*Document, 0, len(files))
-	documentsWithoutSchema := make([]*Document, 0, len(files))
 	schemaRoots := make([]string, 0, len(files))
 	fileIndexes := map[string]int{}
 	for _, file := range files {
@@ -60,18 +63,7 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		result.Files = append(result.Files, fileResult)
 		documents = append(documents, document)
 		applySchemaAssociation(document, cfg.Schema.Associations, "config-association")
-		if document.Schema == "" {
-			documentsWithoutSchema = append(documentsWithoutSchema, document)
-		}
-	}
-	if len(documentsWithoutSchema) > 0 && schemaStoreFetchEnabled(cfg.Schema) {
-		associations, err := fetchSchemaStoreAssociations(ctx, cfg)
-		if err != nil {
-			return Result{}, err
-		}
-		for _, document := range documentsWithoutSchema {
-			applySchemaAssociation(document, associations, "schemastore")
-		}
+		applySchemaStoreAssociation(document, schemaStoreCatalog)
 	}
 	for _, document := range documents {
 		index := fileIndexes[document.RelativePath]
@@ -179,6 +171,8 @@ func compileSchema(ctx context.Context, cache *SchemaCache, cfg Config, schemaUR
 	compileCtx, cancel := context.WithTimeout(ctx, cfg.Timeouts.Compile.Duration)
 	defer cancel()
 	compiler := jsonschema.NewCompiler()
+	compiler.AssertFormat()
+	compiler.UseRegexpEngine(compileECMARegexp)
 	compiler.UseLoader(compilerLoader{cache: cache})
 	result := make(chan struct {
 		schema *jsonschema.Schema

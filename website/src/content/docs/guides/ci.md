@@ -22,7 +22,7 @@ jobs:
         with:
           go-version: stable
       - run: go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
-      - run: dollarlint .
+      - run: dollarlint validate .
 ```
 
 ## Upload SARIF
@@ -47,7 +47,7 @@ jobs:
         with:
           go-version: stable
       - run: go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
-      - run: dollarlint . --sarif > dollarlint.sarif
+      - run: dollarlint validate . --sarif > dollarlint.sarif
       - uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:

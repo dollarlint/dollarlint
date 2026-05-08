@@ -228,7 +228,7 @@ func TestApplySchemaAssociationSkipsIncompleteRules(t *testing.T) {
 	}
 }
 
-func TestLintAppliesSchemaStoreAssociationsByDefault(t *testing.T) {
+func TestLintAppliesSchemaStoreAssociationsWhenEnabled(t *testing.T) {
 	var catalogRequests int
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -245,7 +245,8 @@ func TestLintAppliesSchemaStoreAssociationsByDefault(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "example.yaml"), `name: 42`)
 	cfg := DefaultConfig()
-	cfg.Schema.SchemaStoreCatalogURL = server.URL + "/catalog.json"
+	cfg.Schema.SchemaStore.Enabled = true
+	cfg.Schema.SchemaStore.URL = server.URL + "/catalog.json"
 	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
 	if err != nil {
 		t.Fatalf("Lint: %v", err)
@@ -271,9 +272,7 @@ func TestLintCanDisableSchemaStoreAssociations(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "example.yaml"), `name: 42`)
 	cfg := DefaultConfig()
-	disabled := false
-	cfg.Schema.FetchSchemaStore = &disabled
-	cfg.Schema.SchemaStoreCatalogURL = server.URL
+	cfg.Schema.SchemaStore.URL = server.URL
 	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
 	if err != nil {
 		t.Fatalf("Lint: %v", err)
@@ -309,7 +308,5 @@ func TestValidateDocumentNonValidationError(t *testing.T) {
 
 func configWithoutSchemaStore() Config {
 	cfg := DefaultConfig()
-	disabled := false
-	cfg.Schema.FetchSchemaStore = &disabled
 	return cfg
 }

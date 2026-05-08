@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 type SchemaCache struct {
@@ -28,13 +30,27 @@ type schemaEntry struct {
 
 func NewSchemaCache(cfg Config) *SchemaCache {
 	cfg.ApplyDefaults()
+	client := retryablehttp.NewClient()
+	client.HTTPClient.Timeout = cfg.Timeouts.Fetch.Duration
+	client.RetryMax = fetchRetries(cfg.Schema.Fetch)
+	client.RetryWaitMin = cfg.Schema.Fetch.RetryMinWait.Duration
+	client.RetryWaitMax = cfg.Schema.Fetch.RetryMaxWait.Duration
+	client.CheckRetry = retryableHTTPPolicy
+	client.Logger = nil
 	return &SchemaCache{
-		cfg: cfg,
-		client: &http.Client{
-			Timeout: cfg.Timeouts.Fetch.Duration,
-		},
+		cfg:     cfg,
+		client:  client.StandardClient(),
 		entries: map[string]*schemaEntry{},
 	}
+}
+
+func retryableHTTPPolicy(ctx context.Context, resp *http.Response, err error) (bool, error) {
+	retry, retryErr := retryablehttp.DefaultRetryPolicy(ctx, resp, err)
+	if retry || retryErr != nil || resp == nil {
+		return retry, retryErr
+	}
+	return resp.StatusCode == http.StatusRequestTimeout ||
+		resp.StatusCode == http.StatusTooEarly, nil
 }
 
 func (c *SchemaCache) Load(raw string) (any, error) {

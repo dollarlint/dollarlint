@@ -15,6 +15,8 @@ const (
 type Config = engine.Config
 type DiscoveryConfig = engine.DiscoveryConfig
 type SchemaConfig = engine.SchemaConfig
+type SchemaStoreConfig = engine.SchemaStoreConfig
+type FetchConfig = engine.FetchConfig
 type SchemaAssociation = engine.SchemaAssociation
 type TimeoutConfig = engine.TimeoutConfig
 type OutputConfig = engine.OutputConfig

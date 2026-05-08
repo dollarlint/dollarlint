@@ -17,18 +17,26 @@ Then run it against a repository or config directory:
 dollarlint .
 ```
 
+To bootstrap a project config, run:
+
+```sh
+dollarlint init
+```
+
+That starts a short terminal interview and creates `.dollarlint.yaml` in the current directory. It refuses to overwrite an existing config unless you confirm overwrite or pass `--force`.
+
 ## Try the examples
 
 This repository includes example JSON, YAML, and TOML files:
 
 ```sh
-dollarlint ./examples
+dollarlint validate ./examples
 ```
 
 There is also a SchemaStore suite with common real-world config files that declare remote schemas from `https://www.schemastore.org`:
 
 ```sh
-dollarlint ./examples/schemastore --locations
+dollarlint validate ./examples/schemastore --locations
 ```
 
 Example text output is grouped by file:
@@ -54,9 +62,15 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues in 145ms
 ## Common commands
 
 ```sh
-dollarlint ./config --locations
-dollarlint ./config --verbose
-dollarlint ./config --json
-dollarlint ./config --sarif > dollarlint.sarif
-dollarlint . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
+dollarlint init
+dollarlint init ./packages/api --schema-store
+dollarlint init --output dollarlint.toml --format toml
+dollarlint init --defaults --schema-store
+dollarlint validate ./config --locations
+dollarlint validate ./config --verbose
+dollarlint validate ./config --json
+dollarlint validate ./config --sarif > dollarlint.sarif
+dollarlint validate . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
+dollarlint validate . --schema-store
+dollarlint validate . --schema-store --schema-store-strict --fetch-retries 4
 ```

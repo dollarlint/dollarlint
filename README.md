@@ -13,13 +13,27 @@ go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
 ## CLI
 
 ```sh
+dollarlint init
+dollarlint validate .
 dollarlint .
-dollarlint ./config --locations
-dollarlint ./config --verbose
-dollarlint ./config --json
-dollarlint ./config --sarif > dollarlint.sarif
-dollarlint . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
-dollarlint ./examples/schemastore --locations
+dollarlint validate ./config --locations
+dollarlint validate ./config --verbose
+dollarlint validate ./config --json
+dollarlint validate ./config --sarif > dollarlint.sarif
+dollarlint validate . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
+dollarlint validate . --schema-store
+dollarlint validate ./examples/schemastore --locations
+```
+
+`validate` is the canonical validation command. `dollarlint [path]` remains a backwards-compatible shortcut for `dollarlint validate [path]`.
+
+Use `dollarlint init` to interview you and create a starter `.dollarlint.yaml` in the current directory. It is safe by default and will not overwrite an existing config unless you confirm overwrite or pass `--force`.
+
+```sh
+dollarlint init
+dollarlint init ./packages/api --schema-store
+dollarlint init --output dollarlint.toml --format toml
+dollarlint init --defaults --schema-store
 ```
 
 Exit codes:
@@ -74,7 +88,14 @@ discovery:
 
 schema:
   fetchRemote: true
-  fetchSchemaStore: true
+  fetch:
+    retries: 2
+    retryMinWait: 250ms
+    retryMaxWait: 2s
+  schemaStore:
+    enabled: false
+    url: https://www.schemastore.org/api/json/catalog.json
+    strict: false
   allowedDomains:
     - "www.schemastore.org"
     - "raw.githubusercontent.com"
@@ -105,16 +126,16 @@ output:
   locations: false
 ```
 
-By default, remote `http(s)` schema fetching is enabled. `schema.allowedDomains` can restrict remote schemas to specific hosts, and `schema.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
+By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schema.allowedDomains` can restrict remote schemas to specific hosts, and `schema.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
 
-SchemaStore catalog fetching is enabled by default and can be disabled with `schema.fetchSchemaStore: false`. Domain policy applies to SchemaStore too, so excluding `www.schemastore.org` skips the default catalog lookup. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
+SchemaStore catalog matching is configurable with `schema.schemaStore`. When enabled, files without an explicit schema can be matched by conventional filename using the SchemaStore catalog or a local SchemaStore-shaped catalog. If the catalog cannot be loaded, dollarlint skips SchemaStore matching and still validates explicit schemas; set `schema.schemaStore.strict: true` to fail instead. Precedence is explicit in-file schema, then config associations, then SchemaStore matches, then skipped. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
 
 ## Examples
 
 The `examples/` directory includes a small local schema demo and a `examples/schemastore/` suite that validates common config files against remote schemas from `https://www.schemastore.org`.
 
 ```sh
-dollarlint ./examples/schemastore --locations
+dollarlint validate ./examples/schemastore --locations
 ```
 
 ## Text Output
@@ -140,6 +161,8 @@ settings.json
 ```
 
 Use `--verbose` to show schema URI and keyword metadata under each issue. Use `--quiet` for terse success output.
+
+Text output uses subtle terminal styling when color is available and stays plain for machine-readable modes such as `--json` and `--sarif`.
 
 ## SARIF
 
@@ -184,6 +207,8 @@ func main() {
 
 ```sh
 go test ./...
-go test -coverprofile=coverage.out .
+go test -coverprofile=coverage.out ./internal/engine
 go tool cover -func=coverage.out
 ```
+
+The root package is a small public SDK facade. Most implementation lives in `internal/engine`, with CLI wiring in `internal/cli`, so future integrations such as `serve`, LSP, and MCP can share the same validation engine without expanding the public Go API accidentally.

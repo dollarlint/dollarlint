@@ -36,6 +36,9 @@ type Document struct {
 // repeatedly during a single Lint pass (Documents are not shared across
 // goroutines).
 func (d *Document) azureResourceRefs() []azureARMResourceRef {
+	if d == nil {
+		return nil
+	}
 	if !d.azureRefsComputed {
 		d.azureRefs = collectAzureARMResourceRefs(d.Data)
 		d.azureRefsComputed = true
@@ -218,10 +221,26 @@ func tomlSchemaDirective(raw []byte) string {
 	return ""
 }
 
+// firstLines returns up to limit leading lines from raw without materializing
+// the full slice of lines for large inputs.
 func firstLines(raw []byte, limit int) []string {
-	lines := strings.Split(string(raw), "\n")
-	if len(lines) > limit {
-		return lines[:limit]
+	if limit <= 0 {
+		return nil
+	}
+	lines := make([]string, 0, limit)
+	start := 0
+	for len(lines) < limit && start <= len(raw) {
+		end := bytes.IndexByte(raw[start:], '\n')
+		if end < 0 {
+			lines = append(lines, string(raw[start:]))
+			break
+		}
+		line := raw[start : start+end]
+		if n := len(line); n > 0 && line[n-1] == '\r' {
+			line = line[:n-1]
+		}
+		lines = append(lines, string(line))
+		start += end + 1
 	}
 	return lines
 }

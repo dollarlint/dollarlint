@@ -1,36 +1,15 @@
+# dollarlint configuration
 version = 1
 
 [discovery]
-include = [
-  "*.json",
-  "**/*.json",
-  "*.yaml",
-  "**/*.yaml",
-  "*.yml",
-  "**/*.yml",
-  "*.toml",
-  "**/*.toml",
-]
-exclude = [
-  ".git",
-  "**/.git/**",
-  "node_modules",
-  "**/node_modules/**",
-  "dist",
-  "**/dist/**",
-  "build",
-  "**/build/**",
-  "coverage",
-  "**/coverage/**",
-  ".next",
-  "**/.next/**",
-  ".astro",
-  "**/.astro/**",
-]
+include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.yml", "**/*.yml", "*.toml", "**/*.toml"]
+exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**", "build", "**/build/**", "coverage", "**/coverage/**"]
 
 [schema]
 fetchRemote = true
 maxDepth = 8
+concurrency = 8
+azureResourcePruning = true
 
 [schema.fetch]
 retries = 2
@@ -43,9 +22,24 @@ url = "https://www.schemastore.org/api/json/catalog.json"
 failure = "warn"
 strict = false
 
+# [[schema.associations]]
+# file = "settings/*.toml"
+# schema = "./schemas/settings.schema.json"
+
 [timeouts]
 fetch = "10s"
 compile = "30s"
 
 [output]
-locations = true
+json = false
+sarif = false
+showSkipped = false
+verbose = false
+quiet = false
+locations = false
+
+# [[ignore]]
+# file = "fixtures/*.json"
+# keyword = "required"
+# property = "legacyName"
+# reason = "legacy fixture kept for compatibility"

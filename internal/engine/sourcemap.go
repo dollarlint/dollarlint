@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"unicode"
@@ -195,8 +196,23 @@ func walkYAMLNode(node *yaml.Node, sourceMap SourceMap, pointer string) {
 func buildTOMLSourceMap(raw []byte) (SourceMap, error) {
 	sourceMap := SourceMap{"/": {Line: 1, Column: 1}}
 	var currentTable []string
-	for i, line := range strings.Split(string(raw), "\n") {
-		lineNo := i + 1
+	lineNo := 0
+	for start := 0; start <= len(raw); {
+		lineNo++
+		end := bytes.IndexByte(raw[start:], '\n')
+		var lineBytes []byte
+		if end < 0 {
+			lineBytes = raw[start:]
+			start = len(raw) + 1
+		} else {
+			lineBytes = raw[start : start+end]
+			start += end + 1
+		}
+		// Strip an optional trailing carriage return for CRLF inputs.
+		if n := len(lineBytes); n > 0 && lineBytes[n-1] == '\r' {
+			lineBytes = lineBytes[:n-1]
+		}
+		line := string(lineBytes)
 		body := trimTOMLComment(line)
 		trimmed := strings.TrimSpace(body)
 		if trimmed == "" {

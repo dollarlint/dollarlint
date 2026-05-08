@@ -21,13 +21,6 @@ type azureARMResourceRef struct {
 	SchemaRefPart string
 }
 
-func (document *Document) azureResourceRefs() []azureARMResourceRef {
-	if document == nil {
-		return nil
-	}
-	return collectAzureARMResourceRefs(document.Data)
-}
-
 func primeableSchemaRoots(cfg Config, documents []*Document, schemaRoots []string) []string {
 	if !azureResourcePruningEnabled(cfg.Schema) {
 		return schemaRoots

@@ -128,8 +128,8 @@ func TestReferenceAndURIEdges(t *testing.T) {
 	}
 	var refs []string
 	base, _ := url.Parse("file:///tmp/root.json")
-	addResolvedReference("%zz", base, &refs)
-	addResolvedReference("root.json#/defs/root", base, &refs)
+	refs = appendResolvedReference(refs, "%zz", base)
+	refs = appendResolvedReference(refs, "root.json#/defs/root", base)
 	if len(refs) != 0 {
 		t.Fatalf("self or invalid refs should be skipped: %+v", refs)
 	}

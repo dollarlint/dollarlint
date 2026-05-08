@@ -41,6 +41,12 @@ func buildSourceMap(raw []byte, format string) (SourceMap, error) {
 	switch format {
 	case DocumentFormatJSON:
 		return buildJSONSourceMap(raw)
+	case DocumentFormatJSONC:
+		return buildJSONLikeSourceMap(raw, false)
+	case DocumentFormatJSON5:
+		return buildJSONLikeSourceMap(raw, true)
+	case DocumentFormatJSONLines:
+		return buildJSONLinesSourceMap(raw), nil
 	case DocumentFormatYAML:
 		return buildYAMLSourceMap(raw)
 	case DocumentFormatTOML:
@@ -78,6 +84,250 @@ func buildJSONSourceMap(raw []byte) (SourceMap, error) {
 		return nil, err
 	}
 	return sourceMap, nil
+}
+
+type jsonLikeSourceScanner struct {
+	raw        []byte
+	lineIndex  []int
+	sourceMap  SourceMap
+	allowJSON5 bool
+	offset     int
+}
+
+func buildJSONLikeSourceMap(raw []byte, allowJSON5 bool) (SourceMap, error) {
+	scanner := &jsonLikeSourceScanner{
+		raw:        raw,
+		lineIndex:  newLineIndex(raw),
+		sourceMap:  SourceMap{},
+		allowJSON5: allowJSON5,
+	}
+	if err := scanner.parseValue("/"); err != nil {
+		return nil, err
+	}
+	return scanner.sourceMap, nil
+}
+
+func buildJSONLinesSourceMap(raw []byte) SourceMap {
+	lineMaps := buildJSONLinesSourceMaps(raw)
+	sourceMap := SourceMap{}
+	for lineNo, lineMap := range lineMaps {
+		for pointer, position := range lineMap {
+			linePointer := joinPointer("/", strconv.Itoa(lineNo))
+			if pointer != "/" {
+				linePointer += "/" + strings.TrimPrefix(pointer, "/")
+			}
+			sourceMap[linePointer] = position
+		}
+	}
+	return sourceMap
+}
+
+func buildJSONLinesSourceMaps(raw []byte) map[int]SourceMap {
+	lineMaps := map[int]SourceMap{}
+	lineNo := 0
+	for start := 0; start <= len(raw); {
+		lineNo++
+		end := bytes.IndexByte(raw[start:], '\n')
+		var line []byte
+		if end < 0 {
+			line = raw[start:]
+			start = len(raw) + 1
+		} else {
+			line = raw[start : start+end]
+			start += end + 1
+		}
+		if n := len(line); n > 0 && line[n-1] == '\r' {
+			line = line[:n-1]
+		}
+		if len(bytes.TrimSpace(line)) == 0 {
+			continue
+		}
+		lineMap := safeBuildSourceMap(line, DocumentFormatJSON)
+		if lineMap != nil {
+			lineMaps[lineNo] = offsetSourceMap(lineMap, lineNo-1, 0)
+		}
+	}
+	return lineMaps
+}
+
+func (s *jsonLikeSourceScanner) parseValue(pointer string) error {
+	s.skipSpaceAndComments()
+	if s.offset >= len(s.raw) {
+		return ioErrUnexpectedEOF()
+	}
+	setSourcePosition(s.sourceMap, pointer, positionAtOffset(s.lineIndex, s.offset))
+	switch s.raw[s.offset] {
+	case '{':
+		return s.parseObject(pointer)
+	case '[':
+		return s.parseArray(pointer)
+	case '"':
+		s.parseQuotedString('"')
+	case '\'':
+		if !s.allowJSON5 {
+			return fmt.Errorf("unexpected single-quoted string")
+		}
+		s.parseQuotedString('\'')
+	default:
+		s.parsePrimitive()
+	}
+	return nil
+}
+
+func (s *jsonLikeSourceScanner) parseObject(pointer string) error {
+	s.offset++
+	for {
+		s.skipSpaceAndComments()
+		if s.offset >= len(s.raw) {
+			return ioErrUnexpectedEOF()
+		}
+		if s.raw[s.offset] == '}' {
+			s.offset++
+			return nil
+		}
+		key, err := s.parseObjectKey()
+		if err != nil {
+			return err
+		}
+		s.skipSpaceAndComments()
+		if s.offset >= len(s.raw) || s.raw[s.offset] != ':' {
+			return fmt.Errorf("expected object key separator")
+		}
+		s.offset++
+		if err := s.parseValue(joinPointer(pointer, key)); err != nil {
+			return err
+		}
+		s.skipSpaceAndComments()
+		if s.offset < len(s.raw) && s.raw[s.offset] == ',' {
+			s.offset++
+			continue
+		}
+	}
+}
+
+func (s *jsonLikeSourceScanner) parseArray(pointer string) error {
+	s.offset++
+	index := 0
+	for {
+		s.skipSpaceAndComments()
+		if s.offset >= len(s.raw) {
+			return ioErrUnexpectedEOF()
+		}
+		if s.raw[s.offset] == ']' {
+			s.offset++
+			return nil
+		}
+		if err := s.parseValue(joinPointer(pointer, strconv.Itoa(index))); err != nil {
+			return err
+		}
+		index++
+		s.skipSpaceAndComments()
+		if s.offset < len(s.raw) && s.raw[s.offset] == ',' {
+			s.offset++
+			continue
+		}
+	}
+}
+
+func (s *jsonLikeSourceScanner) parseObjectKey() (string, error) {
+	switch s.raw[s.offset] {
+	case '"':
+		return s.parseQuotedString('"'), nil
+	case '\'':
+		if !s.allowJSON5 {
+			return "", fmt.Errorf("unexpected single-quoted object key")
+		}
+		return s.parseQuotedString('\''), nil
+	default:
+		if !s.allowJSON5 {
+			return "", fmt.Errorf("expected quoted object key")
+		}
+		return s.parseIdentifier(), nil
+	}
+}
+
+func (s *jsonLikeSourceScanner) parseQuotedString(quote byte) string {
+	start := s.offset
+	s.offset++
+	escaped := false
+	for s.offset < len(s.raw) {
+		ch := s.raw[s.offset]
+		s.offset++
+		if escaped {
+			escaped = false
+			continue
+		}
+		if ch == '\\' {
+			escaped = true
+			continue
+		}
+		if ch == quote {
+			var out string
+			if err := json.Unmarshal(s.raw[start:s.offset], &out); err == nil {
+				return out
+			}
+			return strings.Trim(string(s.raw[start+1:s.offset-1]), " \t\r\n")
+		}
+	}
+	return strings.Trim(string(s.raw[start+1:]), " \t\r\n")
+}
+
+func (s *jsonLikeSourceScanner) parseIdentifier() string {
+	start := s.offset
+	for s.offset < len(s.raw) {
+		ch := s.raw[s.offset]
+		if ch == ':' || unicode.IsSpace(rune(ch)) {
+			break
+		}
+		s.offset++
+	}
+	return strings.TrimSpace(string(s.raw[start:s.offset]))
+}
+
+func (s *jsonLikeSourceScanner) parsePrimitive() {
+	for s.offset < len(s.raw) {
+		ch := s.raw[s.offset]
+		if ch == ',' || ch == ']' || ch == '}' || unicode.IsSpace(rune(ch)) {
+			return
+		}
+		if ch == '/' && s.offset+1 < len(s.raw) && (s.raw[s.offset+1] == '/' || s.raw[s.offset+1] == '*') {
+			return
+		}
+		s.offset++
+	}
+}
+
+func (s *jsonLikeSourceScanner) skipSpaceAndComments() {
+	for s.offset < len(s.raw) {
+		if unicode.IsSpace(rune(s.raw[s.offset])) {
+			s.offset++
+			continue
+		}
+		if s.offset+1 >= len(s.raw) || s.raw[s.offset] != '/' {
+			return
+		}
+		switch s.raw[s.offset+1] {
+		case '/':
+			s.offset += 2
+			for s.offset < len(s.raw) && s.raw[s.offset] != '\n' {
+				s.offset++
+			}
+		case '*':
+			s.offset += 2
+			for s.offset+1 < len(s.raw) && !(s.raw[s.offset] == '*' && s.raw[s.offset+1] == '/') {
+				s.offset++
+			}
+			if s.offset+1 < len(s.raw) {
+				s.offset += 2
+			}
+		default:
+			return
+		}
+	}
+}
+
+func ioErrUnexpectedEOF() error {
+	return fmt.Errorf("unexpected EOF")
 }
 
 func walkJSONValue(decoder *json.Decoder, raw []byte, lineIndex []int, sourceMap SourceMap, pointer string) error {
@@ -469,6 +719,24 @@ func positionAtOffset(lineStarts []int, offset int) SourcePosition {
 		return SourcePosition{Line: 1, Column: 1}
 	}
 	return SourcePosition{Line: line + 1, Column: offset - lineStarts[line] + 1}
+}
+
+func offsetSourceMap(sourceMap SourceMap, lineOffset, columnOffset int) SourceMap {
+	if sourceMap == nil {
+		return nil
+	}
+	shifted := SourceMap{}
+	for pointer, position := range sourceMap {
+		if position.Line <= 0 {
+			continue
+		}
+		if position.Line == 1 {
+			position.Column += columnOffset
+		}
+		position.Line += lineOffset
+		shifted[pointer] = position
+	}
+	return shifted
 }
 
 func normalizePointer(pointer string) string {

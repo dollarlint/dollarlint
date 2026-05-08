@@ -43,6 +43,7 @@ type validateOptions struct {
 	catalogFailure    string
 	maxDepth          int
 	fetchRemote       bool
+	noSchemaCache     bool
 	fetchRetries      int
 	fetchRetryMinWait string
 	fetchRetryMaxWait string
@@ -80,8 +81,8 @@ func NewRootCommandWithIO(stdin io.Reader, stdout io.Writer) *cobra.Command {
 	var configPath string
 	cmd := &cobra.Command{
 		Use:           "dollarlint",
-		Short:         "Validate JSON, YAML, and TOML files against their declared JSON Schemas",
-		Long:          "dollarlint validates JSON, YAML, and TOML files against their declared JSON Schemas.\n\nRun `dollarlint validate [path]` to validate files.",
+		Short:         "Validate JSON-family, YAML, and TOML files against their declared JSON Schemas",
+		Long:          "dollarlint validates JSON, JSONC, JSON5, JSON Lines, YAML, and TOML files against their declared JSON Schemas.\n\nRun `dollarlint validate [path]` to validate files.",
 		Version:       version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -141,6 +142,7 @@ func addValidateFlags(cmd *cobra.Command, opts *validateOptions) {
 	cmd.Flags().StringVar(&opts.catalogFailure, "schema-store-failure", "", "SchemaStore catalog failure policy: warn, error, or skip")
 	cmd.Flags().IntVar(&opts.maxDepth, "max-depth", 0, "Maximum external schema reference depth")
 	cmd.Flags().BoolVar(&opts.fetchRemote, "fetch-remote", true, "Allow fetching http(s) schemas")
+	cmd.Flags().BoolVar(&opts.noSchemaCache, "no-schema-cache", false, "Disable disk cache for remote schemas and catalogs")
 	cmd.Flags().IntVar(&opts.fetchRetries, "fetch-retries", defaultFetchRetries, "Number of retries for transient remote schema fetch failures")
 	cmd.Flags().StringVar(&opts.fetchRetryMinWait, "fetch-retry-min-wait", "", "Minimum wait between remote schema fetch retries, e.g. 250ms")
 	cmd.Flags().StringVar(&opts.fetchRetryMaxWait, "fetch-retry-max-wait", "", "Maximum wait between remote schema fetch retries, e.g. 2s")
@@ -203,6 +205,10 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 	}
 	if cmd.Flags().Changed("fetch-remote") {
 		cfg.Schemas.Fetch.Enabled = &opts.fetchRemote
+	}
+	if opts.noSchemaCache {
+		cache := false
+		cfg.Schemas.Fetch.Cache = &cache
 	}
 	if cmd.Flags().Changed("fetch-retries") {
 		cfg.Schemas.Fetch.Retries = &opts.fetchRetries
@@ -289,12 +295,18 @@ func dollarlintFileFormat(path string) (string, error) {
 	switch strings.ToLower(filepathExt(path)) {
 	case ".json":
 		return "json", nil
+	case ".jsonc":
+		return "jsonc", nil
+	case ".json5":
+		return "json5", nil
+	case ".jsonl", ".ndjson":
+		return "jsonl", nil
 	case ".yaml", ".yml":
 		return "yaml", nil
 	case ".toml":
 		return "toml", nil
 	default:
-		return "", fmt.Errorf("unsupported explicit file %s; expected .json, .yaml, .yml, or .toml", path)
+		return "", fmt.Errorf("unsupported explicit file %s; expected .json, .jsonc, .json5, .jsonl, .ndjson, .yaml, .yml, or .toml", path)
 	}
 }
 

@@ -1,5 +1,6 @@
 ---
 import DocsLayout from "../layouts/DocsLayout.astro";
+import LogoOutline from "../components/LogoOutline.astro";
 ---
 
 <DocsLayout
@@ -8,10 +9,17 @@ import DocsLayout from "../layouts/DocsLayout.astro";
   current="/"
 >
   <section class="hero">
+    <div class="hero-marks" aria-hidden="true">
+      {Array.from({ length: 4 }).map(() => (
+        <span class="hero-mark" data-hero-mark>
+          <LogoOutline class="hero-mark-logo" />
+        </span>
+      ))}
+    </div>
     <h1>dollarlint</h1>
     <p class="hero-copy">
-      <code>$schema</code> validation for every JSON, YAML, &amp; TOML file you've
-      got.
+      <code>$schema</code> validation worth every JSON, YAML, &amp; TOML file
+      you've got.
     </p>
     <div class="hero-actions">
       <a class="button primary" href="/guides/installation/">Get started</a>
@@ -20,13 +28,35 @@ import DocsLayout from "../layouts/DocsLayout.astro";
       >
     </div>
   </section>
+  <script is:inline>
+    (() => {
+      const hero = document.currentScript.previousElementSibling;
+      const marks = hero?.querySelectorAll("[data-hero-mark]");
+      if (!marks?.length) return;
+
+      const zones = [
+        { x: [10, 16], y: [11, 17] },
+        { x: [80, 88], y: [14, 20] },
+        { x: [50, 58], y: [74, 80] },
+        { x: [86, 94], y: [76, 84] },
+      ];
+      const rand = ([min, max]) => min + Math.random() * (max - min);
+
+      marks.forEach((mark, index) => {
+        const zone = zones[index % zones.length];
+        mark.style.setProperty("--mark-x", `${rand(zone.x).toFixed(2)}%`);
+        mark.style.setProperty("--mark-y", `${rand(zone.y).toFixed(2)}%`);
+        mark.style.setProperty("--mark-rotate", `${rand([-45, 45]).toFixed(2)}deg`);
+      });
+    })();
+  </script>
 
   <section class="grid" aria-label="Highlights">
     <article class="card">
       <h3>Repo-wide discovery</h3>
       <p>
-        Find JSON, YAML, and TOML files automatically, respect your excludes,
-        and validate matched files in parallel.
+        Find JSON (and variants), YAML, and TOML files automatically,
+        respect your excludes, and validate matched files in parallel.
       </p>
     </article>
     <article class="card">
@@ -78,7 +108,8 @@ import DocsLayout from "../layouts/DocsLayout.astro";
       <div class="command">
         <code>dollarlint validate .</code>
         <p>
-          Audit every JSON, YAML, and TOML file under the current directory.
+          Audit every supported JSON, YAML, and TOML file under the current
+          directory.
         </p>
       </div>
       <div class="command">

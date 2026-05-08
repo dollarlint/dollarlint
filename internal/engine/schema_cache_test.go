@@ -83,6 +83,58 @@ func TestSchemaCacheRemoteFetch(t *testing.T) {
 	}
 }
 
+func TestSchemaCacheUsesPersistentRemoteCache(t *testing.T) {
+	usePersistentSchemaCacheDir(t)
+	var attempts int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&attempts, 1)
+		w.Write([]byte(`{"type":"object"}`))
+	}))
+	schemaURL := server.URL + "/schema.json"
+
+	if _, err := NewSchemaCache(DefaultConfig()).Load(schemaURL); err != nil {
+		t.Fatalf("initial remote load: %v", err)
+	}
+	server.Close()
+	if _, err := NewSchemaCache(DefaultConfig()).Load(schemaURL); err != nil {
+		t.Fatalf("cached remote load: %v", err)
+	}
+	if attempts != 1 {
+		t.Fatalf("attempts = %d", attempts)
+	}
+}
+
+func TestSchemaCacheCanDisablePersistentRemoteCache(t *testing.T) {
+	usePersistentSchemaCacheDir(t)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"type":"object"}`))
+	}))
+	schemaURL := server.URL + "/schema.json"
+	cfg := DefaultConfig()
+	disabled := false
+	cfg.Schemas.Fetch.Cache = &disabled
+
+	if _, err := NewSchemaCache(cfg).Load(schemaURL); err != nil {
+		t.Fatalf("initial remote load: %v", err)
+	}
+	server.Close()
+	if _, err := NewSchemaCache(cfg).Load(schemaURL); err == nil {
+		t.Fatalf("expected second load to fetch instead of using disk cache")
+	}
+}
+
+func usePersistentSchemaCacheDir(t *testing.T) {
+	t.Helper()
+	dir := t.TempDir()
+	previous := persistentSchemaCacheDirFunc
+	persistentSchemaCacheDirFunc = func() string {
+		return dir
+	}
+	t.Cleanup(func() {
+		persistentSchemaCacheDirFunc = previous
+	})
+}
+
 func TestSchemaCacheRetriesTransientRemoteFetchFailures(t *testing.T) {
 	var attempts int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

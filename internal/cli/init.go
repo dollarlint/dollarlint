@@ -315,6 +315,7 @@ pruneResources = true
 
 [schemas.fetch]
 enabled = {{ .FetchRemote }}
+cache = true
 timeout = "10s"
 retries = {{ .FetchRetries }}
 retryMinWait = "250ms"

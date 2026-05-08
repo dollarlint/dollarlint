@@ -64,11 +64,10 @@ const validateArguments = `{
 
     <h2>Use the validate tool</h2>
     <p>
-      The server exposes a single <code>validate</code> tool. It validates JSON, YAML,
-      and TOML files using your dollarlint config, then returns the same result shape
-      as <code>dollarlint validate --format json</code>, wrapped with a boolean <code
-        >ok</code
-      > field.
+      The server exposes a single <code>validate</code> tool. It validates JSON,
+      JSONC, JSON5, JSON Lines, YAML, and TOML files using your dollarlint config,
+      then returns the same result shape as <code>dollarlint validate --format json</code
+      >, wrapped with a boolean <code>ok</code> field.
     </p>
     <CodeBlock code={validateArguments} language="json" />
 

@@ -24,6 +24,7 @@ pruneResources = true
 
 [schemas.fetch]
 enabled = true
+cache = true
 timeout = "10s"
 retries = 2
 retryMinWait = "250ms"
@@ -96,9 +97,9 @@ reason = "legacy fixture kept for compatibility"`;
 
     <h2>Discovery</h2>
     <p>
-      Leave <code>include</code> unset to use the built-in JSON, YAML, YML, and TOML
-      discovery defaults. Set it only when you want to replace that default set with
-      custom discovery globs.
+      Leave <code>include</code> unset to use the built-in JSON, JSONC, JSON5,
+      JSON Lines, YAML, YML, and TOML discovery defaults. Set it only when you
+      want to replace that default set with custom discovery globs.
     </p>
     <p>
       Discovery, exclude, association, and ignore-file globs are matched against
@@ -215,6 +216,12 @@ reason = "legacy fixture kept for compatibility"`;
         <tr
           ><td><code>schemas.fetch.enabled</code></td><td
             >Allow fetching HTTP schemas and catalogs.</td
+          ></tr
+        >
+        <tr
+          ><td><code>schemas.fetch.cache</code></td><td
+            >Cache successful remote schemas and catalogs on disk for repeat
+            runs.</td
           ></tr
         >
         <tr

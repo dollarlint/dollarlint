@@ -25,6 +25,23 @@ func TestSourceMapJSONPositions(t *testing.T) {
 	}
 }
 
+func TestSourceMapJSONVariantsPositions(t *testing.T) {
+	jsoncMap, err := buildSourceMap([]byte("{\n  // keep this human-friendly\n  \"name\": \"ok\",\n  \"items\": [1, 2,],\n}\n"), DocumentFormatJSONC)
+	if err != nil {
+		t.Fatalf("buildSourceMap jsonc: %v", err)
+	}
+	assertPosition(t, jsoncMap, "/", 1, 1)
+	assertPosition(t, jsoncMap, "/name", 3, 11)
+	assertPosition(t, jsoncMap, "/items/1", 4, 16)
+
+	json5Map, err := buildSourceMap([]byte("{\n  unquoted: 'ok',\n  nested: { child: true, },\n}\n"), DocumentFormatJSON5)
+	if err != nil {
+		t.Fatalf("buildSourceMap json5: %v", err)
+	}
+	assertPosition(t, json5Map, "/unquoted", 2, 13)
+	assertPosition(t, json5Map, "/nested/child", 3, 20)
+}
+
 func TestSourceMapYAMLPositions(t *testing.T) {
 	sourceMap, err := buildYAMLSourceMap([]byte("name: ok\nitems:\n  - one\n  - two\nnested:\n  child: true\n"))
 	if err != nil {
@@ -81,6 +98,9 @@ func TestSourceMapHelpers(t *testing.T) {
 	if pos := positionAtOffset([]int{5}, 0); pos.Line != 1 || pos.Column != 1 {
 		t.Fatalf("pre-first-line offset = %+v", pos)
 	}
+	shifted := offsetSourceMap(SourceMap{"/": {Line: 1, Column: 3}, "/next": {Line: 2, Column: 5}}, 4, 2)
+	assertPosition(t, shifted, "/", 5, 5)
+	assertPosition(t, shifted, "/next", 6, 5)
 	if _, err := buildSourceMap(nil, "nope"); err == nil {
 		t.Fatalf("expected unsupported source map format")
 	}
@@ -130,6 +150,18 @@ func TestAttachSourceMap(t *testing.T) {
 	if missing.SourceMap != nil {
 		t.Fatalf("missing file should not attach source map")
 	}
+	linesPath := filepath.Join(dir, "records.jsonl")
+	writeFile(t, linesPath, "\n{\"name\":\"one\"}\n{\"name\":\"two\"}\n")
+	lines, err := ParseDocument(DiscoveredFile{Path: linesPath, RelativePath: "records.jsonl"})
+	if err != nil {
+		t.Fatalf("ParseDocument jsonl: %v", err)
+	}
+	if len(lines.LineDocuments) != 2 || lines.LineDocuments[0].SourceMap != nil {
+		t.Fatalf("jsonl maps should be deferred: %+v", lines.LineDocuments)
+	}
+	AttachSourceMap(lines)
+	assertPosition(t, lines.LineDocuments[0].SourceMap, "/name", 1, 9)
+	assertPosition(t, lines.LineDocuments[1].SourceMap, "/name", 2, 9)
 }
 
 func TestTOMLScannerEdges(t *testing.T) {

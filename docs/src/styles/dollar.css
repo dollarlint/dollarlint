@@ -492,34 +492,67 @@ pre {
   padding: clamp(34px, 6vw, 78px);
 }
 
-.hero::before,
-.hero::after {
-  content: "$";
+.hero > :not(.hero-marks) {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-marks {
   position: absolute;
-  display: grid;
-  place-items: center;
-  inline-size: 118px;
-  block-size: 118px;
-  aspect-ratio: 1;
-  padding: 0;
-  border: 2px solid var(--coin-line);
-  border-radius: 999px;
-  color: var(--coin-ink);
-  font-family: var(--display);
-  font-size: 4rem;
-  font-weight: 400;
-  line-height: 0.86;
-  text-indent: 0.08em;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
-.hero::before {
-  top: 24px;
-  right: 34px;
+.hero-mark {
+  position: absolute;
+  left: var(--mark-x, 72%);
+  top: var(--mark-y, 14%);
+  width: clamp(140px, 15vw, 210px);
+  max-width: 32vw;
+  transform: translate(-50%, -50%) rotate(var(--mark-rotate, 0deg));
+  color: var(--coin-line);
+  opacity: 0.48;
 }
 
-.hero::after {
-  right: -34px;
-  bottom: -38px;
+.hero-mark-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.site-logo-outline {
+  fill: none;
+  overflow: visible;
+}
+
+.site-logo-outline__outer,
+.site-logo-outline__inner,
+.site-logo-outline__seal,
+.site-logo-outline__oval,
+.site-logo-outline__check {
+  vector-effect: non-scaling-stroke;
+  stroke: currentColor;
+}
+
+.site-logo-outline__outer {
+  stroke-width: 1.9;
+}
+
+.site-logo-outline__inner {
+  stroke-width: 1.5;
+}
+
+.site-logo-outline__seal {
+  stroke-width: 1.6;
+}
+
+.site-logo-outline__oval {
+  stroke-width: 1.4;
+}
+
+.site-logo-outline__check {
+  stroke-width: 4.4;
 }
 
 .eyebrow {
@@ -1115,8 +1148,9 @@ tr:last-child td {
     grid-template-columns: 1fr;
   }
 
-  .hero::before {
-    right: -24px;
+  .hero-mark {
+    width: clamp(118px, 28vw, 180px);
+    max-width: 34vw;
   }
 }
 
@@ -1134,11 +1168,10 @@ tr:last-child td {
     padding: 28px;
   }
 
-  .hero::before,
-  .hero::after {
-    width: 86px;
-    height: 86px;
-    font-size: 3rem;
+  .hero-mark {
+    width: clamp(96px, 36vw, 150px);
+    max-width: 42vw;
+    opacity: 0.36;
   }
 
   h1 {

@@ -106,6 +106,7 @@ pruneResources = false
 
 [schemas.fetch]
 enabled = false
+cache = false
 timeout = "2s"
 retries = 4
 retryMinWait = "100ms"
@@ -154,7 +155,7 @@ keyword = "type"
 	if filePath != path || !fileCfg.Output.ShowSkipped {
 		t.Fatalf("file-root explicit config path=%q cfg=%+v", filePath, fileCfg)
 	}
-	if remoteFetchEnabled(cfg.Schemas) || cfg.Schemas.MaxDepth != 3 || cfg.Schemas.Fetch.Timeout.Duration != 2*time.Second {
+	if remoteFetchEnabled(cfg.Schemas) || remoteFetchCacheEnabled(cfg.Schemas.Fetch) || cfg.Schemas.MaxDepth != 3 || cfg.Schemas.Fetch.Timeout.Duration != 2*time.Second {
 		t.Fatalf("toml cfg not decoded/defaulted: %+v", cfg)
 	}
 	if !cfg.Schemas.RequireCoverage {
@@ -205,6 +206,9 @@ schema = "./schema.json"
 	}
 	if fetchRetries(cfg.Schemas.Fetch) != 2 {
 		t.Fatalf("fetch retry default = %+v", cfg.Schemas.Fetch)
+	}
+	if !remoteFetchCacheEnabled(cfg.Schemas.Fetch) {
+		t.Fatalf("fetch cache default = %+v", cfg.Schemas.Fetch)
 	}
 	if mode, err := catalogFailureMode(cfg.Schemas); err != nil || mode != CatalogFailureWarn {
 		t.Fatalf("catalog failure default = %q, %v", mode, err)

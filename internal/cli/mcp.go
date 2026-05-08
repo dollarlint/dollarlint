@@ -58,7 +58,7 @@ func (s mcpServer) serve(ctx context.Context) error {
 	mcpServer := server.NewMCPServer(
 		"dollarlint",
 		version,
-		server.WithInstructions("Use the validate tool to validate JSON, YAML, and TOML files against declared JSON Schemas."),
+		server.WithInstructions("Use the validate tool to validate JSON, JSONC, JSON5, JSON Lines, YAML, and TOML files against declared JSON Schemas."),
 		server.WithToolCapabilities(false),
 		server.WithInputSchemaValidation(),
 		server.WithOutputSchemaValidation(),
@@ -110,7 +110,7 @@ func (s mcpServer) validate(ctx context.Context, args mcpValidateArguments) (mcp
 func validateToolDefinition() mcp.Tool {
 	tool := mcp.NewToolWithRawSchema(
 		"validate",
-		"Validate JSON, YAML, and TOML files using dollarlint config. Returns ok=false when validation issues are found.",
+		"Validate JSON, JSONC, JSON5, JSON Lines, YAML, and TOML files using dollarlint config. Returns ok=false when validation issues are found.",
 		mustRawJSON(validateToolInputSchema()),
 	)
 	tool.RawOutputSchema = mustRawJSON(validateToolOutputSchema())

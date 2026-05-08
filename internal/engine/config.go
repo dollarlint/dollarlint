@@ -19,6 +19,7 @@ func DefaultConfig() Config {
 	useDefaultExcludes := true
 	respectGitIgnore := true
 	fetchEnabled := true
+	fetchCache := true
 	optimizationsEnabled := true
 	azureResourcePruning := true
 	retries := 2
@@ -27,6 +28,10 @@ func DefaultConfig() Config {
 		Discovery: DiscoveryConfig{
 			Include: []string{
 				"*.json", "**/*.json",
+				"*.jsonc", "**/*.jsonc",
+				"*.json5", "**/*.json5",
+				"*.jsonl", "**/*.jsonl",
+				"*.ndjson", "**/*.ndjson",
 				"*.yaml", "**/*.yaml",
 				"*.yml", "**/*.yml",
 				"*.toml", "**/*.toml",
@@ -46,6 +51,7 @@ func DefaultConfig() Config {
 			},
 			Fetch: FetchConfig{
 				Enabled:      &fetchEnabled,
+				Cache:        &fetchCache,
 				Timeout:      NewDuration(10 * time.Second),
 				Retries:      &retries,
 				RetryMinWait: NewDuration(250 * time.Millisecond),
@@ -82,6 +88,9 @@ func (c *Config) ApplyDefaults() {
 	}
 	if c.Schemas.Fetch.Enabled == nil {
 		c.Schemas.Fetch.Enabled = defaults.Schemas.Fetch.Enabled
+	}
+	if c.Schemas.Fetch.Cache == nil {
+		c.Schemas.Fetch.Cache = defaults.Schemas.Fetch.Cache
 	}
 	if c.Schemas.Optimizations.Enabled == nil {
 		c.Schemas.Optimizations.Enabled = defaults.Schemas.Optimizations.Enabled
@@ -240,6 +249,10 @@ func isConfigFileName(path string) bool {
 
 func remoteFetchEnabled(cfg SchemaConfig) bool {
 	return cfg.Fetch.Enabled == nil || *cfg.Fetch.Enabled
+}
+
+func remoteFetchCacheEnabled(cfg FetchConfig) bool {
+	return cfg.Cache == nil || *cfg.Cache
 }
 
 func catalogEnabled(cfg SchemaConfig) bool {

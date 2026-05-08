@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
 )
@@ -19,11 +21,14 @@ import (
 // to avoid unbounded memory growth from misbehaving or hostile servers.
 const maxSchemaResponseBytes = 64 * 1024 * 1024
 
+const persistentSchemaCacheTTL = 24 * time.Hour
+
 type SchemaCache struct {
-	cfg     Config
-	client  *http.Client
-	mu      sync.Mutex
-	entries map[string]*schemaEntry
+	cfg      Config
+	client   *http.Client
+	mu       sync.Mutex
+	entries  map[string]*schemaEntry
+	compiled map[string]*compiledSchemaEntry
 }
 
 // schemaEntry serializes loads of a single URI and caches successful results.
@@ -45,9 +50,10 @@ func NewSchemaCache(cfg Config) *SchemaCache {
 	client.CheckRetry = retryableHTTPPolicy
 	client.Logger = nil
 	return &SchemaCache{
-		cfg:     cfg,
-		client:  client.StandardClient(),
-		entries: map[string]*schemaEntry{},
+		cfg:      cfg,
+		client:   client.StandardClient(),
+		entries:  map[string]*schemaEntry{},
+		compiled: map[string]*compiledSchemaEntry{},
 	}
 }
 
@@ -199,6 +205,16 @@ func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error)
 		if err := checkRemoteDomainPolicy(raw, c.cfg.Schemas); err != nil {
 			return nil, err
 		}
+		cacheEnabled := remoteFetchCacheEnabled(c.cfg.Schemas.Fetch)
+		if cacheEnabled {
+			data, ok := readPersistentSchemaCache(raw)
+			if ok {
+				if doc, err := decodeSchemaDocument(data, parsed.Path); err == nil {
+					return doc, nil
+				}
+				removePersistentSchemaCache(raw)
+			}
+		}
 		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, raw, nil)
 		req.Header.Set("User-Agent", "dollarlint")
 		resp, err := c.client.Do(req)
@@ -216,10 +232,91 @@ func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error)
 		if len(data) > maxSchemaResponseBytes {
 			return nil, fmt.Errorf("fetch schema %s: response exceeds %d bytes", raw, maxSchemaResponseBytes)
 		}
-		return decodeSchemaDocument(data, parsed.Path)
+		doc, err := decodeSchemaDocument(data, parsed.Path)
+		if err != nil {
+			return nil, err
+		}
+		if cacheEnabled {
+			writePersistentSchemaCache(raw, data)
+		}
+		return doc, nil
 	default:
 		return nil, fmt.Errorf("unsupported schema URI scheme %q", parsed.Scheme)
 	}
+}
+
+func readPersistentSchemaCache(raw string) ([]byte, bool) {
+	path, ok := persistentSchemaCachePath(raw)
+	if !ok {
+		return nil, false
+	}
+	info, err := os.Stat(path)
+	if err != nil || info.IsDir() || time.Since(info.ModTime()) > persistentSchemaCacheTTL {
+		return nil, false
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, false
+	}
+	return data, true
+}
+
+func writePersistentSchemaCache(raw string, data []byte) {
+	path, ok := persistentSchemaCachePath(raw)
+	if !ok {
+		return
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return
+	}
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".schema-*")
+	if err != nil {
+		return
+	}
+	tmpPath := tmp.Name()
+	if _, err := tmp.Write(data); err != nil {
+		_ = tmp.Close()
+		_ = os.Remove(tmpPath)
+		return
+	}
+	if err := tmp.Close(); err != nil {
+		_ = os.Remove(tmpPath)
+		return
+	}
+	if err := os.Rename(tmpPath, path); err != nil {
+		_ = os.Remove(tmpPath)
+	}
+}
+
+func removePersistentSchemaCache(raw string) {
+	path, ok := persistentSchemaCachePath(raw)
+	if !ok {
+		return
+	}
+	_ = os.Remove(path)
+}
+
+func persistentSchemaCachePath(raw string) (string, bool) {
+	dir := persistentSchemaCacheDir()
+	if dir == "" {
+		return "", false
+	}
+	sum := sha256.Sum256([]byte(raw))
+	return filepath.Join(dir, fmt.Sprintf("%x.schema", sum)), true
+}
+
+var persistentSchemaCacheDirFunc = defaultPersistentSchemaCacheDir
+
+func persistentSchemaCacheDir() string {
+	return persistentSchemaCacheDirFunc()
+}
+
+func defaultPersistentSchemaCacheDir() string {
+	root, err := os.UserCacheDir()
+	if err != nil {
+		return ""
+	}
+	return filepath.Join(root, "dollarlint", "schemas")
 }
 
 func filePathFromURL(parsed *url.URL) (string, error) {
@@ -239,6 +336,14 @@ func decodeSchemaDocument(data []byte, hint string) (any, error) {
 		if value, err := decodeDocument(data, DocumentFormatJSON); err == nil {
 			return value, nil
 		}
+	case ".jsonc":
+		if value, err := decodeDocument(data, DocumentFormatJSONC); err == nil {
+			return value, nil
+		}
+	case ".json5":
+		if value, err := decodeDocument(data, DocumentFormatJSON5); err == nil {
+			return value, nil
+		}
 	case ".yaml", ".yml":
 		if value, err := decodeDocument(data, DocumentFormatYAML); err == nil {
 			return value, nil
@@ -248,13 +353,13 @@ func decodeSchemaDocument(data []byte, hint string) (any, error) {
 			return value, nil
 		}
 	}
-	for _, format := range []string{DocumentFormatJSON, DocumentFormatYAML, DocumentFormatTOML} {
+	for _, format := range []string{DocumentFormatJSON, DocumentFormatJSONC, DocumentFormatJSON5, DocumentFormatYAML, DocumentFormatTOML} {
 		value, err := decodeDocument(data, format)
 		if err == nil {
 			return value, nil
 		}
 	}
-	return nil, fmt.Errorf("schema document is not valid JSON, YAML, or TOML")
+	return nil, fmt.Errorf("schema document is not valid JSON, JSONC, JSON5, YAML, or TOML")
 }
 
 func discoverSchemaReferences(doc any, baseURI string) ([]string, error) {

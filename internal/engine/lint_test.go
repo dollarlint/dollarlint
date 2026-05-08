@@ -198,6 +198,98 @@ func TestLintOnlyBuildsRequestedSourceLocations(t *testing.T) {
 	}
 }
 
+func TestLintValidatesJSONVariants(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "schema.jsonc"), `{
+  // schemas may also be JSONC
+  "type": "object",
+  "required": ["name"],
+  "properties": {"$schema": {"type": "string"}, "name": {"type": "string"}}
+}`)
+	writeFile(t, filepath.Join(dir, "schema.json5"), `{
+  // schemas may also be JSON5
+  type: 'object',
+  required: ['active'],
+  properties: {$schema: {type: 'string'}, active: {type: 'boolean'}},
+}`)
+	writeFile(t, filepath.Join(dir, "config.jsonc"), `{
+  "$schema": "./schema.jsonc",
+  // comments and trailing commas
+  "name": 42,
+}`)
+	writeFile(t, filepath.Join(dir, "other.json5"), `{
+  $schema: './schema.json5',
+  active: true,
+}`)
+	cfg := configWithoutSchemaStore()
+	cfg.Output.Locations = true
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint json variants: %v", err)
+	}
+	if result.Summary.Discovered != 4 || result.Summary.Validated != 2 || result.Summary.Skipped != 2 || result.Summary.Issues != 1 {
+		t.Fatalf("json variants summary = %+v issues=%+v", result.Summary, result.Issues)
+	}
+	if len(result.Issues) != 1 || result.Issues[0].RelativePath != "config.jsonc" || result.Issues[0].Property != "name" || result.Issues[0].Line != 4 || result.Issues[0].Column == 0 {
+		t.Fatalf("jsonc issue = %+v", result.Issues)
+	}
+	for _, file := range result.Files {
+		if file.RelativePath == "other.json5" && file.Format != DocumentFormatJSON5 {
+			t.Fatalf("json5 file format = %+v", file)
+		}
+	}
+}
+
+func TestLintValidatesJSONLinesAsIndependentDocuments(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "record.schema.json"), `{
+  "type": "object",
+  "required": ["name"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {"type": "string"},
+    "count": {"type": "integer"}
+  }
+}`)
+	writeFile(t, filepath.Join(dir, "events.jsonl"), `
+{"name":"ok","count":1}
+{"name":42}
+{"count":2}
+{"name":"extra","extra":true}
+{"name":}
+`)
+	cfg := configWithoutSchemaStore()
+	cfg.Discovery.Include = []string{"*.jsonl"}
+	cfg.Schemas.Associations = []SchemaAssociation{{File: "*.jsonl", Schema: "./record.schema.json"}}
+	cfg.Output.Locations = true
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint jsonl: %v", err)
+	}
+	if result.Summary.Discovered != 1 || result.Summary.Validated != 1 || result.Summary.Failed != 1 || result.Summary.Issues != 4 {
+		t.Fatalf("jsonl summary = %+v issues=%+v", result.Summary, result.Issues)
+	}
+	if len(result.Files) != 1 || result.Files[0].Status != StatusError || result.Files[0].Format != DocumentFormatJSONLines {
+		t.Fatalf("jsonl file result = %+v", result.Files)
+	}
+	typeIssue := findIssue(result.Issues, "type", "name")
+	if typeIssue.Line != 2 || typeIssue.Column == 0 || typeIssue.InstanceLocation != "/name" {
+		t.Fatalf("jsonl type issue = %+v", typeIssue)
+	}
+	requiredIssue := findIssue(result.Issues, "required", "name")
+	if requiredIssue.Line != 3 || requiredIssue.Column == 0 {
+		t.Fatalf("jsonl required issue = %+v", requiredIssue)
+	}
+	additionalIssue := findIssue(result.Issues, "additionalProperties", "extra")
+	if additionalIssue.Line != 4 || additionalIssue.Column == 0 || additionalIssue.InstanceLocation != "/extra" {
+		t.Fatalf("jsonl additional issue = %+v", additionalIssue)
+	}
+	parseIssue := findMessageIssue(result.Issues, "parse line 5")
+	if parseIssue.Line != 5 || parseIssue.Column == 0 {
+		t.Fatalf("jsonl parse issue = %+v", parseIssue)
+	}
+}
+
 func TestLintParseSchemaAndPrimeErrors(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "bad.json"), `{`)
@@ -536,4 +628,22 @@ func TestValidateDocumentNonValidationError(t *testing.T) {
 func configWithoutSchemaStore() Config {
 	cfg := DefaultConfig()
 	return cfg
+}
+
+func findIssue(issues []Issue, keyword, property string) Issue {
+	for _, issue := range issues {
+		if issue.Keyword == keyword && issue.Property == property {
+			return issue
+		}
+	}
+	return Issue{}
+}
+
+func findMessageIssue(issues []Issue, messagePart string) Issue {
+	for _, issue := range issues {
+		if strings.Contains(issue.Message, messagePart) {
+			return issue
+		}
+	}
+	return Issue{}
 }

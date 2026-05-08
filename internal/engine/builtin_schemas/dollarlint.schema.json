@@ -191,6 +191,9 @@
         "enabled": {
           "type": "boolean"
         },
+        "cache": {
+          "type": "boolean"
+        },
         "timeout": {
           "$ref": "#/$defs/duration"
         },

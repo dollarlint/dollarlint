@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/santhosh-tekuri/jsonschema/v6"
@@ -40,30 +41,33 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 	}
 	result := Result{Root: root}
 	cache := NewSchemaCache(cfg)
-	schemaStoreCatalog, warning, err := loadSchemaStoreCatalog(ctx, cache, cfg)
-	if err != nil {
-		return Result{}, err
+	catalogLoad := loadSchemaStoreCatalogAsync(ctx, cache, cfg)
+	parsedDocuments := parseDocuments(files, cfg)
+	loadedCatalog := <-catalogLoad
+	if loadedCatalog.err != nil {
+		return Result{}, loadedCatalog.err
 	}
-	if warning != nil {
-		addWarning(&result, *warning)
+	if loadedCatalog.warning != nil {
+		addWarning(&result, *loadedCatalog.warning)
 	}
+	schemaStoreCatalog := loadedCatalog.catalog
 	documents := make([]*Document, 0, len(files))
 	validatedDocuments := make([]*Document, 0, len(files))
-	schemaRoots := make([]string, 0, len(files))
 	fileIndexes := map[string]int{}
-	for _, file := range files {
+	for _, parsed := range parsedDocuments {
+		file := parsed.file
 		result.Summary.Discovered++
 		fileResult := FileResult{
 			Path:         file.Path,
 			RelativePath: file.RelativePath,
 			Status:       StatusSkipped,
 		}
-		document, err := ParseDocument(file)
-		if err != nil {
+		document := parsed.document
+		if parsed.err != nil {
 			fileResult.Status = StatusError
-			fileResult.Message = err.Error()
+			fileResult.Message = parsed.err.Error()
 			result.Files = append(result.Files, fileResult)
-			addIssue(&result, issueForError(file, "", err))
+			addIssue(&result, issueForError(file, "", parsed.err))
 			continue
 		}
 		fileResult.Format = document.Format
@@ -78,12 +82,20 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		index := fileIndexes[document.RelativePath]
 		result.Files[index].Schema = document.Schema
 		result.Files[index].SchemaSource = document.SchemaSource
+		parseIssues := issuesForDocumentParseErrors(document)
+		for _, issue := range parseIssues {
+			addIssue(&result, issue)
+		}
+		if len(parseIssues) > 0 {
+			result.Files[index].Status = StatusError
+			result.Files[index].Message = parseIssues[0].Message
+		}
 		if document.Schema == "" {
 			if cfg.Schemas.RequireCoverage {
 				result.Files[index].Status = StatusError
 				result.Files[index].Message = "file is not covered by an inline schema, config association, built-in association, or catalog match"
 				addIssue(&result, issueForMissingSchemaCoverage(document))
-			} else {
+			} else if len(parseIssues) == 0 {
 				result.Summary.Skipped++
 			}
 			continue
@@ -97,18 +109,19 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		}
 		document.Schema = resolved
 		result.Files[index].Schema = resolved
-		result.Files[index].Status = StatusValidated
+		if len(parseIssues) == 0 {
+			result.Files[index].Status = StatusValidated
+		}
 		if opts.SourceLocations || cfg.Output.Locations {
 			AttachSourceMap(document)
 		}
-		validatedDocuments = append(validatedDocuments, document)
-		schemaRoots = append(schemaRoots, resolved)
+		if !document.isEmptyLineDelimitedDocument() {
+			validatedDocuments = append(validatedDocuments, document)
+		}
 	}
-	// Best-effort warmup of referenced schemas. Per-document Prime in
-	// validateDocument surfaces actual errors, so any failure here is ignored.
-	_ = cache.Prime(ctx, primeableSchemaRoots(cfg, validatedDocuments, schemaRoots))
-	for _, document := range validatedDocuments {
-		issues := validateDocument(ctx, cache, cfg, document)
+	for _, validation := range validateDocuments(ctx, cache, cfg, validatedDocuments) {
+		document := validatedDocuments[validation.index]
+		issues := validation.issues
 		for _, issue := range issues {
 			applyIgnore(&issue, cfg.Ignore)
 			addIssue(&result, issue)
@@ -129,6 +142,117 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 	result.Summary.Duration = NewDuration(time.Since(start))
 	result.Summary.DurationNanos = result.Summary.Duration.Nanoseconds()
 	return result, nil
+}
+
+type documentValidation struct {
+	index  int
+	issues []Issue
+}
+
+type parsedDocument struct {
+	file     DiscoveredFile
+	document *Document
+	err      error
+}
+
+type schemaStoreCatalogLoad struct {
+	catalog *schemaStoreCatalog
+	warning *Warning
+	err     error
+}
+
+// compiledSchemaEntry serializes compilations for a schema URI and caches
+// successful results for the lifetime of a single Lint pass.
+type compiledSchemaEntry struct {
+	mu     sync.Mutex
+	loaded bool
+	schema *jsonschema.Schema
+}
+
+func loadSchemaStoreCatalogAsync(ctx context.Context, cache *SchemaCache, cfg Config) <-chan schemaStoreCatalogLoad {
+	results := make(chan schemaStoreCatalogLoad, 1)
+	go func() {
+		catalog, warning, err := loadSchemaStoreCatalog(ctx, cache, cfg)
+		results <- schemaStoreCatalogLoad{catalog: catalog, warning: warning, err: err}
+	}()
+	return results
+}
+
+func parseDocuments(files []DiscoveredFile, cfg Config) []parsedDocument {
+	results := make([]parsedDocument, len(files))
+	if len(files) == 0 {
+		return results
+	}
+	jobs := make(chan int)
+	var wg sync.WaitGroup
+	for i := 0; i < workerCount(cfg.Schemas.Concurrency, len(files)); i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for index := range jobs {
+				document, err := ParseDocument(files[index])
+				results[index] = parsedDocument{
+					file:     files[index],
+					document: document,
+					err:      err,
+				}
+			}
+		}()
+	}
+	for index := range files {
+		jobs <- index
+	}
+	close(jobs)
+	wg.Wait()
+	return results
+}
+
+func validateDocuments(ctx context.Context, cache *SchemaCache, cfg Config, documents []*Document) []documentValidation {
+	results := make([]documentValidation, len(documents))
+	if len(documents) == 0 {
+		return results
+	}
+	jobs := make(chan int)
+	var wg sync.WaitGroup
+	for i := 0; i < workerCount(cfg.Schemas.Concurrency, len(documents)); i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for index := range jobs {
+				results[index] = documentValidation{
+					index:  index,
+					issues: validateDocument(ctx, cache, cfg, documents[index]),
+				}
+			}
+		}()
+	}
+	for index := range documents {
+		jobs <- index
+	}
+	close(jobs)
+	wg.Wait()
+	return results
+}
+
+func workerCount(configured, jobs int) int {
+	if configured < 1 {
+		configured = 1
+	}
+	if configured > jobs {
+		return jobs
+	}
+	return configured
+}
+
+func (c *SchemaCache) compiledEntry(key string) *compiledSchemaEntry {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	entry := c.compiled[key]
+	if entry == nil {
+		entry = &compiledSchemaEntry{}
+		c.compiled[key] = entry
+	}
+	return entry
 }
 
 func addWarning(result *Result, warning Warning) {
@@ -161,6 +285,9 @@ func applyBuiltinSchemaAssociation(document *Document) {
 }
 
 func validateDocument(ctx context.Context, cache *SchemaCache, cfg Config, document *Document) []Issue {
+	if document.isLineDelimited() {
+		return validateLineDelimitedDocument(ctx, cache, cfg, document)
+	}
 	if err := cache.Prime(ctx, primeableDocumentSchemaRoots(cfg, document)); err != nil {
 		return []Issue{{
 			File:         document.Path,
@@ -184,6 +311,36 @@ func validateDocument(ctx context.Context, cache *SchemaCache, cfg Config, docum
 	return nil
 }
 
+func validateLineDelimitedDocument(ctx context.Context, cache *SchemaCache, cfg Config, document *Document) []Issue {
+	if err := cache.Prime(ctx, primeableDocumentSchemaRoots(cfg, document)); err != nil {
+		return []Issue{{
+			File:         document.Path,
+			RelativePath: document.RelativePath,
+			Schema:       document.Schema,
+			Message:      err.Error(),
+		}}
+	}
+	schema, err := compileSchema(ctx, cache, cfg, document.Schema, nil)
+	if err != nil {
+		return []Issue{{
+			File:         document.Path,
+			RelativePath: document.RelativePath,
+			Schema:       document.Schema,
+			Message:      fmt.Sprintf("compile schema: %v", err),
+		}}
+	}
+	var issues []Issue
+	for _, lineDocument := range document.LineDocuments {
+		instance := *document
+		instance.Data = lineDocument.Data
+		instance.SourceMap = lineDocument.SourceMap
+		if err := schema.Validate(lineDocument.Data); err != nil {
+			issues = append(issues, issuesFromSchemaError(&instance, err, cfg.Output)...)
+		}
+	}
+	return issues
+}
+
 func issuesFromSchemaError(document *Document, err error, output OutputConfig) []Issue {
 	var validationErr *jsonschema.ValidationError
 	if errors.As(err, &validationErr) {
@@ -198,6 +355,26 @@ func issuesFromSchemaError(document *Document, err error, output OutputConfig) [
 }
 
 func compileSchema(ctx context.Context, cache *SchemaCache, cfg Config, schemaURI string, documentData any) (*jsonschema.Schema, error) {
+	refs := collectAzureARMResourceRefs(documentData)
+	if shouldPruneRefs(cfg, schemaURI, refs) {
+		return compileSchemaUncached(ctx, cache, cfg, schemaURI, refs)
+	}
+	entry := cache.compiledEntry(schemaURI)
+	entry.mu.Lock()
+	defer entry.mu.Unlock()
+	if entry.loaded {
+		return entry.schema, nil
+	}
+	schema, err := compileSchemaUncached(ctx, cache, cfg, schemaURI, nil)
+	if err != nil {
+		return nil, err
+	}
+	entry.schema = schema
+	entry.loaded = true
+	return schema, nil
+}
+
+func compileSchemaUncached(ctx context.Context, cache *SchemaCache, cfg Config, schemaURI string, refs []azureARMResourceRef) (*jsonschema.Schema, error) {
 	compileCtx, cancel := context.WithTimeout(ctx, cfg.Schemas.Compile.Timeout.Duration)
 	defer cancel()
 	compiler := jsonschema.NewCompiler()
@@ -206,7 +383,6 @@ func compileSchema(ctx context.Context, cache *SchemaCache, cfg Config, schemaUR
 	compiler.UseLoader(loaderFunc(func(u string) (any, error) {
 		return cache.LoadContext(compileCtx, u)
 	}))
-	refs := collectAzureARMResourceRefs(documentData)
 	if err := addPrunedAzureARMResourcesWithRefs(compileCtx, compiler, cache, cfg, schemaURI, refs); err != nil {
 		return nil, err
 	}
@@ -541,6 +717,23 @@ func issueForMissingSchemaCoverage(document *Document) Issue {
 		Keyword:      "schemaCoverage",
 		Message:      "file must declare a schema or match a configured schema association, built-in association, or catalog entry",
 	}
+}
+
+func issuesForDocumentParseErrors(document *Document) []Issue {
+	if document == nil || len(document.ParseErrors) == 0 {
+		return nil
+	}
+	issues := make([]Issue, 0, len(document.ParseErrors))
+	for _, parseErr := range document.ParseErrors {
+		issues = append(issues, Issue{
+			File:         document.Path,
+			RelativePath: document.RelativePath,
+			Line:         parseErr.Line,
+			Column:       parseErr.Column,
+			Message:      parseErr.Message,
+		})
+	}
+	return issues
 }
 
 func addIssue(result *Result, issue Issue) {

@@ -3,32 +3,61 @@ package engine
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
+	"github.com/tailscale/hujson"
+	json5 "github.com/titanous/json5"
 	"gopkg.in/yaml.v3"
 )
 
 const (
-	DocumentFormatJSON = "json"
-	DocumentFormatYAML = "yaml"
-	DocumentFormatTOML = "toml"
+	DocumentFormatJSON      = "json"
+	DocumentFormatJSONC     = "jsonc"
+	DocumentFormatJSON5     = "json5"
+	DocumentFormatJSONLines = "jsonl"
+	DocumentFormatYAML      = "yaml"
+	DocumentFormatTOML      = "toml"
 )
 
 type Document struct {
-	Path         string
-	RelativePath string
-	Format       string
-	Data         any
-	Schema       string
-	SchemaSource string
-	SourceMap    SourceMap
+	Path          string
+	RelativePath  string
+	Format        string
+	Data          any
+	Schema        string
+	SchemaSource  string
+	SourceMap     SourceMap
+	LineDocuments []LineDocument
+	ParseErrors   []DocumentParseError
 
 	azureRefs         []azureARMResourceRef
 	azureRefsComputed bool
+}
+
+type LineDocument struct {
+	Line      int
+	Data      any
+	SourceMap SourceMap
+}
+
+type DocumentParseError struct {
+	Line    int
+	Column  int
+	Message string
+}
+
+func (d *Document) isLineDelimited() bool {
+	return d != nil && d.Format == DocumentFormatJSONLines
+}
+
+func (d *Document) isEmptyLineDelimitedDocument() bool {
+	return d.isLineDelimited() && len(d.LineDocuments) == 0
 }
 
 // azureResourceRefs returns the Azure ARM resource refs declared by this
@@ -55,18 +84,20 @@ func ParseDocument(file DiscoveredFile) (*Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	data, err := decodeDocument(raw, format)
+	data, lineDocuments, parseErrors, err := parseDocumentData(raw, format)
 	if err != nil {
 		return nil, fmt.Errorf("parse %s: %w", file.Path, err)
 	}
 	schema, source := extractSchema(raw, data, format)
 	return &Document{
-		Path:         file.Path,
-		RelativePath: file.RelativePath,
-		Format:       format,
-		Data:         data,
-		Schema:       schema,
-		SchemaSource: source,
+		Path:          file.Path,
+		RelativePath:  file.RelativePath,
+		Format:        format,
+		Data:          data,
+		Schema:        schema,
+		SchemaSource:  source,
+		LineDocuments: lineDocuments,
+		ParseErrors:   parseErrors,
 	}, nil
 }
 
@@ -78,6 +109,14 @@ func AttachSourceMap(document *Document) {
 	if err != nil {
 		return
 	}
+	if document.isLineDelimited() {
+		lineMaps := buildJSONLinesSourceMaps(raw)
+		for i := range document.LineDocuments {
+			document.LineDocuments[i].SourceMap = lineMaps[document.LineDocuments[i].Line]
+		}
+		document.SourceMap = buildJSONLinesSourceMap(raw)
+		return
+	}
 	document.SourceMap = safeBuildSourceMap(raw, document.Format)
 }
 
@@ -85,6 +124,12 @@ func formatForPath(path string) (string, error) {
 	switch strings.ToLower(filepath.Ext(path)) {
 	case ".json":
 		return DocumentFormatJSON, nil
+	case ".jsonc":
+		return DocumentFormatJSONC, nil
+	case ".json5":
+		return DocumentFormatJSON5, nil
+	case ".jsonl", ".ndjson":
+		return DocumentFormatJSONLines, nil
 	case ".yaml", ".yml":
 		return DocumentFormatYAML, nil
 	case ".toml":
@@ -94,10 +139,22 @@ func formatForPath(path string) (string, error) {
 	}
 }
 
+func parseDocumentData(raw []byte, format string) (any, []LineDocument, []DocumentParseError, error) {
+	if format == DocumentFormatJSONLines {
+		return decodeJSONLines(raw)
+	}
+	data, err := decodeDocument(raw, format)
+	return data, nil, nil, err
+}
+
 func decodeDocument(raw []byte, format string) (any, error) {
 	switch format {
 	case DocumentFormatJSON:
 		return decodeJSON(raw)
+	case DocumentFormatJSONC:
+		return decodeJSONC(raw)
+	case DocumentFormatJSON5:
+		return decodeJSON5(raw)
 	case DocumentFormatYAML:
 		var value any
 		if err := yaml.Unmarshal(raw, &value); err != nil {
@@ -122,7 +179,93 @@ func decodeJSON(raw []byte) (any, error) {
 	if err := decoder.Decode(&value); err != nil {
 		return nil, err
 	}
+	if err := ensureSingleJSONValue(decoder); err != nil {
+		return nil, err
+	}
 	return value, nil
+}
+
+func ensureSingleJSONValue(decoder *json.Decoder) error {
+	var extra any
+	err := decoder.Decode(&extra)
+	if err == io.EOF {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	return fmt.Errorf("multiple JSON values")
+}
+
+func decodeJSONC(raw []byte) (any, error) {
+	standardized, err := hujson.Standardize(raw)
+	if err != nil {
+		return nil, err
+	}
+	return decodeJSON(standardized)
+}
+
+func decodeJSON5(raw []byte) (any, error) {
+	decoder := json5.NewDecoder(bytes.NewReader(raw))
+	var value any
+	if err := decoder.Decode(&value); err != nil {
+		return nil, err
+	}
+	var extra any
+	err := decoder.Decode(&extra)
+	if err != io.EOF {
+		if err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("multiple JSON values")
+	}
+	return toJSONValue(value)
+}
+
+func decodeJSONLines(raw []byte) (any, []LineDocument, []DocumentParseError, error) {
+	var values []any
+	var documents []LineDocument
+	var parseErrors []DocumentParseError
+	lineNo := 0
+	for start := 0; start <= len(raw); {
+		lineNo++
+		end := bytes.IndexByte(raw[start:], '\n')
+		var line []byte
+		if end < 0 {
+			line = raw[start:]
+			start = len(raw) + 1
+		} else {
+			line = raw[start : start+end]
+			start += end + 1
+		}
+		if n := len(line); n > 0 && line[n-1] == '\r' {
+			line = line[:n-1]
+		}
+		if len(bytes.TrimSpace(line)) == 0 {
+			continue
+		}
+		value, err := decodeJSON(line)
+		if err != nil {
+			parseErrors = append(parseErrors, DocumentParseError{
+				Line:    lineNo,
+				Column:  jsonErrorColumn(line, err),
+				Message: fmt.Sprintf("parse line %d: %v", lineNo, err),
+			})
+			continue
+		}
+		values = append(values, value)
+		documents = append(documents, LineDocument{Line: lineNo, Data: value})
+	}
+	return values, documents, parseErrors, nil
+}
+
+func jsonErrorColumn(raw []byte, err error) int {
+	var syntaxErr *json.SyntaxError
+	if !errors.As(err, &syntaxErr) || syntaxErr.Offset <= 0 {
+		return 1
+	}
+	pos := positionAtOffset(newLineIndex(raw), int(syntaxErr.Offset)-1)
+	return pos.Column
 }
 
 func toJSONValue(value any) (any, error) {

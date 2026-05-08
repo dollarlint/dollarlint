@@ -3,6 +3,7 @@ package engine
 import (
 	"encoding/json"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -16,6 +17,33 @@ func TestParseDocumentSchemaConventions(t *testing.T) {
 	}
 	if doc.Format != DocumentFormatJSON || doc.Schema != "./schema.json" || doc.SchemaSource != "$schema" {
 		t.Fatalf("json doc = %+v", doc)
+	}
+	jsoncPath := filepath.Join(dir, "data.jsonc")
+	writeFile(t, jsoncPath, `{
+  // comments and trailing commas are allowed
+  "$schema": "./jsonc-schema.json",
+  "name": "ok",
+}`)
+	doc, err = ParseDocument(DiscoveredFile{Path: jsoncPath, RelativePath: "data.jsonc"})
+	if err != nil {
+		t.Fatalf("ParseDocument jsonc: %v", err)
+	}
+	if doc.Format != DocumentFormatJSONC || doc.Schema != "./jsonc-schema.json" || doc.SchemaSource != "$schema" {
+		t.Fatalf("jsonc doc = %+v", doc)
+	}
+	json5Path := filepath.Join(dir, "data.json5")
+	writeFile(t, json5Path, `{
+  // JSON5 object keys and strings
+  $schema: './json5-schema.json',
+  name: 'ok',
+  count: 0x10,
+}`)
+	doc, err = ParseDocument(DiscoveredFile{Path: json5Path, RelativePath: "data.json5"})
+	if err != nil {
+		t.Fatalf("ParseDocument json5: %v", err)
+	}
+	if doc.Format != DocumentFormatJSON5 || doc.Schema != "./json5-schema.json" || doc.SchemaSource != "$schema" {
+		t.Fatalf("json5 doc = %+v", doc)
 	}
 	yamlPath := filepath.Join(dir, "data.yaml")
 	writeFile(t, yamlPath, `
@@ -61,6 +89,11 @@ func TestParseDocumentErrorsAndHelpers(t *testing.T) {
 	writeFile(t, badJSON, `{`)
 	if _, err := ParseDocument(DiscoveredFile{Path: badJSON, RelativePath: "bad.json"}); err == nil {
 		t.Fatalf("expected parse error")
+	}
+	badJSON5 := filepath.Join(dir, "bad.json5")
+	writeFile(t, badJSON5, `{bad: NaN}`)
+	if _, err := ParseDocument(DiscoveredFile{Path: badJSON5, RelativePath: "bad.json5"}); err == nil {
+		t.Fatalf("expected non-json json5 value error")
 	}
 	unsupported := filepath.Join(dir, "bad.txt")
 	writeFile(t, unsupported, "")
@@ -109,5 +142,31 @@ func TestParseDocumentErrorsAndHelpers(t *testing.T) {
 	}
 	if string(data) != `{"a":[{"1":"one"}]}` {
 		t.Fatalf("normalized = %s", data)
+	}
+}
+
+func TestParseDocumentJSONLines(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "events.jsonl")
+	writeFile(t, path, "\n{\"name\":\"first\"}\r\n  {\"name\":\"second\",\"count\":2}\n{\"name\":}\n")
+	doc, err := ParseDocument(DiscoveredFile{Path: path, RelativePath: "events.jsonl"})
+	if err != nil {
+		t.Fatalf("ParseDocument jsonl: %v", err)
+	}
+	if doc.Format != DocumentFormatJSONLines || !doc.isLineDelimited() {
+		t.Fatalf("jsonl format = %+v", doc)
+	}
+	if len(doc.LineDocuments) != 2 || len(doc.ParseErrors) != 1 {
+		t.Fatalf("jsonl records/errors = %d/%d: %+v", len(doc.LineDocuments), len(doc.ParseErrors), doc.ParseErrors)
+	}
+	if doc.LineDocuments[0].Line != 1 || doc.LineDocuments[1].Line != 2 {
+		t.Fatalf("jsonl line numbers = %+v", doc.LineDocuments)
+	}
+	if doc.ParseErrors[0].Line != 3 || doc.ParseErrors[0].Column == 0 || !strings.Contains(doc.ParseErrors[0].Message, "parse line 3") {
+		t.Fatalf("jsonl parse error = %+v", doc.ParseErrors[0])
+	}
+	values, ok := doc.Data.([]any)
+	if !ok || len(values) != 2 {
+		t.Fatalf("jsonl data = %#v", doc.Data)
 	}
 }

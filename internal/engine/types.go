@@ -72,6 +72,7 @@ type CatalogSource struct {
 
 type FetchConfig struct {
 	Enabled        *bool    `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
+	Cache          *bool    `json:"cache,omitempty" yaml:"cache,omitempty" toml:"cache,omitempty"`
 	Timeout        Duration `json:"timeout,omitempty" yaml:"timeout,omitempty" toml:"timeout,omitempty"`
 	Retries        *int     `json:"retries,omitempty" yaml:"retries,omitempty" toml:"retries,omitempty"`
 	RetryMinWait   Duration `json:"retryMinWait,omitempty" yaml:"retryMinWait,omitempty" toml:"retryMinWait,omitempty"`

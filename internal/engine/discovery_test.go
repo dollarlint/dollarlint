@@ -12,6 +12,10 @@ import (
 func TestDiscoverFilesSkipsNonSourceAndMatchesGlobs(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "a.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "variants", "b.jsonc"), `{}`)
+	writeFile(t, filepath.Join(dir, "variants", "c.json5"), `{}`)
+	writeFile(t, filepath.Join(dir, "variants", "d.jsonl"), `{}`)
+	writeFile(t, filepath.Join(dir, "variants", "e.ndjson"), `{}`)
 	writeFile(t, filepath.Join(dir, "nested", "b.yaml"), `name: ok`)
 	writeFile(t, filepath.Join(dir, "node_modules", "c.json"), `{}`)
 	writeFile(t, filepath.Join(dir, "dist", "d.toml"), `name = "ok"`)
@@ -28,7 +32,7 @@ func TestDiscoverFilesSkipsNonSourceAndMatchesGlobs(t *testing.T) {
 	}
 	sort.Strings(rels)
 	got := strings.Join(rels, ",")
-	if got != "a.json,nested/b.yaml" {
+	if got != "a.json,nested/b.yaml,variants/b.jsonc,variants/c.json5,variants/d.jsonl,variants/e.ndjson" {
 		t.Fatalf("discovered %s", got)
 	}
 	disabled := false
@@ -38,7 +42,7 @@ func TestDiscoverFilesSkipsNonSourceAndMatchesGlobs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DiscoverFiles without default excludes: %v", err)
 	}
-	if len(files) != 5 {
+	if len(files) != 9 {
 		t.Fatalf("without default excludes = %+v", files)
 	}
 	cfg = DefaultConfig().Discovery

@@ -6,6 +6,11 @@ const jsonSchema = `{
   "$schema": "./schema.json",
   "name": "example"
 }`;
+const jsoncSchema = `{
+  // JSONC and JSON5 use the same root property
+  "$schema": "./schema.json",
+  "name": "example",
+}`;
 const yamlDirective = `# yaml-language-server: $schema=./schema.json
 name: example`;
 const yamlRoot = `$schema: ./schema.json
@@ -15,8 +20,8 @@ name = "example"`;
 const tomlRoot = `"$schema" = "./schema.json"
 name = "example"`;
 const association = `[[schemas.associations]]
-file = "settings/*.toml"
-schema = "./schemas/settings.schema.json"`;
+file = "*.jsonl"
+schema = "./schemas/event.schema.json"`;
 ---
 
 <DocsLayout title="Schema declarations" current="/guides/schema-declarations/">
@@ -31,9 +36,15 @@ schema = "./schemas/settings.schema.json"`;
       </p>
     </header>
 
-    <h2>JSON</h2>
+    <h2>JSON family</h2>
     <CodeBlock code={jsonSchema} language="json" />
-    <p>JSON uses the conventional root <code>$schema</code> property.</p>
+    <CodeBlock code={jsoncSchema} language="json" />
+    <p>
+      JSON, JSONC, and JSON5 use the conventional root <code>$schema</code>
+      property. JSON Lines files are validated one non-empty line at a time, so
+      cover <code>.jsonl</code> and <code>.ndjson</code> files with a config
+      association, CLI association, or catalog match.
+    </p>
 
     <h2>YAML</h2>
     <CodeBlock code={yamlDirective} language="yaml" />

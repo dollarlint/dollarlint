@@ -82,6 +82,17 @@ func TestExecuteExitCodes(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
+	jsoncDir := filepath.Join(dir, "jsonc")
+	writeFile(t, filepath.Join(jsoncDir, "schema.json"), `{"type":"object","required":["ok"],"properties":{"$schema":{"type":"string"},"ok":{"type":"boolean"}}}`)
+	writeFile(t, filepath.Join(jsoncDir, "settings.jsonc"), `{"$schema":"./schema.json", "ok": true,}`)
+	if code := Execute([]string{"validate", filepath.Join(jsoncDir, "settings.jsonc"), "--format", "json"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("jsonc explicit exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"format": "jsonc"`) {
+		t.Fatalf("jsonc explicit output = %s", stdout.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
 	if code := Execute([]string{"validate", filepath.Join(dir, "missing")}, &stdout, &stderr); code != 2 {
 		t.Fatalf("fatal run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
@@ -149,6 +160,27 @@ func TestExecuteRemoteDomainFlags(t *testing.T) {
 	}
 	if !strings.Contains(stdout.String(), "blocked by configuration") {
 		t.Fatalf("blocked output = %s", stdout.String())
+	}
+}
+
+func TestExecuteNoSchemaCacheFlag(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"type":"object"}`))
+	}))
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "file.json"), `{"$schema":"`+server.URL+`/schema.json"}`)
+	var stdout, stderr bytes.Buffer
+	if code := Execute([]string{"validate", dir, "--no-schema-cache"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("initial no-cache run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	server.Close()
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", dir, "--no-schema-cache"}, &stdout, &stderr); code != 1 {
+		t.Fatalf("second no-cache run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "fetch schema") {
+		t.Fatalf("second no-cache output = %s", stdout.String())
 	}
 }
 
@@ -354,6 +386,7 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 	for _, expected := range []string{
 		"[schemas.fetch]",
 		"enabled = true",
+		"cache = true",
 		`timeout = "10s"`,
 		`retries = 2`,
 		"[schemas.compile]",

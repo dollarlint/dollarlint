@@ -4,12 +4,19 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"path"
+	"strings"
 )
 
 const defaultSchemaStoreCatalogURL = "https://www.schemastore.org/api/json/catalog.json"
 
 type schemaStoreCatalog struct {
 	Schemas []schemaStoreEntry `json:"schemas"`
+
+	indexed        bool
+	exactPaths     map[string]schemaStoreEntry
+	exactBasenames map[string]schemaStoreEntry
+	globs          []schemaStorePattern
 }
 
 type schemaStoreEntry struct {
@@ -17,6 +24,11 @@ type schemaStoreEntry struct {
 	Source    string   `json:"source"`
 	FileMatch []string `json:"fileMatch"`
 	URL       string   `json:"url"`
+}
+
+type schemaStorePattern struct {
+	pattern string
+	entry   schemaStoreEntry
 }
 
 func loadSchemaStoreCatalog(ctx context.Context, cache *SchemaCache, cfg Config) (*schemaStoreCatalog, *Warning, error) {
@@ -36,6 +48,7 @@ func loadSchemaStoreCatalog(ctx context.Context, cache *SchemaCache, cfg Config)
 	if len(catalog.Schemas) == 0 {
 		return nil, nil, nil
 	}
+	catalog.buildIndex()
 	return catalog, nil, nil
 }
 
@@ -157,21 +170,80 @@ func applySchemaStoreAssociation(document *Document, catalog *schemaStoreCatalog
 	if document.Schema != "" || catalog == nil {
 		return
 	}
+	entry, ok := catalog.match(document.RelativePath)
+	if !ok {
+		return
+	}
+	document.Schema = entry.URL
+	document.SchemaSource = entry.schemaSource()
+}
+
+func (catalog *schemaStoreCatalog) buildIndex() {
+	if catalog == nil || catalog.indexed {
+		return
+	}
+	catalog.indexed = true
+	catalog.exactPaths = map[string]schemaStoreEntry{}
+	catalog.exactBasenames = map[string]schemaStoreEntry{}
 	for _, entry := range catalog.Schemas {
-		for _, pattern := range entry.FileMatch {
-			if matchPattern(pattern, document.RelativePath) {
-				document.Schema = entry.URL
-				document.SchemaSource = "catalog"
-				if entry.Source != "" {
-					document.SchemaSource += ":" + entry.Source
-				}
-				if entry.Name != "" {
-					document.SchemaSource += ":" + entry.Name
-				}
-				return
+		for _, rawPattern := range entry.FileMatch {
+			pattern := cleanGlob(rawPattern)
+			if pattern == "" {
+				continue
 			}
+			if hasGlobMeta(pattern) {
+				catalog.globs = append(catalog.globs, schemaStorePattern{pattern: pattern, entry: entry})
+				continue
+			}
+			if strings.Contains(pattern, "/") {
+				addSchemaStoreExact(catalog.exactPaths, pattern, entry)
+				continue
+			}
+			addSchemaStoreExact(catalog.exactBasenames, pattern, entry)
 		}
 	}
+}
+
+func (catalog *schemaStoreCatalog) match(rel string) (schemaStoreEntry, bool) {
+	if catalog == nil {
+		return schemaStoreEntry{}, false
+	}
+	catalog.buildIndex()
+	rel = cleanGlob(rel)
+	if entry, ok := catalog.exactPaths[rel]; ok {
+		return entry, true
+	}
+	if entry, ok := catalog.exactBasenames[path.Base(rel)]; ok {
+		return entry, true
+	}
+	for _, candidate := range catalog.globs {
+		if matchPattern(candidate.pattern, rel) {
+			return candidate.entry, true
+		}
+	}
+	return schemaStoreEntry{}, false
+}
+
+func addSchemaStoreExact(entries map[string]schemaStoreEntry, key string, entry schemaStoreEntry) {
+	if _, exists := entries[key]; exists {
+		return
+	}
+	entries[key] = entry
+}
+
+func hasGlobMeta(pattern string) bool {
+	return strings.ContainsAny(pattern, "*?[{")
+}
+
+func (entry schemaStoreEntry) schemaSource() string {
+	source := "catalog"
+	if entry.Source != "" {
+		source += ":" + entry.Source
+	}
+	if entry.Name != "" {
+		source += ":" + entry.Name
+	}
+	return source
 }
 
 func asSlice(value any) []any {

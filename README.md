@@ -2,7 +2,7 @@
 
 # dollarlint
 
-`dollarlint` validates source JSON, YAML, and TOML files against the JSON Schema each file declares.
+`dollarlint` validates source JSON, JSONC, JSON5, JSON Lines, YAML, and TOML files against JSON Schema.
 
 Files without a schema declaration, config association, built-in association, or catalog match are skipped by default, but still counted in the run summary so CI output makes discovery behavior clear. Set `schemas.requireCoverage = true` when every included file must be covered.
 
@@ -57,10 +57,13 @@ Exit codes:
 Supported in-file conventions:
 
 - JSON: root `$schema`, for example `{"$schema":"./schema.json"}`
+- JSONC/JSON5: root `$schema`, using the same convention after comments and JSON5 syntax are normalized
 - YAML: `# yaml-language-server: $schema=./schema.json`
 - YAML: root `$schema`
 - TOML: Taplo/Even Better TOML directive `#:schema ./schema.json`
 - TOML: root `"$schema" = "./schema.json"`
+
+JSON Lines files (`.jsonl` and `.ndjson`) are validated one non-empty line at a time. Because the file has no single root object, associate a schema through config, the `--schema` flag, or a catalog match.
 
 Config-level schema associations can validate files that do not declare a schema themselves.
 
@@ -95,6 +98,7 @@ pruneResources = true
 
 [schemas.fetch]
 enabled = true
+cache = true
 timeout = "10s"
 retries = 2
 retryMinWait = "250ms"
@@ -135,9 +139,9 @@ branchErrors = "best"
 
 Output format and output file are invocation choices, not persistent config. Use `--format text|json|sarif` and `--output <path>` on `dollarlint validate` when a run needs a machine-readable artifact.
 
-Discovery uses safe defaults. Leave `discovery.include` unset to discover JSON, YAML, YML, and TOML files at any depth. Set `include` only when you want to replace that default set with custom discovery globs. A glob without a slash matches basenames at any depth, so `*.json` matches both `package.json` and `config/settings.json`; use slashes when you want to anchor a pattern to part of the relative path. `useDefaultExcludes = true` skips common dependency, generated, cache, and VCS directories like `node_modules`, `vendor`, `dist`, `build`, `.git`, `.venv`, and `.cache`. Add project-specific exclusions with `discovery.extendExclude` rather than copying the default list. `respectGitIgnore = true` applies root `.gitignore` patterns during directory discovery, while `forceExclude = true` also applies excludes to explicitly passed files.
+Discovery uses safe defaults. Leave `discovery.include` unset to discover JSON, JSONC, JSON5, JSON Lines (`.jsonl` and `.ndjson`), YAML, YML, and TOML files at any depth. Set `include` only when you want to replace that default set with custom discovery globs. A glob without a slash matches basenames at any depth, so `*.json` matches both `package.json` and `config/settings.json`; use slashes when you want to anchor a pattern to part of the relative path. `useDefaultExcludes = true` skips common dependency, generated, cache, and VCS directories like `node_modules`, `vendor`, `dist`, `build`, `.git`, `.venv`, and `.cache`. Add project-specific exclusions with `discovery.extendExclude` rather than copying the default list. `respectGitIgnore = true` applies root `.gitignore` patterns during directory discovery, while `forceExclude = true` also applies excludes to explicitly passed files.
 
-By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schemas.fetch.allowedDomains` can restrict remote schemas to specific hosts, and `schemas.fetch.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches. If you allowlist SchemaStore, prefer `*.schemastore.org` or include both `www.schemastore.org` and `json.schemastore.org`.
+By default, remote `http(s)` schema fetching is enabled and successful remote schemas/catalogs are cached on disk for repeat runs. Set `schemas.fetch.cache = false` or pass `--no-schema-cache` when cache-free fetching is needed. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schemas.fetch.allowedDomains` can restrict remote schemas to specific hosts, and `schemas.fetch.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches. If you allowlist SchemaStore, prefer `*.schemastore.org` or include both `www.schemastore.org` and `json.schemastore.org`.
 
 Catalog matching is configurable with `schemas.catalogs`. When enabled, files without an explicit schema can be matched by conventional filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional catalog sources. Precedence is explicit in-file schema, then config associations, then dollarlint's built-in `.dollarlint.toml` association, then catalog matches, then skipped. Set `schemas.requireCoverage = true` to fail the run when any discovered included file is not covered by one of those schema sources.
 
@@ -193,7 +197,7 @@ dollarlint validate . --format sarif --output dollarlint.sarif
 
 `dollarlint` builds source-location maps only for SARIF runs or when `--locations` is requested, keeping ordinary text and JSON validation on the simpler validation path. SARIF locations are best-effort:
 
-- JSON positions are derived from a token walk over the source.
+- JSON-family positions are derived from a token walk over the source.
 - YAML positions come from `yaml.Node` line/column metadata.
 - TOML positions come from a conservative line scanner for common keys, tables, arrays, and inline tables.
 

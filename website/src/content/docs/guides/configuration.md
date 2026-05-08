@@ -35,6 +35,12 @@ discovery:
 
 schema:
   fetchRemote: true
+  fetchSchemaStore: true
+  allowedDomains:
+    - "www.schemastore.org"
+    - "raw.githubusercontent.com"
+  blockedDomains:
+    - "untrusted.example.com"
   maxDepth: 8
   concurrency: 8
   associations:
@@ -68,9 +74,13 @@ Use `discovery.include` and `discovery.exclude` to decide which files are consid
 
 Remote `http(s)` schema fetching is enabled by default. Set `schema.fetchRemote` to `false` when you need fully offline or hermetic validation.
 
+Use `schema.allowedDomains` to restrict remote schema fetching to specific hosts. Leave it empty to allow any host. Use `schema.blockedDomains` to deny specific hosts; blocked domains win over allowed domains. Entries are exact hosts such as `www.schemastore.org` or wildcard hosts such as `*.example.com`.
+
+The CLI accepts repeatable `--allow-domain` and `--block-domain` flags for one-off runs.
+
 `schema.maxDepth` limits nested schema references, and recursion is detected so cyclical references do not spin forever.
 
-The `examples/schemastore/` directory demonstrates remote fetching with SchemaStore URLs for common package, CI, formatting, dependency, protobuf, and Python tooling configs.
+SchemaStore catalog fetching is enabled by default and can be disabled with `schema.fetchSchemaStore: false`. Domain policy applies to the catalog too, so excluding `www.schemastore.org` skips the default lookup.
 
 ## Ignore rules
 

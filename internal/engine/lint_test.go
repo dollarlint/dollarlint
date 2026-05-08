@@ -33,7 +33,7 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "invalid.json"), `{"$schema":"./schema.json","count":"no","extra":true}`)
 	writeFile(t, filepath.Join(dir, "skip.yaml"), `name: no schema`)
 	writeFile(t, filepath.Join(dir, "associated.toml"), `name = 42`)
-	cfg := DefaultConfig()
+	cfg := configWithoutSchemaStore()
 	cfg.Schema.Associations = []SchemaAssociation{{File: "*.toml", Schema: "./schema.json"}}
 	cfg.Ignore = []IgnoreRule{{File: "invalid.json", Keyword: "additionalProperties", Property: "extra", Reason: "known extra"}}
 	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
@@ -81,7 +81,7 @@ func TestLintOnlyBuildsSourceLocationsForSARIF(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["name"],"properties":{"$schema":{"type":"string"},"name":{"type":"string"}}}`)
 	writeFile(t, filepath.Join(dir, "bad.json"), `{"$schema":"./schema.json"}`)
-	result, err := Lint(context.Background(), Options{Root: dir, Config: DefaultConfig()})
+	result, err := Lint(context.Background(), Options{Root: dir, Config: configWithoutSchemaStore()})
 	if err != nil {
 		t.Fatalf("Lint without sarif: %v", err)
 	}
@@ -105,7 +105,7 @@ func TestLintParseSchemaAndPrimeErrors(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "bad-schema.json"), `{"$schema":"./missing.json"}`)
 	writeFile(t, filepath.Join(dir, "invalid-schema.json"), `{"$schema":"./schema.json","name":"ok"}`)
 	writeFile(t, filepath.Join(dir, "schema.json"), `{"type": 42}`)
-	result, err := Lint(context.Background(), Options{Root: dir, Config: DefaultConfig()})
+	result, err := Lint(context.Background(), Options{Root: dir, Config: configWithoutSchemaStore()})
 	if err != nil {
 		t.Fatalf("Lint: %v", err)
 	}
@@ -222,9 +222,67 @@ func TestIgnoreMatching(t *testing.T) {
 
 func TestApplySchemaAssociationSkipsIncompleteRules(t *testing.T) {
 	doc := &Document{RelativePath: "file.json"}
-	applySchemaAssociation(doc, []SchemaAssociation{{File: ""}, {File: "*.yaml", Schema: "schema.json"}})
+	applySchemaAssociation(doc, []SchemaAssociation{{File: ""}, {File: "*.yaml", Schema: "schema.json"}}, "config-association")
 	if doc.Schema != "" {
 		t.Fatalf("unexpected association = %+v", doc)
+	}
+}
+
+func TestLintAppliesSchemaStoreAssociationsByDefault(t *testing.T) {
+	var catalogRequests int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/catalog.json":
+			catalogRequests++
+			w.Write([]byte(`{"schemas":[{"fileMatch":["example.yaml"],"url":"` + "http://" + r.Host + `/schema.json"}]}`))
+		case "/schema.json":
+			w.Write([]byte(`{"type":"object","required":["name"],"properties":{"name":{"type":"string"}}}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "example.yaml"), `name: 42`)
+	cfg := DefaultConfig()
+	cfg.Schema.SchemaStoreCatalogURL = server.URL + "/catalog.json"
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if catalogRequests != 1 {
+		t.Fatalf("catalog requests = %d", catalogRequests)
+	}
+	if result.Summary.Validated != 1 || result.Summary.Skipped != 0 || len(result.Issues) != 1 {
+		t.Fatalf("schemastore result = %+v issues=%+v", result.Summary, result.Issues)
+	}
+	if result.Files[0].SchemaSource != "schemastore" || !strings.HasSuffix(result.Files[0].Schema, "/schema.json") {
+		t.Fatalf("file schema = %+v", result.Files[0])
+	}
+}
+
+func TestLintCanDisableSchemaStoreAssociations(t *testing.T) {
+	var catalogRequests int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		catalogRequests++
+		w.Write([]byte(`{"schemas":[{"fileMatch":["example.yaml"],"url":"` + "http://" + r.Host + `/schema.json"}]}`))
+	}))
+	defer server.Close()
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "example.yaml"), `name: 42`)
+	cfg := DefaultConfig()
+	disabled := false
+	cfg.Schema.FetchSchemaStore = &disabled
+	cfg.Schema.SchemaStoreCatalogURL = server.URL
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if catalogRequests != 0 {
+		t.Fatalf("catalog should not have been fetched")
+	}
+	if result.Summary.Validated != 0 || result.Summary.Skipped != 1 {
+		t.Fatalf("disabled schemastore result = %+v", result.Summary)
 	}
 }
 
@@ -247,4 +305,11 @@ func TestValidateDocumentNonValidationError(t *testing.T) {
 	if issue.Line != 9 || issue.Column != 2 {
 		t.Fatalf("existing position should not be overwritten: %+v", issue)
 	}
+}
+
+func configWithoutSchemaStore() Config {
+	cfg := DefaultConfig()
+	disabled := false
+	cfg.Schema.FetchSchemaStore = &disabled
+	return cfg
 }

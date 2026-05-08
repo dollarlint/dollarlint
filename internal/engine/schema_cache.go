@@ -163,8 +163,8 @@ func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error)
 		}
 		return decodeSchemaDocument(data, path)
 	case "http", "https":
-		if !remoteFetchEnabled(c.cfg.Schema) {
-			return nil, fmt.Errorf("remote schema fetching disabled for %s", raw)
+		if err := checkRemoteDomainPolicy(raw, c.cfg.Schema); err != nil {
+			return nil, err
 		}
 		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, raw, nil)
 		req.Header.Set("User-Agent", "dollarlint")

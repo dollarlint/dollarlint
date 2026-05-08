@@ -2,6 +2,9 @@ package cli
 
 import (
 	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -54,6 +57,37 @@ func TestExecuteSuccessAndHelpers(t *testing.T) {
 	if association.File != "*.json" || association.Schema != "./schema.json" {
 		t.Fatalf("association = %+v", association)
 	}
+}
+
+func TestExecuteRemoteDomainFlags(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"type":"object"}`))
+	}))
+	defer server.Close()
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "file.json"), `{"$schema":"`+server.URL+`/schema.json"}`)
+	host := mustHost(t, server.URL)
+	var stdout, stderr bytes.Buffer
+	if code := Execute([]string{dir, "--allow-domain", host}, &stdout, &stderr); code != 0 {
+		t.Fatalf("allowed run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{dir, "--block-domain", host}, &stdout, &stderr); code != 1 {
+		t.Fatalf("blocked run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "blocked by configuration") {
+		t.Fatalf("blocked output = %s", stdout.String())
+	}
+}
+
+func mustHost(t *testing.T, raw string) string {
+	t.Helper()
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		t.Fatalf("parse %s: %v", raw, err)
+	}
+	return parsed.Hostname()
 }
 
 func writeFile(t *testing.T, path, content string) {

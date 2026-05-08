@@ -6,6 +6,18 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/charmbracelet/lipgloss"
+)
+
+var (
+	textStyleError   = lipgloss.NewStyle().Foreground(lipgloss.ANSIColor(1)).Bold(true)
+	textStyleSuccess = lipgloss.NewStyle().Foreground(lipgloss.ANSIColor(2)).Bold(true)
+	textStyleFile    = lipgloss.NewStyle().Foreground(lipgloss.ANSIColor(6)).Bold(true)
+	textStyleKeyword = lipgloss.NewStyle().Foreground(lipgloss.ANSIColor(3))
+	textStyleMuted   = lipgloss.NewStyle().Foreground(lipgloss.ANSIColor(8))
+	textStylePointer = lipgloss.NewStyle().Foreground(lipgloss.ANSIColor(7))
+	textStyleSummary = lipgloss.NewStyle().Foreground(lipgloss.ANSIColor(8))
 )
 
 func FormatJSON(result Result) ([]byte, error) {
@@ -14,11 +26,11 @@ func FormatJSON(result Result) ([]byte, error) {
 
 func FormatText(result Result, output OutputConfig) string {
 	if output.Quiet && !result.HasIssues() {
-		return fmt.Sprintf("dollarlint passed in %s\n", formatElapsed(result.Summary.Duration.Duration))
+		return textStyleSuccess.Render(fmt.Sprintf("dollarlint passed in %s", formatElapsed(result.Summary.Duration.Duration))) + "\n"
 	}
 	var builder strings.Builder
 	if result.HasIssues() {
-		fmt.Fprintf(&builder, "dollarlint found %d issue%s in %d file%s after %s",
+		headline := fmt.Sprintf("dollarlint found %d issue%s in %d file%s after %s",
 			result.Summary.Issues,
 			plural(result.Summary.Issues),
 			filesWithIssues(result),
@@ -26,17 +38,20 @@ func FormatText(result Result, output OutputConfig) string {
 			formatElapsed(result.Summary.Duration.Duration),
 		)
 		if result.Summary.Ignored > 0 {
-			fmt.Fprintf(&builder, " (%d ignored)", result.Summary.Ignored)
+			headline += fmt.Sprintf(" (%d ignored)", result.Summary.Ignored)
 		}
+		builder.WriteString(textStyleError.Render(headline))
 		builder.WriteString("\n")
 		writeGroupedIssues(&builder, result, output)
 	} else {
-		fmt.Fprintf(&builder, "dollarlint passed in %s: %d discovered, %d validated, %d skipped\n",
+		headline := fmt.Sprintf("dollarlint passed in %s: %d discovered, %d validated, %d skipped",
 			formatElapsed(result.Summary.Duration.Duration),
 			result.Summary.Discovered,
 			result.Summary.Validated,
 			result.Summary.Skipped,
 		)
+		builder.WriteString(textStyleSuccess.Render(headline))
+		builder.WriteString("\n")
 	}
 	if !output.Quiet {
 		writeSkipped(&builder, result, output.ShowSkipped)
@@ -62,7 +77,7 @@ func writeGroupedIssues(builder *strings.Builder, result Result, output OutputCo
 		issues := grouped[file]
 		sortIssues(issues, output)
 		widths := issueColumnWidths(issues, output)
-		fmt.Fprintf(builder, "\n%s\n", file)
+		fmt.Fprintf(builder, "\n%s\n", textStyleFile.Render(file))
 		for _, issue := range issues {
 			writeIssueRow(builder, issue, output, widths)
 		}
@@ -76,16 +91,12 @@ func writeIssueRow(builder *strings.Builder, issue Issue, output OutputConfig, w
 	if output.Locations && !output.Verbose {
 		messageWidth = widths.Message
 	}
-	fmt.Fprintf(builder, "  %-*s  %-*s  %-*s",
-		widths.Location,
-		location,
-		widths.Keyword,
-		keyword,
-		messageWidth,
-		issue.Message,
-	)
+	locationCell := styledLocation(location, widths.Location)
+	keywordCell := styledCell(textStyleKeyword, keyword, widths.Keyword)
+	messageCell := fmt.Sprintf("%-*s", messageWidth, issue.Message)
+	fmt.Fprintf(builder, "  %s  %s  %s", locationCell, keywordCell, messageCell)
 	if !output.Verbose && issue.InstanceLocation != "" && output.Locations {
-		fmt.Fprintf(builder, "  %s", issue.InstanceLocation)
+		fmt.Fprintf(builder, "  %s", textStylePointer.Render(issue.InstanceLocation))
 	}
 	builder.WriteString("\n")
 	if output.Verbose {
@@ -95,16 +106,16 @@ func writeIssueRow(builder *strings.Builder, issue Issue, output OutputConfig, w
 
 func writeVerboseIssueDetails(builder *strings.Builder, issue Issue) {
 	if issue.InstanceLocation != "" {
-		fmt.Fprintf(builder, "    location: %s\n", issue.InstanceLocation)
+		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("location:"), textStylePointer.Render(issue.InstanceLocation))
 	}
 	if issue.Property != "" {
-		fmt.Fprintf(builder, "    property: %s\n", issue.Property)
+		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("property:"), issue.Property)
 	}
 	if issue.KeywordLocation != "" {
-		fmt.Fprintf(builder, "    keywordLocation: %s\n", issue.KeywordLocation)
+		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("keywordLocation:"), textStylePointer.Render(issue.KeywordLocation))
 	}
 	if issue.Schema != "" {
-		fmt.Fprintf(builder, "    schema: %s\n", issue.Schema)
+		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("schema:"), issue.Schema)
 	}
 }
 
@@ -114,13 +125,13 @@ func writeSkipped(builder *strings.Builder, result Result, showSkipped bool) {
 	}
 	for _, file := range result.Files {
 		if file.Status == StatusSkipped {
-			fmt.Fprintf(builder, "\nskipped: %s (no schema)\n", file.RelativePath)
+			fmt.Fprintf(builder, "\n%s %s %s\n", textStyleMuted.Render("skipped:"), file.RelativePath, textStyleMuted.Render("(no schema)"))
 		}
 	}
 }
 
 func writeSummary(builder *strings.Builder, result Result) {
-	fmt.Fprintf(builder, "\nSummary: %d discovered, %d validated, %d skipped, %d issue%s",
+	summary := fmt.Sprintf("Summary: %d discovered, %d validated, %d skipped, %d issue%s",
 		result.Summary.Discovered,
 		result.Summary.Validated,
 		result.Summary.Skipped,
@@ -128,10 +139,26 @@ func writeSummary(builder *strings.Builder, result Result) {
 		plural(result.Summary.Issues),
 	)
 	if result.Summary.Ignored > 0 {
-		fmt.Fprintf(builder, ", %d ignored", result.Summary.Ignored)
+		summary += fmt.Sprintf(", %d ignored", result.Summary.Ignored)
 	}
-	fmt.Fprintf(builder, " in %s", formatElapsed(result.Summary.Duration.Duration))
+	summary += fmt.Sprintf(" in %s", formatElapsed(result.Summary.Duration.Duration))
 	builder.WriteString("\n")
+	builder.WriteString(textStyleSummary.Render(summary))
+	builder.WriteString("\n")
+}
+
+func styledCell(style lipgloss.Style, value string, width int) string {
+	if width <= 0 {
+		return style.Render(value)
+	}
+	return style.Render(fmt.Sprintf("%-*s", width, value))
+}
+
+func styledLocation(location string, width int) string {
+	if strings.HasPrefix(location, "/") {
+		return styledCell(textStylePointer, location, width)
+	}
+	return styledCell(textStyleMuted, location, width)
 }
 
 type textWidths struct {

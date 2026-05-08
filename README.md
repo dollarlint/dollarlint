@@ -74,6 +74,12 @@ discovery:
 
 schema:
   fetchRemote: true
+  fetchSchemaStore: true
+  allowedDomains:
+    - "www.schemastore.org"
+    - "raw.githubusercontent.com"
+  blockedDomains:
+    - "untrusted.example.com"
   maxDepth: 8
   concurrency: 8
   associations:
@@ -99,7 +105,9 @@ output:
   locations: false
 ```
 
-By default, remote `http(s)` schema fetching is enabled. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
+By default, remote `http(s)` schema fetching is enabled. `schema.allowedDomains` can restrict remote schemas to specific hosts, and `schema.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
+
+SchemaStore catalog fetching is enabled by default and can be disabled with `schema.fetchSchemaStore: false`. Domain policy applies to SchemaStore too, so excluding `www.schemastore.org` skips the default catalog lookup. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
 
 ## Examples
 

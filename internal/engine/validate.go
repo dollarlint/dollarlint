@@ -36,6 +36,8 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 	result := Result{Root: root}
 	cache := NewSchemaCache(cfg)
 	documents := make([]*Document, 0, len(files))
+	validatedDocuments := make([]*Document, 0, len(files))
+	documentsWithoutSchema := make([]*Document, 0, len(files))
 	schemaRoots := make([]string, 0, len(files))
 	fileIndexes := map[string]int{}
 	for _, file := range files {
@@ -54,35 +56,49 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 			continue
 		}
 		fileResult.Format = document.Format
-		applySchemaAssociation(document, cfg.Schema.Associations)
-		fileResult.Schema = document.Schema
-		fileResult.SchemaSource = document.SchemaSource
+		fileIndexes[document.RelativePath] = len(result.Files)
+		result.Files = append(result.Files, fileResult)
+		documents = append(documents, document)
+		applySchemaAssociation(document, cfg.Schema.Associations, "config-association")
+		if document.Schema == "" {
+			documentsWithoutSchema = append(documentsWithoutSchema, document)
+		}
+	}
+	if len(documentsWithoutSchema) > 0 && schemaStoreFetchEnabled(cfg.Schema) {
+		associations, err := fetchSchemaStoreAssociations(ctx, cfg)
+		if err != nil {
+			return Result{}, err
+		}
+		for _, document := range documentsWithoutSchema {
+			applySchemaAssociation(document, associations, "schemastore")
+		}
+	}
+	for _, document := range documents {
+		index := fileIndexes[document.RelativePath]
+		result.Files[index].Schema = document.Schema
+		result.Files[index].SchemaSource = document.SchemaSource
 		if document.Schema == "" {
 			result.Summary.Skipped++
-			result.Files = append(result.Files, fileResult)
 			continue
 		}
 		resolved, err := resolveSchemaURI(document.Schema, document.Path)
 		if err != nil {
-			fileResult.Status = StatusError
-			fileResult.Message = err.Error()
-			result.Files = append(result.Files, fileResult)
-			addIssue(&result, issueForError(file, document.Schema, err))
+			result.Files[index].Status = StatusError
+			result.Files[index].Message = err.Error()
+			addIssue(&result, issueForError(DiscoveredFile{Path: document.Path, RelativePath: document.RelativePath}, document.Schema, err))
 			continue
 		}
 		document.Schema = resolved
-		fileResult.Schema = resolved
-		fileResult.Status = StatusValidated
+		result.Files[index].Schema = resolved
+		result.Files[index].Status = StatusValidated
 		if cfg.Output.SARIF || cfg.Output.Locations {
 			AttachSourceMap(document)
 		}
-		fileIndexes[document.RelativePath] = len(result.Files)
-		result.Files = append(result.Files, fileResult)
-		documents = append(documents, document)
+		validatedDocuments = append(validatedDocuments, document)
 		schemaRoots = append(schemaRoots, resolved)
 	}
 	_ = cache.Prime(ctx, schemaRoots)
-	for _, document := range documents {
+	for _, document := range validatedDocuments {
 		issues := validateDocument(ctx, cache, cfg, document)
 		for _, issue := range issues {
 			applyIgnore(&issue, cfg.Ignore)
@@ -106,7 +122,7 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 	return result, nil
 }
 
-func applySchemaAssociation(document *Document, associations []SchemaAssociation) {
+func applySchemaAssociation(document *Document, associations []SchemaAssociation, source string) {
 	if document.Schema != "" {
 		return
 	}
@@ -116,7 +132,7 @@ func applySchemaAssociation(document *Document, associations []SchemaAssociation
 		}
 		if matchPattern(association.File, document.RelativePath) {
 			document.Schema = association.Schema
-			document.SchemaSource = "config-association"
+			document.SchemaSource = source
 			return
 		}
 	}

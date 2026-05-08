@@ -26,6 +26,7 @@ var defaultConfigFiles = []string{
 
 func DefaultConfig() Config {
 	fetchRemote := true
+	fetchSchemaStore := true
 	return Config{
 		Version: 1,
 		Discovery: DiscoveryConfig{
@@ -55,9 +56,11 @@ func DefaultConfig() Config {
 			},
 		},
 		Schema: SchemaConfig{
-			MaxDepth:    8,
-			FetchRemote: &fetchRemote,
-			Concurrency: runtime.GOMAXPROCS(0),
+			MaxDepth:              8,
+			FetchRemote:           &fetchRemote,
+			FetchSchemaStore:      &fetchSchemaStore,
+			SchemaStoreCatalogURL: defaultSchemaStoreCatalogURL,
+			Concurrency:           runtime.GOMAXPROCS(0),
 		},
 		Timeouts: TimeoutConfig{
 			Fetch:   NewDuration(10 * time.Second),
@@ -82,6 +85,12 @@ func (c *Config) ApplyDefaults() {
 	}
 	if c.Schema.FetchRemote == nil {
 		c.Schema.FetchRemote = defaults.Schema.FetchRemote
+	}
+	if c.Schema.FetchSchemaStore == nil {
+		c.Schema.FetchSchemaStore = defaults.Schema.FetchSchemaStore
+	}
+	if c.Schema.SchemaStoreCatalogURL == "" {
+		c.Schema.SchemaStoreCatalogURL = defaults.Schema.SchemaStoreCatalogURL
 	}
 	if c.Schema.Concurrency <= 0 {
 		c.Schema.Concurrency = defaults.Schema.Concurrency
@@ -159,4 +168,11 @@ func decodeConfig(path string, data []byte, out *Config) error {
 
 func remoteFetchEnabled(cfg SchemaConfig) bool {
 	return cfg.FetchRemote == nil || *cfg.FetchRemote
+}
+
+func schemaStoreFetchEnabled(cfg SchemaConfig) bool {
+	if !remoteFetchEnabled(cfg) || (cfg.FetchSchemaStore != nil && !*cfg.FetchSchemaStore) {
+		return false
+	}
+	return checkRemoteDomainPolicy(cfg.SchemaStoreCatalogURL, cfg) == nil
 }

@@ -41,6 +41,8 @@ func NewRootCommand(stdout io.Writer) *cobra.Command {
 	var associations []string
 	var maxDepth int
 	var fetchRemote bool
+	var allowedDomains []string
+	var blockedDomains []string
 	var fetchTimeout string
 	var compileTimeout string
 
@@ -78,6 +80,12 @@ func NewRootCommand(stdout io.Writer) *cobra.Command {
 			}
 			if cmd.Flags().Changed("fetch-remote") {
 				cfg.Schema.FetchRemote = &fetchRemote
+			}
+			if len(allowedDomains) > 0 {
+				cfg.Schema.AllowedDomains = append(cfg.Schema.AllowedDomains, allowedDomains...)
+			}
+			if len(blockedDomains) > 0 {
+				cfg.Schema.BlockedDomains = append(cfg.Schema.BlockedDomains, blockedDomains...)
 			}
 			if fetchTimeout != "" {
 				if err := cfg.Timeouts.Fetch.UnmarshalText([]byte(fetchTimeout)); err != nil {
@@ -132,6 +140,8 @@ func NewRootCommand(stdout io.Writer) *cobra.Command {
 	cmd.Flags().StringArrayVar(&associations, "schema", nil, "Associate a file glob with a schema as glob=uri; repeatable")
 	cmd.Flags().IntVar(&maxDepth, "max-depth", 0, "Maximum external schema reference depth")
 	cmd.Flags().BoolVar(&fetchRemote, "fetch-remote", true, "Allow fetching http(s) schemas")
+	cmd.Flags().StringArrayVar(&allowedDomains, "allow-domain", nil, "Allow remote schemas from this domain; repeatable")
+	cmd.Flags().StringArrayVar(&blockedDomains, "block-domain", nil, "Block remote schemas from this domain; repeatable")
 	cmd.Flags().StringVar(&fetchTimeout, "fetch-timeout", "", "Timeout for fetching schemas, e.g. 10s")
 	cmd.Flags().StringVar(&compileTimeout, "compile-timeout", "", "Timeout for compiling schemas, e.g. 30s")
 	cmd.Flags().Lookup("fetch-remote").NoOptDefVal = "true"

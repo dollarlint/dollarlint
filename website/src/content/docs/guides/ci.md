@@ -57,6 +57,7 @@ jobs:
 ## CI tips
 
 - Keep `schema.fetchRemote: true` if your source files depend on remote schema URLs.
+- Use `schema.allowedDomains` in locked-down CI environments to fetch only from approved schema hosts.
 - Pin remote schemas through local mirrors or associations when reproducibility matters more than freshness.
 - Use ignore rules for known migration debt instead of excluding whole directories.
 - Use `--show-skipped` periodically to confirm discovery still matches your expectations.

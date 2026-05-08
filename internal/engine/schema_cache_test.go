@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -71,6 +72,40 @@ func TestSchemaCacheRemoteFetch(t *testing.T) {
 	cache = NewSchemaCache(cfg)
 	if _, err := cache.Load(server.URL + "/schema.json"); err == nil {
 		t.Fatalf("expected remote disabled error")
+	}
+}
+
+func TestSchemaCacheRemoteDomainPolicy(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"type":"object"}`))
+	}))
+	defer server.Close()
+	host := mustURLHost(t, server.URL)
+	cfg := DefaultConfig()
+	cfg.Schema.AllowedDomains = []string{host}
+	cache := NewSchemaCache(cfg)
+	if _, err := cache.Load(server.URL + "/schema.json"); err != nil {
+		t.Fatalf("allowed domain load: %v", err)
+	}
+	cfg.Schema.BlockedDomains = []string{host}
+	cache = NewSchemaCache(cfg)
+	if _, err := cache.Load(server.URL + "/schema.json"); err == nil || !strings.Contains(err.Error(), "blocked") {
+		t.Fatalf("expected blocked domain error, got %v", err)
+	}
+	cfg = DefaultConfig()
+	cfg.Schema.AllowedDomains = []string{"example.com"}
+	cache = NewSchemaCache(cfg)
+	if _, err := cache.Load(server.URL + "/schema.json"); err == nil || !strings.Contains(err.Error(), "not allowed") {
+		t.Fatalf("expected disallowed domain error, got %v", err)
+	}
+	if matched, err := matchesAnyDomainPattern("api.example.com", []string{"*.example.com"}); err != nil || !matched {
+		t.Fatalf("wildcard match = %v, %v", matched, err)
+	}
+	if matched, err := matchesAnyDomainPattern("example.com", []string{"*.example.com"}); err != nil || matched {
+		t.Fatalf("wildcard root match = %v, %v", matched, err)
+	}
+	if _, err := matchesAnyDomainPattern("example.com", []string{"bad/domain"}); err == nil {
+		t.Fatalf("expected invalid domain pattern")
 	}
 }
 
@@ -153,4 +188,17 @@ func TestSchemaCacheFetchTimeout(t *testing.T) {
 	if _, err := cache.Load(server.URL + "/slow.json"); err == nil {
 		t.Fatalf("expected fetch timeout")
 	}
+}
+
+func mustURLHost(t *testing.T, raw string) string {
+	t.Helper()
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		t.Fatalf("parse %s: %v", raw, err)
+	}
+	host := parsed.Hostname()
+	if ip := net.ParseIP(host); ip != nil {
+		return ip.String()
+	}
+	return host
 }

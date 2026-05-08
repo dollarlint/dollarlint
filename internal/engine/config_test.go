@@ -68,6 +68,11 @@ func TestLoadConfigDefaultsAndFormats(t *testing.T) {
 version: 1
 schema:
   fetchRemote: false
+  fetchSchemaStore: false
+  allowedDomains:
+    - schemas.example.com
+  blockedDomains:
+    - bad.example.com
   maxDepth: 3
 timeouts:
   fetch: 2s
@@ -82,8 +87,11 @@ ignore:
 	if filepath.Base(path) != ".dollarlint.yaml" {
 		t.Fatalf("path = %s", path)
 	}
-	if remoteFetchEnabled(cfg.Schema) || cfg.Schema.MaxDepth != 3 || cfg.Timeouts.Fetch.Duration != 2*time.Second {
+	if remoteFetchEnabled(cfg.Schema) || schemaStoreFetchEnabled(cfg.Schema) || cfg.Schema.MaxDepth != 3 || cfg.Timeouts.Fetch.Duration != 2*time.Second {
 		t.Fatalf("yaml cfg not decoded/defaulted: %+v", cfg)
+	}
+	if len(cfg.Schema.AllowedDomains) != 1 || cfg.Schema.AllowedDomains[0] != "schemas.example.com" || len(cfg.Schema.BlockedDomains) != 1 {
+		t.Fatalf("domain policy not decoded: %+v", cfg.Schema)
 	}
 	if len(cfg.Discovery.Include) == 0 || len(cfg.Ignore) != 1 {
 		t.Fatalf("defaults or ignore missing: %+v", cfg)

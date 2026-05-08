@@ -24,10 +24,14 @@ type DiscoveryConfig struct {
 }
 
 type SchemaConfig struct {
-	Associations []SchemaAssociation `json:"associations,omitempty" yaml:"associations,omitempty" toml:"associations,omitempty"`
-	MaxDepth     int                 `json:"maxDepth,omitempty" yaml:"maxDepth,omitempty" toml:"maxDepth,omitempty"`
-	FetchRemote  *bool               `json:"fetchRemote,omitempty" yaml:"fetchRemote,omitempty" toml:"fetchRemote,omitempty"`
-	Concurrency  int                 `json:"concurrency,omitempty" yaml:"concurrency,omitempty" toml:"concurrency,omitempty"`
+	Associations          []SchemaAssociation `json:"associations,omitempty" yaml:"associations,omitempty" toml:"associations,omitempty"`
+	MaxDepth              int                 `json:"maxDepth,omitempty" yaml:"maxDepth,omitempty" toml:"maxDepth,omitempty"`
+	FetchRemote           *bool               `json:"fetchRemote,omitempty" yaml:"fetchRemote,omitempty" toml:"fetchRemote,omitempty"`
+	FetchSchemaStore      *bool               `json:"fetchSchemaStore,omitempty" yaml:"fetchSchemaStore,omitempty" toml:"fetchSchemaStore,omitempty"`
+	SchemaStoreCatalogURL string              `json:"schemaStoreCatalogUrl,omitempty" yaml:"schemaStoreCatalogUrl,omitempty" toml:"schemaStoreCatalogUrl,omitempty"`
+	AllowedDomains        []string            `json:"allowedDomains,omitempty" yaml:"allowedDomains,omitempty" toml:"allowedDomains,omitempty"`
+	BlockedDomains        []string            `json:"blockedDomains,omitempty" yaml:"blockedDomains,omitempty" toml:"blockedDomains,omitempty"`
+	Concurrency           int                 `json:"concurrency,omitempty" yaml:"concurrency,omitempty" toml:"concurrency,omitempty"`
 }
 
 type SchemaAssociation struct {

@@ -15,6 +15,10 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 )
 
+// maxSchemaResponseBytes caps the size of a single schema fetched over HTTP
+// to avoid unbounded memory growth from misbehaving or hostile servers.
+const maxSchemaResponseBytes = 64 * 1024 * 1024
+
 type SchemaCache struct {
 	cfg     Config
 	client  *http.Client
@@ -22,10 +26,13 @@ type SchemaCache struct {
 	entries map[string]*schemaEntry
 }
 
+// schemaEntry serializes loads of a single URI and caches successful results.
+// Errors are intentionally not cached: a transient network failure should not
+// permanently poison the cache for the lifetime of the process.
 type schemaEntry struct {
-	once sync.Once
-	doc  any
-	err  error
+	mu     sync.Mutex
+	loaded bool
+	doc    any
 }
 
 func NewSchemaCache(cfg Config) *SchemaCache {
@@ -65,13 +72,18 @@ func (c *SchemaCache) LoadContext(ctx context.Context, raw string) (any, error) 
 		return nil, fmt.Errorf("normalize schema URI %s: %w", raw, err)
 	}
 	entry := c.entry(key)
-	entry.once.Do(func() {
-		entry.doc, entry.err = c.loadUncached(ctx, key)
-	})
-	if entry.err != nil {
-		return nil, entry.err
+	entry.mu.Lock()
+	defer entry.mu.Unlock()
+	if entry.loaded {
+		return entry.doc, nil
 	}
-	return entry.doc, nil
+	doc, err := c.loadUncached(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	entry.doc = doc
+	entry.loaded = true
+	return doc, nil
 }
 
 func (c *SchemaCache) Prime(ctx context.Context, roots []string) error {
@@ -121,6 +133,9 @@ func (c *SchemaCache) loadAndDiscover(ctx context.Context, uris []string) ([]str
 	workers := c.cfg.Schema.Concurrency
 	if workers < 1 {
 		workers = 1
+	}
+	if workers > len(uris) {
+		workers = len(uris)
 	}
 	jobs := make(chan string)
 	results := make(chan result, len(uris))
@@ -192,9 +207,12 @@ func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error)
 		if resp.StatusCode < 200 || resp.StatusCode > 299 {
 			return nil, fmt.Errorf("fetch schema %s: HTTP %d", raw, resp.StatusCode)
 		}
-		data, err := io.ReadAll(resp.Body)
+		data, err := io.ReadAll(io.LimitReader(resp.Body, maxSchemaResponseBytes+1))
 		if err != nil {
 			return nil, fmt.Errorf("read schema response %s: %w", raw, err)
+		}
+		if len(data) > maxSchemaResponseBytes {
+			return nil, fmt.Errorf("fetch schema %s: response exceeds %d bytes", raw, maxSchemaResponseBytes)
 		}
 		return decodeSchemaDocument(data, parsed.Path)
 	default:
@@ -242,12 +260,10 @@ func discoverSchemaReferences(doc any, baseURI string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	var refs []string
-	walkSchemaReferences(doc, base, &refs)
-	return uniqueStrings(refs), nil
+	return uniqueStrings(walkSchemaReferences(doc, base, nil)), nil
 }
 
-func walkSchemaReferences(value any, base *url.URL, refs *[]string) {
+func walkSchemaReferences(value any, base *url.URL, refs []string) []string {
 	switch typed := value.(type) {
 	case map[string]any:
 		nextBase := base
@@ -258,34 +274,35 @@ func walkSchemaReferences(value any, base *url.URL, refs *[]string) {
 		}
 		for _, key := range []string{"$ref", "$dynamicRef", "$recursiveRef"} {
 			if ref, ok := typed[key].(string); ok {
-				addResolvedReference(ref, nextBase, refs)
+				refs = appendResolvedReference(refs, ref, nextBase)
 			}
 		}
 		for _, child := range typed {
-			walkSchemaReferences(child, nextBase, refs)
+			refs = walkSchemaReferences(child, nextBase, refs)
 		}
 	case []any:
 		for _, child := range typed {
-			walkSchemaReferences(child, base, refs)
+			refs = walkSchemaReferences(child, base, refs)
 		}
 	}
+	return refs
 }
 
-func addResolvedReference(ref string, base *url.URL, refs *[]string) {
+func appendResolvedReference(refs []string, ref string, base *url.URL) []string {
 	ref = strings.TrimSpace(ref)
 	if ref == "" || strings.HasPrefix(ref, "#") {
-		return
+		return refs
 	}
 	parsed, err := url.Parse(ref)
 	if err != nil {
-		return
+		return refs
 	}
 	resolved := base.ResolveReference(parsed)
 	resolved.Fragment = ""
 	if resolved.String() == withoutFragmentMust(base.String()) {
-		return
+		return refs
 	}
-	*refs = append(*refs, resolved.String())
+	return append(refs, resolved.String())
 }
 
 func withoutFragmentMust(raw string) string {
@@ -297,13 +314,16 @@ func withoutFragmentMust(raw string) string {
 }
 
 func uniqueStrings(values []string) []string {
-	seen := map[string]bool{}
-	var out []string
+	seen := make(map[string]struct{}, len(values))
+	out := make([]string, 0, len(values))
 	for _, value := range values {
-		if value == "" || seen[value] {
+		if value == "" {
 			continue
 		}
-		seen[value] = true
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
 		out = append(out, value)
 	}
 	return out

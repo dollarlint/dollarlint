@@ -141,12 +141,22 @@ func tokenStartOffset(raw []byte, end int, token any) int {
 		}
 	default:
 		for i := end - 1; i >= 0; i-- {
-			if unicode.IsSpace(rune(raw[i])) || strings.ContainsRune("{[,:", rune(raw[i])) {
+			if isJSONTokenBoundary(raw[i]) {
 				return i + 1
 			}
 		}
 	}
 	return 0
+}
+
+// isJSONTokenBoundary reports whether b is ASCII whitespace or a JSON
+// structural character that can precede a primitive value.
+func isJSONTokenBoundary(b byte) bool {
+	switch b {
+	case ' ', '\t', '\n', '\r', '\v', '\f', '{', '[', ',', ':':
+		return true
+	}
+	return false
 }
 
 func buildYAMLSourceMap(raw []byte) (SourceMap, error) {
@@ -434,12 +444,10 @@ func positionAtOffset(lineStarts []int, offset int) SourcePosition {
 	if offset < 0 {
 		offset = 0
 	}
-	line := 0
-	for i := len(lineStarts) - 1; i >= 0; i-- {
-		if lineStarts[i] <= offset {
-			line = i
-			break
-		}
+	// lineStarts is sorted ascending; find the greatest index whose start <= offset.
+	line := sort.SearchInts(lineStarts, offset+1) - 1
+	if line < 0 {
+		line = 0
 	}
 	return SourcePosition{Line: line + 1, Column: offset - lineStarts[line] + 1}
 }

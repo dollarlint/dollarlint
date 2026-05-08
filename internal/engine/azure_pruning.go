@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -327,7 +328,11 @@ func cloneJSONValue(value any) any {
 	if err != nil {
 		return value
 	}
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber()
 	var cloned any
-	_ = json.Unmarshal(data, &cloned)
+	if err := decoder.Decode(&cloned); err != nil {
+		return value
+	}
 	return cloned
 }

@@ -26,6 +26,21 @@ type Document struct {
 	Schema       string
 	SchemaSource string
 	SourceMap    SourceMap
+
+	azureRefs         []azureARMResourceRef
+	azureRefsComputed bool
+}
+
+// azureResourceRefs returns the Azure ARM resource refs declared by this
+// document, computing them lazily and caching the result. Safe to call
+// repeatedly during a single Lint pass (Documents are not shared across
+// goroutines).
+func (d *Document) azureResourceRefs() []azureARMResourceRef {
+	if !d.azureRefsComputed {
+		d.azureRefs = collectAzureARMResourceRefs(d.Data)
+		d.azureRefsComputed = true
+	}
+	return d.azureRefs
 }
 
 func ParseDocument(file DiscoveredFile) (*Document, error) {

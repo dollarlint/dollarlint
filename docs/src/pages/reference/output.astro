@@ -46,13 +46,12 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues in 180ms</code></pre>
     <pre><code>[output]
 branchErrors = "best"</code></pre>
     <p>
-      Schemas that use <code>oneOf</code> or <code>anyOf</code> can produce many
-      mutually exclusive branch failures for one bad value. By default,
-      dollarlint reports the closest matching branch so the issue list stays
-      focused. Set <code>output.branchErrors = "all"</code> in <code
-        >.dollarlint.toml</code
-      > when you need every failed branch leaf for schema debugging or exact
-      validator inspection.
+      Schemas that use <code>oneOf</code> or <code>anyOf</code> can produce many mutually
+      exclusive branch failures for one bad value. By default, dollarlint reports
+      the closest matching branch so the issue list stays focused. Set <code
+        >output.branchErrors = "all"</code
+      > in <code>.dollarlint.toml</code> when you need every failed branch leaf for
+      schema debugging or exact validator inspection.
     </p>
 
     <h2>SARIF</h2>

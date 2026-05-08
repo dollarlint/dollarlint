@@ -51,7 +51,7 @@ jobs:
 
       - name: Check Go formatting
         run: |
-          unformatted="$(gofmt -l $(find . -name '*.go' -not -path './vendor/*'))"
+          unformatted="$(find . -name '*.go' -not -path './vendor/*' -print0 | xargs -0 gofmt -l)"
           if [ -n "$unformatted" ]; then
             echo "Go files need gofmt:"
             echo "$unformatted"

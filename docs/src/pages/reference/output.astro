@@ -7,29 +7,38 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <header class="doc-header">
       <span class="eyebrow">Reference</span>
       <h1>Output formats</h1>
-      <p class="lead">Use text output locally, JSON for scripts, and SARIF for code scanning systems.</p>
+      <p class="lead">Text for local work, JSON for scripts, SARIF for code scanning — three formats, each worth its weight.</p>
     </header>
 
     <h2>Text</h2>
-    <pre><code>dollarlint found 2 issues in 1 file after 47ms
+    <pre><code>dollarlint found 8 issues in 3 files after 180ms
 
-settings.json
-  /name   type      expected string, received number
-  /count  minimum   must be >= 1
+invalid.json
+  1:1       required              must have required property "enabled"      /
+  3:11      type                  expected string, received number           /name
 
-Summary: 4 discovered, 3 validated, 1 skipped, 2 issues in 47ms</code></pre>
+invalid.toml
+  4:11      type                  expected boolean, received string          /enabled
+
+skipped: no-schema.json (no schema)
+
+Summary: 8 discovered, 7 validated, 1 skipped, 8 issues in 180ms</code></pre>
 
     <h2>Text with locations</h2>
     <pre><code>settings.json
   3:11  type      expected string, received number  /name
   4:12  minimum   must be >= 1   /count</code></pre>
+    <p>Without <code>--locations</code>, the first column is the JSON Pointer location instead of a line and column.</p>
 
     <h2>JSON</h2>
-    <pre><code>dollarlint validate . --json</code></pre>
-    <p>JSON output includes the run root, summary counts, per-file results, issues, warnings, schema locations, and optional source positions.</p>
+    <pre><code>dollarlint validate . --format json</code></pre>
+    <p>JSON output gives you the full accounting: run root, summary counts, duration, per-file results, issues, warnings, schema locations, and optional source positions.</p>
 
     <h2>SARIF</h2>
-    <pre><code>dollarlint validate . --sarif &gt; dollarlint.sarif</code></pre>
-    <p>SARIF output targets GitHub code scanning and similar tools. Source locations are best-effort and fall back to the nearest file or parent object when a precise range is not available.</p>
+    <pre><code>dollarlint validate . --format sarif --output dollarlint.sarif</code></pre>
+    <p>SARIF output is built for GitHub code scanning and similar tools. SARIF is generated only when <code>--format sarif</code> is requested. Source locations are best-effort: when a precise range isn't available, dollarlint falls back to the nearest file or parent object.</p>
+
+    <h2>Warnings</h2>
+    <p>Warnings are separate from validation issues. For example, a catalog failure with <code>schemas.catalogs.failure = "warn"</code> appears as a warning while explicit and configured schemas continue validating.</p>
   </article>
 </DocsLayout>

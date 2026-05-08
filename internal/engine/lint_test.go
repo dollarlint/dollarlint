@@ -35,7 +35,7 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "skip.yaml"), `name: no schema`)
 	writeFile(t, filepath.Join(dir, "associated.toml"), `name = 42`)
 	cfg := configWithoutSchemaStore()
-	cfg.Schema.Associations = []SchemaAssociation{{File: "*.toml", Schema: "./schema.json"}}
+	cfg.Schemas.Associations = []SchemaAssociation{{File: "*.toml", Schema: "./schema.json"}}
 	cfg.Ignore = []IgnoreRule{{File: "invalid.json", Keyword: "additionalProperties", Property: "extra", Reason: "known extra"}}
 	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
 	if err != nil {
@@ -78,25 +78,24 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	}
 }
 
-func TestLintOnlyBuildsSourceLocationsForSARIF(t *testing.T) {
+func TestLintOnlyBuildsRequestedSourceLocations(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["name"],"properties":{"$schema":{"type":"string"},"name":{"type":"string"}}}`)
 	writeFile(t, filepath.Join(dir, "bad.json"), `{"$schema":"./schema.json"}`)
 	result, err := Lint(context.Background(), Options{Root: dir, Config: configWithoutSchemaStore()})
 	if err != nil {
-		t.Fatalf("Lint without sarif: %v", err)
+		t.Fatalf("Lint without source locations: %v", err)
 	}
 	if len(result.Issues) != 1 || result.Issues[0].Line != 0 || result.Issues[0].Column != 0 {
-		t.Fatalf("non-SARIF issue should not have source location: %+v", result.Issues)
+		t.Fatalf("issue should not have source location by default: %+v", result.Issues)
 	}
 	cfg := DefaultConfig()
-	cfg.Output.SARIF = true
-	result, err = Lint(context.Background(), Options{Root: dir, Config: cfg})
+	result, err = Lint(context.Background(), Options{Root: dir, Config: cfg, SourceLocations: true})
 	if err != nil {
-		t.Fatalf("Lint with sarif: %v", err)
+		t.Fatalf("Lint with source locations: %v", err)
 	}
 	if len(result.Issues) != 1 || result.Issues[0].Line == 0 || result.Issues[0].Column == 0 {
-		t.Fatalf("SARIF issue should have source location: %+v", result.Issues)
+		t.Fatalf("issue should have source location when requested: %+v", result.Issues)
 	}
 }
 
@@ -164,8 +163,8 @@ func TestCompileSchemaTimeout(t *testing.T) {
 		t.Fatalf("fileURL: %v", err)
 	}
 	cfg := DefaultConfig()
-	cfg.Timeouts.Compile = NewDuration(time.Millisecond)
-	cfg.Timeouts.Fetch = NewDuration(time.Second)
+	cfg.Schemas.Compile.Timeout = NewDuration(time.Millisecond)
+	cfg.Schemas.Fetch.Timeout = NewDuration(time.Second)
 	cache := NewSchemaCache(cfg)
 	_, err = compileSchema(context.Background(), cache, cfg, schemaURL.String(), nil)
 	if err == nil {
@@ -266,8 +265,8 @@ func TestLintAppliesSchemaStoreAssociationsWhenEnabled(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "example.yaml"), `name: 42`)
 	cfg := DefaultConfig()
-	cfg.Schema.SchemaStore.Enabled = true
-	cfg.Schema.SchemaStore.URL = server.URL + "/catalog.json"
+	cfg.Schemas.Catalogs.Enabled = true
+	cfg.Schemas.Catalogs.Sources = []CatalogSource{{Name: "schemastore", Format: "schemastore", URL: server.URL + "/catalog.json"}}
 	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
 	if err != nil {
 		t.Fatalf("Lint: %v", err)
@@ -293,7 +292,7 @@ func TestLintCanDisableSchemaStoreAssociations(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "example.yaml"), `name: 42`)
 	cfg := DefaultConfig()
-	cfg.Schema.SchemaStore.URL = server.URL
+	cfg.Schemas.Catalogs.Sources = []CatalogSource{{Name: "schemastore", Format: "schemastore", URL: server.URL}}
 	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
 	if err != nil {
 		t.Fatalf("Lint: %v", err)

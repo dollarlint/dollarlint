@@ -61,52 +61,69 @@ func TestLoadConfigDefaultsAndTOML(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadConfig no file: %v", err)
 	}
-	if path != "" || cfg.Version != 1 || !remoteFetchEnabled(cfg.Schema) {
+	if path != "" || cfg.Version != 1 || !remoteFetchEnabled(cfg.Schemas) {
 		t.Fatalf("unexpected defaults: path=%q cfg=%+v", path, cfg)
 	}
-	writeFile(t, filepath.Join(dir, ".dollarlint.yaml"), "output:\n  json: true\n")
+	if configSearchRoot("") != "." {
+		t.Fatalf("empty config search root should resolve to current directory")
+	}
+	writeFile(t, filepath.Join(dir, ".dollarlint.yaml"), "output:\n  showSkipped: true\n")
 	cfg, path, err = LoadConfig(dir, "")
 	if err != nil {
 		t.Fatalf("LoadConfig ignored yaml: %v", err)
 	}
-	if path != "" || cfg.Output.JSON {
+	if path != "" || cfg.Output.ShowSkipped {
 		t.Fatalf("non-toml config should be ignored: path=%q cfg=%+v", path, cfg)
 	}
-	writeFile(t, filepath.Join(dir, "dollarlint.toml"), "output = { json = true }\n")
+	writeFile(t, filepath.Join(dir, "dollarlint.toml"), "output = { showSkipped = true }\n")
 	cfg, path, err = LoadConfig(dir, "")
 	if err != nil {
 		t.Fatalf("LoadConfig ignored no-dot toml: %v", err)
 	}
-	if path != "" || cfg.Output.JSON {
+	if path != "" || cfg.Output.ShowSkipped {
 		t.Fatalf("no-dot toml config should be ignored: path=%q cfg=%+v", path, cfg)
 	}
 	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), `
 version = 1
 
+[discovery]
+include = ["*.json"]
+extendExclude = ["generated/**"]
+useDefaultExcludes = false
+respectGitIgnore = false
+forceExclude = true
+followSymlinks = true
+
 [schemas]
-fetchRemote = false
-allowedDomains = ["schemas.example.com"]
-blockedDomains = ["bad.example.com"]
-azureResourcePruning = false
 maxDepth = 3
 
+[schemas.optimizations]
+enabled = true
+
+[schemas.optimizations.azure]
+pruneResources = false
+
 [schemas.fetch]
+enabled = false
+timeout = "2s"
 retries = 4
 retryMinWait = "100ms"
 retryMaxWait = "1s"
+allowedDomains = ["schemas.example.com"]
+blockedDomains = ["bad.example.com"]
 
 [schemas.catalogs]
 enabled = true
 failure = "skip"
-strict = true
 
 [[schemas.catalogs.sources]]
 name = "company"
 format = "schemastore"
 path = "./catalog.json"
 
-[timeouts]
-fetch = "2s"
+[output]
+showSkipped = true
+locations = true
 
 [[ignore]]
 file = "*.json"
@@ -119,22 +136,47 @@ keyword = "type"
 	if filepath.Base(path) != ".dollarlint.toml" {
 		t.Fatalf("path = %s", path)
 	}
-	if remoteFetchEnabled(cfg.Schema) || cfg.Schema.MaxDepth != 3 || cfg.Timeouts.Fetch.Duration != 2*time.Second {
+	fileRoot := filepath.Join(dir, "settings.json")
+	writeFile(t, fileRoot, `{}`)
+	fileCfg, filePath, err := LoadConfig(fileRoot, "")
+	if err != nil {
+		t.Fatalf("LoadConfig file root: %v", err)
+	}
+	if filePath != path || !fileCfg.Output.ShowSkipped {
+		t.Fatalf("file-root config path=%q cfg=%+v", filePath, fileCfg)
+	}
+	fileCfg, filePath, err = LoadConfig(fileRoot, ".dollarlint.toml")
+	if err != nil {
+		t.Fatalf("LoadConfig file root explicit config: %v", err)
+	}
+	if filePath != path || !fileCfg.Output.ShowSkipped {
+		t.Fatalf("file-root explicit config path=%q cfg=%+v", filePath, fileCfg)
+	}
+	if remoteFetchEnabled(cfg.Schemas) || cfg.Schemas.MaxDepth != 3 || cfg.Schemas.Fetch.Timeout.Duration != 2*time.Second {
 		t.Fatalf("toml cfg not decoded/defaulted: %+v", cfg)
 	}
-	if !cfg.Schema.Catalogs.Enabled || cfg.Schema.Catalogs.Failure != "skip" || !cfg.Schema.Catalogs.Strict || len(cfg.Schema.Catalogs.Sources) != 1 || cfg.Schema.Catalogs.Sources[0].Path != "./catalog.json" {
-		t.Fatalf("catalogs not decoded: %+v", cfg.Schema.Catalogs)
+	if !cfg.Schemas.Catalogs.Enabled || cfg.Schemas.Catalogs.Failure != "skip" || len(cfg.Schemas.Catalogs.Sources) != 1 || cfg.Schemas.Catalogs.Sources[0].Path != "./catalog.json" {
+		t.Fatalf("catalogs not decoded: %+v", cfg.Schemas.Catalogs)
 	}
-	if fetchRetries(cfg.Schema.Fetch) != 4 || cfg.Schema.Fetch.RetryMinWait.Duration != 100*time.Millisecond || cfg.Schema.Fetch.RetryMaxWait.Duration != time.Second {
-		t.Fatalf("fetch resilience config not decoded: %+v", cfg.Schema.Fetch)
+	if fetchRetries(cfg.Schemas.Fetch) != 4 || cfg.Schemas.Fetch.RetryMinWait.Duration != 100*time.Millisecond || cfg.Schemas.Fetch.RetryMaxWait.Duration != time.Second {
+		t.Fatalf("fetch resilience config not decoded: %+v", cfg.Schemas.Fetch)
 	}
-	if len(cfg.Schema.AllowedDomains) != 1 || cfg.Schema.AllowedDomains[0] != "schemas.example.com" || len(cfg.Schema.BlockedDomains) != 1 {
-		t.Fatalf("domain policy not decoded: %+v", cfg.Schema)
+	if len(cfg.Schemas.Fetch.AllowedDomains) != 1 || cfg.Schemas.Fetch.AllowedDomains[0] != "schemas.example.com" || len(cfg.Schemas.Fetch.BlockedDomains) != 1 {
+		t.Fatalf("domain policy not decoded: %+v", cfg.Schemas)
 	}
-	if cfg.Schema.AzureResourcePruning == nil || *cfg.Schema.AzureResourcePruning {
-		t.Fatalf("Azure resource pruning opt-out not decoded: %+v", cfg.Schema)
+	if cfg.Schemas.Optimizations.Azure.PruneResources == nil || *cfg.Schemas.Optimizations.Azure.PruneResources {
+		t.Fatalf("Azure resource pruning opt-out not decoded: %+v", cfg.Schemas)
 	}
-	if len(cfg.Discovery.Include) == 0 || len(cfg.Ignore) != 1 {
+	if !cfg.Output.ShowSkipped || !cfg.Output.Locations {
+		t.Fatalf("output preferences not decoded: %+v", cfg.Output)
+	}
+	if len(cfg.Discovery.Include) != 1 || cfg.Discovery.Include[0] != "*.json" || len(cfg.Discovery.ExtendExclude) != 1 || cfg.Discovery.ExtendExclude[0] != "generated/**" {
+		t.Fatalf("discovery config not decoded: %+v", cfg.Discovery)
+	}
+	if discoveryUseDefaultExcludes(cfg.Discovery) || discoveryRespectGitIgnore(cfg.Discovery) || !cfg.Discovery.ForceExclude || !cfg.Discovery.FollowSymlinks {
+		t.Fatalf("discovery booleans not decoded: %+v", cfg.Discovery)
+	}
+	if len(cfg.Ignore) != 1 {
 		t.Fatalf("defaults or ignore missing: %+v", cfg)
 	}
 	customPath := filepath.Join(dir, "nested", ".dollarlint.toml")
@@ -150,25 +192,25 @@ schema = "./schema.json"
 	if err != nil {
 		t.Fatalf("LoadConfig explicit toml: %v", err)
 	}
-	if path != customPath || cfg.Schema.MaxDepth != 4 || len(cfg.Schema.Associations) != 1 {
+	if path != customPath || cfg.Schemas.MaxDepth != 4 || len(cfg.Schemas.Associations) != 1 {
 		t.Fatalf("toml cfg = %s %+v", path, cfg)
 	}
-	if cfg.Schema.Catalogs.Sources[0].URL != defaultSchemaStoreCatalogURL {
-		t.Fatalf("catalog default URL = %q", cfg.Schema.Catalogs.Sources[0].URL)
+	if cfg.Schemas.Catalogs.Sources[0].URL != defaultSchemaStoreCatalogURL {
+		t.Fatalf("catalog default URL = %q", cfg.Schemas.Catalogs.Sources[0].URL)
 	}
-	if fetchRetries(cfg.Schema.Fetch) != 2 {
-		t.Fatalf("fetch retry default = %+v", cfg.Schema.Fetch)
+	if fetchRetries(cfg.Schemas.Fetch) != 2 {
+		t.Fatalf("fetch retry default = %+v", cfg.Schemas.Fetch)
 	}
-	if mode, err := schemaStoreFailureMode(cfg.Schema); err != nil || mode != SchemaStoreFailureWarn {
-		t.Fatalf("schemaStore failure default = %q, %v", mode, err)
+	if mode, err := catalogFailureMode(cfg.Schemas); err != nil || mode != CatalogFailureWarn {
+		t.Fatalf("catalog failure default = %q, %v", mode, err)
 	}
-	if mode, err := schemaStoreFailureMode(SchemaConfig{Catalogs: CatalogConfig{Failure: SchemaStoreFailureSkip}}); err != nil || mode != SchemaStoreFailureSkip {
+	if mode, err := catalogFailureMode(SchemaConfig{Catalogs: CatalogConfig{Failure: CatalogFailureSkip}}); err != nil || mode != CatalogFailureSkip {
 		t.Fatalf("catalog failure skip = %q, %v", mode, err)
 	}
-	if mode, err := schemaStoreFailureMode(SchemaConfig{Catalogs: CatalogConfig{Failure: SchemaStoreFailureWarn, Strict: true}}); err != nil || mode != SchemaStoreFailureError {
-		t.Fatalf("catalog strict mode = %q, %v", mode, err)
+	if mode, err := catalogFailureMode(SchemaConfig{Catalogs: CatalogConfig{Failure: CatalogFailureError}}); err != nil || mode != CatalogFailureError {
+		t.Fatalf("catalog failure error = %q, %v", mode, err)
 	}
-	if _, err := schemaStoreFailureMode(SchemaConfig{Catalogs: CatalogConfig{Failure: "explode"}}); err == nil {
+	if _, err := catalogFailureMode(SchemaConfig{Catalogs: CatalogConfig{Failure: "explode"}}); err == nil {
 		t.Fatalf("expected invalid catalog failure mode error")
 	}
 	if fetchRetries(FetchConfig{}) != 0 {
@@ -177,37 +219,6 @@ schema = "./schema.json"
 	negativeRetries := -1
 	if fetchRetries(FetchConfig{Retries: &negativeRetries}) != 0 {
 		t.Fatalf("negative fetch retries should resolve to zero")
-	}
-	legacy := Config{Schema: SchemaConfig{SchemaStoreCatalogURL: "./legacy-catalog.json"}}
-	legacyEnabled := true
-	disabled := false
-	legacy.Schema.FetchSchemaStore = &legacyEnabled
-	legacy.ApplyDefaults()
-	if legacy.Schema.SchemaStore.URL != "./legacy-catalog.json" || !legacy.Schema.SchemaStore.Enabled {
-		t.Fatalf("legacy schemastore config not defaulted: %+v", legacy.Schema)
-	}
-	if !legacy.Schema.Catalogs.Enabled || legacy.Schema.Catalogs.Sources[0].URL != "./legacy-catalog.json" {
-		t.Fatalf("legacy catalog config not defaulted: %+v", legacy.Schema.Catalogs)
-	}
-	legacySchemas := Config{
-		Schema:  SchemaConfig{FetchSchemaStore: &disabled},
-		Schemas: SchemaConfig{FetchSchemaStore: &legacyEnabled},
-	}
-	legacySchemas.ApplyDefaults()
-	if legacySchemas.Schema.FetchSchemaStore == nil || !*legacySchemas.Schema.FetchSchemaStore {
-		t.Fatalf("plural schemas alias should override legacy schema field: %+v", legacySchemas.Schema)
-	}
-	appendDefault := Config{
-		Schema: SchemaConfig{
-			SchemaStore: SchemaStoreConfig{URL: "./appended-catalog.json"},
-			Catalogs: CatalogConfig{
-				Sources: []CatalogSource{{Name: "custom", Format: "custom", URL: "./custom-catalog.json"}},
-			},
-		},
-	}
-	appendDefault.ApplyDefaults()
-	if len(appendDefault.Schema.Catalogs.Sources) != 2 || appendDefault.Schema.Catalogs.Sources[1].URL != "./appended-catalog.json" {
-		t.Fatalf("legacy schemastore URL should append default catalog source: %+v", appendDefault.Schema.Catalogs.Sources)
 	}
 }
 

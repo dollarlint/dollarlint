@@ -15,15 +15,15 @@ func checkRemoteDomainPolicy(raw string, cfg SchemaConfig) error {
 	if err != nil {
 		return err
 	}
-	if matched, err := matchesAnyDomainPattern(host, cfg.BlockedDomains); err != nil {
+	if matched, err := matchesAnyDomainPattern(host, cfg.Fetch.BlockedDomains); err != nil {
 		return err
 	} else if matched {
 		return fmt.Errorf("remote schema domain %q is blocked by configuration", host)
 	}
-	if countNonEmptyDomains(cfg.AllowedDomains) == 0 {
+	if countNonEmptyDomains(cfg.Fetch.AllowedDomains) == 0 {
 		return nil
 	}
-	if matched, err := matchesAnyDomainPattern(host, cfg.AllowedDomains); err != nil {
+	if matched, err := matchesAnyDomainPattern(host, cfg.Fetch.AllowedDomains); err != nil {
 		return err
 	} else if !matched {
 		return fmt.Errorf("remote schema domain %q is not allowed by configuration", host)

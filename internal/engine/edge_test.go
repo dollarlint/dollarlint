@@ -66,7 +66,7 @@ func TestDiscoveryDefaultRootAndWalkError(t *testing.T) {
 func TestSchemaCacheEdgeBranches(t *testing.T) {
 	cfg := DefaultConfig()
 	cache := NewSchemaCache(cfg)
-	cache.cfg.Schema.Concurrency = 0
+	cache.cfg.Schemas.Concurrency = 0
 	if _, err := cache.loadAndDiscover(context.Background(), nil); err != nil {
 		t.Fatalf("empty loadAndDiscover: %v", err)
 	}
@@ -110,7 +110,7 @@ func TestPrimeDepthAndCycleEdges(t *testing.T) {
 		t.Fatalf("fileURL a: %v", err)
 	}
 	cfg := DefaultConfig()
-	cfg.Schema.MaxDepth = -1
+	cfg.Schemas.MaxDepth = -1
 	cache := NewSchemaCache(cfg)
 	if err := cache.Prime(context.Background(), []string{aURL.String()}); err == nil {
 		t.Fatalf("expected depth error")

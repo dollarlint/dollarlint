@@ -16,7 +16,11 @@ var defaultConfigFiles = []string{
 }
 
 func DefaultConfig() Config {
-	fetchRemote := true
+	useDefaultExcludes := true
+	respectGitIgnore := true
+	fetchEnabled := true
+	optimizationsEnabled := true
+	azureResourcePruning := true
 	retries := 2
 	return Config{
 		Version: 1,
@@ -27,162 +31,85 @@ func DefaultConfig() Config {
 				"*.yml", "**/*.yml",
 				"*.toml", "**/*.toml",
 			},
-			Exclude: []string{
-				".git", "**/.git/**",
-				".hg", "**/.hg/**",
-				".svn", "**/.svn/**",
-				"node_modules", "**/node_modules/**",
-				"vendor", "**/vendor/**",
-				"dist", "**/dist/**",
-				"build", "**/build/**",
-				"coverage", "**/coverage/**",
-				".next", "**/.next/**",
-				".nuxt", "**/.nuxt/**",
-				".turbo", "**/.turbo/**",
-				".cache", "**/.cache/**",
-				".venv", "**/.venv/**",
-				"venv", "**/venv/**",
-				"target", "**/target/**",
-				"tmp", "**/tmp/**",
-			},
+			UseDefaultExcludes: &useDefaultExcludes,
+			RespectGitIgnore:   &respectGitIgnore,
 		},
-		Schema: SchemaConfig{
+		Schemas: SchemaConfig{
 			Catalogs: CatalogConfig{
 				Sources: []CatalogSource{defaultSchemaStoreCatalogSource()},
 			},
-			SchemaStore: SchemaStoreConfig{
-				URL: defaultSchemaStoreCatalogURL,
+			Optimizations: OptimizationConfig{
+				Enabled: &optimizationsEnabled,
+				Azure: AzureOptimization{
+					PruneResources: &azureResourcePruning,
+				},
 			},
 			Fetch: FetchConfig{
+				Enabled:      &fetchEnabled,
+				Timeout:      NewDuration(10 * time.Second),
 				Retries:      &retries,
 				RetryMinWait: NewDuration(250 * time.Millisecond),
 				RetryMaxWait: NewDuration(2 * time.Second),
 			},
+			Compile: CompileConfig{
+				Timeout: NewDuration(30 * time.Second),
+			},
 			MaxDepth:    8,
-			FetchRemote: &fetchRemote,
 			Concurrency: runtime.GOMAXPROCS(0),
-		},
-		Timeouts: TimeoutConfig{
-			Fetch:   NewDuration(10 * time.Second),
-			Compile: NewDuration(30 * time.Second),
 		},
 	}
 }
 
 func (c *Config) ApplyDefaults() {
 	defaults := DefaultConfig()
-	c.Schema = mergeSchemaConfig(c.Schema, c.Schemas)
-	c.Schemas = c.Schema
 	if c.Version == 0 {
 		c.Version = defaults.Version
 	}
 	if len(c.Discovery.Include) == 0 {
 		c.Discovery.Include = append([]string(nil), defaults.Discovery.Include...)
 	}
-	if len(c.Discovery.Exclude) == 0 {
-		c.Discovery.Exclude = append([]string(nil), defaults.Discovery.Exclude...)
+	if c.Discovery.UseDefaultExcludes == nil {
+		c.Discovery.UseDefaultExcludes = defaults.Discovery.UseDefaultExcludes
 	}
-	if c.Schema.MaxDepth == 0 {
-		c.Schema.MaxDepth = defaults.Schema.MaxDepth
+	if c.Discovery.RespectGitIgnore == nil {
+		c.Discovery.RespectGitIgnore = defaults.Discovery.RespectGitIgnore
 	}
-	if c.Schema.FetchRemote == nil {
-		c.Schema.FetchRemote = defaults.Schema.FetchRemote
+	if c.Schemas.MaxDepth == 0 {
+		c.Schemas.MaxDepth = defaults.Schemas.MaxDepth
 	}
-	if c.Schema.Catalogs.Failure == "" && c.Schema.SchemaStore.Failure != "" {
-		c.Schema.Catalogs.Failure = c.Schema.SchemaStore.Failure
+	if c.Schemas.Fetch.Enabled == nil {
+		c.Schemas.Fetch.Enabled = defaults.Schemas.Fetch.Enabled
 	}
-	if c.Schema.Catalogs.Strict || c.Schema.SchemaStore.Strict {
-		c.Schema.Catalogs.Strict = true
+	if c.Schemas.Optimizations.Enabled == nil {
+		c.Schemas.Optimizations.Enabled = defaults.Schemas.Optimizations.Enabled
 	}
-	if c.Schema.SchemaStoreCatalogURL != "" && c.Schema.SchemaStore.URL == "" {
-		c.Schema.SchemaStore.URL = c.Schema.SchemaStoreCatalogURL
+	if c.Schemas.Optimizations.Azure.PruneResources == nil {
+		c.Schemas.Optimizations.Azure.PruneResources = defaults.Schemas.Optimizations.Azure.PruneResources
 	}
-	if c.Schema.SchemaStore.URL == "" {
-		c.Schema.SchemaStore.URL = defaults.Schema.SchemaStore.URL
+	if c.Schemas.Catalogs.Failure == "" {
+		c.Schemas.Catalogs.Failure = CatalogFailureWarn
 	}
-	if c.Schema.SchemaStoreCatalogURL == "" {
-		c.Schema.SchemaStoreCatalogURL = c.Schema.SchemaStore.URL
+	if len(c.Schemas.Catalogs.Sources) == 0 {
+		c.Schemas.Catalogs.Sources = []CatalogSource{defaultSchemaStoreCatalogSource()}
 	}
-	if c.Schema.FetchSchemaStore != nil && *c.Schema.FetchSchemaStore {
-		c.Schema.SchemaStore.Enabled = true
+	if c.Schemas.Fetch.Retries == nil {
+		c.Schemas.Fetch.Retries = defaults.Schemas.Fetch.Retries
 	}
-	if c.Schema.SchemaStore.Enabled {
-		c.Schema.Catalogs.Enabled = true
+	if c.Schemas.Fetch.RetryMinWait.Duration == 0 {
+		c.Schemas.Fetch.RetryMinWait = defaults.Schemas.Fetch.RetryMinWait
 	}
-	if c.Schema.SchemaStore.Failure == "" {
-		c.Schema.SchemaStore.Failure = SchemaStoreFailureWarn
+	if c.Schemas.Fetch.RetryMaxWait.Duration == 0 {
+		c.Schemas.Fetch.RetryMaxWait = defaults.Schemas.Fetch.RetryMaxWait
 	}
-	if c.Schema.Catalogs.Failure == "" {
-		c.Schema.Catalogs.Failure = SchemaStoreFailureWarn
+	if c.Schemas.Fetch.Timeout.Duration == 0 {
+		c.Schemas.Fetch.Timeout = defaults.Schemas.Fetch.Timeout
 	}
-	if len(c.Schema.Catalogs.Sources) == 0 {
-		source := defaultSchemaStoreCatalogSource()
-		if c.Schema.SchemaStore.URL != "" {
-			source.URL = c.Schema.SchemaStore.URL
-		}
-		c.Schema.Catalogs.Sources = []CatalogSource{source}
-	} else if c.Schema.SchemaStore.URL != "" && c.Schema.SchemaStore.URL != defaultSchemaStoreCatalogURL {
-		c.Schema.Catalogs.Sources = setDefaultCatalogSourceURL(c.Schema.Catalogs.Sources, c.Schema.SchemaStore.URL)
+	if c.Schemas.Compile.Timeout.Duration == 0 {
+		c.Schemas.Compile.Timeout = defaults.Schemas.Compile.Timeout
 	}
-	if c.Schema.Fetch.Retries == nil {
-		c.Schema.Fetch.Retries = defaults.Schema.Fetch.Retries
+	if c.Schemas.Concurrency <= 0 {
+		c.Schemas.Concurrency = defaults.Schemas.Concurrency
 	}
-	if c.Schema.Fetch.RetryMinWait.Duration == 0 {
-		c.Schema.Fetch.RetryMinWait = defaults.Schema.Fetch.RetryMinWait
-	}
-	if c.Schema.Fetch.RetryMaxWait.Duration == 0 {
-		c.Schema.Fetch.RetryMaxWait = defaults.Schema.Fetch.RetryMaxWait
-	}
-	if c.Schema.Concurrency <= 0 {
-		c.Schema.Concurrency = defaults.Schema.Concurrency
-	}
-	if c.Timeouts.Fetch.Duration == 0 {
-		c.Timeouts.Fetch = defaults.Timeouts.Fetch
-	}
-	if c.Timeouts.Compile.Duration == 0 {
-		c.Timeouts.Compile = defaults.Timeouts.Compile
-	}
-	c.Schemas = c.Schema
-}
-
-func mergeSchemaConfig(legacy, current SchemaConfig) SchemaConfig {
-	if len(current.Associations) > 0 {
-		legacy.Associations = current.Associations
-	}
-	if current.Catalogs.Enabled || current.Catalogs.Failure != "" || current.Catalogs.Strict || len(current.Catalogs.Sources) > 0 {
-		legacy.Catalogs = current.Catalogs
-	}
-	if current.SchemaStore.Enabled || current.SchemaStore.URL != "" || current.SchemaStore.Failure != "" || current.SchemaStore.Strict {
-		legacy.SchemaStore = current.SchemaStore
-	}
-	if current.Fetch.Retries != nil || current.Fetch.RetryMinWait.Duration != 0 || current.Fetch.RetryMaxWait.Duration != 0 {
-		legacy.Fetch = current.Fetch
-	}
-	if current.MaxDepth != 0 {
-		legacy.MaxDepth = current.MaxDepth
-	}
-	if current.FetchRemote != nil {
-		legacy.FetchRemote = current.FetchRemote
-	}
-	if current.FetchSchemaStore != nil {
-		legacy.FetchSchemaStore = current.FetchSchemaStore
-	}
-	if current.AzureResourcePruning != nil {
-		legacy.AzureResourcePruning = current.AzureResourcePruning
-	}
-	if current.SchemaStoreCatalogURL != "" {
-		legacy.SchemaStoreCatalogURL = current.SchemaStoreCatalogURL
-	}
-	if len(current.AllowedDomains) > 0 {
-		legacy.AllowedDomains = current.AllowedDomains
-	}
-	if len(current.BlockedDomains) > 0 {
-		legacy.BlockedDomains = current.BlockedDomains
-	}
-	if current.Concurrency != 0 {
-		legacy.Concurrency = current.Concurrency
-	}
-	return legacy
 }
 
 func defaultSchemaStoreCatalogSource() CatalogSource {
@@ -193,21 +120,6 @@ func defaultSchemaStoreCatalogSource() CatalogSource {
 		URL:     defaultSchemaStoreCatalogURL,
 		Enabled: &enabled,
 	}
-}
-
-func setDefaultCatalogSourceURL(sources []CatalogSource, catalogURL string) []CatalogSource {
-	for i := range sources {
-		if sources[i].Name == "schemastore" || sources[i].Format == "schemastore" {
-			sources[i].Name = "schemastore"
-			sources[i].Format = "schemastore"
-			sources[i].URL = catalogURL
-			sources[i].Path = ""
-			return sources
-		}
-	}
-	source := defaultSchemaStoreCatalogSource()
-	source.URL = catalogURL
-	return append(sources, source)
 }
 
 func LoadConfig(root, explicitPath string) (Config, string, error) {
@@ -232,6 +144,7 @@ func LoadConfig(root, explicitPath string) (Config, string, error) {
 }
 
 func resolveConfigPath(root, explicitPath string) (string, error) {
+	root = configSearchRoot(root)
 	if explicitPath != "" {
 		path := explicitPath
 		if !filepath.IsAbs(path) {
@@ -256,6 +169,17 @@ func resolveConfigPath(root, explicitPath string) (string, error) {
 	return "", nil
 }
 
+func configSearchRoot(root string) string {
+	if root == "" {
+		root = "."
+	}
+	info, err := os.Stat(root)
+	if err == nil && !info.IsDir() {
+		return filepath.Dir(root)
+	}
+	return root
+}
+
 func decodeConfig(path string, data []byte, out *Config) error {
 	if !isConfigFileName(path) {
 		return fmt.Errorf("unsupported config file %s; dollarlint config must be named .dollarlint.toml", filepath.Base(path))
@@ -271,32 +195,20 @@ func isConfigFileName(path string) bool {
 }
 
 func remoteFetchEnabled(cfg SchemaConfig) bool {
-	return cfg.FetchRemote == nil || *cfg.FetchRemote
+	return cfg.Fetch.Enabled == nil || *cfg.Fetch.Enabled
 }
 
-func schemaStoreEnabled(cfg SchemaConfig) bool {
-	if cfg.Catalogs.Enabled {
-		return true
-	}
-	if cfg.SchemaStore.Enabled {
-		return true
-	}
-	return cfg.FetchSchemaStore != nil && *cfg.FetchSchemaStore
+func catalogEnabled(cfg SchemaConfig) bool {
+	return cfg.Catalogs.Enabled
 }
 
-func schemaStoreFailureMode(cfg SchemaConfig) (string, error) {
-	if cfg.Catalogs.Strict || cfg.SchemaStore.Strict {
-		return SchemaStoreFailureError, nil
-	}
+func catalogFailureMode(cfg SchemaConfig) (string, error) {
 	mode := cfg.Catalogs.Failure
 	if mode == "" {
-		mode = cfg.SchemaStore.Failure
-	}
-	if mode == "" {
-		mode = SchemaStoreFailureWarn
+		mode = CatalogFailureWarn
 	}
 	switch mode {
-	case SchemaStoreFailureWarn, SchemaStoreFailureError, SchemaStoreFailureSkip:
+	case CatalogFailureWarn, CatalogFailureError, CatalogFailureSkip:
 		return mode, nil
 	default:
 		return "", fmt.Errorf("unsupported catalog failure policy %q; expected warn, error, or skip", mode)
@@ -304,7 +216,8 @@ func schemaStoreFailureMode(cfg SchemaConfig) (string, error) {
 }
 
 func azureResourcePruningEnabled(cfg SchemaConfig) bool {
-	return cfg.AzureResourcePruning == nil || *cfg.AzureResourcePruning
+	return (cfg.Optimizations.Enabled == nil || *cfg.Optimizations.Enabled) &&
+		(cfg.Optimizations.Azure.PruneResources == nil || *cfg.Optimizations.Azure.PruneResources)
 }
 
 func fetchRetries(cfg FetchConfig) int {

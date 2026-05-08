@@ -7,7 +7,7 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <header class="doc-header">
       <span class="eyebrow">Reference</span>
       <h1>Configuration</h1>
-      <p class="lead">dollarlint reads TOML config from <code>.dollarlint.toml</code>. The validate command searches the target root unless <code>--config</code> points to a specific file.</p>
+      <p class="lead">dollarlint reads TOML config from <code>.dollarlint.toml</code>. Directory validation searches the target root; explicit file validation searches beside the file. Use <code>--config</code> to point at a specific config.</p>
     </header>
 
     <h2>Starter config</h2>
@@ -15,23 +15,37 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
 
 [discovery]
 include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.yml", "**/*.yml", "*.toml", "**/*.toml"]
-exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**", "build", "**/build/**", "coverage", "**/coverage/**"]
+extendExclude = []
+useDefaultExcludes = true
+respectGitIgnore = true
+forceExclude = false
+followSymlinks = false
 
 [schemas]
-fetchRemote = true
 maxDepth = 8
 concurrency = 8
-azureResourcePruning = true
+
+[schemas.optimizations]
+enabled = true
+
+[schemas.optimizations.azure]
+pruneResources = true
 
 [schemas.fetch]
+enabled = true
+timeout = "10s"
 retries = 2
 retryMinWait = "250ms"
 retryMaxWait = "2s"
+allowedDomains = []
+blockedDomains = []
+
+[schemas.compile]
+timeout = "30s"
 
 [schemas.catalogs]
-enabled = false
+enabled = true
 failure = "warn"
-strict = false
 
 [[schemas.catalogs.sources]]
 name = "schemastore"
@@ -43,19 +57,21 @@ enabled = true
 file = "settings/*.toml"
 schema = "./schemas/settings.schema.json"
 
-[timeouts]
-fetch = "10s"
-compile = "30s"
-
 [output]
-json = false
-sarif = false
 showSkipped = false
 verbose = false
 quiet = false
-locations = false</code></pre>
+locations = false
+
+[[ignore]]
+file = "fixtures/*.json"
+keyword = "required"
+property = "legacyName"
+reason = "legacy fixture kept for compatibility"</code></pre>
+    <p>Format and output file are per-run choices — use <code>--format</code> and <code>--output</code> on <code>dollarlint validate</code> whenever you need JSON, SARIF, or a file artifact.</p>
 
     <h2>Discovery</h2>
+    <p>The default include globs cover <code>*.json</code>, <code>*.yaml</code>, <code>*.yml</code>, and <code>*.toml</code> at any depth.</p>
     <table>
       <thead>
         <tr>
@@ -65,10 +81,14 @@ locations = false</code></pre>
       </thead>
       <tbody>
         <tr><td><code>include</code></td><td>File globs to consider during discovery.</td></tr>
-        <tr><td><code>exclude</code></td><td>File and directory globs to ignore during discovery.</td></tr>
+        <tr><td><code>extendExclude</code></td><td>Additional file and directory globs to ignore, on top of the built-in default excludes.</td></tr>
+        <tr><td><code>useDefaultExcludes</code></td><td>Skip common VCS, dependency, generated, cache, and virtual environment directories.</td></tr>
+        <tr><td><code>respectGitIgnore</code></td><td>Apply the root <code>.gitignore</code> during directory discovery.</td></tr>
+        <tr><td><code>forceExclude</code></td><td>Apply excludes even to explicitly passed files. By default, explicit file targets bypass excludes.</td></tr>
         <tr><td><code>followSymlinks</code></td><td>Follow symbolic links during discovery.</td></tr>
       </tbody>
     </table>
+    <p>Default excludes are intentionally not written out by <code>dollarlint init</code>. Keep project-specific ignores in <code>extendExclude</code>.</p>
 
     <h2>Schemas</h2>
     <table>
@@ -79,17 +99,72 @@ locations = false</code></pre>
         </tr>
       </thead>
       <tbody>
-        <tr><td><code>fetchRemote</code></td><td>Allow fetching HTTP schemas.</td></tr>
-        <tr><td><code>allowedDomains</code></td><td>Restrict remote schemas to exact or wildcard hosts.</td></tr>
-        <tr><td><code>blockedDomains</code></td><td>Deny hosts even when they match the allowlist.</td></tr>
         <tr><td><code>maxDepth</code></td><td>Maximum external schema reference depth.</td></tr>
-        <tr><td><code>concurrency</code></td><td>Number of concurrent validation workers.</td></tr>
-        <tr><td><code>azureResourcePruning</code></td><td>Prune Azure Resource Manager schemas to referenced resource providers before compilation.</td></tr>
+        <tr><td><code>concurrency</code></td><td>Number of concurrent validation workers. Defaults to <code>GOMAXPROCS</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Associations</h2>
+    <p>Associations map discovered files to schemas when the file does not declare one itself.</p>
+    <pre><code>[[schemas.associations]]
+file = "settings/*.toml"
+schema = "./schemas/settings.schema.json"</code></pre>
+    <p>Association globs are matched against paths relative to the validation root. In-file declarations win over associations.</p>
+
+    <h2>Fetch and compile</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>schemas.fetch.enabled</code></td><td>Allow fetching HTTP schemas and catalogs.</td></tr>
+        <tr><td><code>schemas.fetch.timeout</code></td><td>Timeout for each schema fetch.</td></tr>
+        <tr><td><code>schemas.fetch.retries</code></td><td>Retries for transient remote schema fetch failures. <code>408</code>, <code>425</code>, <code>429</code>, and retryable <code>5xx</code> responses are retried.</td></tr>
+        <tr><td><code>schemas.fetch.retryMinWait</code></td><td>Minimum retry backoff.</td></tr>
+        <tr><td><code>schemas.fetch.retryMaxWait</code></td><td>Maximum retry backoff.</td></tr>
+        <tr><td><code>schemas.fetch.allowedDomains</code></td><td>Restrict remote schemas to exact or wildcard hosts.</td></tr>
+        <tr><td><code>schemas.fetch.blockedDomains</code></td><td>Deny hosts even when they match the allowlist.</td></tr>
+        <tr><td><code>schemas.compile.timeout</code></td><td>Timeout for compiling each schema.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Optimizations</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>schemas.optimizations.enabled</code></td><td>Enable or disable schema-specific optimizations as a group.</td></tr>
+        <tr><td><code>schemas.optimizations.azure.pruneResources</code></td><td>Prune Azure Resource Manager schemas to referenced resource providers before compilation.</td></tr>
       </tbody>
     </table>
 
     <h2>Catalogs</h2>
-    <p>Catalogs map conventional filenames to schemas when a file does not declare <code>$schema</code> and no explicit association matches. SchemaStore is the default catalog source format.</p>
+    <p>Catalogs map well-known filenames to schemas when a file doesn't declare <code>$schema</code> and no explicit association matches. SchemaStore is the built-in catalog source, and custom sources can use the same catalog shape.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>schemas.catalogs.enabled</code></td><td>Enable catalog filename matching.</td></tr>
+        <tr><td><code>schemas.catalogs.failure</code></td><td>Choose <code>warn</code>, <code>error</code>, or <code>skip</code> when a catalog cannot be loaded.</td></tr>
+        <tr><td><code>schemas.catalogs.sources</code></td><td>List SchemaStore-format catalog sources.</td></tr>
+        <tr><td><code>schemas.catalogs.sources[].name</code></td><td>Human-readable source name used in schema source metadata and warnings.</td></tr>
+        <tr><td><code>schemas.catalogs.sources[].format</code></td><td>Catalog format. Currently <code>schemastore</code>.</td></tr>
+        <tr><td><code>schemas.catalogs.sources[].url</code></td><td>Remote catalog URL. Mutually exclusive with <code>path</code>.</td></tr>
+        <tr><td><code>schemas.catalogs.sources[].path</code></td><td>Local catalog path. Mutually exclusive with <code>url</code>.</td></tr>
+        <tr><td><code>schemas.catalogs.sources[].enabled</code></td><td>Disable one source without deleting it.</td></tr>
+      </tbody>
+    </table>
 
     <h2>Ignore rules</h2>
     <pre><code>[[ignore]]
@@ -97,5 +172,23 @@ file = "fixtures/*.json"
 keyword = "required"
 property = "legacyName"
 reason = "legacy fixture kept for compatibility"</code></pre>
+    <p>Ignore rules match validation issues by file glob, JSON Schema keyword, and property. All configured fields must match; omitted fields act like wildcards. Ignored issues are still reported as ignored and do not make the run fail.</p>
+
+    <h2>Output preferences</h2>
+    <p>Config can set text-output preferences only. Machine-readable formats and output files are intentionally per-run choices.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>output.showSkipped</code></td><td>Show skipped files in text output.</td></tr>
+        <tr><td><code>output.verbose</code></td><td>Show expanded issue metadata in text output.</td></tr>
+        <tr><td><code>output.quiet</code></td><td>Use terse success output.</td></tr>
+        <tr><td><code>output.locations</code></td><td>Include line and column positions in text and JSON output.</td></tr>
+      </tbody>
+    </table>
   </article>
 </DocsLayout>

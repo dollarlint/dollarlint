@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 641.533 387.573" role="img" aria-label="dollarlint logo">
+  <path fill="var(--logo-outer-fill, #2f8f43)" d="M606.439 7.767H35.094c-15.534 0-28.127 12.593-28.127 28.127v315.784c0 15.534 12.593 28.127 28.127 28.127h571.345c15.534 0 28.127-12.593 28.127-28.127V35.894c0-15.534-12.593-28.127-28.127-28.127Z"/>
+  <path fill="var(--logo-inner-fill, #dff2d3)" d="M107.373 346.806c0-37.227-30.179-67.406-67.406-67.406V108.173c37.227 0 67.406-30.179 67.406-67.406H534.16c0 37.227 30.179 67.406 67.406 67.406V279.4c-37.227 0-67.406 30.179-67.406 67.406H107.373Z"/>
+  <circle fill="var(--logo-seal-fill, #64b85f)" cx="322.148" cy="193.787" r="120.781"/>
+  <ellipse fill="var(--logo-oval-fill, #64b85f)" cx="125.582" cy="193.787" rx="26.221" ry="29.163"/>
+  <ellipse fill="var(--logo-oval-fill, #64b85f)" cx="515.951" cy="193.787" rx="26.221" ry="29.163"/>
+  <path fill="none" stroke="var(--logo-check, #11692d)" stroke-linecap="round" stroke-linejoin="round" stroke-width="24" d="m266.46 198.077 36.629 36.629 71.984-71.984"/>
+</svg>

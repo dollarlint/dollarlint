@@ -64,7 +64,7 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		fileIndexes[document.RelativePath] = len(result.Files)
 		result.Files = append(result.Files, fileResult)
 		documents = append(documents, document)
-		applySchemaAssociation(document, cfg.Schema.Associations, "config-association")
+		applySchemaAssociation(document, cfg.Schemas.Associations, "config-association")
 		applySchemaStoreAssociation(document, schemaStoreCatalog)
 	}
 	for _, document := range documents {
@@ -85,7 +85,7 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		document.Schema = resolved
 		result.Files[index].Schema = resolved
 		result.Files[index].Status = StatusValidated
-		if cfg.Output.SARIF || cfg.Output.Locations {
+		if opts.SourceLocations || cfg.Output.Locations {
 			AttachSourceMap(document)
 		}
 		validatedDocuments = append(validatedDocuments, document)
@@ -177,7 +177,7 @@ func issuesFromSchemaError(document *Document, err error) []Issue {
 }
 
 func compileSchema(ctx context.Context, cache *SchemaCache, cfg Config, schemaURI string, documentData any) (*jsonschema.Schema, error) {
-	compileCtx, cancel := context.WithTimeout(ctx, cfg.Timeouts.Compile.Duration)
+	compileCtx, cancel := context.WithTimeout(ctx, cfg.Schemas.Compile.Timeout.Duration)
 	defer cancel()
 	compiler := jsonschema.NewCompiler()
 	compiler.AssertFormat()

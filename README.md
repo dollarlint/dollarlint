@@ -17,8 +17,8 @@ dollarlint init
 dollarlint validate .
 dollarlint validate ./config --locations
 dollarlint validate ./config --verbose
-dollarlint validate ./config --json
-dollarlint validate ./config --sarif > dollarlint.sarif
+dollarlint validate ./config --format json
+dollarlint validate ./config --format sarif --output dollarlint.sarif
 dollarlint validate . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
 dollarlint validate . --schema-store
 dollarlint validate . --schema-store --schema-store-failure error
@@ -68,25 +68,37 @@ version = 1
 
 [discovery]
 include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.toml", "**/*.toml"]
-exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**"]
+extendExclude = ["generated/**"]
+useDefaultExcludes = true
+respectGitIgnore = true
+forceExclude = false
+followSymlinks = false
 
 [schemas]
-fetchRemote = true
-allowedDomains = ["www.schemastore.org", "raw.githubusercontent.com"]
-blockedDomains = ["untrusted.example.com"]
-azureResourcePruning = true
 maxDepth = 8
 concurrency = 8
 
+[schemas.optimizations]
+enabled = true
+
+[schemas.optimizations.azure]
+pruneResources = true
+
 [schemas.fetch]
+enabled = true
+timeout = "10s"
 retries = 2
 retryMinWait = "250ms"
 retryMaxWait = "2s"
+allowedDomains = ["www.schemastore.org", "raw.githubusercontent.com"]
+blockedDomains = ["untrusted.example.com"]
+
+[schemas.compile]
+timeout = "30s"
 
 [schemas.catalogs]
 enabled = false
 failure = "warn"
-strict = false
 
 [[schemas.catalogs.sources]]
 name = "schemastore"
@@ -98,10 +110,6 @@ enabled = true
 file = "settings/*.toml"
 schema = "./schemas/settings.schema.json"
 
-[timeouts]
-fetch = "10s"
-compile = "30s"
-
 [[ignore]]
 file = "fixtures/*.json"
 keyword = "required"
@@ -109,21 +117,23 @@ property = "legacyName"
 reason = "legacy fixture kept for compatibility"
 
 [output]
-json = false
-sarif = false
 showSkipped = false
 verbose = false
 quiet = false
 locations = false
 ```
 
-By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schemas.allowedDomains` can restrict remote schemas to specific hosts, and `schemas.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
+Output format and output file are invocation choices, not persistent config. Use `--format text|json|sarif` and `--output <path>` on `dollarlint validate` when a run needs a machine-readable artifact.
+
+Discovery uses safe defaults. `useDefaultExcludes = true` skips common dependency, generated, cache, and VCS directories like `node_modules`, `vendor`, `dist`, `build`, `.git`, `.venv`, and `.cache`. Add project-specific exclusions with `discovery.extendExclude` rather than copying the default list. `respectGitIgnore = true` applies root `.gitignore` patterns during directory discovery, while `forceExclude = true` also applies excludes to explicitly passed files.
+
+By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schemas.fetch.allowedDomains` can restrict remote schemas to specific hosts, and `schemas.fetch.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
 
 Catalog matching is configurable with `schemas.catalogs`. When enabled, files without an explicit schema can be matched by conventional filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional catalog sources. Precedence is explicit in-file schema, then config associations, then catalog matches, then skipped.
 
 Catalog failures are modeled separately from validation issues. By default `schemas.catalogs.failure = "warn"` records a warning, skips catalog inference, still validates explicit/configured schemas, and exits `0` unless validation issues are found. Use `"error"` when catalog availability should fail the run with exit `2`, or `"skip"` for a silent fallback. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
 
-Azure Resource Manager deployment schemas from `schema.management.azure.com` are pruned to the resource provider schemas used by the template before compilation. This avoids compiling the full Azure provider catalog for ordinary ARM templates. Set `schemas.azureResourcePruning = false` to disable this Azure-specific optimization.
+Azure Resource Manager deployment schemas from `schema.management.azure.com` are pruned to the resource provider schemas used by the template before compilation. This avoids compiling the full Azure provider catalog for ordinary ARM templates. Set `schemas.optimizations.azure.pruneResources = false` to disable this Azure-specific optimization, or `schemas.optimizations.enabled = false` to disable all schema optimizations.
 
 ## Examples
 
@@ -158,11 +168,15 @@ settings.json
 
 Use `--verbose` to show schema URI and keyword metadata under each issue. Use `--quiet` for terse success output.
 
-Text output uses subtle terminal styling when color is available and stays plain for machine-readable modes such as `--json` and `--sarif`.
+Text output uses subtle terminal styling when color is available and stays plain for machine-readable formats such as `--format json` and `--format sarif`.
 
 ## SARIF
 
-Use `--sarif` to emit SARIF 2.1.0 for GitHub code scanning and similar tools.
+Use `--format sarif` to emit SARIF 2.1.0 for GitHub code scanning and similar tools. Use `--output` to write the SARIF artifact directly:
+
+```sh
+dollarlint validate . --format sarif --output dollarlint.sarif
+```
 
 `dollarlint` builds source-location maps only for SARIF runs or when `--locations` is requested, keeping ordinary text and JSON validation on the simpler validation path. SARIF locations are best-effort:
 

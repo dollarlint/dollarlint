@@ -7,30 +7,30 @@ import (
 
 func TestDomainPolicyEdges(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.Schema.AllowedDomains = []string{"https://schemas.example.com:443/path", "*.example.org:443", ""}
-	if err := checkRemoteDomainPolicy("https://schemas.example.com/schema.json", cfg.Schema); err != nil {
+	cfg.Schemas.Fetch.AllowedDomains = []string{"https://schemas.example.com:443/path", "*.example.org:443", ""}
+	if err := checkRemoteDomainPolicy("https://schemas.example.com/schema.json", cfg.Schemas); err != nil {
 		t.Fatalf("expected exact URL-pattern domain allow: %v", err)
 	}
-	if err := checkRemoteDomainPolicy("https://api.example.org/schema.json", cfg.Schema); err != nil {
+	if err := checkRemoteDomainPolicy("https://api.example.org/schema.json", cfg.Schemas); err != nil {
 		t.Fatalf("expected wildcard domain allow: %v", err)
 	}
-	if err := checkRemoteDomainPolicy("https://example.org/schema.json", cfg.Schema); err == nil || !strings.Contains(err.Error(), "not allowed") {
+	if err := checkRemoteDomainPolicy("https://example.org/schema.json", cfg.Schemas); err == nil || !strings.Contains(err.Error(), "not allowed") {
 		t.Fatalf("expected wildcard not to match root domain, got %v", err)
 	}
-	cfg.Schema.BlockedDomains = []string{"//api.example.org"}
-	if err := checkRemoteDomainPolicy("https://api.example.org/schema.json", cfg.Schema); err == nil || !strings.Contains(err.Error(), "blocked") {
+	cfg.Schemas.Fetch.BlockedDomains = []string{"//api.example.org"}
+	if err := checkRemoteDomainPolicy("https://api.example.org/schema.json", cfg.Schemas); err == nil || !strings.Contains(err.Error(), "blocked") {
 		t.Fatalf("expected blocked URL-pattern domain, got %v", err)
 	}
-	cfg.Schema.BlockedDomains = []string{"bad domain"}
-	if err := checkRemoteDomainPolicy("https://schemas.example.com/schema.json", cfg.Schema); err == nil || !strings.Contains(err.Error(), "invalid schema domain") {
+	cfg.Schemas.Fetch.BlockedDomains = []string{"bad domain"}
+	if err := checkRemoteDomainPolicy("https://schemas.example.com/schema.json", cfg.Schemas); err == nil || !strings.Contains(err.Error(), "invalid schema domain") {
 		t.Fatalf("expected invalid blocked domain, got %v", err)
 	}
-	cfg.Schema.BlockedDomains = nil
-	cfg.Schema.AllowedDomains = []string{"bad/domain"}
-	if err := checkRemoteDomainPolicy("https://schemas.example.com/schema.json", cfg.Schema); err == nil || !strings.Contains(err.Error(), "invalid schema domain") {
+	cfg.Schemas.Fetch.BlockedDomains = nil
+	cfg.Schemas.Fetch.AllowedDomains = []string{"bad/domain"}
+	if err := checkRemoteDomainPolicy("https://schemas.example.com/schema.json", cfg.Schemas); err == nil || !strings.Contains(err.Error(), "invalid schema domain") {
 		t.Fatalf("expected invalid allowed domain, got %v", err)
 	}
-	if err := checkRemoteDomainPolicy("file:///tmp/schema.json", cfg.Schema); err == nil || !strings.Contains(err.Error(), "has no host") {
+	if err := checkRemoteDomainPolicy("file:///tmp/schema.json", cfg.Schemas); err == nil || !strings.Contains(err.Error(), "has no host") {
 		t.Fatalf("expected no-host policy error, got %v", err)
 	}
 	if _, err := hostForDomainPolicy("file:///tmp/schema.json"); err == nil || !strings.Contains(err.Error(), "has no host") {

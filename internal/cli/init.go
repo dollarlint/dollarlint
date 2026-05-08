@@ -17,20 +17,18 @@ import (
 )
 
 type initOptions struct {
-	output             string
-	force              bool
-	defaults           bool
-	fetchRemote        bool
-	fetchRetries       int
-	schemaStore        bool
-	schemaStoreFailure string
-	schemaStoreStrict  bool
+	output         string
+	force          bool
+	defaults       bool
+	fetchRemote    bool
+	fetchRetries   int
+	schemaStore    bool
+	catalogFailure string
 }
 
 type initTemplateData struct {
 	SchemaStoreEnabled bool
-	SchemaStoreFailure string
-	SchemaStoreStrict  bool
+	CatalogFailure     string
 	SchemaStoreURL     string
 	FetchRemote        bool
 	FetchRetries       int
@@ -38,11 +36,11 @@ type initTemplateData struct {
 
 func defaultInitOptions() initOptions {
 	return initOptions{
-		output:             ".dollarlint.toml",
-		fetchRemote:        true,
-		fetchRetries:       defaultFetchRetries,
-		schemaStore:        true,
-		schemaStoreFailure: dollarlint.SchemaStoreFailureWarn,
+		output:         ".dollarlint.toml",
+		fetchRemote:    true,
+		fetchRetries:   defaultFetchRetries,
+		schemaStore:    true,
+		catalogFailure: dollarlint.CatalogFailureWarn,
 	}
 }
 
@@ -63,8 +61,7 @@ func newInitCommand(stdin io.Reader, stdout io.Writer) *cobra.Command {
 	cmd.Flags().BoolVar(&opts.fetchRemote, "fetch-remote", opts.fetchRemote, "Allow fetching http(s) schemas in the generated config")
 	cmd.Flags().IntVar(&opts.fetchRetries, "fetch-retries", opts.fetchRetries, "Retries for transient remote schema fetch failures in the generated config")
 	cmd.Flags().BoolVar(&opts.schemaStore, "schema-store", opts.schemaStore, "Enable SchemaStore catalog filename matching in the generated config")
-	cmd.Flags().StringVar(&opts.schemaStoreFailure, "schema-store-failure", opts.schemaStoreFailure, "SchemaStore catalog failure policy in the generated config: warn, error, or skip")
-	cmd.Flags().BoolVar(&opts.schemaStoreStrict, "schema-store-strict", false, "Fail validation when the SchemaStore catalog cannot be loaded")
+	cmd.Flags().StringVar(&opts.catalogFailure, "schema-store-failure", opts.catalogFailure, "SchemaStore catalog failure policy in the generated config: warn, error, or skip")
 	return cmd
 }
 
@@ -154,7 +151,7 @@ func isTerminalFile(file *os.File) bool {
 type initPrompter interface {
 	Confirm(question string, defaultValue bool) (bool, error)
 	NonNegativeInt(question string, defaultValue int) (int, error)
-	SchemaStoreFailure(defaultValue string) (string, error)
+	CatalogFailure(defaultValue string) (string, error)
 }
 
 type clackPrompter struct {
@@ -170,8 +167,8 @@ func (p clackPrompter) NonNegativeInt(question string, defaultValue int) (int, e
 	return promptNonNegativeInt(p.stdin, p.stdout, question, defaultValue)
 }
 
-func (p clackPrompter) SchemaStoreFailure(defaultValue string) (string, error) {
-	return promptSchemaStoreFailure(p.stdin, p.stdout, defaultValue)
+func (p clackPrompter) CatalogFailure(defaultValue string) (string, error) {
+	return promptCatalogFailure(p.stdin, p.stdout, defaultValue)
 }
 
 func interviewInitWithPrompter(prompter initPrompter, opts *initOptions) error {
@@ -191,11 +188,11 @@ func interviewInitWithPrompter(prompter initPrompter, opts *initOptions) error {
 	}
 	opts.schemaStore = schemaStore
 	if opts.schemaStore {
-		failure, err := prompter.SchemaStoreFailure(opts.schemaStoreFailure)
+		failure, err := prompter.CatalogFailure(opts.catalogFailure)
 		if err != nil {
 			return err
 		}
-		opts.schemaStoreFailure = failure
+		opts.catalogFailure = failure
 	}
 	return nil
 }
@@ -234,7 +231,7 @@ func promptNonNegativeInt(stdin, stdout *os.File, question string, defaultValue 
 	return strconv.Atoi(strings.TrimSpace(answer))
 }
 
-func promptSchemaStoreFailure(stdin, stdout *os.File, defaultValue string) (string, error) {
+func promptCatalogFailure(stdin, stdout *os.File, defaultValue string) (string, error) {
 	return prompts.Select(prompts.SelectParams[string]{
 		Context:      context.Background(),
 		Input:        stdin,
@@ -242,9 +239,9 @@ func promptSchemaStoreFailure(stdin, stdout *os.File, defaultValue string) (stri
 		Message:      "Catalog failure policy",
 		InitialValue: defaultValue,
 		Options: []*prompts.SelectOption[string]{
-			{Label: "warn", Value: dollarlint.SchemaStoreFailureWarn, Hint: "continue with a warning"},
-			{Label: "error", Value: dollarlint.SchemaStoreFailureError, Hint: "fail the run"},
-			{Label: "skip", Value: dollarlint.SchemaStoreFailureSkip, Hint: "silently skip catalog inference"},
+			{Label: "warn", Value: dollarlint.CatalogFailureWarn, Hint: "continue with a warning"},
+			{Label: "error", Value: dollarlint.CatalogFailureError, Hint: "fail the run"},
+			{Label: "skip", Value: dollarlint.CatalogFailureSkip, Hint: "silently skip catalog inference"},
 		},
 		Required: true,
 	})
@@ -258,14 +255,11 @@ func validateInitOutputPath(target string) error {
 }
 
 func normalizeInitOptions(opts *initOptions) error {
-	if opts.schemaStoreStrict {
-		opts.schemaStoreFailure = dollarlint.SchemaStoreFailureError
-	}
-	switch opts.schemaStoreFailure {
-	case dollarlint.SchemaStoreFailureWarn, dollarlint.SchemaStoreFailureError, dollarlint.SchemaStoreFailureSkip:
+	switch opts.catalogFailure {
+	case dollarlint.CatalogFailureWarn, dollarlint.CatalogFailureError, dollarlint.CatalogFailureSkip:
 		return nil
 	default:
-		return fmt.Errorf("unsupported schema-store-failure %q; expected warn, error, or skip", opts.schemaStoreFailure)
+		return fmt.Errorf("unsupported schema-store-failure %q; expected warn, error, or skip", opts.catalogFailure)
 	}
 }
 
@@ -275,9 +269,8 @@ func renderStarterConfig(opts initOptions) ([]byte, error) {
 	}
 	data := initTemplateData{
 		SchemaStoreEnabled: opts.schemaStore,
-		SchemaStoreFailure: opts.schemaStoreFailure,
-		SchemaStoreStrict:  opts.schemaStoreStrict,
-		SchemaStoreURL:     dollarlint.DefaultConfig().Schema.Catalogs.Sources[0].URL,
+		CatalogFailure:     opts.catalogFailure,
+		SchemaStoreURL:     dollarlint.DefaultConfig().Schemas.Catalogs.Sources[0].URL,
 		FetchRemote:        opts.fetchRemote,
 		FetchRetries:       opts.fetchRetries,
 	}
@@ -301,23 +294,35 @@ version = 1
 
 [discovery]
 include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.yml", "**/*.yml", "*.toml", "**/*.toml"]
-exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**", "build", "**/build/**", "coverage", "**/coverage/**"]
+extendExclude = []
+useDefaultExcludes = true
+respectGitIgnore = true
+forceExclude = false
+followSymlinks = false
 
 [schemas]
-fetchRemote = {{ .FetchRemote }}
 maxDepth = 8
 concurrency = 8
-azureResourcePruning = true
+
+[schemas.optimizations]
+enabled = true
+
+[schemas.optimizations.azure]
+pruneResources = true
 
 [schemas.fetch]
+enabled = {{ .FetchRemote }}
+timeout = "10s"
 retries = {{ .FetchRetries }}
 retryMinWait = "250ms"
 retryMaxWait = "2s"
 
+[schemas.compile]
+timeout = "30s"
+
 [schemas.catalogs]
 enabled = {{ .SchemaStoreEnabled }}
-failure = "{{ .SchemaStoreFailure }}"
-strict = {{ .SchemaStoreStrict }}
+failure = "{{ .CatalogFailure }}"
 
 [[schemas.catalogs.sources]]
 name = "schemastore"
@@ -329,13 +334,7 @@ enabled = true
 # file = "settings/*.toml"
 # schema = "./schemas/settings.schema.json"
 
-[timeouts]
-fetch = "10s"
-compile = "30s"
-
 [output]
-json = false
-sarif = false
 showSkipped = false
 verbose = false
 quiet = false

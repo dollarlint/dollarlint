@@ -22,7 +22,7 @@ type azureARMResourceRef struct {
 }
 
 func primeableSchemaRoots(cfg Config, documents []*Document, schemaRoots []string) []string {
-	if !azureResourcePruningEnabled(cfg.Schema) {
+	if !azureResourcePruningEnabled(cfg.Schemas) {
 		return schemaRoots
 	}
 	roots := make([]string, 0, len(schemaRoots))
@@ -43,7 +43,7 @@ func primeableDocumentSchemaRoots(cfg Config, document *Document) []string {
 }
 
 func shouldPruneRefs(cfg Config, schemaURI string, refs []azureARMResourceRef) bool {
-	return azureResourcePruningEnabled(cfg.Schema) &&
+	return azureResourcePruningEnabled(cfg.Schemas) &&
 		isAzureARMDeploymentTemplateSchema(schemaURI) &&
 		len(refs) > 0
 }

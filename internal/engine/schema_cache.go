@@ -38,10 +38,10 @@ type schemaEntry struct {
 func NewSchemaCache(cfg Config) *SchemaCache {
 	cfg.ApplyDefaults()
 	client := retryablehttp.NewClient()
-	client.HTTPClient.Timeout = cfg.Timeouts.Fetch.Duration
-	client.RetryMax = fetchRetries(cfg.Schema.Fetch)
-	client.RetryWaitMin = cfg.Schema.Fetch.RetryMinWait.Duration
-	client.RetryWaitMax = cfg.Schema.Fetch.RetryMaxWait.Duration
+	client.HTTPClient.Timeout = cfg.Schemas.Fetch.Timeout.Duration
+	client.RetryMax = fetchRetries(cfg.Schemas.Fetch)
+	client.RetryWaitMin = cfg.Schemas.Fetch.RetryMinWait.Duration
+	client.RetryWaitMax = cfg.Schemas.Fetch.RetryMaxWait.Duration
 	client.CheckRetry = retryableHTTPPolicy
 	client.Logger = nil
 	return &SchemaCache{
@@ -61,7 +61,7 @@ func retryableHTTPPolicy(ctx context.Context, resp *http.Response, err error) (b
 }
 
 func (c *SchemaCache) Load(raw string) (any, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.Timeouts.Fetch.Duration)
+	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.Schemas.Fetch.Timeout.Duration)
 	defer cancel()
 	return c.LoadContext(ctx, raw)
 }
@@ -90,8 +90,8 @@ func (c *SchemaCache) Prime(ctx context.Context, roots []string) error {
 	current := uniqueStrings(roots)
 	visited := map[string]bool{}
 	for depth := 0; len(current) > 0; depth++ {
-		if depth > c.cfg.Schema.MaxDepth {
-			return fmt.Errorf("schema reference depth exceeds limit %d", c.cfg.Schema.MaxDepth)
+		if depth > c.cfg.Schemas.MaxDepth {
+			return fmt.Errorf("schema reference depth exceeds limit %d", c.cfg.Schemas.MaxDepth)
 		}
 		next, err := c.loadAndDiscover(ctx, current)
 		if err != nil {
@@ -130,7 +130,7 @@ func (c *SchemaCache) loadAndDiscover(ctx context.Context, uris []string) ([]str
 		refs []string
 		err  error
 	}
-	workers := c.cfg.Schema.Concurrency
+	workers := c.cfg.Schemas.Concurrency
 	if workers < 1 {
 		workers = 1
 	}
@@ -194,7 +194,7 @@ func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error)
 		}
 		return decodeSchemaDocument(data, path)
 	case "http", "https":
-		if err := checkRemoteDomainPolicy(raw, c.cfg.Schema); err != nil {
+		if err := checkRemoteDomainPolicy(raw, c.cfg.Schemas); err != nil {
 			return nil, err
 		}
 		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, raw, nil)

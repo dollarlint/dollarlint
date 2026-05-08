@@ -7,23 +7,28 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <header class="doc-header">
       <span class="eyebrow">Guide</span>
       <h1>Quick start</h1>
-      <p class="lead">Initialize a config, validate your files, and choose the output format that matches your workflow.</p>
+      <p class="lead">Get up and running in a few minutes: set up a config, run your first validation, and pick the output format that pays off for your workflow.</p>
     </header>
 
     <h2>1. Create a config</h2>
     <pre><code>dollarlint init</code></pre>
-    <p>The interactive setup writes a starter <code>.dollarlint.toml</code>. It will not overwrite an existing config unless you confirm it or pass <code>--force</code>.</p>
+    <p>The interactive setup writes a starter <code>.dollarlint.toml</code>. It asks before overwriting an existing config, and <code>--defaults</code> skips prompts for automation.</p>
 
     <h2>2. Validate a directory</h2>
     <pre><code>dollarlint validate .</code></pre>
-    <p>The validate command discovers supported file types, loads each declared schema, and prints grouped results.</p>
+    <p>dollarlint discovers JSON, YAML, and TOML files, skips common dependency and cache directories, respects the root <code>.gitignore</code>, loads declared schemas, and groups results by file.</p>
 
-    <h2>3. Add locations when fixing issues</h2>
+    <div class="note">
+      <p>Files without an in-file schema, config association, or catalog match are skipped, but still counted in the summary so discovery remains visible.</p>
+    </div>
+
+    <h2>3. Pinpoint issues with locations</h2>
     <pre><code>dollarlint validate ./config --locations</code></pre>
-    <p>Line and column positions make text and JSON output easier to use during local fixes.</p>
+    <p>Line and column positions are available for text and JSON output. SARIF always requests source mapping so code scanning tools can point at the closest source location.</p>
 
-    <h2>4. Use machine-readable output in automation</h2>
-    <pre><code>dollarlint validate . --json
-dollarlint validate . --sarif &gt; dollarlint.sarif</code></pre>
+    <h2>4. Cash out machine-readable output</h2>
+    <pre><code>dollarlint validate . --format json
+dollarlint validate . --format sarif --output dollarlint.sarif</code></pre>
+    <p>Text is the default. JSON and SARIF are requested per run with <code>--format</code>; output files are requested per run with <code>--output</code>.</p>
   </article>
 </DocsLayout>

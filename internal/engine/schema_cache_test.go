@@ -76,7 +76,7 @@ func TestSchemaCacheRemoteFetch(t *testing.T) {
 	}
 	cfg := DefaultConfig()
 	disabled := false
-	cfg.Schema.FetchRemote = &disabled
+	cfg.Schemas.Fetch.Enabled = &disabled
 	cache = NewSchemaCache(cfg)
 	if _, err := cache.Load(server.URL + "/schema.json"); err == nil {
 		t.Fatalf("expected remote disabled error")
@@ -96,8 +96,8 @@ func TestSchemaCacheRetriesTransientRemoteFetchFailures(t *testing.T) {
 	defer server.Close()
 
 	cfg := DefaultConfig()
-	cfg.Schema.Fetch.RetryMinWait = NewDuration(time.Millisecond)
-	cfg.Schema.Fetch.RetryMaxWait = NewDuration(time.Millisecond)
+	cfg.Schemas.Fetch.RetryMinWait = NewDuration(time.Millisecond)
+	cfg.Schemas.Fetch.RetryMaxWait = NewDuration(time.Millisecond)
 	cache := NewSchemaCache(cfg)
 	if _, err := cache.Load(server.URL + "/schema.json"); err != nil {
 		t.Fatalf("remote load after retry: %v", err)
@@ -131,18 +131,18 @@ func TestSchemaCacheRemoteDomainPolicy(t *testing.T) {
 	defer server.Close()
 	host := mustURLHost(t, server.URL)
 	cfg := DefaultConfig()
-	cfg.Schema.AllowedDomains = []string{host}
+	cfg.Schemas.Fetch.AllowedDomains = []string{host}
 	cache := NewSchemaCache(cfg)
 	if _, err := cache.Load(server.URL + "/schema.json"); err != nil {
 		t.Fatalf("allowed domain load: %v", err)
 	}
-	cfg.Schema.BlockedDomains = []string{host}
+	cfg.Schemas.Fetch.BlockedDomains = []string{host}
 	cache = NewSchemaCache(cfg)
 	if _, err := cache.Load(server.URL + "/schema.json"); err == nil || !strings.Contains(err.Error(), "blocked") {
 		t.Fatalf("expected blocked domain error, got %v", err)
 	}
 	cfg = DefaultConfig()
-	cfg.Schema.AllowedDomains = []string{"example.com"}
+	cfg.Schemas.Fetch.AllowedDomains = []string{"example.com"}
 	cache = NewSchemaCache(cfg)
 	if _, err := cache.Load(server.URL + "/schema.json"); err == nil || !strings.Contains(err.Error(), "not allowed") {
 		t.Fatalf("expected disallowed domain error, got %v", err)
@@ -169,7 +169,7 @@ func TestSchemaCacheDepthAndLoadErrors(t *testing.T) {
 		t.Fatalf("fileURL: %v", err)
 	}
 	cfg := DefaultConfig()
-	cfg.Schema.MaxDepth = 0
+	cfg.Schemas.MaxDepth = 0
 	cache := NewSchemaCache(cfg)
 	if err := cache.Prime(context.Background(), []string{rootURL.String()}); err == nil {
 		t.Fatalf("expected depth error")
@@ -236,8 +236,8 @@ func TestSchemaCacheFetchTimeout(t *testing.T) {
 	defer server.Close()
 	cfg := DefaultConfig()
 	zeroRetries := 0
-	cfg.Schema.Fetch.Retries = &zeroRetries
-	cfg.Timeouts.Fetch = NewDuration(time.Nanosecond)
+	cfg.Schemas.Fetch.Retries = &zeroRetries
+	cfg.Schemas.Fetch.Timeout = NewDuration(time.Nanosecond)
 	cache := NewSchemaCache(cfg)
 	if _, err := cache.Load(server.URL + "/slow.json"); err == nil {
 		t.Fatalf("expected fetch timeout")

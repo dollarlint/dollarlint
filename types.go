@@ -13,20 +13,21 @@ const (
 )
 
 const (
-	SchemaStoreFailureWarn  = engine.SchemaStoreFailureWarn
-	SchemaStoreFailureError = engine.SchemaStoreFailureError
-	SchemaStoreFailureSkip  = engine.SchemaStoreFailureSkip
+	CatalogFailureWarn  = engine.CatalogFailureWarn
+	CatalogFailureError = engine.CatalogFailureError
+	CatalogFailureSkip  = engine.CatalogFailureSkip
 )
 
 type Config = engine.Config
 type DiscoveryConfig = engine.DiscoveryConfig
 type SchemaConfig = engine.SchemaConfig
-type SchemaStoreConfig = engine.SchemaStoreConfig
 type CatalogConfig = engine.CatalogConfig
 type CatalogSource = engine.CatalogSource
+type OptimizationConfig = engine.OptimizationConfig
+type AzureOptimization = engine.AzureOptimization
 type FetchConfig = engine.FetchConfig
 type SchemaAssociation = engine.SchemaAssociation
-type TimeoutConfig = engine.TimeoutConfig
+type CompileConfig = engine.CompileConfig
 type OutputConfig = engine.OutputConfig
 type IgnoreRule = engine.IgnoreRule
 type Options = engine.Options

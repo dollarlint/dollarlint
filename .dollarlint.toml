@@ -1,25 +1,55 @@
+#:schema ./schemas/dollarlint.schema.json
 # dollarlint configuration
 version = 1
 
 [discovery]
-include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.yml", "**/*.yml", "*.toml", "**/*.toml"]
-exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**", "build", "**/build/**", "coverage", "**/coverage/**"]
+include = [
+  "*.json",
+  "**/*.json",
+  "*.yaml",
+  "**/*.yaml",
+  "*.yml",
+  "**/*.yml",
+  "*.toml",
+  "**/*.toml",
+]
+extendExclude = []
+useDefaultExcludes = true
+respectGitIgnore = true
+forceExclude = false
+followSymlinks = false
 
 [schemas]
-fetchRemote = true
 maxDepth = 8
 concurrency = 8
-azureResourcePruning = true
 
 [schemas.fetch]
+enabled = true
+timeout = "10s"
 retries = 2
 retryMinWait = "250ms"
 retryMaxWait = "2s"
+allowedDomains = [
+  "www.schemastore.org",
+  "schema.management.azure.com",
+  "json-schema.org",
+]
+blockedDomains = ["untrusted.example.com"]
+
+[schemas.compile]
+timeout = "30s"
+
+[schemas.optimizations]
+enabled = true
+
+[schemas.optimizations.azure]
+# Azure Resource Manager schemas are huge; prune them to the resource
+# provider schemas used by each template before compiling.
+pruneResources = true
 
 [schemas.catalogs]
 enabled = true
 failure = "warn"
-strict = false
 
 [[schemas.catalogs.sources]]
 name = "schemastore"
@@ -27,24 +57,18 @@ format = "schemastore"
 url = "https://www.schemastore.org/api/json/catalog.json"
 enabled = true
 
-# [[schemas.associations]]
-# file = "settings/*.toml"
-# schema = "./schemas/settings.schema.json"
-
-[timeouts]
-fetch = "10s"
-compile = "30s"
+[[schemas.associations]]
+file = ".dollarlint.toml"
+schema = "./schemas/dollarlint.schema.json"
 
 [output]
-json = false
-sarif = false
 showSkipped = false
 verbose = false
 quiet = false
 locations = false
 
-# [[ignore]]
-# file = "fixtures/*.json"
-# keyword = "required"
-# property = "legacyName"
-# reason = "legacy fixture kept for compatibility"
+[[ignore]]
+file = "fixtures/*.json"
+keyword = "required"
+property = "legacyName"
+reason = "legacy fixture kept for compatibility"

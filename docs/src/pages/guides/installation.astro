@@ -7,18 +7,22 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <header class="doc-header">
       <span class="eyebrow">Guide</span>
       <h1>Installation</h1>
-      <p class="lead">Install the dollarlint command with Go, then run it from any project that contains JSON, YAML, or TOML config files.</p>
+      <p class="lead">Install the dollarlint CLI with Go, then point it at any project with JSON, YAML, or TOML config files. It's a small investment that pays dividends.</p>
     </header>
 
-    <h2>Install with Go</h2>
+    <h2>Install from source with Go</h2>
     <pre><code>go install github.com/agorischek/dollarlint/cmd/dollarlint@latest</code></pre>
+    <p>This installs the <code>dollarlint</code> command from the latest module version available to your Go toolchain.</p>
 
-    <h2>Check the command</h2>
+    <h2>Release binaries</h2>
+    <p>The project is configured for GoReleaser and GitHub Releases. Once a release is published, prefer the archive for your platform when you do not want to build from source.</p>
+
+    <h2>Verify the install</h2>
     <pre><code>dollarlint version
 dollarlint --help</code></pre>
 
     <div class="note">
-      <p>The CLI expects commands such as <code>dollarlint validate .</code>. Bare paths are not accepted.</p>
+      <p>dollarlint expects a subcommand. Use <code>dollarlint validate .</code>; bare paths such as <code>dollarlint .</code> are intentionally rejected.</p>
     </div>
   </article>
 </DocsLayout>

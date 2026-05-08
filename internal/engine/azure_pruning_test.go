@@ -58,14 +58,19 @@ func TestAzureARMResourceRefCollection(t *testing.T) {
 }
 
 func TestAzureARMResourcePruningConfigDefaultAndOptOut(t *testing.T) {
-	if !azureResourcePruningEnabled(DefaultConfig().Schema) {
+	if !azureResourcePruningEnabled(DefaultConfig().Schemas) {
 		t.Fatalf("Azure resource pruning should be enabled by default")
 	}
 	disabled := false
 	cfg := DefaultConfig()
-	cfg.Schema.AzureResourcePruning = &disabled
-	if azureResourcePruningEnabled(cfg.Schema) {
+	cfg.Schemas.Optimizations.Azure.PruneResources = &disabled
+	if azureResourcePruningEnabled(cfg.Schemas) {
 		t.Fatalf("Azure resource pruning opt-out was ignored")
+	}
+	cfg = DefaultConfig()
+	cfg.Schemas.Optimizations.Enabled = &disabled
+	if azureResourcePruningEnabled(cfg.Schemas) {
+		t.Fatalf("global schema optimization opt-out was ignored")
 	}
 }
 
@@ -76,8 +81,8 @@ func TestAzureARMResourcePruningSkipsUnusedProviderSchemas(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "azuredeploy.json"), azureARMFixtureTemplate(server.URL))
 
 	cfg := DefaultConfig()
-	cfg.Timeouts.Compile = NewDuration(testTimeout)
-	cfg.Timeouts.Fetch = NewDuration(testTimeout)
+	cfg.Schemas.Compile.Timeout = NewDuration(testTimeout)
+	cfg.Schemas.Fetch.Timeout = NewDuration(testTimeout)
 	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
 	if err != nil {
 		t.Fatalf("Lint with pruning: %v", err)
@@ -98,9 +103,9 @@ func TestAzureARMResourcePruningCanBeDisabled(t *testing.T) {
 
 	disabled := false
 	cfg := DefaultConfig()
-	cfg.Schema.AzureResourcePruning = &disabled
-	cfg.Timeouts.Compile = NewDuration(testTimeout)
-	cfg.Timeouts.Fetch = NewDuration(testTimeout)
+	cfg.Schemas.Optimizations.Azure.PruneResources = &disabled
+	cfg.Schemas.Compile.Timeout = NewDuration(testTimeout)
+	cfg.Schemas.Fetch.Timeout = NewDuration(testTimeout)
 	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
 	if err != nil {
 		t.Fatalf("Lint without pruning: %v", err)

@@ -9,53 +9,50 @@ const (
 )
 
 const (
-	SchemaStoreFailureWarn  = "warn"
-	SchemaStoreFailureError = "error"
-	SchemaStoreFailureSkip  = "skip"
+	CatalogFailureWarn  = "warn"
+	CatalogFailureError = "error"
+	CatalogFailureSkip  = "skip"
 )
 
 type Config struct {
 	Version   int             `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
 	Discovery DiscoveryConfig `json:"discovery,omitempty" yaml:"discovery,omitempty" toml:"discovery,omitempty"`
 	Schemas   SchemaConfig    `json:"schemas,omitempty" yaml:"schemas,omitempty" toml:"schemas,omitempty"`
-	Schema    SchemaConfig    `json:"schema,omitempty" yaml:"schema,omitempty" toml:"schema,omitempty"`
-	Timeouts  TimeoutConfig   `json:"timeouts,omitempty" yaml:"timeouts,omitempty" toml:"timeouts,omitempty"`
 	Ignore    []IgnoreRule    `json:"ignore,omitempty" yaml:"ignore,omitempty" toml:"ignore,omitempty"`
 	Output    OutputConfig    `json:"output,omitempty" yaml:"output,omitempty" toml:"output,omitempty"`
 }
 
 type DiscoveryConfig struct {
-	Include        []string `json:"include,omitempty" yaml:"include,omitempty" toml:"include,omitempty"`
-	Exclude        []string `json:"exclude,omitempty" yaml:"exclude,omitempty" toml:"exclude,omitempty"`
-	FollowSymlinks bool     `json:"followSymlinks,omitempty" yaml:"followSymlinks,omitempty" toml:"followSymlinks,omitempty"`
+	Include            []string `json:"include,omitempty" yaml:"include,omitempty" toml:"include,omitempty"`
+	ExtendExclude      []string `json:"extendExclude,omitempty" yaml:"extendExclude,omitempty" toml:"extendExclude,omitempty"`
+	UseDefaultExcludes *bool    `json:"useDefaultExcludes,omitempty" yaml:"useDefaultExcludes,omitempty" toml:"useDefaultExcludes,omitempty"`
+	RespectGitIgnore   *bool    `json:"respectGitIgnore,omitempty" yaml:"respectGitIgnore,omitempty" toml:"respectGitIgnore,omitempty"`
+	ForceExclude       bool     `json:"forceExclude,omitempty" yaml:"forceExclude,omitempty" toml:"forceExclude,omitempty"`
+	FollowSymlinks     bool     `json:"followSymlinks,omitempty" yaml:"followSymlinks,omitempty" toml:"followSymlinks,omitempty"`
 }
 
 type SchemaConfig struct {
-	Associations          []SchemaAssociation `json:"associations,omitempty" yaml:"associations,omitempty" toml:"associations,omitempty"`
-	Catalogs              CatalogConfig       `json:"catalogs,omitempty" yaml:"catalogs,omitempty" toml:"catalogs,omitempty"`
-	SchemaStore           SchemaStoreConfig   `json:"schemaStore,omitempty" yaml:"schemaStore,omitempty" toml:"schemaStore,omitempty"`
-	Fetch                 FetchConfig         `json:"fetch,omitempty" yaml:"fetch,omitempty" toml:"fetch,omitempty"`
-	MaxDepth              int                 `json:"maxDepth,omitempty" yaml:"maxDepth,omitempty" toml:"maxDepth,omitempty"`
-	FetchRemote           *bool               `json:"fetchRemote,omitempty" yaml:"fetchRemote,omitempty" toml:"fetchRemote,omitempty"`
-	FetchSchemaStore      *bool               `json:"fetchSchemaStore,omitempty" yaml:"fetchSchemaStore,omitempty" toml:"fetchSchemaStore,omitempty"`
-	AzureResourcePruning  *bool               `json:"azureResourcePruning,omitempty" yaml:"azureResourcePruning,omitempty" toml:"azureResourcePruning,omitempty"`
-	SchemaStoreCatalogURL string              `json:"schemaStoreCatalogUrl,omitempty" yaml:"schemaStoreCatalogUrl,omitempty" toml:"schemaStoreCatalogUrl,omitempty"`
-	AllowedDomains        []string            `json:"allowedDomains,omitempty" yaml:"allowedDomains,omitempty" toml:"allowedDomains,omitempty"`
-	BlockedDomains        []string            `json:"blockedDomains,omitempty" yaml:"blockedDomains,omitempty" toml:"blockedDomains,omitempty"`
-	Concurrency           int                 `json:"concurrency,omitempty" yaml:"concurrency,omitempty" toml:"concurrency,omitempty"`
+	Associations  []SchemaAssociation `json:"associations,omitempty" yaml:"associations,omitempty" toml:"associations,omitempty"`
+	Catalogs      CatalogConfig       `json:"catalogs,omitempty" yaml:"catalogs,omitempty" toml:"catalogs,omitempty"`
+	Optimizations OptimizationConfig  `json:"optimizations,omitempty" yaml:"optimizations,omitempty" toml:"optimizations,omitempty"`
+	Fetch         FetchConfig         `json:"fetch,omitempty" yaml:"fetch,omitempty" toml:"fetch,omitempty"`
+	Compile       CompileConfig       `json:"compile,omitempty" yaml:"compile,omitempty" toml:"compile,omitempty"`
+	MaxDepth      int                 `json:"maxDepth,omitempty" yaml:"maxDepth,omitempty" toml:"maxDepth,omitempty"`
+	Concurrency   int                 `json:"concurrency,omitempty" yaml:"concurrency,omitempty" toml:"concurrency,omitempty"`
 }
 
-type SchemaStoreConfig struct {
-	Enabled bool   `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
-	URL     string `json:"url,omitempty" yaml:"url,omitempty" toml:"url,omitempty"`
-	Failure string `json:"failure,omitempty" yaml:"failure,omitempty" toml:"failure,omitempty"`
-	Strict  bool   `json:"strict,omitempty" yaml:"strict,omitempty" toml:"strict,omitempty"`
+type OptimizationConfig struct {
+	Enabled *bool             `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
+	Azure   AzureOptimization `json:"azure,omitempty" yaml:"azure,omitempty" toml:"azure,omitempty"`
+}
+
+type AzureOptimization struct {
+	PruneResources *bool `json:"pruneResources,omitempty" yaml:"pruneResources,omitempty" toml:"pruneResources,omitempty"`
 }
 
 type CatalogConfig struct {
 	Enabled bool            `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
 	Failure string          `json:"failure,omitempty" yaml:"failure,omitempty" toml:"failure,omitempty"`
-	Strict  bool            `json:"strict,omitempty" yaml:"strict,omitempty" toml:"strict,omitempty"`
 	Sources []CatalogSource `json:"sources,omitempty" yaml:"sources,omitempty" toml:"sources,omitempty"`
 }
 
@@ -68,9 +65,13 @@ type CatalogSource struct {
 }
 
 type FetchConfig struct {
-	Retries      *int     `json:"retries,omitempty" yaml:"retries,omitempty" toml:"retries,omitempty"`
-	RetryMinWait Duration `json:"retryMinWait,omitempty" yaml:"retryMinWait,omitempty" toml:"retryMinWait,omitempty"`
-	RetryMaxWait Duration `json:"retryMaxWait,omitempty" yaml:"retryMaxWait,omitempty" toml:"retryMaxWait,omitempty"`
+	Enabled        *bool    `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
+	Timeout        Duration `json:"timeout,omitempty" yaml:"timeout,omitempty" toml:"timeout,omitempty"`
+	Retries        *int     `json:"retries,omitempty" yaml:"retries,omitempty" toml:"retries,omitempty"`
+	RetryMinWait   Duration `json:"retryMinWait,omitempty" yaml:"retryMinWait,omitempty" toml:"retryMinWait,omitempty"`
+	RetryMaxWait   Duration `json:"retryMaxWait,omitempty" yaml:"retryMaxWait,omitempty" toml:"retryMaxWait,omitempty"`
+	AllowedDomains []string `json:"allowedDomains,omitempty" yaml:"allowedDomains,omitempty" toml:"allowedDomains,omitempty"`
+	BlockedDomains []string `json:"blockedDomains,omitempty" yaml:"blockedDomains,omitempty" toml:"blockedDomains,omitempty"`
 }
 
 type SchemaAssociation struct {
@@ -78,14 +79,11 @@ type SchemaAssociation struct {
 	Schema string `json:"schema" yaml:"schema" toml:"schema"`
 }
 
-type TimeoutConfig struct {
-	Fetch   Duration `json:"fetch,omitempty" yaml:"fetch,omitempty" toml:"fetch,omitempty"`
-	Compile Duration `json:"compile,omitempty" yaml:"compile,omitempty" toml:"compile,omitempty"`
+type CompileConfig struct {
+	Timeout Duration `json:"timeout,omitempty" yaml:"timeout,omitempty" toml:"timeout,omitempty"`
 }
 
 type OutputConfig struct {
-	JSON        bool `json:"json,omitempty" yaml:"json,omitempty" toml:"json,omitempty"`
-	SARIF       bool `json:"sarif,omitempty" yaml:"sarif,omitempty" toml:"sarif,omitempty"`
 	ShowSkipped bool `json:"showSkipped,omitempty" yaml:"showSkipped,omitempty" toml:"showSkipped,omitempty"`
 	Verbose     bool `json:"verbose,omitempty" yaml:"verbose,omitempty" toml:"verbose,omitempty"`
 	Quiet       bool `json:"quiet,omitempty" yaml:"quiet,omitempty" toml:"quiet,omitempty"`
@@ -100,8 +98,9 @@ type IgnoreRule struct {
 }
 
 type Options struct {
-	Root   string
-	Config Config
+	Root            string
+	Config          Config
+	SourceLocations bool
 }
 
 type Result struct {

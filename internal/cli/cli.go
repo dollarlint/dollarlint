@@ -17,30 +17,38 @@ var version = "dev"
 
 const defaultFetchRetries = 2
 
+const (
+	outputFormatText  = "text"
+	outputFormatJSON  = "json"
+	outputFormatSARIF = "sarif"
+)
+
 type validateOptions struct {
-	configPath         *string
-	jsonOutput         bool
-	sarifOutput        bool
-	showSkipped        bool
-	verbose            bool
-	quiet              bool
-	locations          bool
-	includes           []string
-	excludes           []string
-	associations       []string
-	schemaStore        bool
-	schemaStoreURL     string
-	schemaStoreStrict  bool
-	schemaStoreFailure string
-	maxDepth           int
-	fetchRemote        bool
-	fetchRetries       int
-	fetchRetryMinWait  string
-	fetchRetryMaxWait  string
-	allowedDomains     []string
-	blockedDomains     []string
-	fetchTimeout       string
-	compileTimeout     string
+	configPath        *string
+	format            string
+	outputPath        string
+	showSkipped       bool
+	verbose           bool
+	quiet             bool
+	locations         bool
+	includes          []string
+	extendExcludes    []string
+	noDefaultExcludes bool
+	noGitIgnore       bool
+	forceExclude      bool
+	associations      []string
+	schemaStore       bool
+	schemaStoreURL    string
+	catalogFailure    string
+	maxDepth          int
+	fetchRemote       bool
+	fetchRetries      int
+	fetchRetryMinWait string
+	fetchRetryMaxWait string
+	allowedDomains    []string
+	blockedDomains    []string
+	fetchTimeout      string
+	compileTimeout    string
 }
 
 func Execute(args []string, stdout, stderr io.Writer) int {
@@ -113,19 +121,21 @@ func newVersionCommand(stdout io.Writer) *cobra.Command {
 }
 
 func addValidateFlags(cmd *cobra.Command, opts *validateOptions) {
-	cmd.Flags().BoolVar(&opts.jsonOutput, "json", false, "Write machine-readable JSON output")
-	cmd.Flags().BoolVar(&opts.sarifOutput, "sarif", false, "Write SARIF 2.1.0 output")
+	cmd.Flags().StringVar(&opts.format, "format", outputFormatText, "Output format: text, json, or sarif")
+	cmd.Flags().StringVarP(&opts.outputPath, "output", "o", "", "Write output to a file instead of stdout")
 	cmd.Flags().BoolVar(&opts.showSkipped, "show-skipped", false, "Show files skipped because they do not declare a schema")
 	cmd.Flags().BoolVar(&opts.verbose, "verbose", false, "Show expanded issue metadata in text output")
 	cmd.Flags().BoolVar(&opts.quiet, "quiet", false, "Use terse text output")
 	cmd.Flags().BoolVar(&opts.locations, "locations", false, "Include line and column locations in text and JSON output")
 	cmd.Flags().StringArrayVar(&opts.includes, "include", nil, "Glob to include during discovery; repeatable")
-	cmd.Flags().StringArrayVar(&opts.excludes, "exclude", nil, "Glob to exclude during discovery; repeatable")
+	cmd.Flags().StringArrayVar(&opts.extendExcludes, "extend-exclude", nil, "Additional discovery exclude glob; repeatable")
+	cmd.Flags().BoolVar(&opts.noDefaultExcludes, "no-default-excludes", false, "Disable built-in discovery excludes for common generated and dependency directories")
+	cmd.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "Do not apply root .gitignore patterns during discovery")
+	cmd.Flags().BoolVar(&opts.forceExclude, "force-exclude", false, "Apply discovery excludes even to explicitly passed files")
 	cmd.Flags().StringArrayVar(&opts.associations, "schema", nil, "Associate a file glob with a schema as glob=uri; repeatable")
 	cmd.Flags().BoolVar(&opts.schemaStore, "schema-store", false, "Match conventional filenames using the SchemaStore catalog")
 	cmd.Flags().StringVar(&opts.schemaStoreURL, "schema-store-url", "", "SchemaStore catalog URL or local path")
-	cmd.Flags().StringVar(&opts.schemaStoreFailure, "schema-store-failure", "", "SchemaStore catalog failure policy: warn, error, or skip")
-	cmd.Flags().BoolVar(&opts.schemaStoreStrict, "schema-store-strict", false, "Fail when the SchemaStore catalog cannot be loaded")
+	cmd.Flags().StringVar(&opts.catalogFailure, "schema-store-failure", "", "SchemaStore catalog failure policy: warn, error, or skip")
 	cmd.Flags().IntVar(&opts.maxDepth, "max-depth", 0, "Maximum external schema reference depth")
 	cmd.Flags().BoolVar(&opts.fetchRemote, "fetch-remote", true, "Allow fetching http(s) schemas")
 	cmd.Flags().IntVar(&opts.fetchRetries, "fetch-retries", defaultFetchRetries, "Number of retries for transient remote schema fetch failures")
@@ -150,95 +160,130 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 	if len(opts.includes) > 0 {
 		cfg.Discovery.Include = opts.includes
 	}
-	if len(opts.excludes) > 0 {
-		cfg.Discovery.Exclude = append(cfg.Discovery.Exclude, opts.excludes...)
+	if len(opts.extendExcludes) > 0 {
+		cfg.Discovery.ExtendExclude = append(cfg.Discovery.ExtendExclude, opts.extendExcludes...)
+	}
+	if opts.noDefaultExcludes {
+		useDefaultExcludes := false
+		cfg.Discovery.UseDefaultExcludes = &useDefaultExcludes
+	}
+	if opts.noGitIgnore {
+		respectGitIgnore := false
+		cfg.Discovery.RespectGitIgnore = &respectGitIgnore
+	}
+	if opts.forceExclude {
+		cfg.Discovery.ForceExclude = true
 	}
 	for _, raw := range opts.associations {
 		association, err := parseAssociation(raw)
 		if err != nil {
 			return err
 		}
-		cfg.Schema.Associations = append(cfg.Schema.Associations, association)
+		cfg.Schemas.Associations = append(cfg.Schemas.Associations, association)
 	}
 	if cmd.Flags().Changed("schema-store") {
-		cfg.Schema.Catalogs.Enabled = opts.schemaStore
-		cfg.Schema.SchemaStore.Enabled = opts.schemaStore
+		cfg.Schemas.Catalogs.Enabled = opts.schemaStore
 	}
 	if opts.schemaStoreURL != "" {
-		cfg.Schema.Catalogs.Enabled = true
-		cfg.Schema.SchemaStore.Enabled = true
-		cfg.Schema.Catalogs.Sources = setSchemaStoreCatalogURL(cfg.Schema.Catalogs.Sources, opts.schemaStoreURL)
+		cfg.Schemas.Catalogs.Enabled = true
+		cfg.Schemas.Catalogs.Sources = setSchemaStoreCatalogURL(cfg.Schemas.Catalogs.Sources, opts.schemaStoreURL)
 	}
-	if opts.schemaStoreFailure != "" {
-		cfg.Schema.Catalogs.Failure = opts.schemaStoreFailure
-	}
-	if cmd.Flags().Changed("schema-store-strict") {
-		cfg.Schema.Catalogs.Strict = opts.schemaStoreStrict
+	if opts.catalogFailure != "" {
+		cfg.Schemas.Catalogs.Failure = opts.catalogFailure
 	}
 	if opts.maxDepth > 0 {
-		cfg.Schema.MaxDepth = opts.maxDepth
+		cfg.Schemas.MaxDepth = opts.maxDepth
 	}
 	if cmd.Flags().Changed("fetch-remote") {
-		cfg.Schema.FetchRemote = &opts.fetchRemote
+		cfg.Schemas.Fetch.Enabled = &opts.fetchRemote
 	}
 	if cmd.Flags().Changed("fetch-retries") {
-		cfg.Schema.Fetch.Retries = &opts.fetchRetries
+		cfg.Schemas.Fetch.Retries = &opts.fetchRetries
 	}
 	if opts.fetchRetryMinWait != "" {
-		if err := cfg.Schema.Fetch.RetryMinWait.UnmarshalText([]byte(opts.fetchRetryMinWait)); err != nil {
+		if err := cfg.Schemas.Fetch.RetryMinWait.UnmarshalText([]byte(opts.fetchRetryMinWait)); err != nil {
 			return err
 		}
 	}
 	if opts.fetchRetryMaxWait != "" {
-		if err := cfg.Schema.Fetch.RetryMaxWait.UnmarshalText([]byte(opts.fetchRetryMaxWait)); err != nil {
+		if err := cfg.Schemas.Fetch.RetryMaxWait.UnmarshalText([]byte(opts.fetchRetryMaxWait)); err != nil {
 			return err
 		}
 	}
 	if len(opts.allowedDomains) > 0 {
-		cfg.Schema.AllowedDomains = append(cfg.Schema.AllowedDomains, opts.allowedDomains...)
+		cfg.Schemas.Fetch.AllowedDomains = append(cfg.Schemas.Fetch.AllowedDomains, opts.allowedDomains...)
 	}
 	if len(opts.blockedDomains) > 0 {
-		cfg.Schema.BlockedDomains = append(cfg.Schema.BlockedDomains, opts.blockedDomains...)
+		cfg.Schemas.Fetch.BlockedDomains = append(cfg.Schemas.Fetch.BlockedDomains, opts.blockedDomains...)
 	}
 	if opts.fetchTimeout != "" {
-		if err := cfg.Timeouts.Fetch.UnmarshalText([]byte(opts.fetchTimeout)); err != nil {
+		if err := cfg.Schemas.Fetch.Timeout.UnmarshalText([]byte(opts.fetchTimeout)); err != nil {
 			return err
 		}
 	}
 	if opts.compileTimeout != "" {
-		if err := cfg.Timeouts.Compile.UnmarshalText([]byte(opts.compileTimeout)); err != nil {
+		if err := cfg.Schemas.Compile.Timeout.UnmarshalText([]byte(opts.compileTimeout)); err != nil {
 			return err
 		}
 	}
-	cfg.Output.JSON = cfg.Output.JSON || opts.jsonOutput
-	cfg.Output.SARIF = cfg.Output.SARIF || opts.sarifOutput
 	cfg.Output.ShowSkipped = cfg.Output.ShowSkipped || opts.showSkipped
 	cfg.Output.Verbose = cfg.Output.Verbose || opts.verbose
 	cfg.Output.Quiet = cfg.Output.Quiet || opts.quiet
 	cfg.Output.Locations = cfg.Output.Locations || opts.locations
-	result, err := dollarlint.Lint(context.Background(), dollarlint.Options{Root: root, Config: cfg})
+	format, err := validateOutputFormat(opts.format)
 	if err != nil {
 		return err
 	}
-	if cfg.Output.SARIF {
-		data, err := dollarlint.FormatSARIF(result)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintln(stdout, string(data))
-	} else if cfg.Output.JSON {
-		data, err := dollarlint.FormatJSON(result)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintln(stdout, string(data))
-	} else {
-		fmt.Fprint(stdout, dollarlint.FormatText(result, cfg.Output))
+	result, err := dollarlint.Lint(context.Background(), dollarlint.Options{Root: root, Config: cfg, SourceLocations: format == outputFormatSARIF})
+	if err != nil {
+		return err
+	}
+	data, err := formatValidateResult(result, cfg.Output, format)
+	if err != nil {
+		return err
+	}
+	if err := writeValidateOutput(stdout, opts.outputPath, data); err != nil {
+		return err
 	}
 	if result.HasIssues() {
 		return errIssues
 	}
 	return nil
+}
+
+func validateOutputFormat(format string) (string, error) {
+	switch strings.ToLower(format) {
+	case "", outputFormatText:
+		return outputFormatText, nil
+	case outputFormatJSON:
+		return outputFormatJSON, nil
+	case outputFormatSARIF:
+		return outputFormatSARIF, nil
+	default:
+		return "", fmt.Errorf("unknown output format %q (expected text, json, or sarif)", format)
+	}
+}
+
+func formatValidateResult(result dollarlint.Result, output dollarlint.OutputConfig, format string) ([]byte, error) {
+	switch format {
+	case outputFormatJSON:
+		return dollarlint.FormatJSON(result)
+	case outputFormatSARIF:
+		return dollarlint.FormatSARIF(result)
+	default:
+		return []byte(dollarlint.FormatText(result, output)), nil
+	}
+}
+
+func writeValidateOutput(stdout io.Writer, outputPath string, data []byte) error {
+	if len(data) == 0 || data[len(data)-1] != '\n' {
+		data = append(data, '\n')
+	}
+	if outputPath == "" || outputPath == "-" {
+		_, err := stdout.Write(data)
+		return err
+	}
+	return os.WriteFile(outputPath, data, 0o644)
 }
 
 func setSchemaStoreCatalogURL(sources []dollarlint.CatalogSource, catalogURL string) []dollarlint.CatalogSource {

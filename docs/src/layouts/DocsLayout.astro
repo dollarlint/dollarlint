@@ -1,4 +1,5 @@
 ---
+import Logo from "../components/Logo.astro";
 import "../styles/dollar.css";
 
 const {
@@ -16,6 +17,7 @@ const nav = [
       { href: "/guides/quick-start/", label: "Quick start" },
       { href: "/guides/schema-declarations/", label: "Schema declarations" },
       { href: "/guides/schemastore/", label: "Catalogs" },
+      { href: "/guides/examples/", label: "Examples" },
     ],
   },
   {
@@ -27,6 +29,14 @@ const nav = [
       { href: "/reference/exit-codes/", label: "Exit codes" },
     ],
   },
+];
+
+const currentLabel = nav.flatMap((section) => section.links).find((link) => link.href === current)?.label ?? "Menu";
+const slogans = [
+  "Put your money where your schema is",
+  "Your configs need an audit",
+  "No blank checks for bad config",
+  "Make every schema count",
 ];
 ---
 
@@ -67,6 +77,47 @@ const nav = [
             setPressed(theme);
           });
         });
+        const menu = document.querySelector("[data-mobile-menu]");
+        const menuButton = document.querySelector("[data-mobile-menu-button]");
+        const menuPanel = document.querySelector("[data-mobile-menu-panel]");
+        const closeMenu = () => {
+          menu?.removeAttribute("data-open");
+          menuButton?.setAttribute("aria-expanded", "false");
+          menuPanel?.setAttribute("hidden", "");
+        };
+        const openMenu = () => {
+          menu?.setAttribute("data-open", "true");
+          menuButton?.setAttribute("aria-expanded", "true");
+          menuPanel?.removeAttribute("hidden");
+        };
+        menuButton?.addEventListener("click", () => {
+          const isOpen = menu?.hasAttribute("data-open");
+          if (isOpen) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        });
+        document.addEventListener("click", (event) => {
+          if (!menu?.contains(event.target)) {
+            closeMenu();
+          }
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            closeMenu();
+          }
+        });
+        const slogan = document.querySelector("[data-slogan]");
+        const slogans = ["Put your money where your schema is", "Your configs need an audit", "No blank checks for bad config", "Make every schema count"];
+        let sloganIndex = 0;
+        window.setInterval(() => {
+          if (!slogan) {
+            return;
+          }
+          sloganIndex = (sloganIndex + 1) % slogans.length;
+          slogan.textContent = slogans[sloganIndex];
+        }, 4200);
       });
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -82,12 +133,48 @@ const nav = [
     <div class="site-shell">
       <aside class="sidebar" aria-label="Documentation">
         <a class="brand" href="/">
-          <span class="brand-mark" aria-hidden="true">$</span>
+          <Logo class="brand-logo" />
           <span>
             <span class="brand-title">dollarlint</span>
-            <span class="brand-subtitle">JSON Schema checks for config files</span>
+            <span class="brand-subtitle" data-slogan>{slogans[0]}</span>
           </span>
         </a>
+        <div class="mobile-menu" data-mobile-menu>
+          <button
+            class="mobile-menu-trigger"
+            type="button"
+            aria-controls="mobile-docs-menu"
+            aria-expanded="false"
+            data-mobile-menu-button
+          >
+            <span>Menu</span>
+            <span>{currentLabel}</span>
+          </button>
+          <div class="mobile-menu-panel" id="mobile-docs-menu" data-mobile-menu-panel hidden>
+            {nav.map((section) => (
+              <nav class="mobile-nav-section" aria-label={`${section.heading} mobile`}>
+                <div class="nav-heading">{section.heading}</div>
+                <ul class="nav-list">
+                  {section.links.map((link) => (
+                    <li>
+                      <a class="nav-link" href={link.href} aria-current={current === link.href ? "page" : undefined}>
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            ))}
+            <div class="mobile-theme">
+              <div class="nav-heading">Theme</div>
+              <div class="theme-switch" role="group" aria-label="Theme">
+                <button class="theme-button" type="button" data-theme-option="light" aria-pressed="false">Light</button>
+                <button class="theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
+                <button class="theme-button" type="button" data-theme-option="system" aria-pressed="true">System</button>
+              </div>
+            </div>
+          </div>
+        </div>
         {nav.map((section) => (
           <nav class="nav-section" aria-label={section.heading}>
             <div class="nav-heading">{section.heading}</div>
@@ -102,21 +189,24 @@ const nav = [
             </ul>
           </nav>
         ))}
-      </aside>
-      <main class="content">
-        <div class="topbar">
+        <div class="sidebar-theme">
+          <div class="nav-heading">Theme</div>
           <div class="theme-switch" role="group" aria-label="Theme">
             <button class="theme-button" type="button" data-theme-option="light" aria-pressed="false">Light</button>
             <button class="theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
             <button class="theme-button" type="button" data-theme-option="system" aria-pressed="true">System</button>
           </div>
+        </div>
+      </aside>
+      <main class="content">
+        <div class="topbar">
           <a class="pill" href="https://github.com/agorischek/dollarlint">GitHub</a>
           <a class="pill" href="/reference/cli/">CLI reference</a>
         </div>
         <div class="page">
           <slot />
           <footer class="footer">
-            dollarlint validates JSON, YAML, and TOML files against the JSON Schema each file declares.
+            dollarlint is open source and free to use. If your configs pass, consider them valid tender.
           </footer>
         </div>
       </main>

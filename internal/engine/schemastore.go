@@ -20,11 +20,11 @@ type schemaStoreEntry struct {
 }
 
 func loadSchemaStoreCatalog(ctx context.Context, cache *SchemaCache, cfg Config) (*schemaStoreCatalog, *Warning, error) {
-	if !schemaStoreEnabled(cfg.Schema) {
+	if !catalogEnabled(cfg.Schemas) {
 		return nil, nil, nil
 	}
 	catalog := &schemaStoreCatalog{}
-	for _, source := range enabledSchemaStoreCatalogSources(cfg.Schema) {
+	for _, source := range enabledSchemaStoreCatalogSources(cfg.Schemas) {
 		loaded, warning, err := loadSchemaStoreCatalogSource(ctx, cache, cfg, source)
 		if err != nil || warning != nil {
 			return nil, warning, err
@@ -42,15 +42,7 @@ func loadSchemaStoreCatalog(ctx context.Context, cache *SchemaCache, cfg Config)
 func enabledSchemaStoreCatalogSources(cfg SchemaConfig) []CatalogSource {
 	sources := cfg.Catalogs.Sources
 	if len(sources) == 0 {
-		source := defaultSchemaStoreCatalogSource()
-		source.URL = cfg.SchemaStore.URL
-		if source.URL == "" {
-			source.URL = cfg.SchemaStoreCatalogURL
-		}
-		if source.URL == "" {
-			source.URL = defaultSchemaStoreCatalogURL
-		}
-		sources = []CatalogSource{source}
+		sources = []CatalogSource{defaultSchemaStoreCatalogSource()}
 	}
 	var out []CatalogSource
 	for _, source := range sources {
@@ -78,7 +70,7 @@ func loadSchemaStoreCatalogSource(ctx context.Context, cache *SchemaCache, cfg C
 	if catalogURL == "" {
 		return nil, nil, nil
 	}
-	if !remoteFetchEnabled(cfg.Schema) && isRemoteURI(catalogURL) {
+	if !remoteFetchEnabled(cfg.Schemas) && isRemoteURI(catalogURL) {
 		return schemaStoreCatalogError(cfg, source, "catalog %s requires remote schema fetching", catalogURL)
 	}
 	resolved, err := resolveCatalogURI(catalogURL)
@@ -116,14 +108,14 @@ func loadSchemaStoreCatalogSource(ctx context.Context, cache *SchemaCache, cfg C
 
 func schemaStoreCatalogError(cfg Config, source CatalogSource, format string, args ...any) (*schemaStoreCatalog, *Warning, error) {
 	message := fmt.Sprintf(format, args...)
-	mode, err := schemaStoreFailureMode(cfg.Schema)
+	mode, err := catalogFailureMode(cfg.Schemas)
 	if err != nil {
 		return nil, nil, err
 	}
 	switch mode {
-	case SchemaStoreFailureError:
+	case CatalogFailureError:
 		return nil, nil, fmt.Errorf("%s", message)
-	case SchemaStoreFailureSkip:
+	case CatalogFailureSkip:
 		return nil, nil, nil
 	default:
 		sourceName := source.Name

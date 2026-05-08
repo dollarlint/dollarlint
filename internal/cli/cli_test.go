@@ -16,7 +16,7 @@ func TestExecuteExitCodes(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["name"],"properties":{"$schema":{"type":"string"},"name":{"type":"string"}}}`)
 	writeFile(t, filepath.Join(dir, "bad.json"), `{"$schema":"./schema.json"}`)
 	var stdout, stderr bytes.Buffer
-	if code := Execute([]string{dir, "--json"}, &stdout, &stderr); code != 2 {
+	if code := Execute([]string{dir, "--format", "json"}, &stdout, &stderr); code != 2 {
 		t.Fatalf("bare path exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stderr.String(), "unknown command") && !strings.Contains(stderr.String(), "unknown flag") {
@@ -24,7 +24,7 @@ func TestExecuteExitCodes(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{"validate", dir, "--json"}, &stdout, &stderr); code != 1 {
+	if code := Execute([]string{"validate", dir, "--format", "json"}, &stdout, &stderr); code != 1 {
 		t.Fatalf("validate command exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), `"issues": 1`) {
@@ -40,11 +40,43 @@ func TestExecuteExitCodes(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{"validate", dir, "--sarif"}, &stdout, &stderr); code != 1 {
+	if code := Execute([]string{"validate", dir, "--format", "sarif"}, &stdout, &stderr); code != 1 {
 		t.Fatalf("sarif run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), `"version": "2.1.0"`) || !strings.Contains(stdout.String(), `"startLine"`) {
 		t.Fatalf("sarif output mismatch: %s", stdout.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
+	outputPath := filepath.Join(dir, "dollarlint.sarif")
+	if code := Execute([]string{"validate", dir, "--format", "sarif", "--output", outputPath}, &stdout, &stderr); code != 1 {
+		t.Fatalf("sarif file run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if stdout.Len() != 0 {
+		t.Fatalf("expected --output to suppress stdout, got %s", stdout.String())
+	}
+	data, err := os.ReadFile(outputPath)
+	if err != nil {
+		t.Fatalf("read sarif output: %v", err)
+	}
+	if !strings.Contains(string(data), `"version": "2.1.0"`) || !strings.HasSuffix(string(data), "\n") {
+		t.Fatalf("sarif file output mismatch: %s", string(data))
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", dir, "--json"}, &stdout, &stderr); code != 2 {
+		t.Fatalf("removed json shortcut exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "unknown flag") {
+		t.Fatalf("removed json shortcut stderr = %s", stderr.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", dir, "--format", "xml"}, &stdout, &stderr); code != 2 {
+		t.Fatalf("invalid format exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "unknown output format") {
+		t.Fatalf("invalid format stderr = %s", stderr.String())
 	}
 	stdout.Reset()
 	stderr.Reset()
@@ -97,13 +129,60 @@ func TestExecuteRemoteDomainFlags(t *testing.T) {
 	}
 }
 
+func TestExecuteDiscoveryFlags(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["ok"],"properties":{"$schema":{"type":"string"},"ok":{"type":"boolean"}}}`)
+	writeFile(t, filepath.Join(dir, ".gitignore"), "ignored.json\n")
+	writeFile(t, filepath.Join(dir, "ignored.json"), `{"$schema":"./schema.json"}`)
+	writeFile(t, filepath.Join(dir, "generated", "bad.json"), `{"$schema":"../schema.json"}`)
+	writeFile(t, filepath.Join(dir, "node_modules", "bad.json"), `{"$schema":"../schema.json"}`)
+	writeFile(t, filepath.Join(dir, "target.json"), `{"$schema":"./schema.json","ok":true}`)
+	var stdout, stderr bytes.Buffer
+	if code := Execute([]string{"validate", dir, "--format", "json", "--extend-exclude", "generated/**"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("default discovery exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"issues": 0`) {
+		t.Fatalf("default discovery output = %s", stdout.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", dir, "--format", "json", "--no-gitignore", "--extend-exclude", "generated/**"}, &stdout, &stderr); code != 1 {
+		t.Fatalf("no-gitignore exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"issues": 1`) {
+		t.Fatalf("no-gitignore output = %s", stdout.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", dir, "--format", "json", "--no-default-excludes", "--extend-exclude", "generated/**"}, &stdout, &stderr); code != 1 {
+		t.Fatalf("no-default-excludes exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"issues": 1`) {
+		t.Fatalf("no-default-excludes output = %s", stdout.String())
+	}
+	writeFile(t, filepath.Join(dir, "target.json"), `{"$schema":"./schema.json"}`)
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", filepath.Join(dir, "target.json"), "--format", "json", "--extend-exclude", "target.json"}, &stdout, &stderr); code != 1 {
+		t.Fatalf("explicit file exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", filepath.Join(dir, "target.json"), "--format", "json", "--extend-exclude", "target.json", "--force-exclude"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("force-exclude exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"discovered": 0`) {
+		t.Fatalf("force-exclude output = %s", stdout.String())
+	}
+}
+
 func TestExecuteSchemaStoreFlags(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "catalog.json"), `{"schemas":[{"name":"Custom","fileMatch":["custom.json"],"url":"./custom.schema.json"}]}`)
 	writeFile(t, filepath.Join(dir, "custom.schema.json"), `{"type":"object","required":["ok"],"properties":{"ok":{"type":"boolean"}}}`)
 	writeFile(t, filepath.Join(dir, "custom.json"), `{"ok":true}`)
 	var stdout, stderr bytes.Buffer
-	if code := Execute([]string{"validate", dir, "--schema-store-url", filepath.Join(dir, "catalog.json"), "--schema-store-failure", "warn", "--schema-store-strict", "--fetch-retries", "1", "--fetch-retry-min-wait", "1ms", "--fetch-retry-max-wait", "1ms", "--show-skipped"}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"validate", dir, "--schema-store-url", filepath.Join(dir, "catalog.json"), "--schema-store-failure", "warn", "--fetch-retries", "1", "--fetch-retry-min-wait", "1ms", "--fetch-retry-max-wait", "1ms", "--show-skipped"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("schema-store run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), "1 validated") || !strings.Contains(stdout.String(), "2 skipped") {
@@ -142,14 +221,14 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{"init", dir, "--force", "--schema-store-strict"}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"init", dir, "--force", "--schema-store-failure", "error"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("force init exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	data, err = os.ReadFile(configPath)
 	if err != nil {
 		t.Fatalf("read forced config: %v", err)
 	}
-	if !strings.Contains(string(data), `failure = "error"`) || !strings.Contains(string(data), "strict = true") {
+	if !strings.Contains(string(data), `failure = "error"`) || strings.Contains(string(data), "strict =") {
 		t.Fatalf("forced config = %s", string(data))
 	}
 	stdout.Reset()
@@ -167,14 +246,14 @@ func TestInitCommandRequiresTOML(t *testing.T) {
 	dir := t.TempDir()
 	var stdout, stderr bytes.Buffer
 	tomlPath := filepath.Join(dir, "nested", ".dollarlint.toml")
-	if code := Execute([]string{"init", "--output", tomlPath, "--schema-store-strict"}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"init", "--output", tomlPath, "--schema-store-failure", "error"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("toml init exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	data, err := os.ReadFile(tomlPath)
 	if err != nil {
 		t.Fatalf("read toml config: %v", err)
 	}
-	if !strings.Contains(string(data), "[schemas.catalogs]") || !strings.Contains(string(data), `failure = "error"`) || !strings.Contains(string(data), "strict = true") {
+	if !strings.Contains(string(data), "[schemas.catalogs]") || !strings.Contains(string(data), `failure = "error"`) || strings.Contains(string(data), "strict =") {
 		t.Fatalf("toml config = %s", string(data))
 	}
 	stdout.Reset()
@@ -197,10 +276,10 @@ func TestInitPlainPrompts(t *testing.T) {
 	if err := interviewInitWithPrompter(&prompter, &opts); err != nil {
 		t.Fatalf("interviewInit: %v", err)
 	}
-	if opts.fetchRemote || opts.fetchRetries != 4 || !opts.schemaStore || opts.schemaStoreFailure != "error" || opts.schemaStoreStrict {
+	if opts.fetchRemote || opts.fetchRetries != 4 || !opts.schemaStore || opts.catalogFailure != "error" {
 		t.Fatalf("opts = %+v", opts)
 	}
-	if strings.Join(prompter.questions, "|") != "Allow remote http(s) schema fetching?|Retries for transient schema fetch failures|Enable catalog filename matching?|schemaStoreFailure" {
+	if strings.Join(prompter.questions, "|") != "Allow remote http(s) schema fetching?|Retries for transient schema fetch failures|Enable catalog filename matching?|catalogFailure" {
 		t.Fatalf("questions = %+v", prompter.questions)
 	}
 }
@@ -214,7 +293,7 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 	if err := interviewInitWithPrompter(&prompter, &opts); err != nil {
 		t.Fatalf("interviewInit: %v", err)
 	}
-	if !opts.fetchRemote || opts.fetchRetries != defaultFetchRetries || opts.schemaStore || opts.schemaStoreStrict {
+	if !opts.fetchRemote || opts.fetchRetries != defaultFetchRetries || opts.schemaStore {
 		t.Fatalf("opts after prompts = %+v", opts)
 	}
 	data, err := renderStarterConfig(defaultInitOptions())
@@ -223,15 +302,20 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 	}
 	config := string(data)
 	for _, expected := range []string{
-		"fetchRemote = true",
-		`retries = 2`,
+		"[schemas.fetch]",
 		"enabled = true",
+		`timeout = "10s"`,
+		`retries = 2`,
+		"[schemas.compile]",
+		`timeout = "30s"`,
 		`failure = "warn"`,
-		"strict = false",
 	} {
 		if !strings.Contains(config, expected) {
 			t.Fatalf("default config missing %q:\n%s", expected, config)
 		}
+	}
+	if strings.Contains(config, "fetchRemote") || strings.Contains(config, "strict =") || strings.Contains(config, "[timeouts]") {
+		t.Fatalf("default config contains removed keys:\n%s", config)
 	}
 }
 
@@ -260,22 +344,14 @@ func TestInitOverwritePromptComesBeforeInterview(t *testing.T) {
 
 func TestNormalizeInitOptions(t *testing.T) {
 	opts := defaultInitOptions()
-	opts.schemaStoreFailure = "skip"
+	opts.catalogFailure = "skip"
 	if err := normalizeInitOptions(&opts); err != nil {
 		t.Fatalf("normalize skip: %v", err)
 	}
-	if opts.schemaStoreFailure != "skip" {
-		t.Fatalf("failure = %q", opts.schemaStoreFailure)
+	if opts.catalogFailure != "skip" {
+		t.Fatalf("failure = %q", opts.catalogFailure)
 	}
-	opts.schemaStoreStrict = true
-	if err := normalizeInitOptions(&opts); err != nil {
-		t.Fatalf("normalize strict: %v", err)
-	}
-	if opts.schemaStoreFailure != "error" {
-		t.Fatalf("strict should force error, got %q", opts.schemaStoreFailure)
-	}
-	opts.schemaStoreStrict = false
-	opts.schemaStoreFailure = "explode"
+	opts.catalogFailure = "explode"
 	if err := normalizeInitOptions(&opts); err == nil {
 		t.Fatalf("expected invalid failure policy error")
 	}
@@ -308,8 +384,8 @@ func (p *fakeInitPrompter) NonNegativeInt(question string, defaultValue int) (in
 	return value, nil
 }
 
-func (p *fakeInitPrompter) SchemaStoreFailure(defaultValue string) (string, error) {
-	p.questions = append(p.questions, "schemaStoreFailure")
+func (p *fakeInitPrompter) CatalogFailure(defaultValue string) (string, error) {
+	p.questions = append(p.questions, "catalogFailure")
 	if len(p.failures) == 0 {
 		return defaultValue, nil
 	}

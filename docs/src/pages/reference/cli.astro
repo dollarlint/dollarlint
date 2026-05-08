@@ -86,9 +86,9 @@ const mcpConfig = `{
         <tr><td><code>--output</code>, <code>-o</code></td><td>Write output to a file instead of stdout. Use <code>-</code> or omit it for stdout.</td></tr>
         <tr><td><code>--locations</code></td><td>Include line and column positions in text and JSON output. SARIF requests source locations automatically.</td></tr>
         <tr><td><code>--verbose</code></td><td>Show expanded issue metadata in text output.</td></tr>
-        <tr><td><code>--quiet</code></td><td>Use terse text output.</td></tr>
-        <tr><td><code>--show-skipped</code></td><td>Show files skipped because they do not declare a schema.</td></tr>
-        <tr><td><code>--include</code></td><td>Set discovery include globs. Repeatable; when provided, replaces config includes for this run.</td></tr>
+        <tr><td><code>--quiet</code></td><td>Use terse success text output and omit the summary details from failing text output.</td></tr>
+        <tr><td><code>--show-skipped</code></td><td>Show files skipped because they do not declare or match a schema.</td></tr>
+        <tr><td><code>--include</code></td><td>Set discovery include globs. Repeatable; when provided, replaces config includes for this run. A glob without a slash can match a basename at any depth.</td></tr>
         <tr><td><code>--extend-exclude</code></td><td>Add a discovery exclude glob on top of config and built-in default excludes. Repeatable.</td></tr>
         <tr><td><code>--no-default-excludes</code></td><td>Disable built-in discovery excludes.</td></tr>
         <tr><td><code>--no-gitignore</code></td><td>Do not apply root <code>.gitignore</code> patterns during discovery.</td></tr>

@@ -183,6 +183,8 @@ func (c *SchemaCache) loadAndDiscover(ctx context.Context, uris []string) ([]str
 func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error) {
 	parsed, _ := url.Parse(raw)
 	switch parsed.Scheme {
+	case "dollarlint":
+		return loadBuiltinSchema(raw)
 	case "file":
 		path, err := filePathFromURL(parsed)
 		if err != nil {

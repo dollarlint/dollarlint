@@ -2,7 +2,7 @@
 
 `dollarlint` validates source JSON, YAML, and TOML files against the JSON Schema each file declares.
 
-Files without a schema declaration, config association, or catalog match are skipped by default, but still counted in the run summary so CI output makes discovery behavior clear. Set `schemas.requireCoverage = true` when every included file must be covered.
+Files without a schema declaration, config association, built-in association, or catalog match are skipped by default, but still counted in the run summary so CI output makes discovery behavior clear. Set `schemas.requireCoverage = true` when every included file must be covered.
 
 ## Install
 
@@ -97,7 +97,7 @@ timeout = "10s"
 retries = 2
 retryMinWait = "250ms"
 retryMaxWait = "2s"
-allowedDomains = ["www.schemastore.org", "raw.githubusercontent.com"]
+allowedDomains = ["*.schemastore.org", "raw.githubusercontent.com"]
 blockedDomains = ["untrusted.example.com"]
 
 [schemas.compile]
@@ -134,9 +134,11 @@ Output format and output file are invocation choices, not persistent config. Use
 
 Discovery uses safe defaults. Leave `discovery.include` unset to discover JSON, YAML, YML, and TOML files at any depth. Set `include` only when you want to replace that default set with custom globs. `useDefaultExcludes = true` skips common dependency, generated, cache, and VCS directories like `node_modules`, `vendor`, `dist`, `build`, `.git`, `.venv`, and `.cache`. Add project-specific exclusions with `discovery.extendExclude` rather than copying the default list. `respectGitIgnore = true` applies root `.gitignore` patterns during directory discovery, while `forceExclude = true` also applies excludes to explicitly passed files.
 
-By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schemas.fetch.allowedDomains` can restrict remote schemas to specific hosts, and `schemas.fetch.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
+By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schemas.fetch.allowedDomains` can restrict remote schemas to specific hosts, and `schemas.fetch.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches. If you allowlist SchemaStore, prefer `*.schemastore.org` or include both `www.schemastore.org` and `json.schemastore.org`.
 
-Catalog matching is configurable with `schemas.catalogs`. When enabled, files without an explicit schema can be matched by conventional filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional catalog sources. Precedence is explicit in-file schema, then config associations, then catalog matches, then skipped. Set `schemas.requireCoverage = true` to fail the run when any discovered included file is not covered by one of those schema sources.
+Catalog matching is configurable with `schemas.catalogs`. When enabled, files without an explicit schema can be matched by conventional filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional catalog sources. Precedence is explicit in-file schema, then config associations, then dollarlint's built-in `.dollarlint.toml` association, then catalog matches, then skipped. Set `schemas.requireCoverage = true` to fail the run when any discovered included file is not covered by one of those schema sources.
+
+dollarlint automatically validates discovered `.dollarlint.toml` files against its embedded config schema. Users can override that by adding an in-file schema declaration or a config association for `.dollarlint.toml`.
 
 Catalog failures are modeled separately from validation issues. By default `schemas.catalogs.failure = "warn"` records a warning, skips catalog inference, still validates explicit/configured schemas, and exits `0` unless validation issues are found. Use `"error"` when catalog availability should fail the run with exit `2`, or `"skip"` for a silent fallback. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
 

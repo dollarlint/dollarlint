@@ -16,4 +16,4 @@ jobs:
         with:
           go-version: stable
       - run: go test ./...
-      - run: go run ./cmd/dollarlint ./examples/schemastore
+      - run: go run ./cmd/dollarlint validate ./examples/schemastore

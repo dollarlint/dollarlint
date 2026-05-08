@@ -156,6 +156,9 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 	if len(args) == 1 {
 		root = args[0]
 	}
+	if err := validateExplicitTarget(root); err != nil {
+		return err
+	}
 	cfg, _, err := dollarlint.LoadConfig(root, *opts.configPath)
 	if err != nil {
 		return err
@@ -194,7 +197,7 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 	if opts.catalogFailure != "" {
 		cfg.Schemas.Catalogs.Failure = opts.catalogFailure
 	}
-	if opts.maxDepth > 0 {
+	if cmd.Flags().Changed("max-depth") {
 		cfg.Schemas.MaxDepth = opts.maxDepth
 	}
 	if cmd.Flags().Changed("fetch-remote") {
@@ -265,6 +268,45 @@ func validateOutputFormat(format string) (string, error) {
 	default:
 		return "", fmt.Errorf("unknown output format %q (expected text, json, or sarif)", format)
 	}
+}
+
+func validateExplicitTarget(root string) error {
+	info, err := os.Stat(root)
+	if err != nil {
+		return nil
+	}
+	if info.IsDir() {
+		return nil
+	}
+	if _, err := dollarlintFileFormat(root); err != nil {
+		return err
+	}
+	return nil
+}
+
+func dollarlintFileFormat(path string) (string, error) {
+	switch strings.ToLower(filepathExt(path)) {
+	case ".json":
+		return "json", nil
+	case ".yaml", ".yml":
+		return "yaml", nil
+	case ".toml":
+		return "toml", nil
+	default:
+		return "", fmt.Errorf("unsupported explicit file %s; expected .json, .yaml, .yml, or .toml", path)
+	}
+}
+
+func filepathExt(path string) string {
+	for i := len(path) - 1; i >= 0; i-- {
+		switch path[i] {
+		case '.':
+			return path[i:]
+		case '/', '\\':
+			return ""
+		}
+	}
+	return ""
 }
 
 func formatValidateResult(result dollarlint.Result, output dollarlint.OutputConfig, format string) ([]byte, error) {

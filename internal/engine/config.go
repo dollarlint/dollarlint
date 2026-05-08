@@ -139,8 +139,41 @@ func LoadConfig(root, explicitPath string) (Config, string, error) {
 	if err := decodeConfig(path, data, &loaded); err != nil {
 		return cfg, "", err
 	}
+	if err := validateConfigValues(loaded); err != nil {
+		return cfg, "", err
+	}
 	loaded.ApplyDefaults()
 	return loaded, path, nil
+}
+
+func validateConfigValues(cfg Config) error {
+	if cfg.Schemas.MaxDepth < 0 {
+		return fmt.Errorf("schemas.maxDepth must be >= 0")
+	}
+	if cfg.Schemas.Concurrency < 0 {
+		return fmt.Errorf("schemas.concurrency must be >= 0")
+	}
+	if cfg.Schemas.Fetch.Retries != nil && *cfg.Schemas.Fetch.Retries < 0 {
+		return fmt.Errorf("schemas.fetch.retries must be >= 0")
+	}
+	if cfg.Schemas.Fetch.Timeout.Duration < 0 {
+		return fmt.Errorf("schemas.fetch.timeout must be >= 0")
+	}
+	if cfg.Schemas.Fetch.RetryMinWait.Duration < 0 {
+		return fmt.Errorf("schemas.fetch.retryMinWait must be >= 0")
+	}
+	if cfg.Schemas.Fetch.RetryMaxWait.Duration < 0 {
+		return fmt.Errorf("schemas.fetch.retryMaxWait must be >= 0")
+	}
+	if cfg.Schemas.Compile.Timeout.Duration < 0 {
+		return fmt.Errorf("schemas.compile.timeout must be >= 0")
+	}
+	if cfg.Schemas.Catalogs.Failure != "" {
+		if _, err := catalogFailureMode(cfg.Schemas); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func resolveConfigPath(root, explicitPath string) (string, error) {

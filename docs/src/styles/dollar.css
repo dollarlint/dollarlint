@@ -251,12 +251,16 @@ pre {
   display: block;
   min-width: 0;
   max-width: 100%;
-  min-height: 2.2rem;
+  min-height: 2.1rem;
   margin-top: 2px;
   color: var(--ink-soft);
   font-size: 0.78rem;
   line-height: 1.35;
-  overflow-wrap: break-word;
+}
+
+.brand-subtitle span {
+  display: block;
+  white-space: nowrap;
 }
 
 .nav-section {
@@ -818,7 +822,7 @@ tr:last-child td {
   .brand-subtitle {
     min-width: 0;
     max-width: 17rem;
-    min-height: 1.1rem;
+    min-height: 2.1rem;
   }
 
   .nav-section {

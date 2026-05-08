@@ -84,7 +84,7 @@ reason = "legacy fixture kept for compatibility"`;
     <p>Format and output file are per-run choices — use <code>--format</code> and <code>--output</code> on <code>dollarlint validate</code> whenever you need JSON, SARIF, or a file artifact.</p>
 
     <h2>Discovery</h2>
-    <p>Leave <code>include</code> unset to use the built-in JSON, YAML, YML, and TOML discovery defaults. Set it only when you want to replace that default set with custom globs.</p>
+    <p>Leave <code>include</code> unset to use the built-in JSON, YAML, YML, and TOML discovery defaults. Set it only when you want to replace that default set with custom globs. A glob without a slash can match a basename at any depth.</p>
     <table>
       <thead>
         <tr>
@@ -93,7 +93,7 @@ reason = "legacy fixture kept for compatibility"`;
         </tr>
       </thead>
       <tbody>
-        <tr><td><code>include</code></td><td>Optional replacement file globs to consider during discovery.</td></tr>
+        <tr><td><code>include</code></td><td>Optional replacement file globs to consider during discovery. Repeatable CLI includes replace config includes for that run.</td></tr>
         <tr><td><code>extendExclude</code></td><td>Additional file and directory globs to ignore, on top of the built-in default excludes.</td></tr>
         <tr><td><code>useDefaultExcludes</code></td><td>Skip common VCS, dependency, generated, cache, and virtual environment directories.</td></tr>
         <tr><td><code>respectGitIgnore</code></td><td>Apply the root <code>.gitignore</code> during directory discovery.</td></tr>
@@ -114,12 +114,12 @@ reason = "legacy fixture kept for compatibility"`;
       <tbody>
         <tr><td><code>maxDepth</code></td><td>Maximum external schema reference depth.</td></tr>
         <tr><td><code>concurrency</code></td><td>Number of concurrent validation workers. Defaults to <code>GOMAXPROCS</code>.</td></tr>
-        <tr><td><code>requireCoverage</code></td><td>Fail when a discovered included file has no in-file schema, config association, or catalog match.</td></tr>
+        <tr><td><code>requireCoverage</code></td><td>Fail when a discovered included file has no in-file schema, config association, built-in association, or catalog match.</td></tr>
       </tbody>
     </table>
 
     <h2>Associations</h2>
-    <p>Associations map discovered files to schemas when the file does not declare one itself.</p>
+    <p>Associations map discovered files to schemas when the file does not declare one itself. dollarlint also has a built-in association for <code>.dollarlint.toml</code>, backed by the embedded config schema; explicit in-file declarations and user associations still win.</p>
     <CodeBlock code={associationConfig} language="toml" />
     <p>Association globs are matched against paths relative to the validation root. In-file declarations win over associations.</p>
 
@@ -137,7 +137,7 @@ reason = "legacy fixture kept for compatibility"`;
         <tr><td><code>schemas.fetch.retries</code></td><td>Retries for transient remote schema fetch failures. <code>408</code>, <code>425</code>, <code>429</code>, and retryable <code>5xx</code> responses are retried.</td></tr>
         <tr><td><code>schemas.fetch.retryMinWait</code></td><td>Minimum retry backoff.</td></tr>
         <tr><td><code>schemas.fetch.retryMaxWait</code></td><td>Maximum retry backoff.</td></tr>
-        <tr><td><code>schemas.fetch.allowedDomains</code></td><td>Restrict remote schemas to exact or wildcard hosts.</td></tr>
+        <tr><td><code>schemas.fetch.allowedDomains</code></td><td>Restrict remote schemas to exact or wildcard hosts. For SchemaStore, use <code>*.schemastore.org</code> or include both <code>www.schemastore.org</code> and <code>json.schemastore.org</code>.</td></tr>
         <tr><td><code>schemas.fetch.blockedDomains</code></td><td>Deny hosts even when they match the allowlist.</td></tr>
         <tr><td><code>schemas.compile.timeout</code></td><td>Timeout for compiling each schema.</td></tr>
       </tbody>
@@ -159,7 +159,7 @@ reason = "legacy fixture kept for compatibility"`;
     </table>
 
     <h2>Catalogs</h2>
-    <p>Catalogs map well-known filenames to schemas when a file doesn't declare <code>$schema</code> and no explicit association matches. SchemaStore is the built-in catalog source, and custom sources can use the same catalog shape.</p>
+    <p>Catalogs map well-known filenames to schemas when a file doesn't declare <code>$schema</code> and no explicit or built-in association matches. SchemaStore is the built-in catalog source, and custom sources can use the same catalog shape.</p>
     <table>
       <thead>
         <tr>

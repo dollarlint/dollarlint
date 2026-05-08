@@ -85,6 +85,15 @@ func TestExecuteExitCodes(t *testing.T) {
 	if code := Execute([]string{"validate", filepath.Join(dir, "missing")}, &stdout, &stderr); code != 2 {
 		t.Fatalf("fatal run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
+	writeFile(t, filepath.Join(dir, "README.md"), "# docs\n")
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", filepath.Join(dir, "README.md")}, &stdout, &stderr); code != 2 {
+		t.Fatalf("unsupported explicit file exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "unsupported explicit file") {
+		t.Fatalf("unsupported explicit file stderr = %s", stderr.String())
+	}
 }
 
 func TestExecuteSuccessAndHelpers(t *testing.T) {
@@ -201,6 +210,33 @@ func TestExecuteSchemaStoreFlags(t *testing.T) {
 	}
 	if !strings.Contains(stdout.String(), "1 validated") || !strings.Contains(stdout.String(), "2 skipped") {
 		t.Fatalf("schema-store output = %s", stdout.String())
+	}
+}
+
+func TestExecuteRejectsNegativeNumericOptions(t *testing.T) {
+	dir := t.TempDir()
+	var stdout, stderr bytes.Buffer
+	if code := Execute([]string{"validate", dir, "--max-depth", "-1"}, &stdout, &stderr); code != 2 {
+		t.Fatalf("negative max-depth exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "schemas.maxDepth") {
+		t.Fatalf("negative max-depth stderr = %s", stderr.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", dir, "--fetch-retries", "-1"}, &stdout, &stderr); code != 2 {
+		t.Fatalf("negative fetch-retries exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "schemas.fetch.retries") {
+		t.Fatalf("negative fetch-retries stderr = %s", stderr.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"init", filepath.Join(dir, "init"), "--defaults", "--fetch-retries", "-1"}, &stdout, &stderr); code != 2 {
+		t.Fatalf("negative init fetch-retries exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "fetch-retries") {
+		t.Fatalf("negative init fetch-retries stderr = %s", stderr.String())
 	}
 }
 

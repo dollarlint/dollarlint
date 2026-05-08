@@ -130,6 +130,53 @@ func TestLintRequiresSchemaCoverage(t *testing.T) {
 	t.Fatalf("missing uncovered file result: %+v", result.Files)
 }
 
+func TestLintAppliesBuiltinDollarlintConfigSchema(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), "version = 1\n")
+
+	result, err := Lint(context.Background(), Options{Root: dir, Config: DefaultConfig()})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if result.Summary.Discovered != 1 || result.Summary.Validated != 1 || result.Summary.Skipped != 0 || result.Summary.Issues != 0 {
+		t.Fatalf("summary counts = %+v issues=%+v", result.Summary, result.Issues)
+	}
+	if len(result.Files) != 1 || result.Files[0].Schema != builtinDollarlintConfigSchemaURI || result.Files[0].SchemaSource != builtinDollarlintConfigSchemaSource {
+		t.Fatalf("builtin schema file = %+v", result.Files)
+	}
+
+	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), "version = 1\nunknown = true\n")
+	result, err = Lint(context.Background(), Options{Root: dir, Config: DefaultConfig()})
+	if err != nil {
+		t.Fatalf("Lint invalid config: %v", err)
+	}
+	if result.Summary.Issues == 0 {
+		t.Fatalf("expected invalid config issue, result = %+v", result)
+	}
+}
+
+func TestLintUserAssociationWinsOverBuiltinDollarlintConfigSchema(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "allow.schema.json"), `{"type":"object"}`)
+	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), "unknown = true\n")
+
+	cfg := DefaultConfig()
+	cfg.Schemas.Associations = []SchemaAssociation{{File: ".dollarlint.toml", Schema: "./allow.schema.json"}}
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	for _, file := range result.Files {
+		if file.RelativePath == ".dollarlint.toml" {
+			if file.SchemaSource != "config-association" || strings.Contains(file.Schema, "dollarlint://") {
+				t.Fatalf("config association should win: %+v", file)
+			}
+			return
+		}
+	}
+	t.Fatalf("missing .dollarlint.toml result: %+v", result.Files)
+}
+
 func TestLintOnlyBuildsRequestedSourceLocations(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["name"],"properties":{"$schema":{"type":"string"},"name":{"type":"string"}}}`)

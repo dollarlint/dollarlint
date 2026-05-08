@@ -259,6 +259,12 @@ func TestLoadConfigErrors(t *testing.T) {
 	if err := decodeConfig(unsupported, nil, &cfg); err == nil {
 		t.Fatalf("expected unsupported config format")
 	}
+	writeFile(t, badTOML, `[schemas]
+maxDepth = -1
+`)
+	if _, _, err := LoadConfig(dir, ""); err == nil || !strings.Contains(err.Error(), "schemas.maxDepth") {
+		t.Fatalf("expected negative maxDepth error, got %v", err)
+	}
 	blockingDir := filepath.Join(dir, "block")
 	if err := os.Mkdir(blockingDir, 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)

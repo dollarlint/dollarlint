@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/agorischek/dollarlint/schemas/dollarlint.schema.json",
+  "title": "dollarlint configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "discovery": {
+      "$ref": "#/$defs/discovery"
+    },
+    "schemas": {
+      "$ref": "#/$defs/schemas"
+    },
+    "output": {
+      "$ref": "#/$defs/output"
+    },
+    "ignore": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ignoreRule"
+      }
+    }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "duration": {
+      "type": "string",
+      "pattern": "^[0-9]+(\\.[0-9]+)?(ns|us|µs|ms|s|m|h)$"
+    },
+    "discovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "include": {
+          "$ref": "#/$defs/stringList"
+        },
+        "extendExclude": {
+          "$ref": "#/$defs/stringList"
+        },
+        "useDefaultExcludes": {
+          "type": "boolean"
+        },
+        "respectGitIgnore": {
+          "type": "boolean"
+        },
+        "forceExclude": {
+          "type": "boolean"
+        },
+        "followSymlinks": {
+          "type": "boolean"
+        }
+      }
+    },
+    "schemas": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "associations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/schemaAssociation"
+          }
+        },
+        "catalogs": {
+          "$ref": "#/$defs/catalogs"
+        },
+        "optimizations": {
+          "$ref": "#/$defs/optimizations"
+        },
+        "fetch": {
+          "$ref": "#/$defs/fetch"
+        },
+        "compile": {
+          "$ref": "#/$defs/compile"
+        },
+        "requireCoverage": {
+          "type": "boolean"
+        },
+        "maxDepth": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "concurrency": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "schemaAssociation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        }
+      },
+      "required": ["file", "schema"]
+    },
+    "catalogs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "failure": {
+          "type": "string",
+          "enum": ["warn", "error", "skip"]
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/catalogSource"
+          }
+        }
+      }
+    },
+    "catalogSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": ["url"],
+          "not": {
+            "required": ["path"]
+          }
+        },
+        {
+          "required": ["path"],
+          "not": {
+            "required": ["url"]
+          }
+        }
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["schemastore"]
+        },
+        "url": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "optimizations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "azure": {
+          "$ref": "#/$defs/azureOptimizations"
+        }
+      }
+    },
+    "azureOptimizations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pruneResources": {
+          "type": "boolean"
+        }
+      }
+    },
+    "fetch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "timeout": {
+          "$ref": "#/$defs/duration"
+        },
+        "retries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "retryMinWait": {
+          "$ref": "#/$defs/duration"
+        },
+        "retryMaxWait": {
+          "$ref": "#/$defs/duration"
+        },
+        "allowedDomains": {
+          "$ref": "#/$defs/stringList"
+        },
+        "blockedDomains": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    },
+    "compile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timeout": {
+          "$ref": "#/$defs/duration"
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "showSkipped": {
+          "type": "boolean"
+        },
+        "verbose": {
+          "type": "boolean"
+        },
+        "quiet": {
+          "type": "boolean"
+        },
+        "locations": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ignoreRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "property": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

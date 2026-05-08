@@ -255,6 +255,9 @@ func validateInitOutputPath(target string) error {
 }
 
 func normalizeInitOptions(opts *initOptions) error {
+	if opts.fetchRetries < 0 {
+		return fmt.Errorf("fetch-retries must be >= 0")
+	}
 	switch opts.catalogFailure {
 	case dollarlint.CatalogFailureWarn, dollarlint.CatalogFailureError, dollarlint.CatalogFailureSkip:
 		return nil
@@ -302,6 +305,7 @@ followSymlinks = false
 [schemas]
 maxDepth = 8
 concurrency = 8
+requireCoverage = false
 
 [schemas.optimizations]
 enabled = true
@@ -315,6 +319,8 @@ timeout = "10s"
 retries = {{ .FetchRetries }}
 retryMinWait = "250ms"
 retryMaxWait = "2s"
+allowedDomains = []
+blockedDomains = []
 
 [schemas.compile]
 timeout = "30s"

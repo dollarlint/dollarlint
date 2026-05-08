@@ -26,6 +26,9 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		start = time.Now()
 	}
 	cfg := opts.Config
+	if err := validateConfigValues(cfg); err != nil {
+		return Result{}, err
+	}
 	cfg.ApplyDefaults()
 	root := opts.Root
 	if root == "" {
@@ -68,6 +71,7 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		result.Files = append(result.Files, fileResult)
 		documents = append(documents, document)
 		applySchemaAssociation(document, cfg.Schemas.Associations, "config-association")
+		applyBuiltinSchemaAssociation(document)
 		applySchemaStoreAssociation(document, schemaStoreCatalog)
 	}
 	for _, document := range documents {
@@ -77,7 +81,7 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		if document.Schema == "" {
 			if cfg.Schemas.RequireCoverage {
 				result.Files[index].Status = StatusError
-				result.Files[index].Message = "file is not covered by an inline schema, config association, or catalog match"
+				result.Files[index].Message = "file is not covered by an inline schema, config association, built-in association, or catalog match"
 				addIssue(&result, issueForMissingSchemaCoverage(document))
 			} else {
 				result.Summary.Skipped++
@@ -146,6 +150,14 @@ func applySchemaAssociation(document *Document, associations []SchemaAssociation
 			return
 		}
 	}
+}
+
+func applyBuiltinSchemaAssociation(document *Document) {
+	if document.Schema != "" || path.Base(document.RelativePath) != ".dollarlint.toml" {
+		return
+	}
+	document.Schema = builtinDollarlintConfigSchemaURI
+	document.SchemaSource = builtinDollarlintConfigSchemaSource
 }
 
 func validateDocument(ctx context.Context, cache *SchemaCache, cfg Config, document *Document) []Issue {
@@ -388,7 +400,7 @@ func issueForMissingSchemaCoverage(document *Document) Issue {
 		File:         document.Path,
 		RelativePath: document.RelativePath,
 		Keyword:      "schemaCoverage",
-		Message:      "file must declare a schema or match a configured schema association or catalog entry",
+		Message:      "file must declare a schema or match a configured schema association, built-in association, or catalog entry",
 	}
 }
 

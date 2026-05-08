@@ -19,7 +19,7 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <p>dollarlint discovers JSON, YAML, and TOML files, skips common dependency and cache directories, respects the root <code>.gitignore</code>, loads declared schemas, and groups results by file.</p>
 
     <div class="note">
-      <p>Files without an in-file schema, config association, or catalog match are skipped by default, but still counted in the summary so discovery remains visible. Set <code>schemas.requireCoverage = true</code> when every included file must be covered by one of those schema sources.</p>
+      <p>Files without an in-file schema, config association, built-in association, or catalog match are skipped by default, but still counted in the summary so discovery remains visible. <code>.dollarlint.toml</code> is covered automatically by dollarlint's embedded config schema. Set <code>schemas.requireCoverage = true</code> when every included file must be covered by one of those schema sources.</p>
     </div>
 
     <h2>3. Pinpoint issues with locations</h2>

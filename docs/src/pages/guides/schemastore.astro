@@ -29,7 +29,7 @@ enabled = true`;
 
     <h2>Enable catalog matching</h2>
     <pre><code>dollarlint validate . --schema-store</code></pre>
-    <p>Catalog matching is optional at runtime unless it is enabled in <code>.dollarlint.toml</code>. Explicit in-file schemas and config associations still take precedence.</p>
+    <p>Catalog matching is optional at runtime unless it is enabled in <code>.dollarlint.toml</code>. Explicit in-file schemas, config associations, and dollarlint's built-in <code>.dollarlint.toml</code> association still take precedence.</p>
 
     <h2>Use a custom catalog</h2>
     <pre><code>dollarlint validate . --schema-store-url ./catalog.json</code></pre>
@@ -64,6 +64,10 @@ enabled = true`;
     </table>
 
     <pre><code>dollarlint validate . --schema-store --schema-store-failure error</code></pre>
-    <p>If <code>schemas.fetch.enabled = false</code>, remote catalogs are unavailable. With the default <code>warn</code> policy, dollarlint warns and keeps validating explicit or configured schemas.</p>
+    <p>If <code>schemas.fetch.enabled = false</code>, remote catalogs are unavailable. With the default <code>warn</code> policy, dollarlint warns and keeps validating explicit or configured local schemas. Files that explicitly declare remote schemas still report schema-loading issues when remote fetching is disabled.</p>
+
+    <div class="note">
+      <p>If you restrict remote domains while using SchemaStore, allow <code>*.schemastore.org</code> or include both <code>www.schemastore.org</code> and <code>json.schemastore.org</code>; many SchemaStore URLs resolve through the JSON host.</p>
+    </div>
   </article>
 </DocsLayout>

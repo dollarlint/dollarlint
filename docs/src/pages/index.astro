@@ -10,7 +10,7 @@ import DocsLayout from "../layouts/DocsLayout.astro";
   <section class="hero">
     <h1>dollarlint</h1>
     <p class="hero-copy">
-      <code>$schema</code> validation for JSON, YAML, &amp; TOML, with Schema Store and SARIF support.
+      <code>$schema</code> validation for all of your JSON, YAML, &amp; TOML files.
     </p>
     <div class="hero-actions">
       <a class="button primary" href="/guides/installation/">Get started</a>
@@ -20,16 +20,28 @@ import DocsLayout from "../layouts/DocsLayout.astro";
 
   <section class="grid" aria-label="Highlights">
     <article class="card">
-      <h3>All the schemas</h3>
+      <h3>Repo-wide discovery</h3>
+      <p>Find JSON, YAML, and TOML files automatically, respect your excludes, and validate matched files in parallel.</p>
+    </article>
+    <article class="card">
+      <h3>Any schema source</h3>
       <p>Use explicit in-file declarations, config associations, or catalog inference. Schemas can live beside your files or across the network.</p>
     </article>
     <article class="card">
-      <h3>CI-ready output</h3>
+      <h3>Local &amp; CI</h3>
       <p>Styled text for terminals, structured JSON for scripts, SARIF 2.1.0 for code scanning, and predictable exit codes for automation.</p>
     </article>
     <article class="card">
-      <h3>Safe discovery</h3>
-      <p>Built-in default excludes, root <code>.gitignore</code> support, and per-project extensions keep dependency and cache directories out of the bill.</p>
+      <h3>Ignore known issues</h3>
+      <p>Suppress known validation issues by location or pointer while keeping the rest of the file under schema coverage.</p>
+    </article>
+    <article class="card">
+      <h3>MCP server</h3>
+      <p>Expose validation as a structured local tool for editors and agents, with source locations included automatically.</p>
+    </article>
+    <article class="card">
+      <h3>Fast by design</h3>
+      <p>Prune complex schemas before compilation so large catalogs and cloud resource definitions stay practical to validate.</p>
     </article>
   </section>
 

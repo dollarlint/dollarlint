@@ -324,8 +324,6 @@ func cloneJSONValue(value any) any {
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.UseNumber()
 	var cloned any
-	if err := decoder.Decode(&cloned); err != nil {
-		return value
-	}
+	_ = decoder.Decode(&cloned)
 	return cloned
 }

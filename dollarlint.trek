@@ -1,6 +1,7 @@
 {
   "bookmarks" : [
+
   ],
-  "command" : "npm --prefix website run dev",
+  "command" : "npm --prefix docs run dev",
   "title" : "dollarlint Docs"
 }

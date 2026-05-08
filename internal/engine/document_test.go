@@ -85,6 +85,23 @@ func TestParseDocumentErrorsAndHelpers(t *testing.T) {
 	if len(firstLines([]byte("a\nb\nc"), 2)) != 2 {
 		t.Fatalf("firstLines did not limit")
 	}
+	if lines := firstLines([]byte("a\r\nb"), 2); len(lines) != 2 || lines[0] != "a" {
+		t.Fatalf("firstLines CRLF = %#v", lines)
+	}
+	if lines := firstLines([]byte("a"), 0); lines != nil {
+		t.Fatalf("zero limit firstLines = %#v", lines)
+	}
+	if refs := ((*Document)(nil)).azureResourceRefs(); refs != nil {
+		t.Fatalf("nil document refs = %#v", refs)
+	}
+	azureDoc := &Document{Data: map[string]any{"resources": []any{map[string]any{"type": "Microsoft.Good/widgets", "apiVersion": "2023-01-01"}}}}
+	if refs := azureDoc.azureResourceRefs(); len(refs) != 1 {
+		t.Fatalf("azure refs = %#v", refs)
+	}
+	azureDoc.Data = nil
+	if refs := azureDoc.azureResourceRefs(); len(refs) != 1 {
+		t.Fatalf("cached azure refs = %#v", refs)
+	}
 	normalized := normalizeYAML(map[any]any{"a": []any{map[any]any{1: "one"}}})
 	data, err := json.Marshal(normalized)
 	if err != nil {

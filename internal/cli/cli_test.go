@@ -235,6 +235,29 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 	}
 }
 
+func TestInitOverwritePromptComesBeforeInterview(t *testing.T) {
+	dir := t.TempDir()
+	target := filepath.Join(dir, ".dollarlint.toml")
+	writeFile(t, target, "# existing\n")
+
+	opts := defaultInitOptions()
+	prompter := fakeInitPrompter{confirms: []bool{false}}
+	if err := confirmInitTarget(target, opts, true, &prompter); err == nil {
+		t.Fatalf("expected existing config error")
+	}
+	if strings.Join(prompter.questions, "|") != "Overwrite existing .dollarlint.toml?" {
+		t.Fatalf("questions = %+v", prompter.questions)
+	}
+
+	prompter = fakeInitPrompter{confirms: []bool{true}}
+	if err := confirmInitTarget(target, opts, true, &prompter); err != nil {
+		t.Fatalf("overwrite confirm: %v", err)
+	}
+	if strings.Join(prompter.questions, "|") != "Overwrite existing .dollarlint.toml?" {
+		t.Fatalf("overwrite questions = %+v", prompter.questions)
+	}
+}
+
 func TestNormalizeInitOptions(t *testing.T) {
 	opts := defaultInitOptions()
 	opts.schemaStoreFailure = "skip"

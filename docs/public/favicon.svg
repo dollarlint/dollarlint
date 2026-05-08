@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#f5efdc"/>
+      <stop offset="100%" stop-color="#ddd5b4"/>
+    </radialGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="10" fill="url(#paper)" stroke="#1f6b4a" stroke-width="2"/>
+  <rect x="6" y="6" width="52" height="52" rx="7" fill="none" stroke="#1f6b4a" stroke-width="1" stroke-dasharray="2 2" opacity="0.5"/>
+  <text x="32" y="46" text-anchor="middle"
+        font-family="Iowan Old Style, Palatino, Georgia, serif"
+        font-weight="700" font-size="44" fill="#15543d">$</text>
+</svg>

@@ -54,6 +54,10 @@ func TestSchemaCacheRemoteFetch(t *testing.T) {
 			http.Error(w, "nope", http.StatusNotFound)
 			return
 		}
+		if r.URL.Path == "/large.json" {
+			w.Write([]byte(strings.Repeat(" ", maxSchemaResponseBytes+1)))
+			return
+		}
 		if r.Header.Get("User-Agent") != "dollarlint" {
 			t.Fatalf("missing user agent")
 		}
@@ -66,6 +70,9 @@ func TestSchemaCacheRemoteFetch(t *testing.T) {
 	}
 	if _, err := cache.Load(server.URL + "/missing.json"); err == nil {
 		t.Fatalf("expected non-2xx error")
+	}
+	if _, err := cache.Load(server.URL + "/large.json"); err == nil {
+		t.Fatalf("expected oversized response error")
 	}
 	cfg := DefaultConfig()
 	disabled := false
@@ -173,6 +180,9 @@ func TestSchemaCacheDepthAndLoadErrors(t *testing.T) {
 	empty := "file://"
 	if _, err := cache.Load(empty); err == nil {
 		t.Fatalf("expected empty file URL path")
+	}
+	if values := uniqueStrings([]string{"", "a", "a", "b"}); len(values) != 2 || values[0] != "a" || values[1] != "b" {
+		t.Fatalf("uniqueStrings = %#v", values)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()

@@ -75,6 +75,12 @@ func TestSourceMapHelpers(t *testing.T) {
 	if pos := positionAtOffset([]int{0}, -10); pos.Line != 1 || pos.Column != 1 {
 		t.Fatalf("negative offset = %+v", pos)
 	}
+	if pos := positionAtOffset(nil, 10); pos.Line != 1 || pos.Column != 1 {
+		t.Fatalf("empty line starts offset = %+v", pos)
+	}
+	if pos := positionAtOffset([]int{5}, 0); pos.Line != 1 || pos.Column != 1 {
+		t.Fatalf("pre-first-line offset = %+v", pos)
+	}
 	if _, err := buildSourceMap(nil, "nope"); err == nil {
 		t.Fatalf("expected unsupported source map format")
 	}
@@ -162,6 +168,11 @@ func TestTOMLScannerEdges(t *testing.T) {
 	if indexTOMLTopLevel("abc", '=') != -1 {
 		t.Fatalf("missing top-level separator should be -1")
 	}
+	crlfMap, err := buildTOMLSourceMap([]byte("[server]\r\nname = \"ok\"\r\n"))
+	if err != nil {
+		t.Fatalf("buildTOMLSourceMap CRLF: %v", err)
+	}
+	assertPosition(t, crlfMap, "/server/name", 2, 8)
 }
 
 func FuzzSafeBuildSourceMap(f *testing.F) {

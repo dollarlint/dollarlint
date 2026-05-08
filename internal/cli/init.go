@@ -74,21 +74,28 @@ func runInit(cmd *cobra.Command, stdin io.Reader, stdout io.Writer, args []strin
 		root = args[0]
 	}
 	interactive := isInteractiveIO(stdin, stdout)
-	if !opts.defaults && interactive {
-		if err := interviewInit(stdin.(*os.File), stdout.(*os.File), &opts); err != nil {
-			return err
-		}
-	} else if !opts.defaults && !interactive {
-		fmt.Fprintln(stdout, "No interactive terminal detected; using init defaults. Pass --defaults to silence this message.")
-	}
-	if err := normalizeInitOptions(&opts); err != nil {
-		return err
+	var prompter initPrompter
+	if interactive {
+		prompter = clackPrompter{stdin: stdin.(*os.File), stdout: stdout.(*os.File)}
 	}
 	target := opts.output
 	if !filepath.IsAbs(target) {
 		target = filepath.Join(root, target)
 	}
 	if err := validateInitOutputPath(target); err != nil {
+		return err
+	}
+	if err := confirmInitTarget(target, opts, interactive, prompter); err != nil {
+		return err
+	}
+	if !opts.defaults && interactive {
+		if err := interviewInitWithPrompter(prompter, &opts); err != nil {
+			return err
+		}
+	} else if !opts.defaults && !interactive {
+		fmt.Fprintln(stdout, "No interactive terminal detected; using init defaults. Pass --defaults to silence this message.")
+	}
+	if err := normalizeInitOptions(&opts); err != nil {
 		return err
 	}
 	content, err := renderStarterConfig(opts)
@@ -98,28 +105,32 @@ func runInit(cmd *cobra.Command, stdin io.Reader, stdout io.Writer, args []strin
 	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 		return fmt.Errorf("create config directory: %w", err)
 	}
-	if !opts.force {
-		if _, err := os.Stat(target); err == nil {
-			if !opts.defaults && interactive {
-				overwrite, promptErr := promptConfirm(stdin.(*os.File), stdout.(*os.File), "Overwrite existing .dollarlint.toml?", false)
-				if promptErr != nil {
-					return promptErr
-				}
-				if !overwrite {
-					return fmt.Errorf("config %s already exists; use --force to overwrite", target)
-				}
-			} else {
-				return fmt.Errorf("config %s already exists; use --force to overwrite", target)
-			}
-		} else if !os.IsNotExist(err) {
-			return fmt.Errorf("check config %s: %w", target, err)
-		}
-	}
 	if err := os.WriteFile(target, content, 0o644); err != nil {
 		return fmt.Errorf("write config %s: %w", target, err)
 	}
 	fmt.Fprintf(stdout, "Created %s\n", target)
 	fmt.Fprintln(stdout, "Run dollarlint validate . to check your files.")
+	return nil
+}
+
+func confirmInitTarget(target string, opts initOptions, interactive bool, prompter initPrompter) error {
+	if opts.force {
+		return nil
+	}
+	if _, err := os.Stat(target); err == nil {
+		if !opts.defaults && interactive {
+			overwrite, promptErr := prompter.Confirm("Overwrite existing .dollarlint.toml?", false)
+			if promptErr != nil {
+				return promptErr
+			}
+			if overwrite {
+				return nil
+			}
+		}
+		return fmt.Errorf("config %s already exists; use --force to overwrite", target)
+	} else if !os.IsNotExist(err) {
+		return fmt.Errorf("check config %s: %w", target, err)
+	}
 	return nil
 }
 

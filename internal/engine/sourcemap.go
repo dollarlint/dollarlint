@@ -457,13 +457,16 @@ func newLineIndex(raw []byte) []int {
 }
 
 func positionAtOffset(lineStarts []int, offset int) SourcePosition {
+	if len(lineStarts) == 0 {
+		return SourcePosition{Line: 1, Column: 1}
+	}
 	if offset < 0 {
 		offset = 0
 	}
 	// lineStarts is sorted ascending; find the greatest index whose start <= offset.
 	line := sort.SearchInts(lineStarts, offset+1) - 1
 	if line < 0 {
-		line = 0
+		return SourcePosition{Line: 1, Column: 1}
 	}
 	return SourcePosition{Line: line + 1, Column: offset - lineStarts[line] + 1}
 }

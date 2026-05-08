@@ -1,0 +1,196 @@
+/* dollarlint — US dollar bill inspired theme.
+   Palette draws from greenback ink, treasury seal green, cream/linen paper,
+   and the deep black engraving used on US currency. */
+
+:root {
+  --dl-green-950: #0b1f17;
+  --dl-green-900: #11352a;
+  --dl-green-800: #15543d;
+  --dl-green-700: #1f6b4a;
+  --dl-green-600: #2f8a5d;
+  --dl-green-500: #3fa46c;
+  --dl-green-400: #6cc191;
+  --dl-green-300: #9fd8b6;
+  --dl-green-200: #cbe9d6;
+  --dl-green-100: #e6f3eb;
+
+  --dl-paper: #f5efdc;
+  --dl-paper-soft: #ece4cb;
+  --dl-ink: #0f1a14;
+  --dl-seal-red: #8a1f1f;
+  --dl-gold: #b88a3a;
+}
+
+/* Dark theme — engraved greenback */
+:root,
+:root[data-theme='dark'] {
+  --sl-color-accent-low: var(--dl-green-900);
+  --sl-color-accent: var(--dl-green-600);
+  --sl-color-accent-high: var(--dl-green-300);
+
+  --sl-color-white: #f3ead2;
+  --sl-color-gray-1: #e2dabb;
+  --sl-color-gray-2: #c8c0a3;
+  --sl-color-gray-3: #8b9588;
+  --sl-color-gray-4: #4f6258;
+  --sl-color-gray-5: #2a3b32;
+  --sl-color-gray-6: #1a2922;
+  --sl-color-black: #0a160f;
+
+  --sl-color-bg: #0a160f;
+  --sl-color-bg-nav: #0e1f17;
+  --sl-color-bg-sidebar: #0c1a13;
+  --sl-color-bg-inline-code: #15301f;
+  --sl-color-bg-accent: var(--dl-green-700);
+  --sl-color-text: #ece2c2;
+  --sl-color-text-accent: var(--dl-green-300);
+  --sl-color-hairline: #1f3527;
+  --sl-color-hairline-light: #2a4534;
+  --sl-color-hairline-shade: #15281d;
+}
+
+/* Light theme — linen paper */
+:root[data-theme='light'] {
+  --sl-color-accent-low: var(--dl-green-200);
+  --sl-color-accent: var(--dl-green-700);
+  --sl-color-accent-high: var(--dl-green-900);
+
+  --sl-color-white: #0a160f;
+  --sl-color-gray-1: #1a2c22;
+  --sl-color-gray-2: #2c3f33;
+  --sl-color-gray-3: #4f6258;
+  --sl-color-gray-4: #6f8377;
+  --sl-color-gray-5: #b9b393;
+  --sl-color-gray-6: #ddd5b4;
+  --sl-color-gray-7: var(--dl-paper-soft);
+  --sl-color-black: var(--dl-paper);
+
+  --sl-color-bg: var(--dl-paper);
+  --sl-color-bg-nav: #efe7cf;
+  --sl-color-bg-sidebar: #efe7cf;
+  --sl-color-bg-inline-code: #e1e8d9;
+  --sl-color-bg-accent: var(--dl-green-700);
+  --sl-color-text: var(--dl-ink);
+  --sl-color-text-accent: var(--dl-green-800);
+  --sl-color-hairline: #d3c9a4;
+  --sl-color-hairline-light: #c0b58a;
+  --sl-color-hairline-shade: #e1d8b4;
+}
+
+/* Currency-paper texture: subtle radial guilloché-style pattern */
+body {
+  background-image:
+    radial-gradient(
+      circle at 25% 15%,
+      color-mix(in srgb, var(--sl-color-accent) 8%, transparent) 0,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 80% 85%,
+      color-mix(in srgb, var(--sl-color-accent) 6%, transparent) 0,
+      transparent 65%
+    );
+  background-attachment: fixed;
+}
+
+:root[data-theme='light'] body {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 8px,
+      color-mix(in srgb, var(--dl-green-800) 3%, transparent) 8px 9px
+    ),
+    radial-gradient(
+      circle at 20% 20%,
+      color-mix(in srgb, var(--dl-green-700) 10%, transparent) 0,
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      color-mix(in srgb, var(--dl-gold) 8%, transparent) 0,
+      transparent 60%
+    );
+}
+
+/* Site title — engraved, slightly letterspaced */
+.site-title,
+a.site-title {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua',
+    Georgia, serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--sl-color-text-accent);
+}
+
+/* Hero — currency portrait frame */
+.hero h1,
+.hero .tagline {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+.hero h1 {
+  letter-spacing: 0.01em;
+}
+
+.hero .tagline::after {
+  content: '';
+  display: block;
+  width: 4rem;
+  height: 2px;
+  margin-top: 1rem;
+  background: linear-gradient(
+    90deg,
+    var(--dl-green-700),
+    var(--dl-gold),
+    var(--dl-green-700)
+  );
+  border-radius: 2px;
+}
+
+/* Cards — bordered like a banknote vignette */
+.card {
+  border: 1px solid var(--sl-color-hairline-light);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--sl-color-accent) 6%, transparent),
+      transparent 60%
+    ),
+    var(--sl-color-bg-nav);
+  box-shadow: inset 0 0 0 1px var(--sl-color-hairline-shade);
+}
+
+.card .icon {
+  color: var(--sl-color-text-accent);
+}
+
+/* Action buttons — primary looks stamped in green ink */
+.action.primary {
+  background: var(--dl-green-700);
+  border-color: var(--dl-green-800);
+  color: #f3ead2;
+}
+
+.action.primary:hover {
+  background: var(--dl-green-600);
+  border-color: var(--dl-green-700);
+}
+
+/* Inline code */
+:not(pre) > code {
+  border: 1px solid var(--sl-color-hairline);
+  color: var(--sl-color-text-accent);
+}
+
+/* Tables — ledger ruling */
+.sl-markdown-content table {
+  border: 1px solid var(--sl-color-hairline-light);
+}
+
+.sl-markdown-content thead {
+  background: color-mix(in srgb, var(--sl-color-accent) 14%, transparent);
+}
+
+.sl-markdown-content tbody tr:nth-child(odd) {
+  background: color-mix(in srgb, var(--sl-color-accent) 5%, transparent);
+}

@@ -344,6 +344,7 @@ showSkipped = false
 verbose = false
 quiet = false
 locations = false
+branchErrors = "best"
 
 # [[ignore]]
 # file = "fixtures/*.json"

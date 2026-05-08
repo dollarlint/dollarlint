@@ -7,24 +7,48 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <header class="doc-header">
       <span class="eyebrow">Guide</span>
       <h1>Examples</h1>
-      <p class="lead">The repository includes local-schema, SchemaStore, and Azure ARM examples so you can test the main workflows without inventing fixtures from scratch.</p>
+      <p class="lead">
+        The repository includes local-schema, SchemaStore, and Azure ARM
+        examples so you can test the main workflows without inventing fixtures
+        from scratch.
+      </p>
     </header>
 
     <h2>Local schemas</h2>
     <pre><code>dollarlint validate ./examples/basics --locations --show-skipped</code></pre>
-    <p>The basics fixture includes valid and invalid JSON, YAML, and TOML files, plus one file without a schema to demonstrate skipped-file accounting.</p>
+    <p>
+      The basics fixture includes valid and invalid JSON, YAML, and TOML files,
+      plus one file without a schema to demonstrate skipped-file accounting.
+    </p>
 
     <h2>SchemaStore-backed files</h2>
     <pre><code>dollarlint validate ./examples/schemastore --schema-store --locations</code></pre>
-    <p>These examples cover common config files such as <code>package.json</code>, <code>tsconfig.json</code>, <code>renovate.json</code>, <code>buf.yaml</code>, and <code>ruff.toml</code>. Some declare schemas directly; catalog matching can infer schemas for conventional filenames.</p>
+    <p>
+      These examples cover common config files such as <code>package.json</code
+      >, <code>tsconfig.json</code>, <code>renovate.json</code>, <code
+        >buf.yaml</code
+      >, and <code>ruff.toml</code>. Some declare schemas directly; catalog
+      matching can infer schemas for conventional filenames.
+    </p>
 
     <h2>Azure ARM templates</h2>
     <pre><code>dollarlint validate ./examples/azure --locations</code></pre>
-    <p>The Azure examples use real <code>https://schema.management.azure.com</code> schema URLs and exercise the Azure resource pruning optimization. The directory includes one intentionally invalid template.</p>
+    <p>
+      The Azure examples use real <code
+        >https://schema.management.azure.com</code
+      > schema URLs and exercise the Azure resource pruning optimization. The directory
+      includes one intentionally invalid template. The default output reports
+      the closest matching schema branch for that invalid storage account; set <code
+        >output.branchErrors = "all"</code
+      > if you want to inspect every failed Azure resource branch.
+    </p>
 
     <h2>Machine-readable output</h2>
     <pre><code>dollarlint validate ./examples/basics --format json --locations
 dollarlint validate ./examples/basics --format sarif --output dollarlint.sarif</code></pre>
-    <p>Use JSON when a script needs run summaries and issue metadata. Use SARIF when CI should upload code scanning results.</p>
+    <p>
+      Use JSON when a script needs run summaries and issue metadata. Use SARIF
+      when CI should upload code scanning results.
+    </p>
   </article>
 </DocsLayout>

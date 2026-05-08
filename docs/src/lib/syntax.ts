@@ -7,9 +7,14 @@ const escapeHtml = (value: string) =>
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
 
-const token = (kind: string, value: string) => `<span class="syntax-${kind}">${escapeHtml(value)}</span>`;
+const token = (kind: string, value: string) =>
+  `<span class="syntax-${kind}">${escapeHtml(value)}</span>`;
 
-const highlightPattern = (line: string, pattern: RegExp, kindForMatch: (match: string, start: number, line: string) => string) => {
+const highlightPattern = (
+  line: string,
+  pattern: RegExp,
+  kindForMatch: (match: string, start: number, line: string) => string,
+) => {
   let output = "";
   let index = 0;
 
@@ -30,7 +35,12 @@ const highlightJsonLine = (line: string) =>
     /"([^"\\]|\\.)*"\s*(?=:)|"([^"\\]|\\.)*"|-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b|\b(?:true|false|null)\b|[{}\[\],:]/g,
     (match, start, source) => {
       if (match.startsWith('"')) {
-        if (source.slice(start + match.length).trimStart().startsWith(":")) {
+        if (
+          source
+            .slice(start + match.length)
+            .trimStart()
+            .startsWith(":")
+        ) {
           return "key";
         }
         return "string";
@@ -62,7 +72,14 @@ const highlightTomlBody = (line: string) =>
       if (trimmed.startsWith('"') && !trimmed.endsWith("=")) {
         return "string";
       }
-      if (trimmed === "=" || trimmed === "[" || trimmed === "]" || trimmed === "," || trimmed === "[[" || trimmed === "]]") {
+      if (
+        trimmed === "=" ||
+        trimmed === "[" ||
+        trimmed === "]" ||
+        trimmed === "," ||
+        trimmed === "[[" ||
+        trimmed === "]]"
+      ) {
         return "punctuation";
       }
       if (/^-?\d/.test(trimmed)) {

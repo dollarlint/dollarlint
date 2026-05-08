@@ -319,6 +319,114 @@ func TestValidationIssueHelpers(t *testing.T) {
 	}
 }
 
+func TestValidationIssuesCompactChoiceBranches(t *testing.T) {
+	doc := &Document{Path: "/tmp/file.json", RelativePath: "file.json", Schema: "file:///tmp/schema.json"}
+	err := &jsonschema.ValidationError{
+		InstanceLocation: []string{"resources"},
+		ErrorKind:        &kind.OneOf{},
+		Causes: []*jsonschema.ValidationError{
+			{
+				InstanceLocation: []string{"resources", "0"},
+				ErrorKind:        &kind.Group{},
+				Causes: []*jsonschema.ValidationError{
+					{
+						InstanceLocation: []string{"resources", "0"},
+						ErrorKind:        &kind.OneOf{},
+						Causes: []*jsonschema.ValidationError{
+							{
+								InstanceLocation: []string{"resources", "0"},
+								ErrorKind:        &kind.Group{},
+								Causes: []*jsonschema.ValidationError{
+									{
+										InstanceLocation: []string{"resources", "0", "sku", "name"},
+										ErrorKind: &kind.Enum{Got: "NotARealSku", Want: []any{
+											"Standard_LRS",
+										}},
+									},
+									{
+										InstanceLocation: []string{"resources", "0", "properties", "allowBlobPublicAccess"},
+										ErrorKind:        &kind.Pattern{Got: "nope", Want: "^\\[([^\\[].*)?\\]$"},
+									},
+								},
+							},
+							{
+								InstanceLocation: []string{"resources", "0"},
+								ErrorKind:        &kind.Group{},
+								Causes: []*jsonschema.ValidationError{
+									{
+										InstanceLocation: []string{"resources", "0", "type"},
+										ErrorKind: &kind.Enum{Got: "Microsoft.Storage/storageAccounts", Want: []any{
+											"Microsoft.Storage/storageAccounts/blobServices",
+										}},
+									},
+									{
+										InstanceLocation: []string{"resources", "0", "name"},
+										ErrorKind:        &kind.Pattern{Got: "invalidstorage", Want: "^.*/default$"},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				InstanceLocation: []string{"resources"},
+				ErrorKind:        &kind.Type{Got: "array", Want: []string{"object"}},
+			},
+		},
+	}
+	issues := issuesFromValidationError(doc, err)
+	if len(issues) != 2 {
+		t.Fatalf("compacted issues = %+v", issues)
+	}
+	for _, issue := range issues {
+		if issue.InstanceLocation == "/resources" || issue.InstanceLocation == "/resources/0/type" {
+			t.Fatalf("reported unrelated branch issue: %+v", issues)
+		}
+	}
+	if issues[0].InstanceLocation != "/resources/0/sku/name" || issues[1].InstanceLocation != "/resources/0/properties/allowBlobPublicAccess" {
+		t.Fatalf("unexpected compacted issues = %+v", issues)
+	}
+	allIssues := issuesFromValidationErrorWithOutput(doc, err, OutputConfig{BranchErrors: BranchErrorsAll})
+	if len(allIssues) != 5 {
+		t.Fatalf("all branch issues = %+v", allIssues)
+	}
+	var sawRootType, sawResourceType bool
+	for _, issue := range allIssues {
+		if issue.InstanceLocation == "/resources" {
+			sawRootType = true
+		}
+		if issue.InstanceLocation == "/resources/0/type" {
+			sawResourceType = true
+		}
+	}
+	if !sawRootType || !sawResourceType {
+		t.Fatalf("all branch issues omitted branch failures: %+v", allIssues)
+	}
+}
+
+func TestValidationIssuesDedupeRepeatedLeaves(t *testing.T) {
+	doc := &Document{Path: "/tmp/file.json", RelativePath: "file.json", Schema: "file:///tmp/schema.json"}
+	duplicate := &jsonschema.ValidationError{
+		InstanceLocation: []string{"name"},
+		ErrorKind:        &kind.Pattern{Got: "bad", Want: "^[a-z]+$"},
+	}
+	err := &jsonschema.ValidationError{
+		ErrorKind: &kind.Group{},
+		Causes: []*jsonschema.ValidationError{
+			duplicate,
+			{
+				InstanceLocation: []string{"name"},
+				ErrorKind:        &kind.Pattern{Got: "bad", Want: "^[a-z]+$"},
+			},
+		},
+	}
+	issues := issuesFromValidationError(doc, err)
+	if len(issues) != 1 || issues[0].InstanceLocation != "/name" {
+		t.Fatalf("deduped issues = %+v", issues)
+	}
+}
+
 func TestIgnoreMatching(t *testing.T) {
 	issue := Issue{RelativePath: "nested/file.json", Keyword: "type", KeywordLocation: "/properties/name/type", Property: "name", InstanceLocation: "/name"}
 	if !ignoreMatches(issue, IgnoreRule{File: "**/*.json", Keyword: "/properties/name/type", Property: "/name"}) {
@@ -410,7 +518,7 @@ func TestValidateDocumentNonValidationError(t *testing.T) {
 	if issue.Message != "plain" || issue.Schema != "schema" {
 		t.Fatalf("issueForError = %+v", issue)
 	}
-	issues := issuesFromSchemaError(&Document{Path: "/tmp/a.json", RelativePath: "a.json", Schema: "schema"}, err)
+	issues := issuesFromSchemaError(&Document{Path: "/tmp/a.json", RelativePath: "a.json", Schema: "schema"}, err, OutputConfig{})
 	if len(issues) != 1 || issues[0].Message != "plain" {
 		t.Fatalf("issuesFromSchemaError = %+v", issues)
 	}

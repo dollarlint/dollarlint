@@ -18,6 +18,11 @@ const (
 	CatalogFailureSkip  = engine.CatalogFailureSkip
 )
 
+const (
+	BranchErrorsBest = engine.BranchErrorsBest
+	BranchErrorsAll  = engine.BranchErrorsAll
+)
+
 type Config = engine.Config
 type DiscoveryConfig = engine.DiscoveryConfig
 type SchemaConfig = engine.SchemaConfig

@@ -24,20 +24,40 @@ enabled = true`;
     <header class="doc-header">
       <span class="eyebrow">Guide</span>
       <h1>Catalogs and SchemaStore</h1>
-      <p class="lead">Catalog matching lets dollarlint infer schemas for well-known filenames — think <code>package.json</code>, <code>tsconfig.json</code>, and friends — without anyone having to declare <code>$schema</code> by hand. SchemaStore is the built-in catalog.</p>
+      <p class="lead">
+        Catalog matching lets dollarlint infer schemas for well-known filenames
+        — think <code>package.json</code>, <code>tsconfig.json</code>, and
+        friends — without anyone having to declare <code>$schema</code> by hand. SchemaStore
+        is the built-in catalog.
+      </p>
     </header>
 
     <h2>Enable catalog matching</h2>
     <pre><code>dollarlint validate . --schema-store</code></pre>
-    <p>Catalog matching is optional at runtime unless it is enabled in <code>.dollarlint.toml</code>. Explicit in-file schemas, config associations, and dollarlint's built-in <code>.dollarlint.toml</code> association still take precedence.</p>
+    <p>
+      Catalog matching is optional at runtime unless it is enabled in <code
+        >.dollarlint.toml</code
+      >. Explicit in-file schemas, config associations, and dollarlint's
+      built-in <code>.dollarlint.toml</code> association still take precedence.
+    </p>
 
     <h2>Use a custom catalog</h2>
     <pre><code>dollarlint validate . --schema-store-url ./catalog.json</code></pre>
-    <p>In config, use <code>schemas.catalogs</code> and one or more <code>schemas.catalogs.sources</code>. Sources follow the SchemaStore catalog format, including a top-level <code>schemas</code> array with <code>fileMatch</code> and <code>url</code> entries.</p>
+    <p>
+      In config, use <code>schemas.catalogs</code> and one or more <code
+        >schemas.catalogs.sources</code
+      >. Sources follow the SchemaStore catalog format, including a top-level <code
+        >schemas</code
+      > array with <code>fileMatch</code> and <code>url</code> entries.
+    </p>
 
     <CodeBlock code={catalogConfig} language="toml" />
 
-    <p>A source must use exactly one of <code>url</code> or <code>path</code>. Relative schema URLs inside a catalog are resolved relative to that catalog.</p>
+    <p>
+      A source must use exactly one of <code>url</code> or <code>path</code>.
+      Relative schema URLs inside a catalog are resolved relative to that
+      catalog.
+    </p>
 
     <h2>Choose what happens when a catalog can't load</h2>
     <table>
@@ -50,24 +70,44 @@ enabled = true`;
       <tbody>
         <tr>
           <td><code>warn</code></td>
-          <td>Log a warning, skip catalog inference, and keep validating explicit or configured schemas.</td>
+          <td
+            >Log a warning, skip catalog inference, and keep validating explicit
+            or configured schemas.</td
+          >
         </tr>
         <tr>
           <td><code>error</code></td>
-          <td>Stop the run — if you're counting on the catalog, this makes sure it's non-negotiable.</td>
+          <td
+            >Stop the run — if you're counting on the catalog, this makes sure
+            it's non-negotiable.</td
+          >
         </tr>
         <tr>
           <td><code>skip</code></td>
-          <td>Quietly move on without catalog inference. No news is good news.</td>
+          <td
+            >Quietly move on without catalog inference. No news is good news.</td
+          >
         </tr>
       </tbody>
     </table>
 
     <pre><code>dollarlint validate . --schema-store --schema-store-failure error</code></pre>
-    <p>If <code>schemas.fetch.enabled = false</code>, remote catalogs are unavailable. With the default <code>warn</code> policy, dollarlint warns and keeps validating explicit or configured local schemas. Files that explicitly declare remote schemas still report schema-loading issues when remote fetching is disabled.</p>
+    <p>
+      If <code>schemas.fetch.enabled = false</code>, remote catalogs are
+      unavailable. With the default <code>warn</code> policy, dollarlint warns and
+      keeps validating explicit or configured local schemas. Files that explicitly
+      declare remote schemas still report schema-loading issues when remote fetching
+      is disabled.
+    </p>
 
     <div class="note">
-      <p>If you restrict remote domains while using SchemaStore, allow <code>*.schemastore.org</code> or include both <code>www.schemastore.org</code> and <code>json.schemastore.org</code>; many SchemaStore URLs resolve through the JSON host.</p>
+      <p>
+        If you restrict remote domains while using SchemaStore, allow <code
+          >*.schemastore.org</code
+        > or include both <code>www.schemastore.org</code> and <code
+          >json.schemastore.org</code
+        >; many SchemaStore URLs resolve through the JSON host.
+      </p>
     </div>
   </article>
 </DocsLayout>

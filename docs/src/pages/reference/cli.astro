@@ -18,7 +18,10 @@ const mcpConfig = `{
     <header class="doc-header">
       <span class="eyebrow">Reference</span>
       <h1>CLI reference</h1>
-      <p class="lead">The full ledger of commands and flags for validating files, creating configs, and checking what you've got installed.</p>
+      <p class="lead">
+        The full ledger of commands and flags for validating files, creating
+        configs, and checking what you've got installed.
+      </p>
     </header>
 
     <h2>Commands</h2>
@@ -32,15 +35,23 @@ const mcpConfig = `{
       <tbody>
         <tr>
           <td><code>dollarlint validate [path]</code></td>
-          <td>Validate files under a path. Defaults to the current directory if you don't specify one.</td>
+          <td
+            >Validate files under a path. Defaults to the current directory if
+            you don't specify one.</td
+          >
         </tr>
         <tr>
           <td><code>dollarlint init [path]</code></td>
-          <td>Mint a starter <code>.dollarlint.toml</code> in the target directory.</td>
+          <td
+            >Mint a starter <code>.dollarlint.toml</code> in the target directory.</td
+          >
         </tr>
         <tr>
           <td><code>dollarlint serve mcp</code></td>
-          <td>Start a Model Context Protocol server over stdio so agents can validate files with dollarlint.</td>
+          <td
+            >Start a Model Context Protocol server over stdio so agents can
+            validate files with dollarlint.</td
+          >
         </tr>
         <tr>
           <td><code>dollarlint version</code></td>
@@ -64,7 +75,10 @@ const mcpConfig = `{
       <tbody>
         <tr>
           <td><code>--config</code></td>
-          <td>Use an explicit <code>.dollarlint.toml</code> path. Relative paths are resolved from the validation root, or beside an explicit file target.</td>
+          <td
+            >Use an explicit <code>.dollarlint.toml</code> path. Relative paths are
+            resolved from the validation root, or beside an explicit file target.</td
+          >
         </tr>
         <tr>
           <td><code>--version</code>, <code>-v</code></td>
@@ -82,30 +96,141 @@ const mcpConfig = `{
         </tr>
       </thead>
       <tbody>
-        <tr><td><code>--format</code></td><td>Choose <code>text</code>, <code>json</code>, or <code>sarif</code>. Defaults to <code>text</code>.</td></tr>
-        <tr><td><code>--output</code>, <code>-o</code></td><td>Write output to a file instead of stdout. Use <code>-</code> or omit it for stdout.</td></tr>
-        <tr><td><code>--locations</code></td><td>Include line and column positions in text and JSON output. SARIF requests source locations automatically.</td></tr>
-        <tr><td><code>--verbose</code></td><td>Show expanded issue metadata in text output.</td></tr>
-        <tr><td><code>--quiet</code></td><td>Use terse success text output and omit the summary details from failing text output.</td></tr>
-        <tr><td><code>--show-skipped</code></td><td>Show files skipped because they do not declare or match a schema.</td></tr>
-        <tr><td><code>--include</code></td><td>Set discovery include globs. Repeatable; when provided, replaces config includes for this run. A glob without a slash can match a basename at any depth.</td></tr>
-        <tr><td><code>--extend-exclude</code></td><td>Add a discovery exclude glob on top of config and built-in default excludes. Repeatable. A glob without a slash can match a basename at any depth.</td></tr>
-        <tr><td><code>--no-default-excludes</code></td><td>Disable built-in discovery excludes.</td></tr>
-        <tr><td><code>--no-gitignore</code></td><td>Do not apply root <code>.gitignore</code> patterns during discovery.</td></tr>
-        <tr><td><code>--force-exclude</code></td><td>Apply excludes even to explicitly passed files.</td></tr>
-        <tr><td><code>--schema</code></td><td>Associate a file glob with a schema as <code>glob=uri</code>. Repeatable. Association globs use the same slashless-basename behavior as discovery globs.</td></tr>
-        <tr><td><code>--schema-store</code></td><td>Match conventional filenames using the SchemaStore catalog.</td></tr>
-        <tr><td><code>--schema-store-url</code></td><td>Use a SchemaStore-format catalog URL or local path and enable catalog matching.</td></tr>
-        <tr><td><code>--schema-store-failure</code></td><td>Set catalog failure policy to <code>warn</code>, <code>error</code>, or <code>skip</code>.</td></tr>
-        <tr><td><code>--max-depth</code></td><td>Set maximum external schema reference depth.</td></tr>
-        <tr><td><code>--fetch-remote</code></td><td>Allow fetching HTTP schemas. Defaults to enabled; pass <code>--fetch-remote=false</code> to disable.</td></tr>
-        <tr><td><code>--fetch-retries</code></td><td>Set retries for transient remote schema fetch failures. Defaults to <code>2</code>.</td></tr>
-        <tr><td><code>--allow-domain</code></td><td>Allow remote schemas from a domain. Repeatable.</td></tr>
-        <tr><td><code>--block-domain</code></td><td>Block remote schemas from a domain. Repeatable.</td></tr>
-        <tr><td><code>--fetch-timeout</code></td><td>Set schema fetch timeout, such as <code>10s</code>.</td></tr>
-        <tr><td><code>--compile-timeout</code></td><td>Set schema compile timeout, such as <code>30s</code>.</td></tr>
+        <tr
+          ><td><code>--format</code></td><td
+            >Choose <code>text</code>, <code>json</code>, or <code>sarif</code>.
+            Defaults to <code>text</code>.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--output</code>, <code>-o</code></td><td
+            >Write output to a file instead of stdout. Use <code>-</code> or omit
+            it for stdout.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--locations</code></td><td
+            >Include line and column positions in text and JSON output. SARIF
+            requests source locations automatically.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--verbose</code></td><td
+            >Show expanded issue metadata in text output.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--quiet</code></td><td
+            >Use terse success text output and omit the summary details from
+            failing text output.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--show-skipped</code></td><td
+            >Show files skipped because they do not declare or match a schema.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--include</code></td><td
+            >Set discovery include globs. Repeatable; when provided, replaces
+            config includes for this run. A glob without a slash can match a
+            basename at any depth.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--extend-exclude</code></td><td
+            >Add a discovery exclude glob on top of config and built-in default
+            excludes. Repeatable. A glob without a slash can match a basename at
+            any depth.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--no-default-excludes</code></td><td
+            >Disable built-in discovery excludes.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--no-gitignore</code></td><td
+            >Do not apply root <code>.gitignore</code> patterns during discovery.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--force-exclude</code></td><td
+            >Apply excludes even to explicitly passed files.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--schema</code></td><td
+            >Associate a file glob with a schema as <code>glob=uri</code>.
+            Repeatable. Association globs use the same slashless-basename
+            behavior as discovery globs.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--schema-store</code></td><td
+            >Match conventional filenames using the SchemaStore catalog.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--schema-store-url</code></td><td
+            >Use a SchemaStore-format catalog URL or local path and enable
+            catalog matching.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--schema-store-failure</code></td><td
+            >Set catalog failure policy to <code>warn</code>, <code>error</code
+            >, or <code>skip</code>.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--max-depth</code></td><td
+            >Set maximum external schema reference depth.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--fetch-remote</code></td><td
+            >Allow fetching HTTP schemas. Defaults to enabled; pass <code
+              >--fetch-remote=false</code
+            > to disable.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--fetch-retries</code></td><td
+            >Set retries for transient remote schema fetch failures. Defaults to <code
+              >2</code
+            >.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--allow-domain</code></td><td
+            >Allow remote schemas from a domain. Repeatable.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--block-domain</code></td><td
+            >Block remote schemas from a domain. Repeatable.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--fetch-timeout</code></td><td
+            >Set schema fetch timeout, such as <code>10s</code>.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--compile-timeout</code></td><td
+            >Set schema compile timeout, such as <code>30s</code>.</td
+          ></tr
+        >
       </tbody>
     </table>
+    <p>
+      Branch-error reporting is configured in <code>.dollarlint.toml</code>
+      rather than a validate flag. Use <code>output.branchErrors = "best"</code>
+      for focused <code>oneOf</code>/<code>anyOf</code> diagnostics, or <code
+        >"all"</code
+      > when debugging every failed schema branch.
+    </p>
 
     <h2>Init flags</h2>
     <table>
@@ -116,19 +241,65 @@ const mcpConfig = `{
         </tr>
       </thead>
       <tbody>
-        <tr><td><code>--output</code>, <code>-o</code></td><td>Path to the <code>.dollarlint.toml</code> file to create.</td></tr>
-        <tr><td><code>--force</code></td><td>Overwrite an existing config file.</td></tr>
-        <tr><td><code>--defaults</code></td><td>Skip prompts and use defaults plus provided flags.</td></tr>
-        <tr><td><code>--fetch-remote</code></td><td>Allow fetching HTTP schemas in the generated config. Pass <code>--fetch-remote=false</code> to disable.</td></tr>
-        <tr><td><code>--fetch-retries</code></td><td>Set generated retry count for transient fetch failures. Defaults to <code>2</code>.</td></tr>
-        <tr><td><code>--schema-store</code></td><td>Enable the built-in SchemaStore catalog in the generated config. Defaults to enabled.</td></tr>
-        <tr><td><code>--schema-store-failure</code></td><td>Set generated catalog failure policy to <code>warn</code>, <code>error</code>, or <code>skip</code>.</td></tr>
+        <tr
+          ><td><code>--output</code>, <code>-o</code></td><td
+            >Path to the <code>.dollarlint.toml</code> file to create.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--force</code></td><td
+            >Overwrite an existing config file.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--defaults</code></td><td
+            >Skip prompts and use defaults plus provided flags.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--fetch-remote</code></td><td
+            >Allow fetching HTTP schemas in the generated config. Pass <code
+              >--fetch-remote=false</code
+            > to disable.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--fetch-retries</code></td><td
+            >Set generated retry count for transient fetch failures. Defaults to <code
+              >2</code
+            >.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--schema-store</code></td><td
+            >Enable the built-in SchemaStore catalog in the generated config.
+            Defaults to enabled.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--schema-store-failure</code></td><td
+            >Set generated catalog failure policy to <code>warn</code>, <code
+              >error</code
+            >, or <code>skip</code>.</td
+          ></tr
+        >
       </tbody>
     </table>
 
     <h2>MCP server</h2>
-    <p><code>dollarlint serve mcp</code> starts a stdio MCP server. It is meant to be launched by an MCP client, not run directly in a terminal session.</p>
+    <p>
+      <code>dollarlint serve mcp</code> starts a stdio MCP server. It is meant to
+      be launched by an MCP client, not run directly in a terminal session.
+    </p>
     <pre><code>{mcpConfig}</code></pre>
-    <p>The server exposes one tool, <code>validate</code>, with one optional argument: <code>include</code>. Pass file or glob patterns relative to the server working directory to narrow validation for a tool call, or omit it to use configured discovery. The tool includes source locations automatically and returns structured JSON with <code>ok</code>, <code>message</code>, and the regular dollarlint <code>result</code> payload.</p>
+    <p>
+      The server exposes one tool, <code>validate</code>, with one optional
+      argument: <code>include</code>. Pass file or glob patterns relative to the
+      server working directory to narrow validation for a tool call, or omit it
+      to use configured discovery. The tool includes source locations
+      automatically and returns structured JSON with <code>ok</code>, <code
+        >message</code
+      >, and the regular dollarlint <code>result</code> payload.
+    </p>
   </article>
 </DocsLayout>

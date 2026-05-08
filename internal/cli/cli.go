@@ -57,6 +57,7 @@ func Execute(args []string, stdout, stderr io.Writer) int {
 }
 
 func ExecuteWithIO(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
+	configureNoColor()
 	cmd := NewRootCommandWithIO(stdin, stdout)
 	cmd.SetArgs(args)
 	cmd.SetErr(stderr)

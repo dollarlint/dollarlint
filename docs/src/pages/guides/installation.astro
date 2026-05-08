@@ -7,15 +7,26 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <header class="doc-header">
       <span class="eyebrow">Guide</span>
       <h1>Installation</h1>
-      <p class="lead">Install the dollarlint CLI with Go, then point it at any project with JSON, YAML, or TOML config files. It's a small investment that pays dividends.</p>
+      <p class="lead">
+        Install the dollarlint CLI with Go, then point it at any project with
+        JSON, YAML, or TOML config files. It's a small investment that pays
+        dividends.
+      </p>
     </header>
 
     <h2>Install from source with Go</h2>
     <pre><code>go install github.com/agorischek/dollarlint/cmd/dollarlint@latest</code></pre>
-    <p>This installs the <code>dollarlint</code> command from the latest module version available to your Go toolchain.</p>
+    <p>
+      This installs the <code>dollarlint</code> command from the latest module version
+      available to your Go toolchain.
+    </p>
 
     <h2>Release binaries</h2>
-    <p>The project is configured for GoReleaser and GitHub Releases. Once a release is published, prefer the archive for your platform when you do not want to build from source.</p>
+    <p>
+      The project is configured for GoReleaser and GitHub Releases. Once a
+      release is published, prefer the archive for your platform when you do not
+      want to build from source.
+    </p>
 
     <h2>Verify the install</h2>
     <pre><code>dollarlint version

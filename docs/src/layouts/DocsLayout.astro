@@ -33,7 +33,9 @@ const nav = [
   },
 ];
 
-const currentLabel = nav.flatMap((section) => section.links).find((link) => link.href === current)?.label ?? "Menu";
+const currentLabel =
+  nav.flatMap((section) => section.links).find((link) => link.href === current)
+    ?.label ?? "Menu";
 const currentPageLabel = current === "/guides/" ? "Guides" : currentLabel;
 const slogans = [
   ["Put your money", "where your schema is"],
@@ -52,7 +54,8 @@ const slogans = [
     <script is:inline>
       const storedTheme = localStorage.getItem("dollarlint-theme") || "system";
       const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      const resolveTheme = (theme) => (theme === "system" ? (themeQuery.matches ? "dark" : "light") : theme);
+      const resolveTheme = (theme) =>
+        theme === "system" ? (themeQuery.matches ? "dark" : "light") : theme;
       const applyTheme = (theme) => {
         const resolved = resolveTheme(theme);
         document.documentElement.dataset.themeChoice = theme;
@@ -65,17 +68,22 @@ const slogans = [
         ["Balance your", "config books"],
         ["Make every", "schema count"],
       ];
-      window.__dollarlintSlogan = sloganOptions[Math.floor(Math.random() * sloganOptions.length)];
+      window.__dollarlintSlogan =
+        sloganOptions[Math.floor(Math.random() * sloganOptions.length)];
       applyTheme(storedTheme);
       themeQuery.addEventListener("change", () => {
-        const currentTheme = localStorage.getItem("dollarlint-theme") || "system";
+        const currentTheme =
+          localStorage.getItem("dollarlint-theme") || "system";
         applyTheme(currentTheme);
       });
       window.addEventListener("DOMContentLoaded", () => {
         const buttons = document.querySelectorAll("[data-theme-option]");
         const setPressed = (theme) => {
           buttons.forEach((button) => {
-            button.setAttribute("aria-pressed", String(button.dataset.themeOption === theme));
+            button.setAttribute(
+              "aria-pressed",
+              String(button.dataset.themeOption === theme),
+            );
           });
         };
         setPressed(storedTheme);
@@ -139,7 +147,11 @@ const slogans = [
             <Logo class="brand-logo" />
             <span>
               <span class="brand-title">dollarlint</span>
-              <span class="brand-subtitle" data-slogan aria-label={slogans[0].join(" ")}>
+              <span
+                class="brand-subtitle"
+                data-slogan
+                aria-label={slogans[0].join(" ")}
+              >
                 <span data-slogan-line>{slogans[0][0]}</span>
                 <span data-slogan-line>{slogans[0][1]}</span>
               </span>
@@ -147,13 +159,18 @@ const slogans = [
           </a>
           <script is:inline>
             (() => {
-              const slogan = document.currentScript.previousElementSibling?.querySelector("[data-slogan]");
+              const slogan =
+                document.currentScript.previousElementSibling?.querySelector(
+                  "[data-slogan]",
+                );
               const lines = window.__dollarlintSlogan;
               if (!slogan || !Array.isArray(lines)) return;
               slogan.setAttribute("aria-label", lines.join(" "));
-              slogan.querySelectorAll("[data-slogan-line]").forEach((line, index) => {
-                line.textContent = lines[index] || "";
-              });
+              slogan
+                .querySelectorAll("[data-slogan-line]")
+                .forEach((line, index) => {
+                  line.textContent = lines[index] || "";
+                });
             })();
           </script>
           <div class="mobile-menu" data-mobile-menu>
@@ -166,58 +183,118 @@ const slogans = [
               data-mobile-menu-button
             >
               <span class="sr-only">Menu</span>
-              <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+              <span class="menu-icon" aria-hidden="true"
+                ><span></span><span></span><span></span></span
+              >
             </button>
-            <div class="mobile-menu-panel" id="mobile-docs-menu" data-mobile-menu-panel hidden>
+            <div
+              class="mobile-menu-panel"
+              id="mobile-docs-menu"
+              data-mobile-menu-panel
+              hidden
+            >
               <div class="mobile-menu-current">{currentPageLabel}</div>
               <div class="mobile-menu-scroll">
-                {nav.map((section) => (
-                  <nav class="mobile-nav-section" aria-label={`${section.heading} mobile`}>
-                    <div class="nav-heading">{section.heading}</div>
-                    <ul class="nav-list">
-                      {section.links.map((link) => (
-                        <li>
-                          <a class="nav-link" href={link.href} aria-current={current === link.href ? "page" : undefined}>
-                            {link.label}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
-                ))}
+                {
+                  nav.map((section) => (
+                    <nav
+                      class="mobile-nav-section"
+                      aria-label={`${section.heading} mobile`}
+                    >
+                      <div class="nav-heading">{section.heading}</div>
+                      <ul class="nav-list">
+                        {section.links.map((link) => (
+                          <li>
+                            <a
+                              class="nav-link"
+                              href={link.href}
+                              aria-current={
+                                current === link.href ? "page" : undefined
+                              }
+                            >
+                              {link.label}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </nav>
+                  ))
+                }
               </div>
               <div class="mobile-theme">
                 <div class="theme-switch" role="group" aria-label="Theme">
-                  <button class="theme-button" type="button" data-theme-option="light" aria-pressed="false">Light</button>
-                  <button class="theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
-                  <button class="theme-button" type="button" data-theme-option="system" aria-pressed="true">System</button>
+                  <button
+                    class="theme-button"
+                    type="button"
+                    data-theme-option="light"
+                    aria-pressed="false">Light</button
+                  >
+                  <button
+                    class="theme-button"
+                    type="button"
+                    data-theme-option="dark"
+                    aria-pressed="false">Dark</button
+                  >
+                  <button
+                    class="theme-button"
+                    type="button"
+                    data-theme-option="system"
+                    aria-pressed="true">System</button
+                  >
                 </div>
-                <a class="utility-link" href="https://github.com/agorischek/dollarlint">GitHub</a>
+                <a
+                  class="utility-link"
+                  href="https://github.com/agorischek/dollarlint">GitHub</a
+                >
               </div>
             </div>
           </div>
         </div>
-        {nav.map((section) => (
-          <nav class="nav-section" aria-label={section.heading}>
-            <div class="nav-heading">{section.heading}</div>
-            <ul class="nav-list">
-              {section.links.map((link) => (
-                <li>
-                  <a class="nav-link" href={link.href} aria-current={current === link.href ? "page" : undefined}>
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ))}
+        {
+          nav.map((section) => (
+            <nav class="nav-section" aria-label={section.heading}>
+              <div class="nav-heading">{section.heading}</div>
+              <ul class="nav-list">
+                {section.links.map((link) => (
+                  <li>
+                    <a
+                      class="nav-link"
+                      href={link.href}
+                      aria-current={current === link.href ? "page" : undefined}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))
+        }
         <div class="sidebar-theme">
           <div class="theme-switch" role="group" aria-label="Theme">
-            <button class="theme-button" type="button" data-theme-option="light" aria-pressed="false">Light</button>
-            <button class="theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
-            <button class="theme-button" type="button" data-theme-option="system" aria-pressed="true">System</button>
+            <button
+              class="theme-button"
+              type="button"
+              data-theme-option="light"
+              aria-pressed="false">Light</button
+            >
+            <button
+              class="theme-button"
+              type="button"
+              data-theme-option="dark"
+              aria-pressed="false">Dark</button
+            >
+            <button
+              class="theme-button"
+              type="button"
+              data-theme-option="system"
+              aria-pressed="true">System</button
+            >
           </div>
-          <a class="utility-link" href="https://github.com/agorischek/dollarlint">GitHub</a>
+          <a
+            class="utility-link"
+            href="https://github.com/agorischek/dollarlint">GitHub</a
+          >
         </div>
       </aside>
       <main class="content">

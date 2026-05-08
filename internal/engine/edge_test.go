@@ -171,7 +171,7 @@ func TestValidateHelperEdges(t *testing.T) {
 		t.Fatalf("expected empty keyword")
 	}
 	doc := &Document{Path: "/tmp/a.json", RelativePath: "a.json"}
-	issues := issuesFromSchemaError(doc, errors.New("plain"))
+	issues := issuesFromSchemaError(doc, errors.New("plain"), OutputConfig{})
 	if len(issues) != 1 || issues[0].Message != "plain" {
 		t.Fatalf("plain issues = %+v", issues)
 	}

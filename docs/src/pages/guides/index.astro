@@ -10,32 +10,38 @@ const guides = [
   {
     href: "/guides/quick-start/",
     title: "Quick start",
-    description: "Create a starter config, validate a directory, and choose an output format.",
+    description:
+      "Create a starter config, validate a directory, and choose an output format.",
   },
   {
     href: "/guides/schema-declarations/",
     title: "Schema declarations",
-    description: "Declare schemas in JSON, YAML, and TOML, or associate files from config.",
+    description:
+      "Declare schemas in JSON, YAML, and TOML, or associate files from config.",
   },
   {
     href: "/guides/ignore-rules/",
     title: "Ignore rules",
-    description: "Keep known validation errors visible without letting them fail the run.",
+    description:
+      "Keep known validation errors visible without letting them fail the run.",
   },
   {
     href: "/guides/schemastore/",
     title: "Catalogs",
-    description: "Infer schemas for well-known filenames with SchemaStore or custom catalogs.",
+    description:
+      "Infer schemas for well-known filenames with SchemaStore or custom catalogs.",
   },
   {
     href: "/guides/mcp/",
     title: "MCP server",
-    description: "Expose dollarlint validation to agents and editors through Model Context Protocol.",
+    description:
+      "Expose dollarlint validation to agents and editors through Model Context Protocol.",
   },
   {
     href: "/guides/examples/",
     title: "Examples",
-    description: "Run the local schema, SchemaStore, and Azure examples from the repository.",
+    description:
+      "Run the local schema, SchemaStore, and Azure examples from the repository.",
   },
 ];
 ---
@@ -45,16 +51,21 @@ const guides = [
     <header class="doc-header">
       <span class="eyebrow">Guides</span>
       <h1>Guides</h1>
-      <p class="lead">Start with the first run, then dig into schema declarations, catalogs, ignore rules, and practical examples.</p>
+      <p class="lead">
+        Start with the first run, then dig into schema declarations, catalogs,
+        ignore rules, and practical examples.
+      </p>
     </header>
 
     <div class="grid guide-grid">
-      {guides.map((guide) => (
-        <a class="card guide-card" href={guide.href}>
-          <h3>{guide.title}</h3>
-          <p>{guide.description}</p>
-        </a>
-      ))}
+      {
+        guides.map((guide) => (
+          <a class="card guide-card" href={guide.href}>
+            <h3>{guide.title}</h3>
+            <p>{guide.description}</p>
+          </a>
+        ))
+      }
     </div>
   </article>
 </DocsLayout>

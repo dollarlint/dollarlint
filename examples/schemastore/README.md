@@ -1,6 +1,6 @@
 # SchemaStore examples
 
-These examples declare schemas from `https://www.schemastore.org` and are meant to exercise dollarlint's default remote schema fetching behavior.
+These examples declare schemas from `https://www.schemastore.org` and intentionally contain schema violations so dollarlint's error reporting can be exercised against remote schemas.
 
 ```sh
 dollarlint validate ./examples/schemastore --locations

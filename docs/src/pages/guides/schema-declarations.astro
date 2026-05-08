@@ -24,7 +24,11 @@ schema = "./schemas/settings.schema.json"`;
     <header class="doc-header">
       <span class="eyebrow">Guide</span>
       <h1>Schema declarations</h1>
-      <p class="lead">Every file can declare its own schema. For files that can't (or shouldn't) carry a <code>$schema</code>, config-level associations have you covered.</p>
+      <p class="lead">
+        Every file can declare its own schema. For files that can't (or
+        shouldn't) carry a <code>$schema</code>, config-level associations have
+        you covered.
+      </p>
     </header>
 
     <h2>JSON</h2>
@@ -34,20 +38,43 @@ schema = "./schemas/settings.schema.json"`;
     <h2>YAML</h2>
     <CodeBlock code={yamlDirective} language="yaml" />
     <CodeBlock code={yamlRoot} language="yaml" />
-    <p>The comment directive follows the YAML Language Server convention. dollarlint scans the first 25 lines for it before looking for a root <code>$schema</code> key.</p>
+    <p>
+      The comment directive follows the YAML Language Server convention.
+      dollarlint scans the first 25 lines for it before looking for a root <code
+        >$schema</code
+      > key.
+    </p>
 
     <h2>TOML</h2>
     <CodeBlock code={tomlDirective} language="toml" />
     <CodeBlock code={tomlRoot} language="toml" />
-    <p>The comment directive follows the Taplo and Even Better TOML convention. A root <code>$schema</code> key also works, but it must be quoted because <code>$</code> is not a bare TOML key character.</p>
+    <p>
+      The comment directive follows the Taplo and Even Better TOML convention. A
+      root <code>$schema</code> key also works, but it must be quoted because <code
+        >$</code
+      > is not a bare TOML key character.
+    </p>
 
     <h2>Config associations</h2>
-    <p>When you can't — or don't want to — add a declaration to each file, associations let you cover them from your config instead.</p>
+    <p>
+      When you can't — or don't want to — add a declaration to each file,
+      associations let you cover them from your config instead.
+    </p>
     <CodeBlock code={association} language="toml" />
-    <p>Association globs are matched against each discovered file's path relative to the validation root. Like discovery globs, a pattern without a slash can match a basename at any depth.</p>
+    <p>
+      Association globs are matched against each discovered file's path relative
+      to the validation root. Like discovery globs, a pattern without a slash
+      can match a basename at any depth.
+    </p>
 
     <div class="note">
-      <p>Precedence order: in-file declaration first, then config association, then dollarlint's built-in <code>.dollarlint.toml</code> association, then catalog match. If none of those hit, the file gets skipped unless <code>schemas.requireCoverage = true</code>.</p>
+      <p>
+        Precedence order: in-file declaration first, then config association,
+        then dollarlint's built-in <code>.dollarlint.toml</code> association, then
+        catalog match. If none of those hit, the file gets skipped unless <code
+          >schemas.requireCoverage = true</code
+        >.
+      </p>
     </div>
   </article>
 </DocsLayout>

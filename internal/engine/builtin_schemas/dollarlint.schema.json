@@ -236,6 +236,10 @@
         },
         "locations": {
           "type": "boolean"
+        },
+        "branchErrors": {
+          "type": "string",
+          "enum": ["best", "all"]
         }
       }
     },

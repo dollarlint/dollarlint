@@ -1,10 +1,10 @@
 # yaml-language-server: $schema=https://www.schemastore.org/buf.json
-version: v2
+version: v3
 modules:
   - path: proto
 lint:
   use:
-    - STANDARD
+    - EVERYTHING
 breaking:
   use:
-    - FILE
+    - DEFINITELY_BREAKING

@@ -20,13 +20,23 @@ reason = "fixture intentionally keeps the old shape"`;
     <header class="doc-header">
       <span class="eyebrow">Guide</span>
       <h1>Ignore rules</h1>
-      <p class="lead">Use ignore rules for known validation issues that should stay visible in reports without failing the run.</p>
+      <p class="lead">
+        Use ignore rules for known validation issues that should stay visible in
+        reports without failing the run.
+      </p>
     </header>
 
     <h2>Start with a narrow rule</h2>
-    <p>Ignore rules live in <code>.dollarlint.toml</code>. Each rule can match by file glob, JSON Schema keyword, affected property, and an optional reason.</p>
+    <p>
+      Ignore rules live in <code>.dollarlint.toml</code>. Each rule can match by
+      file glob, JSON Schema keyword, affected property, and an optional reason.
+    </p>
     <CodeBlock code={ignoreRule} language="toml" />
-    <p>All fields you include must match. Fields you leave out act like wildcards, so prefer starting specific and relaxing the rule only when you mean to cover a broader class of known issues.</p>
+    <p>
+      All fields you include must match. Fields you leave out act like
+      wildcards, so prefer starting specific and relaxing the rule only when you
+      mean to cover a broader class of known issues.
+    </p>
 
     <h2>How matching works</h2>
     <table>
@@ -37,25 +47,64 @@ reason = "fixture intentionally keeps the old shape"`;
         </tr>
       </thead>
       <tbody>
-        <tr><td><code>file</code></td><td>A discovered file path relative to the validation root, using the same glob style as discovery. A pattern without a slash can match a basename at any depth.</td></tr>
-        <tr><td><code>keyword</code></td><td>Either the JSON Schema keyword name, such as <code>required</code> or <code>type</code>, or the full keyword location.</td></tr>
-        <tr><td><code>property</code></td><td>The affected property name, the instance pointer such as <code>/name</code>, or a glob when matching a bare property name.</td></tr>
-        <tr><td><code>reason</code></td><td>Human context for the report. If omitted, dollarlint records that the issue matched an ignore rule.</td></tr>
+        <tr
+          ><td><code>file</code></td><td
+            >A discovered file path relative to the validation root, using the
+            same glob style as discovery. A pattern without a slash can match a
+            basename at any depth.</td
+          ></tr
+        >
+        <tr
+          ><td><code>keyword</code></td><td
+            >Either the JSON Schema keyword name, such as <code>required</code> or
+            <code>type</code>, or the full keyword location.</td
+          ></tr
+        >
+        <tr
+          ><td><code>property</code></td><td
+            >The affected property name, the instance pointer such as <code
+              >/name</code
+            >, or a glob when matching a bare property name.</td
+          ></tr
+        >
+        <tr
+          ><td><code>reason</code></td><td
+            >Human context for the report. If omitted, dollarlint records that
+            the issue matched an ignore rule.</td
+          ></tr
+        >
       </tbody>
     </table>
 
     <h2>Use verbose output for stable values</h2>
-    <p>When you are writing a precise rule, run validation with <code>--verbose</code>. Verbose text output shows metadata such as the schema URI, keyword, keyword location, and property, which are better anchors than copying the human-readable message.</p>
+    <p>
+      When you are writing a precise rule, run validation with <code
+        >--verbose</code
+      >. Verbose text output shows metadata such as the schema URI, keyword,
+      keyword location, and property, which are better anchors than copying the
+      human-readable message.
+    </p>
     <pre><code>dollarlint validate . --verbose</code></pre>
 
     <h2>Match pointers when property names are ambiguous</h2>
-    <p>If a property name appears in many places, match the instance pointer or keyword location instead of the bare name.</p>
+    <p>
+      If a property name appears in many places, match the instance pointer or
+      keyword location instead of the bare name.
+    </p>
     <CodeBlock code={pointerRule} language="toml" />
 
     <h2>What ignored means</h2>
-    <p>Ignored issues are still counted and reported as ignored, but they do not make the run fail. Exit code <code>0</code> means there were no non-ignored issues.</p>
+    <p>
+      Ignored issues are still counted and reported as ignored, but they do not
+      make the run fail. Exit code <code>0</code> means there were no non-ignored
+      issues.
+    </p>
     <div class="note">
-      <p>Use discovery excludes for files that should not be checked at all. Use ignore rules when the file should still be validated, but a specific known issue should not block the run.</p>
+      <p>
+        Use discovery excludes for files that should not be checked at all. Use
+        ignore rules when the file should still be validated, but a specific
+        known issue should not block the run.
+      </p>
     </div>
   </article>
 </DocsLayout>

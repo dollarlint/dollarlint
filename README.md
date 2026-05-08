@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/public/logo.svg" alt="dollarlint logo" width="180">
+</p>
+
 # dollarlint
 
 `dollarlint` validates source JSON, YAML, and TOML files against the JSON Schema each file declares.
@@ -128,6 +132,7 @@ showSkipped = false
 verbose = false
 quiet = false
 locations = false
+branchErrors = "best"
 ```
 
 Output format and output file are invocation choices, not persistent config. Use `--format text|json|sarif` and `--output <path>` on `dollarlint validate` when a run needs a machine-readable artifact.
@@ -176,6 +181,7 @@ settings.json
 ```
 
 Use `--verbose` to show schema URI and keyword metadata under each issue. Use `--quiet` for terse success output.
+Set `output.branchErrors = "all"` when you need every failed `oneOf`/`anyOf` branch leaf for schema debugging; the default `"best"` reports the closest matching branch.
 
 Text output uses subtle terminal styling when color is available and stays plain for machine-readable formats such as `--format json` and `--format sarif`.
 

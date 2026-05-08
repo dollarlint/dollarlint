@@ -10,50 +10,90 @@ const { class: className = "" } = Astro.props;
   focusable="false"
 >
   <defs>
-    <linearGradient id="site-logo-outer-gradient" x1="86" x2="556" y1="24" y2="363" gradientUnits="userSpaceOnUse">
-      <stop class="site-logo__outer-stop-start" offset="0" />
-      <stop class="site-logo__outer-stop-end" offset="1" />
+    <linearGradient
+      id="site-logo-outer-gradient"
+      x1="86"
+      x2="556"
+      y1="24"
+      y2="363"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop class="site-logo__outer-stop-start" offset="0"></stop>
+      <stop class="site-logo__outer-stop-end" offset="1"></stop>
     </linearGradient>
-    <linearGradient id="site-logo-inner-gradient" x1="96" x2="548" y1="70" y2="323" gradientUnits="userSpaceOnUse">
-      <stop class="site-logo__inner-stop-start" offset="0" />
-      <stop class="site-logo__inner-stop-end" offset="1" />
+    <linearGradient
+      id="site-logo-inner-gradient"
+      x1="96"
+      x2="548"
+      y1="70"
+      y2="323"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop class="site-logo__inner-stop-start" offset="0"></stop>
+      <stop class="site-logo__inner-stop-end" offset="1"></stop>
     </linearGradient>
-    <linearGradient id="site-logo-seal-gradient" x1="260" x2="382" y1="90" y2="306" gradientUnits="userSpaceOnUse">
-      <stop class="site-logo__seal-stop-start" offset="0" />
-      <stop class="site-logo__seal-stop-end" offset="1" />
+    <linearGradient
+      id="site-logo-seal-gradient"
+      x1="260"
+      x2="382"
+      y1="90"
+      y2="306"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop class="site-logo__seal-stop-start" offset="0"></stop>
+      <stop class="site-logo__seal-stop-end" offset="1"></stop>
     </linearGradient>
-    <pattern id="site-logo-paper-texture" width="34" height="34" patternUnits="userSpaceOnUse">
-      <path class="site-logo__texture-line" d="M0 8h34M0 23h34" />
-      <circle class="site-logo__texture-dot" cx="8" cy="14" r="1.5" />
-      <circle class="site-logo__texture-dot" cx="24" cy="30" r="1.2" />
+    <pattern
+      id="site-logo-paper-texture"
+      width="34"
+      height="34"
+      patternUnits="userSpaceOnUse"
+    >
+      <path class="site-logo__texture-line" d="M0 8h34M0 23h34"></path>
+      <circle class="site-logo__texture-dot" cx="8" cy="14" r="1.5"></circle>
+      <circle class="site-logo__texture-dot" cx="24" cy="30" r="1.2"></circle>
     </pattern>
   </defs>
   <path
     class="site-logo__outer-fill"
     d="M606.439 7.767H35.094c-15.534 0-28.127 12.593-28.127 28.127v315.784c0 15.534 12.593 28.127 28.127 28.127h571.345c15.534 0 28.127-12.593 28.127-28.127V35.894c0-15.534-12.593-28.127-28.127-28.127Z"
-  />
+  ></path>
   <path
     class="site-logo__texture"
     d="M606.439 7.767H35.094c-15.534 0-28.127 12.593-28.127 28.127v315.784c0 15.534 12.593 28.127 28.127 28.127h571.345c15.534 0 28.127-12.593 28.127-28.127V35.894c0-15.534-12.593-28.127-28.127-28.127Z"
-  />
+  ></path>
   <path
     class="site-logo__inner-fill"
     d="M107.373 346.806c0-37.227-30.179-67.406-67.406-67.406V108.173c37.227 0 67.406-30.179 67.406-67.406H534.16c0 37.227 30.179 67.406 67.406 67.406V279.4c-37.227 0-67.406 30.179-67.406 67.406H107.373Z"
-  />
+  ></path>
   <path
     class="site-logo__texture site-logo__texture--inner"
     d="M107.373 346.806c0-37.227-30.179-67.406-67.406-67.406V108.173c37.227 0 67.406-30.179 67.406-67.406H534.16c0 37.227 30.179 67.406 67.406 67.406V279.4c-37.227 0-67.406 30.179-67.406 67.406H107.373Z"
-  />
-  <circle class="site-logo__seal-fill" cx="322.148" cy="193.787" r="120.781" />
-  <circle class="site-logo__texture site-logo__texture--seal" cx="322.148" cy="193.787" r="120.781" />
-  <ellipse class="site-logo__oval-fill" cx="125.582" cy="193.787" rx="26.221" ry="29.163" />
-  <ellipse class="site-logo__oval-fill" cx="515.951" cy="193.787" rx="26.221" ry="29.163" />
+  ></path>
+  <circle class="site-logo__seal-fill" cx="322.148" cy="193.787" r="120.781"
+  ></circle>
+  <circle
+    class="site-logo__texture site-logo__texture--seal"
+    cx="322.148"
+    cy="193.787"
+    r="120.781"></circle>
+  <ellipse
+    class="site-logo__oval-fill"
+    cx="125.582"
+    cy="193.787"
+    rx="26.221"
+    ry="29.163"></ellipse>
+  <ellipse
+    class="site-logo__oval-fill"
+    cx="515.951"
+    cy="193.787"
+    rx="26.221"
+    ry="29.163"></ellipse>
   <path
     class="site-logo__check"
     fill="none"
     stroke-linecap="round"
     stroke-linejoin="round"
     stroke-width="16"
-    d="m266.46 198.077 36.629 36.629 71.984-71.984"
-  />
+    d="m266.46 198.077 36.629 36.629 71.984-71.984"></path>
 </svg>

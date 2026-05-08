@@ -5,8 +5,9 @@
   "schedule": ["before 5am on monday"],
   "packageRules": [
     {
-      "matchManagers": ["gomod"],
-      "groupName": "Go modules"
+      "matchManagers": ["not-a-real-manager"],
+      "groupName": false,
+      "enabled": "yes"
     }
   ]
 }

@@ -14,6 +14,11 @@ const (
 	CatalogFailureSkip  = "skip"
 )
 
+const (
+	BranchErrorsBest = "best"
+	BranchErrorsAll  = "all"
+)
+
 type Config struct {
 	Version   int             `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
 	Discovery DiscoveryConfig `json:"discovery,omitempty" yaml:"discovery,omitempty" toml:"discovery,omitempty"`
@@ -85,10 +90,11 @@ type CompileConfig struct {
 }
 
 type OutputConfig struct {
-	ShowSkipped bool `json:"showSkipped,omitempty" yaml:"showSkipped,omitempty" toml:"showSkipped,omitempty"`
-	Verbose     bool `json:"verbose,omitempty" yaml:"verbose,omitempty" toml:"verbose,omitempty"`
-	Quiet       bool `json:"quiet,omitempty" yaml:"quiet,omitempty" toml:"quiet,omitempty"`
-	Locations   bool `json:"locations,omitempty" yaml:"locations,omitempty" toml:"locations,omitempty"`
+	ShowSkipped  bool   `json:"showSkipped,omitempty" yaml:"showSkipped,omitempty" toml:"showSkipped,omitempty"`
+	Verbose      bool   `json:"verbose,omitempty" yaml:"verbose,omitempty" toml:"verbose,omitempty"`
+	Quiet        bool   `json:"quiet,omitempty" yaml:"quiet,omitempty" toml:"quiet,omitempty"`
+	Locations    bool   `json:"locations,omitempty" yaml:"locations,omitempty" toml:"locations,omitempty"`
+	BranchErrors string `json:"branchErrors,omitempty" yaml:"branchErrors,omitempty" toml:"branchErrors,omitempty"`
 }
 
 type IgnoreRule struct {

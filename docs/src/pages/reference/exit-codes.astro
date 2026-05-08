@@ -7,7 +7,11 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <header class="doc-header">
       <span class="eyebrow">Reference</span>
       <h1>Exit codes</h1>
-      <p class="lead">The bottom line. dollarlint uses small, predictable exit codes so your CI can tell the difference between "your config is wrong" and "the command itself failed."</p>
+      <p class="lead">
+        The bottom line. dollarlint uses small, predictable exit codes so your
+        CI can tell the difference between "your config is wrong" and "the
+        command itself failed."
+      </p>
     </header>
 
     <table>
@@ -24,17 +28,28 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
         </tr>
         <tr>
           <td><code>1</code></td>
-          <td>Something's off — validation issues, parse issues, schema loading issues, or compile issues were found.</td>
+          <td
+            >Something's off — validation issues, parse issues, schema loading
+            issues, or compile issues were found.</td
+          >
         </tr>
         <tr>
           <td><code>2</code></td>
-          <td>Can't even get started — the command or configuration couldn't be used.</td>
+          <td
+            >Can't even get started — the command or configuration couldn't be
+            used.</td
+          >
         </tr>
       </tbody>
     </table>
 
     <div class="warning">
-      <p>If catalog availability is a deal-breaker, use <code>--schema-store-failure error</code> or <code>schemas.catalogs.failure = "error"</code>. That turns catalog load failures into command errors with exit code <code>2</code>.</p>
+      <p>
+        If catalog availability is a deal-breaker, use <code
+          >--schema-store-failure error</code
+        > or <code>schemas.catalogs.failure = "error"</code>. That turns catalog
+        load failures into command errors with exit code <code>2</code>.
+      </p>
     </div>
   </article>
 </DocsLayout>

@@ -7,7 +7,10 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <header class="doc-header">
       <span class="eyebrow">Reference</span>
       <h1>Output formats</h1>
-      <p class="lead">Text for local work, JSON for scripts, SARIF for code scanning — three formats, each worth its weight.</p>
+      <p class="lead">
+        Text for local work, JSON for scripts, SARIF for code scanning — three
+        formats, each worth its weight.
+      </p>
     </header>
 
     <h2>Text</h2>
@@ -26,17 +29,46 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues in 180ms</code></pre>
     <pre><code>settings.json
   3:11  type      expected string, received number  /name
   4:12  minimum   must be >= 1   /count</code></pre>
-    <p>Without <code>--locations</code>, the first column is the JSON Pointer location instead of a line and column.</p>
+    <p>
+      Without <code>--locations</code>, the first column is the JSON Pointer
+      location instead of a line and column.
+    </p>
 
     <h2>JSON</h2>
     <pre><code>dollarlint validate . --format json</code></pre>
-    <p>JSON output gives you the full accounting: run root, summary counts, duration, per-file results, issues, warnings, schema locations, and optional source positions.</p>
+    <p>
+      JSON output gives you the full accounting: run root, summary counts,
+      duration, per-file results, issues, warnings, schema locations, and
+      optional source positions.
+    </p>
+
+    <h2>Branch errors</h2>
+    <pre><code>[output]
+branchErrors = "best"</code></pre>
+    <p>
+      Schemas that use <code>oneOf</code> or <code>anyOf</code> can produce many
+      mutually exclusive branch failures for one bad value. By default,
+      dollarlint reports the closest matching branch so the issue list stays
+      focused. Set <code>output.branchErrors = "all"</code> in <code
+        >.dollarlint.toml</code
+      > when you need every failed branch leaf for schema debugging or exact
+      validator inspection.
+    </p>
 
     <h2>SARIF</h2>
     <pre><code>dollarlint validate . --format sarif --output dollarlint.sarif</code></pre>
-    <p>SARIF output is built for GitHub code scanning and similar tools. SARIF is generated only when <code>--format sarif</code> is requested. Source locations are best-effort: when a precise range isn't available, dollarlint falls back to the nearest file or parent object.</p>
+    <p>
+      SARIF output is built for GitHub code scanning and similar tools. SARIF is
+      generated only when <code>--format sarif</code> is requested. Source locations
+      are best-effort: when a precise range isn't available, dollarlint falls back
+      to the nearest file or parent object.
+    </p>
 
     <h2>Warnings</h2>
-    <p>Warnings are separate from validation issues. For example, a catalog failure with <code>schemas.catalogs.failure = "warn"</code> appears as a warning while explicit and configured schemas continue validating.</p>
+    <p>
+      Warnings are separate from validation issues. For example, a catalog
+      failure with <code>schemas.catalogs.failure = "warn"</code> appears as a warning
+      while explicit and configured schemas continue validating.
+    </p>
   </article>
 </DocsLayout>

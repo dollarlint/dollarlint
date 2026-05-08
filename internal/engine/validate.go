@@ -179,15 +179,15 @@ func validateDocument(ctx context.Context, cache *SchemaCache, cfg Config, docum
 		}}
 	}
 	if err := schema.Validate(document.Data); err != nil {
-		return issuesFromSchemaError(document, err)
+		return issuesFromSchemaError(document, err, cfg.Output)
 	}
 	return nil
 }
 
-func issuesFromSchemaError(document *Document, err error) []Issue {
+func issuesFromSchemaError(document *Document, err error, output OutputConfig) []Issue {
 	var validationErr *jsonschema.ValidationError
 	if errors.As(err, &validationErr) {
-		return issuesFromValidationError(document, validationErr)
+		return issuesFromValidationErrorWithOutput(document, validationErr, output)
 	}
 	return []Issue{{
 		File:         document.Path,
@@ -228,16 +228,49 @@ func compileSchema(ctx context.Context, cache *SchemaCache, cfg Config, schemaUR
 }
 
 func issuesFromValidationError(document *Document, err *jsonschema.ValidationError) []Issue {
+	return issuesFromValidationErrorWithOutput(document, err, OutputConfig{BranchErrors: BranchErrorsBest})
+}
+
+func issuesFromValidationErrorWithOutput(document *Document, err *jsonschema.ValidationError, output OutputConfig) []Issue {
+	mode, modeErr := branchErrorMode(output)
+	if modeErr != nil {
+		mode = BranchErrorsBest
+	}
+	if mode == BranchErrorsAll {
+		return collectAllValidationIssues(document, err, nil)
+	}
 	return collectValidationIssues(document, err, nil)
 }
 
-func collectValidationIssues(document *Document, err *jsonschema.ValidationError, issues []Issue) []Issue {
+func collectAllValidationIssues(document *Document, err *jsonschema.ValidationError, issues []Issue) []Issue {
 	if len(err.Causes) > 0 {
 		for _, cause := range err.Causes {
-			issues = collectValidationIssues(document, cause, issues)
+			issues = collectAllValidationIssues(document, cause, issues)
 		}
 		return issues
 	}
+	return append(issues, leafValidationIssues(document, err)...)
+}
+
+func collectValidationIssues(document *Document, err *jsonschema.ValidationError, issues []Issue) []Issue {
+	return append(issues, compactValidationIssues(document, err)...)
+}
+
+func compactValidationIssues(document *Document, err *jsonschema.ValidationError) []Issue {
+	if len(err.Causes) > 0 {
+		if isChoiceValidationError(err) {
+			return bestChoiceIssues(document, err)
+		}
+		var issues []Issue
+		for _, cause := range err.Causes {
+			issues = append(issues, compactValidationIssues(document, cause)...)
+		}
+		return dedupeIssues(issues)
+	}
+	return leafValidationIssues(document, err)
+}
+
+func leafValidationIssues(document *Document, err *jsonschema.ValidationError) []Issue {
 	base := Issue{
 		File:             document.Path,
 		RelativePath:     document.RelativePath,
@@ -249,6 +282,7 @@ func collectValidationIssues(document *Document, err *jsonschema.ValidationError
 		Message:          validationMessage(err),
 	}
 	applyIssuePosition(document, &base)
+	var issues []Issue
 	switch typed := err.ErrorKind.(type) {
 	case *kind.Required:
 		for _, missing := range typed.Missing {
@@ -272,6 +306,111 @@ func collectValidationIssues(document *Document, err *jsonschema.ValidationError
 		issues = append(issues, base)
 	}
 	return issues
+}
+
+func isChoiceValidationError(err *jsonschema.ValidationError) bool {
+	switch err.ErrorKind.(type) {
+	case *kind.OneOf, *kind.AnyOf:
+		return true
+	default:
+		return false
+	}
+}
+
+type choiceIssueScore struct {
+	discriminatorFailures int
+	contextTypeFailures   int
+	maxDepth              int
+	issues                int
+}
+
+func bestChoiceIssues(document *Document, err *jsonschema.ValidationError) []Issue {
+	if len(err.Causes) == 0 {
+		return leafValidationIssues(document, err)
+	}
+	context := instanceLocation(err.InstanceLocation)
+	var best []Issue
+	var bestScore choiceIssueScore
+	for i, cause := range err.Causes {
+		issues := compactValidationIssues(document, cause)
+		score := scoreChoiceIssues(context, issues)
+		if i == 0 || betterChoiceScore(score, bestScore) {
+			best = issues
+			bestScore = score
+		}
+	}
+	return dedupeIssues(best)
+}
+
+func scoreChoiceIssues(context string, issues []Issue) choiceIssueScore {
+	score := choiceIssueScore{issues: len(issues)}
+	for _, issue := range issues {
+		score.maxDepth = max(score.maxDepth, pointerDepth(issue.InstanceLocation))
+		if isImmediateDiscriminatorIssue(context, issue) {
+			score.discriminatorFailures++
+		}
+		if issue.Keyword == "type" && normalizePointer(issue.InstanceLocation) == normalizePointer(context) {
+			score.contextTypeFailures++
+		}
+	}
+	return score
+}
+
+func betterChoiceScore(left, right choiceIssueScore) bool {
+	if left.discriminatorFailures != right.discriminatorFailures {
+		return left.discriminatorFailures < right.discriminatorFailures
+	}
+	if left.contextTypeFailures != right.contextTypeFailures {
+		return left.contextTypeFailures < right.contextTypeFailures
+	}
+	if left.maxDepth != right.maxDepth {
+		return left.maxDepth > right.maxDepth
+	}
+	return left.issues < right.issues
+}
+
+func isImmediateDiscriminatorIssue(context string, issue Issue) bool {
+	switch issue.Property {
+	case "type", "apiVersion", "kind":
+	default:
+		return false
+	}
+	if issue.Keyword != "enum" && issue.Keyword != "const" {
+		return false
+	}
+	return normalizePointer(issue.InstanceLocation) == joinPointer(context, issue.Property)
+}
+
+func pointerDepth(pointer string) int {
+	pointer = strings.Trim(normalizePointer(pointer), "/")
+	if pointer == "" {
+		return 0
+	}
+	return len(strings.Split(pointer, "/"))
+}
+
+func dedupeIssues(issues []Issue) []Issue {
+	seen := map[string]bool{}
+	deduped := make([]Issue, 0, len(issues))
+	for _, issue := range issues {
+		key := issueDedupeKey(issue)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		deduped = append(deduped, issue)
+	}
+	return deduped
+}
+
+func issueDedupeKey(issue Issue) string {
+	return strings.Join([]string{
+		issue.Keyword,
+		issue.KeywordLocation,
+		issue.Property,
+		issue.InstanceLocation,
+		issue.Message,
+	}, "\x00")
 }
 
 func applyIssuePosition(document *Document, issue *Issue) {

@@ -57,6 +57,9 @@ func DefaultConfig() Config {
 			MaxDepth:    8,
 			Concurrency: runtime.GOMAXPROCS(0),
 		},
+		Output: OutputConfig{
+			BranchErrors: BranchErrorsBest,
+		},
 	}
 }
 
@@ -109,6 +112,9 @@ func (c *Config) ApplyDefaults() {
 	}
 	if c.Schemas.Concurrency <= 0 {
 		c.Schemas.Concurrency = defaults.Schemas.Concurrency
+	}
+	if c.Output.BranchErrors == "" {
+		c.Output.BranchErrors = defaults.Output.BranchErrors
 	}
 }
 
@@ -170,6 +176,11 @@ func validateConfigValues(cfg Config) error {
 	}
 	if cfg.Schemas.Catalogs.Failure != "" {
 		if _, err := catalogFailureMode(cfg.Schemas); err != nil {
+			return err
+		}
+	}
+	if cfg.Output.BranchErrors != "" {
+		if _, err := branchErrorMode(cfg.Output); err != nil {
 			return err
 		}
 	}
@@ -251,6 +262,19 @@ func catalogFailureMode(cfg SchemaConfig) (string, error) {
 func azureResourcePruningEnabled(cfg SchemaConfig) bool {
 	return (cfg.Optimizations.Enabled == nil || *cfg.Optimizations.Enabled) &&
 		(cfg.Optimizations.Azure.PruneResources == nil || *cfg.Optimizations.Azure.PruneResources)
+}
+
+func branchErrorMode(cfg OutputConfig) (string, error) {
+	mode := cfg.BranchErrors
+	if mode == "" {
+		mode = BranchErrorsBest
+	}
+	switch mode {
+	case BranchErrorsBest, BranchErrorsAll:
+		return mode, nil
+	default:
+		return "", fmt.Errorf("unsupported output.branchErrors %q; expected best or all", mode)
+	}
 }
 
 func fetchRetries(cfg FetchConfig) int {

@@ -125,6 +125,7 @@ path = "./catalog.json"
 [output]
 showSkipped = true
 locations = true
+branchErrors = "all"
 
 [[ignore]]
 file = "*.json"
@@ -171,7 +172,7 @@ keyword = "type"
 	if cfg.Schemas.Optimizations.Azure.PruneResources == nil || *cfg.Schemas.Optimizations.Azure.PruneResources {
 		t.Fatalf("Azure resource pruning opt-out not decoded: %+v", cfg.Schemas)
 	}
-	if !cfg.Output.ShowSkipped || !cfg.Output.Locations {
+	if !cfg.Output.ShowSkipped || !cfg.Output.Locations || cfg.Output.BranchErrors != BranchErrorsAll {
 		t.Fatalf("output preferences not decoded: %+v", cfg.Output)
 	}
 	if len(cfg.Discovery.Include) != 1 || cfg.Discovery.Include[0] != "*.json" || len(cfg.Discovery.ExtendExclude) != 1 || cfg.Discovery.ExtendExclude[0] != "generated/**" {
@@ -216,6 +217,15 @@ schema = "./schema.json"
 	}
 	if _, err := catalogFailureMode(SchemaConfig{Catalogs: CatalogConfig{Failure: "explode"}}); err == nil {
 		t.Fatalf("expected invalid catalog failure mode error")
+	}
+	if mode, err := branchErrorMode(OutputConfig{}); err != nil || mode != BranchErrorsBest {
+		t.Fatalf("branch errors default = %q, %v", mode, err)
+	}
+	if mode, err := branchErrorMode(OutputConfig{BranchErrors: BranchErrorsAll}); err != nil || mode != BranchErrorsAll {
+		t.Fatalf("branch errors all = %q, %v", mode, err)
+	}
+	if _, err := branchErrorMode(OutputConfig{BranchErrors: "explode"}); err == nil {
+		t.Fatalf("expected invalid branch errors mode")
 	}
 	if fetchRetries(FetchConfig{}) != 0 {
 		t.Fatalf("nil fetch retries should resolve to zero")
@@ -264,6 +274,12 @@ maxDepth = -1
 `)
 	if _, _, err := LoadConfig(dir, ""); err == nil || !strings.Contains(err.Error(), "schemas.maxDepth") {
 		t.Fatalf("expected negative maxDepth error, got %v", err)
+	}
+	writeFile(t, badTOML, `[output]
+branchErrors = "explode"
+`)
+	if _, _, err := LoadConfig(dir, ""); err == nil || !strings.Contains(err.Error(), "output.branchErrors") {
+		t.Fatalf("expected invalid branchErrors error, got %v", err)
 	}
 	blockingDir := filepath.Join(dir, "block")
 	if err := os.Mkdir(blockingDir, 0o755); err != nil {

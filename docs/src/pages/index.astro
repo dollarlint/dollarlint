@@ -10,38 +10,59 @@ import DocsLayout from "../layouts/DocsLayout.astro";
   <section class="hero">
     <h1>dollarlint</h1>
     <p class="hero-copy">
-      <code>$schema</code> validation for every JSON, YAML, &amp; TOML file you've got.
+      <code>$schema</code> validation for every JSON, YAML, &amp; TOML file you've
+      got.
     </p>
     <div class="hero-actions">
       <a class="button primary" href="/guides/installation/">Get started</a>
-      <a class="button secondary" href="/reference/configuration/">Config reference</a>
+      <a class="button secondary" href="/reference/configuration/"
+        >Config reference</a
+      >
     </div>
   </section>
 
   <section class="grid" aria-label="Highlights">
     <article class="card">
       <h3>Repo-wide discovery</h3>
-      <p>Find JSON, YAML, and TOML files automatically, respect your excludes, and validate matched files in parallel.</p>
+      <p>
+        Find JSON, YAML, and TOML files automatically, respect your excludes,
+        and validate matched files in parallel.
+      </p>
     </article>
     <article class="card">
       <h3>Any schema source</h3>
-      <p>Use explicit in-file declarations, config associations, or catalog inference. Schemas can live beside your files or across the network.</p>
+      <p>
+        Use explicit in-file declarations, config associations, or catalog
+        inference. Schemas can live beside your files or across the network.
+      </p>
     </article>
     <article class="card">
       <h3>Local &amp; CI</h3>
-      <p>Styled text for terminals, structured JSON for scripts, SARIF 2.1.0 for code scanning, and predictable exit codes for automation.</p>
+      <p>
+        Styled text for terminals, structured JSON for scripts, SARIF 2.1.0 for
+        code scanning, and predictable exit codes for automation.
+      </p>
     </article>
     <article class="card">
       <h3>Ignore known issues</h3>
-      <p>Suppress known validation issues by location or pointer while keeping the rest of the file under schema coverage.</p>
+      <p>
+        Suppress known validation issues by location or pointer while keeping
+        the rest of the file under schema coverage.
+      </p>
     </article>
     <article class="card">
       <h3>Tooling for agents</h3>
-      <p>Expose validation through MCP as a structured local tool for editors and agents, with source locations included automatically.</p>
+      <p>
+        Expose validation through MCP as a structured local tool for editors and
+        agents, with source locations included automatically.
+      </p>
     </article>
     <article class="card">
       <h3>Fast by design</h3>
-      <p>Prune complex schemas before compilation so large catalogs and cloud resource definitions stay practical to validate.</p>
+      <p>
+        Prune complex schemas before compilation so large catalogs and cloud
+        resource definitions stay practical to validate.
+      </p>
     </article>
   </section>
 
@@ -50,18 +71,27 @@ import DocsLayout from "../layouts/DocsLayout.astro";
     <div class="command-list">
       <div class="command">
         <code>dollarlint init</code>
-        <p>Mint a starter <code>.dollarlint.toml</code> in the current directory.</p>
+        <p>
+          Mint a starter <code>.dollarlint.toml</code> in the current directory.
+        </p>
       </div>
       <div class="command">
         <code>dollarlint validate .</code>
-        <p>Audit every JSON, YAML, and TOML file under the current directory.</p>
+        <p>
+          Audit every JSON, YAML, and TOML file under the current directory.
+        </p>
       </div>
       <div class="command">
         <code>dollarlint validate ./config --locations</code>
-        <p>Get the exact line and column — no more hunting for where the bill comes due.</p>
+        <p>
+          Get the exact line and column — no more hunting for where the bill
+          comes due.
+        </p>
       </div>
       <div class="command">
-        <code>dollarlint validate . --format sarif --output dollarlint.sarif</code>
+        <code
+          >dollarlint validate . --format sarif --output dollarlint.sarif</code
+        >
         <p>Generate a CI-friendly code scanning artifact.</p>
       </div>
     </div>

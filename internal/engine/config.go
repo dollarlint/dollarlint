@@ -1,27 +1,20 @@
 package engine
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/pelletier/go-toml/v2"
-	"gopkg.in/yaml.v3"
 )
 
 var defaultConfigFiles = []string{
-	".dollarlint.yaml",
-	".dollarlint.yml",
 	".dollarlint.toml",
-	".dollarlint.json",
-	"dollarlint.yaml",
-	"dollarlint.yml",
 	"dollarlint.toml",
-	"dollarlint.json",
 }
 
 func DefaultConfig() Config {
@@ -151,6 +144,9 @@ func resolveConfigPath(root, explicitPath string) (string, error) {
 		if !filepath.IsAbs(path) {
 			path = filepath.Join(root, path)
 		}
+		if strings.ToLower(filepath.Ext(path)) != ".toml" {
+			return "", fmt.Errorf("unsupported config format %s; dollarlint config must be TOML", filepath.Ext(path))
+		}
 		if _, err := os.Stat(path); err != nil {
 			return "", fmt.Errorf("config %s: %w", path, err)
 		}
@@ -168,21 +164,13 @@ func resolveConfigPath(root, explicitPath string) (string, error) {
 }
 
 func decodeConfig(path string, data []byte, out *Config) error {
-	switch ext := filepath.Ext(path); ext {
-	case ".json":
-		if err := json.Unmarshal(data, out); err != nil {
-			return fmt.Errorf("decode config %s: %w", path, err)
-		}
-	case ".yaml", ".yml":
-		if err := yaml.Unmarshal(data, out); err != nil {
-			return fmt.Errorf("decode config %s: %w", path, err)
-		}
+	switch ext := strings.ToLower(filepath.Ext(path)); ext {
 	case ".toml":
 		if err := toml.Unmarshal(data, out); err != nil {
 			return fmt.Errorf("decode config %s: %w", path, err)
 		}
 	default:
-		return fmt.Errorf("unsupported config format %s", ext)
+		return fmt.Errorf("unsupported config format %s; dollarlint config must be TOML", ext)
 	}
 	return nil
 }
@@ -196,6 +184,10 @@ func schemaStoreEnabled(cfg SchemaConfig) bool {
 		return true
 	}
 	return cfg.FetchSchemaStore != nil && *cfg.FetchSchemaStore
+}
+
+func azureResourcePruningEnabled(cfg SchemaConfig) bool {
+	return cfg.AzureResourcePruning == nil || *cfg.AzureResourcePruning
 }
 
 func fetchRetries(cfg FetchConfig) int {

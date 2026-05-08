@@ -55,7 +55,7 @@ func TestDurationEncoding(t *testing.T) {
 	}
 }
 
-func TestLoadConfigDefaultsAndFormats(t *testing.T) {
+func TestLoadConfigDefaultsAndTOML(t *testing.T) {
 	dir := t.TempDir()
 	cfg, path, err := LoadConfig(dir, "")
 	if err != nil {
@@ -64,39 +64,51 @@ func TestLoadConfigDefaultsAndFormats(t *testing.T) {
 	if path != "" || cfg.Version != 1 || !remoteFetchEnabled(cfg.Schema) {
 		t.Fatalf("unexpected defaults: path=%q cfg=%+v", path, cfg)
 	}
-	writeFile(t, filepath.Join(dir, ".dollarlint.yaml"), `
-version: 1
-schema:
-  fetchRemote: false
-  fetchSchemaStore: false
-  fetch:
-    retries: 4
-    retryMinWait: 100ms
-    retryMaxWait: 1s
-  schemaStore:
-    enabled: true
-    url: ./catalog.json
-    strict: true
-  allowedDomains:
-    - schemas.example.com
-  blockedDomains:
-    - bad.example.com
-  maxDepth: 3
-timeouts:
-  fetch: 2s
-ignore:
-  - file: "*.json"
-    keyword: type
+	writeFile(t, filepath.Join(dir, ".dollarlint.yaml"), "output:\n  json: true\n")
+	cfg, path, err = LoadConfig(dir, "")
+	if err != nil {
+		t.Fatalf("LoadConfig ignored yaml: %v", err)
+	}
+	if path != "" || cfg.Output.JSON {
+		t.Fatalf("non-toml config should be ignored: path=%q cfg=%+v", path, cfg)
+	}
+	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), `
+version = 1
+
+[schema]
+fetchRemote = false
+fetchSchemaStore = false
+allowedDomains = ["schemas.example.com"]
+blockedDomains = ["bad.example.com"]
+azureResourcePruning = false
+maxDepth = 3
+
+[schema.fetch]
+retries = 4
+retryMinWait = "100ms"
+retryMaxWait = "1s"
+
+[schema.schemaStore]
+enabled = true
+url = "./catalog.json"
+strict = true
+
+[timeouts]
+fetch = "2s"
+
+[[ignore]]
+file = "*.json"
+keyword = "type"
 `)
 	cfg, path, err = LoadConfig(dir, "")
 	if err != nil {
-		t.Fatalf("LoadConfig yaml: %v", err)
+		t.Fatalf("LoadConfig toml: %v", err)
 	}
-	if filepath.Base(path) != ".dollarlint.yaml" {
+	if filepath.Base(path) != ".dollarlint.toml" {
 		t.Fatalf("path = %s", path)
 	}
 	if remoteFetchEnabled(cfg.Schema) || cfg.Schema.MaxDepth != 3 || cfg.Timeouts.Fetch.Duration != 2*time.Second {
-		t.Fatalf("yaml cfg not decoded/defaulted: %+v", cfg)
+		t.Fatalf("toml cfg not decoded/defaulted: %+v", cfg)
 	}
 	if !cfg.Schema.SchemaStore.Enabled || cfg.Schema.SchemaStore.URL != "./catalog.json" || !cfg.Schema.SchemaStore.Strict {
 		t.Fatalf("schemaStore not decoded: %+v", cfg.Schema.SchemaStore)
@@ -107,11 +119,14 @@ ignore:
 	if len(cfg.Schema.AllowedDomains) != 1 || cfg.Schema.AllowedDomains[0] != "schemas.example.com" || len(cfg.Schema.BlockedDomains) != 1 {
 		t.Fatalf("domain policy not decoded: %+v", cfg.Schema)
 	}
+	if cfg.Schema.AzureResourcePruning == nil || *cfg.Schema.AzureResourcePruning {
+		t.Fatalf("Azure resource pruning opt-out not decoded: %+v", cfg.Schema)
+	}
 	if len(cfg.Discovery.Include) == 0 || len(cfg.Ignore) != 1 {
 		t.Fatalf("defaults or ignore missing: %+v", cfg)
 	}
-	tomlPath := filepath.Join(dir, "custom.toml")
-	writeFile(t, tomlPath, `
+	customPath := filepath.Join(dir, "custom.toml")
+	writeFile(t, customPath, `
 version = 1
 [schema]
 maxDepth = 4
@@ -121,19 +136,10 @@ schema = "./schema.json"
 `)
 	cfg, path, err = LoadConfig(dir, "custom.toml")
 	if err != nil {
-		t.Fatalf("LoadConfig toml: %v", err)
+		t.Fatalf("LoadConfig custom toml: %v", err)
 	}
-	if path != tomlPath || cfg.Schema.MaxDepth != 4 || len(cfg.Schema.Associations) != 1 {
+	if path != customPath || cfg.Schema.MaxDepth != 4 || len(cfg.Schema.Associations) != 1 {
 		t.Fatalf("toml cfg = %s %+v", path, cfg)
-	}
-	jsonPath := filepath.Join(dir, "custom.json")
-	writeFile(t, jsonPath, `{"output":{"json":true}}`)
-	cfg, _, err = LoadConfig(dir, jsonPath)
-	if err != nil {
-		t.Fatalf("LoadConfig json: %v", err)
-	}
-	if !cfg.Output.JSON {
-		t.Fatalf("json output config not decoded")
 	}
 	if cfg.Schema.SchemaStore.URL != defaultSchemaStoreCatalogURL {
 		t.Fatalf("schemaStore default URL = %q", cfg.Schema.SchemaStore.URL)
@@ -159,13 +165,18 @@ schema = "./schema.json"
 
 func TestLoadConfigErrors(t *testing.T) {
 	dir := t.TempDir()
-	if _, _, err := LoadConfig(dir, "missing.yaml"); err == nil {
+	if _, _, err := LoadConfig(dir, "missing.toml"); err == nil {
 		t.Fatalf("expected missing explicit config error")
 	}
-	badYAML := filepath.Join(dir, ".dollarlint.yaml")
-	writeFile(t, badYAML, "schema: [")
+	badTOML := filepath.Join(dir, ".dollarlint.toml")
+	writeFile(t, badTOML, "[schema")
 	if _, _, err := LoadConfig(dir, ""); err == nil {
-		t.Fatalf("expected bad yaml error")
+		t.Fatalf("expected bad toml error")
+	}
+	jsonConfig := filepath.Join(dir, "custom.json")
+	writeFile(t, jsonConfig, `{"output":{"json":true}}`)
+	if _, _, err := LoadConfig(dir, jsonConfig); err == nil {
+		t.Fatalf("expected explicit json config rejection")
 	}
 	unsupported := filepath.Join(dir, "config.ini")
 	writeFile(t, unsupported, "")

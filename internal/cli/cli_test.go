@@ -120,14 +120,14 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 	if !strings.Contains(stdout.String(), "No interactive terminal detected") {
 		t.Fatalf("noninteractive init should explain defaults: %s", stdout.String())
 	}
-	configPath := filepath.Join(dir, ".dollarlint.yaml")
+	configPath := filepath.Join(dir, ".dollarlint.toml")
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		t.Fatalf("read generated config: %v", err)
 	}
 	text := string(data)
-	if !strings.Contains(text, "schemaStore:") || !strings.Contains(text, "enabled: true") || !strings.Contains(text, "retryMinWait: 250ms") {
-		t.Fatalf("generated yaml = %s", text)
+	if !strings.Contains(text, "[schema.schemaStore]") || !strings.Contains(text, "enabled = true") || !strings.Contains(text, `retryMinWait = "250ms"`) {
+		t.Fatalf("generated toml = %s", text)
 	}
 	stdout.Reset()
 	stderr.Reset()
@@ -146,7 +146,7 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read forced config: %v", err)
 	}
-	if !strings.Contains(string(data), "strict: true") {
+	if !strings.Contains(string(data), "strict = true") {
 		t.Fatalf("forced config = %s", string(data))
 	}
 	stdout.Reset()
@@ -160,27 +160,14 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 	}
 }
 
-func TestInitCommandFormats(t *testing.T) {
+func TestInitCommandRequiresTOML(t *testing.T) {
 	dir := t.TempDir()
 	var stdout, stderr bytes.Buffer
-	jsonPath := filepath.Join(dir, "dollarlint.json")
-	if code := Execute([]string{"init", dir, "--output", jsonPath}, &stdout, &stderr); code != 0 {
-		t.Fatalf("json init exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
-	}
-	data, err := os.ReadFile(jsonPath)
-	if err != nil {
-		t.Fatalf("read json config: %v", err)
-	}
-	if !strings.Contains(string(data), `"version": 1`) || !strings.Contains(string(data), `"schemaStore"`) {
-		t.Fatalf("json config = %s", string(data))
-	}
-	stdout.Reset()
-	stderr.Reset()
 	tomlPath := filepath.Join(dir, "nested", "dollarlint.toml")
 	if code := Execute([]string{"init", "--output", tomlPath, "--schema-store-strict"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("toml init exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
-	data, err = os.ReadFile(tomlPath)
+	data, err := os.ReadFile(tomlPath)
 	if err != nil {
 		t.Fatalf("read toml config: %v", err)
 	}
@@ -189,8 +176,11 @@ func TestInitCommandFormats(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{"init", dir, "--output", "config.ini"}, &stdout, &stderr); code != 2 {
+	if code := Execute([]string{"init", dir, "--output", "dollarlint.json"}, &stdout, &stderr); code != 2 {
 		t.Fatalf("expected unsupported inferred format failure, exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "must be TOML") {
+		t.Fatalf("non-toml init stderr = %s", stderr.String())
 	}
 }
 

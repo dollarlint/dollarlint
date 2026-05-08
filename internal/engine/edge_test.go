@@ -22,7 +22,7 @@ func TestConfigErrorEdges(t *testing.T) {
 	}
 	var cfg Config
 	if err := decodeConfig("bad.json", []byte("{"), &cfg); err == nil {
-		t.Fatalf("expected bad json config")
+		t.Fatalf("expected non-toml config rejection")
 	}
 	if err := decodeConfig("bad.toml", []byte("="), &cfg); err == nil {
 		t.Fatalf("expected bad toml config")

@@ -89,7 +89,7 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		validatedDocuments = append(validatedDocuments, document)
 		schemaRoots = append(schemaRoots, resolved)
 	}
-	_ = cache.Prime(ctx, schemaRoots)
+	_ = cache.Prime(ctx, primeableSchemaRoots(cfg, validatedDocuments, schemaRoots))
 	for _, document := range validatedDocuments {
 		issues := validateDocument(ctx, cache, cfg, document)
 		for _, issue := range issues {
@@ -131,7 +131,7 @@ func applySchemaAssociation(document *Document, associations []SchemaAssociation
 }
 
 func validateDocument(ctx context.Context, cache *SchemaCache, cfg Config, document *Document) []Issue {
-	if err := cache.Prime(ctx, []string{document.Schema}); err != nil {
+	if err := cache.Prime(ctx, primeableDocumentSchemaRoots(cfg, document)); err != nil {
 		return []Issue{{
 			File:         document.Path,
 			RelativePath: document.RelativePath,
@@ -139,7 +139,7 @@ func validateDocument(ctx context.Context, cache *SchemaCache, cfg Config, docum
 			Message:      err.Error(),
 		}}
 	}
-	schema, err := compileSchema(ctx, cache, cfg, document.Schema)
+	schema, err := compileSchema(ctx, cache, cfg, document.Schema, document.Data)
 	if err != nil {
 		return []Issue{{
 			File:         document.Path,
@@ -167,13 +167,16 @@ func issuesFromSchemaError(document *Document, err error) []Issue {
 	}}
 }
 
-func compileSchema(ctx context.Context, cache *SchemaCache, cfg Config, schemaURI string) (*jsonschema.Schema, error) {
+func compileSchema(ctx context.Context, cache *SchemaCache, cfg Config, schemaURI string, documentData any) (*jsonschema.Schema, error) {
 	compileCtx, cancel := context.WithTimeout(ctx, cfg.Timeouts.Compile.Duration)
 	defer cancel()
 	compiler := jsonschema.NewCompiler()
 	compiler.AssertFormat()
 	compiler.UseRegexpEngine(compileECMARegexp)
 	compiler.UseLoader(compilerLoader{cache: cache})
+	if err := addPrunedAzureARMResources(compileCtx, compiler, cache, cfg, schemaURI, documentData); err != nil {
+		return nil, err
+	}
 	result := make(chan struct {
 		schema *jsonschema.Schema
 		err    error

@@ -166,7 +166,7 @@ func TestCompileSchemaTimeout(t *testing.T) {
 	cfg.Timeouts.Compile = NewDuration(time.Millisecond)
 	cfg.Timeouts.Fetch = NewDuration(time.Second)
 	cache := NewSchemaCache(cfg)
-	_, err = compileSchema(context.Background(), cache, cfg, schemaURL.String())
+	_, err = compileSchema(context.Background(), cache, cfg, schemaURL.String(), nil)
 	if err == nil {
 		t.Fatalf("expected compile timeout")
 	}

@@ -3,23 +3,17 @@ title: Configuration
 description: Configure discovery, schema loading, ignore rules, output, and timeouts.
 ---
 
-`dollarlint` looks for configuration files in the target root:
+`dollarlint` config files are TOML only. The CLI looks for configuration files in the target root:
 
-- `.dollarlint.yaml`
-- `.dollarlint.yml`
 - `.dollarlint.toml`
-- `.dollarlint.json`
-- `dollarlint.yaml`
-- `dollarlint.yml`
 - `dollarlint.toml`
-- `dollarlint.json`
 
 Create a starter config with:
 
 ```sh
 dollarlint init
 dollarlint init ./packages/api --schema-store
-dollarlint init --output dollarlint.toml --format toml
+dollarlint init --output dollarlint.toml
 dollarlint init --defaults --schema-store
 ```
 
@@ -27,61 +21,52 @@ dollarlint init --defaults --schema-store
 
 ## Full example
 
-```yaml
-version: 1
+```toml
+version = 1
 
-discovery:
-  include:
-    - "*.json"
-    - "**/*.json"
-    - "*.yaml"
-    - "**/*.yaml"
-    - "*.toml"
-    - "**/*.toml"
-  exclude:
-    - node_modules
-    - "**/node_modules/**"
-    - dist
-    - "**/dist/**"
+[discovery]
+include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.toml", "**/*.toml"]
+exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**"]
 
-schema:
-  fetchRemote: true
-  fetch:
-    retries: 2
-    retryMinWait: 250ms
-    retryMaxWait: 2s
-  schemaStore:
-    enabled: false
-    url: https://www.schemastore.org/api/json/catalog.json
-    strict: false
-  allowedDomains:
-    - "www.schemastore.org"
-    - "raw.githubusercontent.com"
-  blockedDomains:
-    - "untrusted.example.com"
-  maxDepth: 8
-  concurrency: 8
-  associations:
-    - file: "settings/*.toml"
-      schema: "./schemas/settings.schema.json"
+[schema]
+fetchRemote = true
+allowedDomains = ["www.schemastore.org", "raw.githubusercontent.com"]
+blockedDomains = ["untrusted.example.com"]
+azureResourcePruning = true
+maxDepth = 8
+concurrency = 8
 
-timeouts:
-  fetch: 10s
-  compile: 30s
+[schema.fetch]
+retries = 2
+retryMinWait = "250ms"
+retryMaxWait = "2s"
 
-ignore:
-  - file: "fixtures/*.json"
-    keyword: "required"
-    property: "legacyName"
-    reason: "legacy fixture kept for compatibility"
+[schema.schemaStore]
+enabled = false
+url = "https://www.schemastore.org/api/json/catalog.json"
+strict = false
 
-output:
-  json: false
-  sarif: false
-  showSkipped: false
-  verbose: false
-  quiet: false
-  locations: false
+[[schema.associations]]
+file = "settings/*.toml"
+schema = "./schemas/settings.schema.json"
+
+[timeouts]
+fetch = "10s"
+compile = "30s"
+
+[[ignore]]
+file = "fixtures/*.json"
+keyword = "required"
+property = "legacyName"
+reason = "legacy fixture kept for compatibility"
+
+[output]
+json = false
+sarif = false
+showSkipped = false
+verbose = false
+quiet = false
+locations = false
 ```
 
 ## Discovery
@@ -114,12 +99,12 @@ By default, SchemaStore catalog failures are non-fatal: dollarlint skips catalog
 
 Ignore rules match known issues by file pattern, JSON Schema keyword, and property:
 
-```yaml
-ignore:
-  - file: "legacy/*.json"
-    keyword: "required"
-    property: "enabled"
-    reason: "legacy files are migrated gradually"
+```toml
+[[ignore]]
+file = "legacy/*.json"
+keyword = "required"
+property = "enabled"
+reason = "legacy files are migrated gradually"
 ```
 
 Ignored issues remain visible in machine-readable output but do not count as failing issues.

@@ -27,12 +27,12 @@ dollarlint validate ./examples/schemastore --locations
 
 `validate` is the canonical validation command. `dollarlint [path]` remains a backwards-compatible shortcut for `dollarlint validate [path]`.
 
-Use `dollarlint init` to interview you and create a starter `.dollarlint.yaml` in the current directory. It is safe by default and will not overwrite an existing config unless you confirm overwrite or pass `--force`.
+Use `dollarlint init` to interview you and create a starter `.dollarlint.toml` in the current directory. It is safe by default and will not overwrite an existing config unless you confirm overwrite or pass `--force`.
 
 ```sh
 dollarlint init
 dollarlint init ./packages/api --schema-store
-dollarlint init --output dollarlint.toml --format toml
+dollarlint init --output dollarlint.toml
 dollarlint init --defaults --schema-store
 ```
 
@@ -56,79 +56,66 @@ Config-level schema associations can validate files that do not declare a schema
 
 ## Configuration
 
-`dollarlint` searches the target root for:
+`dollarlint` config files are TOML only. The CLI searches the target root for:
 
-- `.dollarlint.yaml`
-- `.dollarlint.yml`
 - `.dollarlint.toml`
-- `.dollarlint.json`
-- `dollarlint.yaml`
-- `dollarlint.yml`
 - `dollarlint.toml`
-- `dollarlint.json`
 
 Example:
 
-```yaml
-version: 1
+```toml
+version = 1
 
-discovery:
-  include:
-    - "*.json"
-    - "**/*.json"
-    - "*.yaml"
-    - "**/*.yaml"
-    - "*.toml"
-    - "**/*.toml"
-  exclude:
-    - node_modules
-    - "**/node_modules/**"
-    - dist
-    - "**/dist/**"
+[discovery]
+include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.toml", "**/*.toml"]
+exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**"]
 
-schema:
-  fetchRemote: true
-  fetch:
-    retries: 2
-    retryMinWait: 250ms
-    retryMaxWait: 2s
-  schemaStore:
-    enabled: false
-    url: https://www.schemastore.org/api/json/catalog.json
-    strict: false
-  allowedDomains:
-    - "www.schemastore.org"
-    - "raw.githubusercontent.com"
-  blockedDomains:
-    - "untrusted.example.com"
-  maxDepth: 8
-  concurrency: 8
-  associations:
-    - file: "settings/*.toml"
-      schema: "./schemas/settings.schema.json"
+[schema]
+fetchRemote = true
+allowedDomains = ["www.schemastore.org", "raw.githubusercontent.com"]
+blockedDomains = ["untrusted.example.com"]
+azureResourcePruning = true
+maxDepth = 8
+concurrency = 8
 
-timeouts:
-  fetch: 10s
-  compile: 30s
+[schema.fetch]
+retries = 2
+retryMinWait = "250ms"
+retryMaxWait = "2s"
 
-ignore:
-  - file: "fixtures/*.json"
-    keyword: "required"
-    property: "legacyName"
-    reason: "legacy fixture kept for compatibility"
+[schema.schemaStore]
+enabled = false
+url = "https://www.schemastore.org/api/json/catalog.json"
+strict = false
 
-output:
-  json: false
-  sarif: false
-  showSkipped: false
-  verbose: false
-  quiet: false
-  locations: false
+[[schema.associations]]
+file = "settings/*.toml"
+schema = "./schemas/settings.schema.json"
+
+[timeouts]
+fetch = "10s"
+compile = "30s"
+
+[[ignore]]
+file = "fixtures/*.json"
+keyword = "required"
+property = "legacyName"
+reason = "legacy fixture kept for compatibility"
+
+[output]
+json = false
+sarif = false
+showSkipped = false
+verbose = false
+quiet = false
+locations = false
 ```
 
 By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schema.allowedDomains` can restrict remote schemas to specific hosts, and `schema.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
 
-SchemaStore catalog matching is configurable with `schema.schemaStore`. When enabled, files without an explicit schema can be matched by conventional filename using the SchemaStore catalog or a local SchemaStore-shaped catalog. If the catalog cannot be loaded, dollarlint skips SchemaStore matching and still validates explicit schemas; set `schema.schemaStore.strict: true` to fail instead. Precedence is explicit in-file schema, then config associations, then SchemaStore matches, then skipped. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
+SchemaStore catalog matching is configurable with `schema.schemaStore`. When enabled, files without an explicit schema can be matched by conventional filename using the SchemaStore catalog or a local SchemaStore-shaped catalog. If the catalog cannot be loaded, dollarlint skips SchemaStore matching and still validates explicit schemas; set `schema.schemaStore.strict = true` to fail instead. Precedence is explicit in-file schema, then config associations, then SchemaStore matches, then skipped. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
+
+Azure Resource Manager deployment schemas from `schema.management.azure.com` are pruned to the resource provider schemas used by the template before compilation. This avoids compiling the full Azure provider catalog for ordinary ARM templates. Set `schema.azureResourcePruning = false` to disable this Azure-specific optimization.
 
 ## Examples
 

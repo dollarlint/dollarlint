@@ -23,7 +23,7 @@ To bootstrap a project config, run:
 dollarlint init
 ```
 
-That starts a short terminal interview and creates `.dollarlint.yaml` in the current directory. It refuses to overwrite an existing config unless you confirm overwrite or pass `--force`.
+That starts a short terminal interview and creates `.dollarlint.toml` in the current directory. It refuses to overwrite an existing config unless you confirm overwrite or pass `--force`.
 
 ## Try the examples
 
@@ -64,7 +64,7 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues in 145ms
 ```sh
 dollarlint init
 dollarlint init ./packages/api --schema-store
-dollarlint init --output dollarlint.toml --format toml
+dollarlint init --output dollarlint.toml
 dollarlint init --defaults --schema-store
 dollarlint validate ./config --locations
 dollarlint validate ./config --verbose

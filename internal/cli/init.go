@@ -2,7 +2,6 @@ package cli
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -17,7 +16,6 @@ import (
 
 type initOptions struct {
 	output            string
-	format            string
 	force             bool
 	defaults          bool
 	fetchRemote       bool
@@ -35,7 +33,7 @@ type initTemplateData struct {
 }
 
 func newInitCommand(stdin io.Reader, stdout io.Writer) *cobra.Command {
-	opts := initOptions{output: ".dollarlint.yaml", fetchRemote: true, fetchRetries: defaultFetchRetries}
+	opts := initOptions{output: ".dollarlint.toml", fetchRemote: true, fetchRetries: defaultFetchRetries}
 	cmd := &cobra.Command{
 		Use:   "init [path]",
 		Short: "Create a starter dollarlint config file",
@@ -45,8 +43,7 @@ func newInitCommand(stdin io.Reader, stdout io.Writer) *cobra.Command {
 			return runInit(cmd, stdin, stdout, args, opts)
 		},
 	}
-	cmd.Flags().StringVarP(&opts.output, "output", "o", ".dollarlint.yaml", "Config file path to create")
-	cmd.Flags().StringVar(&opts.format, "format", "", "Config format: yaml, json, or toml; inferred from --output when omitted")
+	cmd.Flags().StringVarP(&opts.output, "output", "o", ".dollarlint.toml", "TOML config file path to create")
 	cmd.Flags().BoolVar(&opts.force, "force", false, "Overwrite an existing config file")
 	cmd.Flags().BoolVar(&opts.defaults, "defaults", false, "Skip prompts and use defaults plus provided flags")
 	cmd.Flags().BoolVar(&opts.fetchRemote, "fetch-remote", true, "Allow fetching http(s) schemas in the generated config")
@@ -72,11 +69,10 @@ func runInit(cmd *cobra.Command, stdin io.Reader, stdout io.Writer, args []strin
 	if !filepath.IsAbs(target) {
 		target = filepath.Join(root, target)
 	}
-	format, err := resolveInitFormat(opts.format, target)
-	if err != nil {
+	if err := validateInitOutputPath(target); err != nil {
 		return err
 	}
-	content, err := renderStarterConfig(format, opts)
+	content, err := renderStarterConfig(opts)
 	if err != nil {
 		return err
 	}
@@ -123,14 +119,6 @@ func isTerminalFile(file *os.File) bool {
 }
 
 func interviewInit(stdin io.Reader, stdout io.Writer, opts *initOptions) error {
-	format := opts.format
-	if format == "" {
-		if inferred, err := resolveInitFormat("", opts.output); err == nil {
-			format = inferred
-		} else {
-			format = "yaml"
-		}
-	}
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
@@ -143,14 +131,6 @@ func interviewInit(stdin io.Reader, stdout io.Writer, opts *initOptions) error {
 					}
 					return nil
 				}),
-			huh.NewSelect[string]().
-				Title("Which config format should we use?").
-				Options(
-					huh.NewOption("YAML (.yaml/.yml)", "yaml"),
-					huh.NewOption("JSON (.json)", "json"),
-					huh.NewOption("TOML (.toml)", "toml"),
-				).
-				Value(&format),
 		),
 		huh.NewGroup(
 			huh.NewConfirm().
@@ -190,7 +170,6 @@ func interviewInit(stdin io.Reader, stdout io.Writer, opts *initOptions) error {
 		return err
 	}
 	opts.output = strings.TrimSpace(opts.output)
-	opts.format = format
 	return nil
 }
 
@@ -201,33 +180,14 @@ func enabledWord(enabled bool) string {
 	return "disabled"
 }
 
-func resolveInitFormat(raw, target string) (string, error) {
-	format := strings.ToLower(strings.TrimSpace(raw))
-	if format == "" {
-		switch strings.ToLower(filepath.Ext(target)) {
-		case ".yaml", ".yml":
-			format = "yaml"
-		case ".json":
-			format = "json"
-		case ".toml":
-			format = "toml"
-		default:
-			return "", fmt.Errorf("cannot infer config format from %s; set --format yaml, json, or toml", target)
-		}
+func validateInitOutputPath(target string) error {
+	if strings.ToLower(filepath.Ext(target)) != ".toml" {
+		return fmt.Errorf("unsupported config format %s; dollarlint config must be TOML", filepath.Ext(target))
 	}
-	switch format {
-	case "yaml", "yml":
-		return "yaml", nil
-	case "json":
-		return "json", nil
-	case "toml":
-		return "toml", nil
-	default:
-		return "", fmt.Errorf("unsupported config format %q; use yaml, json, or toml", raw)
-	}
+	return nil
 }
 
-func renderStarterConfig(format string, opts initOptions) ([]byte, error) {
+func renderStarterConfig(opts initOptions) ([]byte, error) {
 	data := initTemplateData{
 		SchemaStoreEnabled: opts.schemaStore,
 		SchemaStoreStrict:  opts.schemaStoreStrict,
@@ -235,16 +195,7 @@ func renderStarterConfig(format string, opts initOptions) ([]byte, error) {
 		FetchRemote:        opts.fetchRemote,
 		FetchRetries:       opts.fetchRetries,
 	}
-	switch format {
-	case "yaml":
-		return executeInitTemplate(starterYAMLTemplate, data)
-	case "toml":
-		return executeInitTemplate(starterTOMLTemplate, data)
-	case "json":
-		return json.MarshalIndent(starterJSONConfig(data), "", "  ")
-	default:
-		return nil, fmt.Errorf("unsupported config format %q", format)
-	}
+	return executeInitTemplate(starterTOMLTemplate, data)
 }
 
 func executeInitTemplate(raw string, data initTemplateData) ([]byte, error) {
@@ -259,105 +210,6 @@ func executeInitTemplate(raw string, data initTemplateData) ([]byte, error) {
 	return out.Bytes(), nil
 }
 
-func starterJSONConfig(data initTemplateData) map[string]any {
-	return map[string]any{
-		"version": 1,
-		"discovery": map[string]any{
-			"include": []string{"*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.yml", "**/*.yml", "*.toml", "**/*.toml"},
-			"exclude": []string{"node_modules", "**/node_modules/**", "dist", "**/dist/**", "build", "**/build/**", "coverage", "**/coverage/**"},
-		},
-		"schema": map[string]any{
-			"fetchRemote": data.FetchRemote,
-			"fetch": map[string]any{
-				"retries":      data.FetchRetries,
-				"retryMinWait": "250ms",
-				"retryMaxWait": "2s",
-			},
-			"maxDepth":    8,
-			"concurrency": 8,
-			"schemaStore": map[string]any{
-				"enabled": data.SchemaStoreEnabled,
-				"url":     data.SchemaStoreURL,
-				"strict":  data.SchemaStoreStrict,
-			},
-			"associations": []any{},
-		},
-		"timeouts": map[string]any{
-			"fetch":   "10s",
-			"compile": "30s",
-		},
-		"ignore": []any{},
-		"output": map[string]any{
-			"json":        false,
-			"sarif":       false,
-			"showSkipped": false,
-			"verbose":     false,
-			"quiet":       false,
-			"locations":   false,
-		},
-	}
-}
-
-const starterYAMLTemplate = `# dollarlint configuration
-version: 1
-
-discovery:
-  include:
-    - "*.json"
-    - "**/*.json"
-    - "*.yaml"
-    - "**/*.yaml"
-    - "*.yml"
-    - "**/*.yml"
-    - "*.toml"
-    - "**/*.toml"
-  exclude:
-    - node_modules
-    - "**/node_modules/**"
-    - dist
-    - "**/dist/**"
-    - build
-    - "**/build/**"
-    - coverage
-    - "**/coverage/**"
-
-schema:
-  fetchRemote: {{ .FetchRemote }}
-  fetch:
-    retries: {{ .FetchRetries }}
-    retryMinWait: 250ms
-    retryMaxWait: 2s
-  maxDepth: 8
-  concurrency: 8
-  schemaStore:
-    enabled: {{ .SchemaStoreEnabled }}
-    url: {{ .SchemaStoreURL }}
-    strict: {{ .SchemaStoreStrict }}
-  associations: []
-  # associations:
-  #   - file: "settings/*.toml"
-  #     schema: "./schemas/settings.schema.json"
-
-timeouts:
-  fetch: 10s
-  compile: 30s
-
-ignore: []
-# ignore:
-#   - file: "fixtures/*.json"
-#     keyword: "required"
-#     property: "legacyName"
-#     reason: "legacy fixture kept for compatibility"
-
-output:
-  json: false
-  sarif: false
-  showSkipped: false
-  verbose: false
-  quiet: false
-  locations: false
-`
-
 const starterTOMLTemplate = `# dollarlint configuration
 version = 1
 
@@ -369,6 +221,7 @@ exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**", "build", 
 fetchRemote = {{ .FetchRemote }}
 maxDepth = 8
 concurrency = 8
+azureResourcePruning = true
 
 [schema.fetch]
 retries = {{ .FetchRetries }}

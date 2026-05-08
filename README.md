@@ -1,4 +1,4 @@
-<img src="docs/public/logo.svg" alt="dollarlint logo" width="96">
+<img src="docs/public/logo.svg" alt="dollarlint logo" height="58">
 
 # dollarlint
 

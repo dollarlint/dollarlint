@@ -23,11 +23,19 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+      - name: Set up Node for npm publishing
+        uses: actions/setup-node@v6
         with:
-          distribution: goreleaser
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser-pro
           version: "~> v2"
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

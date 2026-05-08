@@ -1,6 +1,13 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema-pro.json
+
 version: 2
 
 project_name: dollarlint
+
+metadata:
+  license: MIT
+  homepage: https://github.com/agorischek/dollarlint
+  description: Validate JSON-family, YAML, and TOML files against their declared JSON Schemas.
 
 before:
   hooks:
@@ -60,6 +67,25 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
+npms:
+  - id: dollarlint
+    ids:
+      - dollarlint
+    name: dollarlint
+    description: Validate JSON-family, YAML, and TOML files against their declared JSON Schemas.
+    homepage: https://github.com/agorischek/dollarlint
+    keywords:
+      - cli
+      - json-schema
+      - json
+      - yaml
+      - toml
+      - validation
+    license: MIT
+    repository: https://github.com/agorischek/dollarlint
+    bugs: https://github.com/agorischek/dollarlint/issues
+    access: public
 
 release:
   github:

@@ -120,4 +120,10 @@ jobs:
           cache: true
 
       - name: Check GoReleaser config
-        run: go run github.com/goreleaser/goreleaser/v2@v2.15.4 check
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser-pro
+          version: "~> v2"
+          args: check
+        env:
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}

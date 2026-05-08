@@ -12,6 +12,13 @@ Files without a schema declaration, config association, built-in association, or
 go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
 ```
 
+After the first npm-backed release is published, you can also install the CLI
+with npm:
+
+```sh
+npm install -g dollarlint
+```
+
 To build from a local checkout:
 
 ```sh

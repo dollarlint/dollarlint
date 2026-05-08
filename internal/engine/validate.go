@@ -2,7 +2,6 @@ package engine
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"path"
@@ -13,13 +12,12 @@ import (
 	"github.com/santhosh-tekuri/jsonschema/v6/kind"
 )
 
-type compilerLoader struct {
-	cache *SchemaCache
-}
+// loaderFunc adapts a closure to the jsonschema.Loader interface so we can
+// capture the compile context and propagate cancellation/timeout into schema
+// fetches performed during compilation.
+type loaderFunc func(string) (any, error)
 
-func (l compilerLoader) Load(url string) (any, error) {
-	return l.cache.Load(url)
-}
+func (f loaderFunc) Load(url string) (any, error) { return f(url) }
 
 func Lint(ctx context.Context, opts Options) (Result, error) {
 	start := time.Now()
@@ -92,6 +90,8 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		validatedDocuments = append(validatedDocuments, document)
 		schemaRoots = append(schemaRoots, resolved)
 	}
+	// Best-effort warmup of referenced schemas. Per-document Prime in
+	// validateDocument surfaces actual errors, so any failure here is ignored.
 	_ = cache.Prime(ctx, primeableSchemaRoots(cfg, validatedDocuments, schemaRoots))
 	for _, document := range validatedDocuments {
 		issues := validateDocument(ctx, cache, cfg, document)
@@ -181,41 +181,40 @@ func compileSchema(ctx context.Context, cache *SchemaCache, cfg Config, schemaUR
 	compiler := jsonschema.NewCompiler()
 	compiler.AssertFormat()
 	compiler.UseRegexpEngine(compileECMARegexp)
-	compiler.UseLoader(compilerLoader{cache: cache})
-	if err := addPrunedAzureARMResources(compileCtx, compiler, cache, cfg, schemaURI, documentData); err != nil {
+	compiler.UseLoader(loaderFunc(func(u string) (any, error) {
+		return cache.LoadContext(compileCtx, u)
+	}))
+	refs := collectAzureARMResourceRefs(documentData)
+	if err := addPrunedAzureARMResourcesWithRefs(compileCtx, compiler, cache, cfg, schemaURI, refs); err != nil {
 		return nil, err
 	}
-	result := make(chan struct {
+	type compileResult struct {
 		schema *jsonschema.Schema
 		err    error
-	}, 1)
+	}
+	resultCh := make(chan compileResult, 1)
 	go func() {
 		schema, err := compiler.Compile(schemaURI)
-		result <- struct {
-			schema *jsonschema.Schema
-			err    error
-		}{schema: schema, err: err}
+		resultCh <- compileResult{schema: schema, err: err}
 	}()
 	select {
 	case <-compileCtx.Done():
 		return nil, compileCtx.Err()
-	case compiled := <-result:
+	case compiled := <-resultCh:
 		return compiled.schema, compiled.err
 	}
 }
 
 func issuesFromValidationError(document *Document, err *jsonschema.ValidationError) []Issue {
-	var issues []Issue
-	collectValidationIssues(document, err, &issues)
-	return issues
+	return collectValidationIssues(document, err, nil)
 }
 
-func collectValidationIssues(document *Document, err *jsonschema.ValidationError, issues *[]Issue) {
+func collectValidationIssues(document *Document, err *jsonschema.ValidationError, issues []Issue) []Issue {
 	if len(err.Causes) > 0 {
 		for _, cause := range err.Causes {
-			collectValidationIssues(document, cause, issues)
+			issues = collectValidationIssues(document, cause, issues)
 		}
-		return
+		return issues
 	}
 	base := Issue{
 		File:             document.Path,
@@ -234,7 +233,7 @@ func collectValidationIssues(document *Document, err *jsonschema.ValidationError
 			issue := base
 			issue.Property = missing
 			issue.Message = fmt.Sprintf("missing property %q", missing)
-			*issues = append(*issues, issue)
+			issues = append(issues, issue)
 		}
 	case *kind.AdditionalProperties:
 		for _, property := range typed.Properties {
@@ -245,11 +244,12 @@ func collectValidationIssues(document *Document, err *jsonschema.ValidationError
 			issue.Column = 0
 			applyIssuePosition(document, &issue)
 			issue.Message = fmt.Sprintf("additional property %q not allowed", property)
-			*issues = append(*issues, issue)
+			issues = append(issues, issue)
 		}
 	default:
-		*issues = append(*issues, base)
+		issues = append(issues, base)
 	}
+	return issues
 }
 
 func applyIssuePosition(document *Document, issue *Issue) {
@@ -337,9 +337,4 @@ func addIssue(result *Result, issue Issue) {
 		return
 	}
 	result.Summary.Issues++
-}
-
-func (r Result) MarshalJSON() ([]byte, error) {
-	type alias Result
-	return json.Marshal(alias(r))
 }

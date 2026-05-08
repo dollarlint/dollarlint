@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -11,7 +12,7 @@ import (
 	"text/template"
 
 	"github.com/agorischek/dollarlint"
-	"github.com/manifoldco/promptui"
+	"github.com/orochaa/go-clack/prompts"
 	"github.com/spf13/cobra"
 )
 
@@ -74,7 +75,7 @@ func runInit(cmd *cobra.Command, stdin io.Reader, stdout io.Writer, args []strin
 	}
 	interactive := isInteractiveIO(stdin, stdout)
 	if !opts.defaults && interactive {
-		if err := interviewInit(asReadCloser(stdin), asWriteCloser(stdout), &opts); err != nil {
+		if err := interviewInit(stdin.(*os.File), stdout.(*os.File), &opts); err != nil {
 			return err
 		}
 	} else if !opts.defaults && !interactive {
@@ -100,7 +101,7 @@ func runInit(cmd *cobra.Command, stdin io.Reader, stdout io.Writer, args []strin
 	if !opts.force {
 		if _, err := os.Stat(target); err == nil {
 			if !opts.defaults && interactive {
-				overwrite, promptErr := promptConfirm(asReadCloser(stdin), asWriteCloser(stdout), "Overwrite existing .dollarlint.toml?", false)
+				overwrite, promptErr := promptConfirm(stdin.(*os.File), stdout.(*os.File), "Overwrite existing .dollarlint.toml?", false)
 				if promptErr != nil {
 					return promptErr
 				}
@@ -117,11 +118,8 @@ func runInit(cmd *cobra.Command, stdin io.Reader, stdout io.Writer, args []strin
 	if err := os.WriteFile(target, content, 0o644); err != nil {
 		return fmt.Errorf("write config %s: %w", target, err)
 	}
-	if cmd.Flags().Changed("schema-store") || opts.schemaStore {
-		fmt.Fprintf(stdout, "Created %s with SchemaStore matching %s\n", target, enabledWord(opts.schemaStore))
-		return nil
-	}
 	fmt.Fprintf(stdout, "Created %s\n", target)
+	fmt.Fprintln(stdout, "Run dollarlint validate . to check your files.")
 	return nil
 }
 
@@ -148,25 +146,25 @@ type initPrompter interface {
 	SchemaStoreFailure(defaultValue string) (string, error)
 }
 
-type promptuiPrompter struct {
-	stdin  io.ReadCloser
-	stdout io.WriteCloser
+type clackPrompter struct {
+	stdin  *os.File
+	stdout *os.File
 }
 
-func (p promptuiPrompter) Confirm(question string, defaultValue bool) (bool, error) {
+func (p clackPrompter) Confirm(question string, defaultValue bool) (bool, error) {
 	return promptConfirm(p.stdin, p.stdout, question, defaultValue)
 }
 
-func (p promptuiPrompter) NonNegativeInt(question string, defaultValue int) (int, error) {
+func (p clackPrompter) NonNegativeInt(question string, defaultValue int) (int, error) {
 	return promptNonNegativeInt(p.stdin, p.stdout, question, defaultValue)
 }
 
-func (p promptuiPrompter) SchemaStoreFailure(defaultValue string) (string, error) {
+func (p clackPrompter) SchemaStoreFailure(defaultValue string) (string, error) {
 	return promptSchemaStoreFailure(p.stdin, p.stdout, defaultValue)
 }
 
-func interviewInit(stdin io.ReadCloser, stdout io.WriteCloser, opts *initOptions) error {
-	return interviewInitWithPrompter(promptuiPrompter{stdin: stdin, stdout: stdout}, opts)
+func interviewInit(stdin, stdout *os.File, opts *initOptions) error {
+	return interviewInitWithPrompter(clackPrompter{stdin: stdin, stdout: stdout}, opts)
 }
 
 func interviewInitWithPrompter(prompter initPrompter, opts *initOptions) error {
@@ -195,45 +193,26 @@ func interviewInitWithPrompter(prompter initPrompter, opts *initOptions) error {
 	return nil
 }
 
-func promptConfirm(stdin io.ReadCloser, stdout io.WriteCloser, question string, defaultValue bool) (bool, error) {
-	prompt := promptui.Prompt{
-		Label:   question,
-		Default: "n",
-		Stdin:   stdin,
-		Stdout:  stdout,
-		Validate: func(input string) error {
-			switch strings.ToLower(strings.TrimSpace(input)) {
-			case "", "y", "yes", "n", "no":
-				return nil
-			default:
-				return fmt.Errorf("please answer y or n")
-			}
-		},
-	}
-	if defaultValue {
-		prompt.Default = "y"
-	}
-	answer, err := prompt.Run()
-	if err != nil {
-		return false, err
-	}
-	switch strings.ToLower(strings.TrimSpace(answer)) {
-	case "":
-		return defaultValue, nil
-	case "y", "yes":
-		return true, nil
-	default:
-		return false, nil
-	}
+func promptConfirm(stdin, stdout *os.File, question string, defaultValue bool) (bool, error) {
+	return prompts.Confirm(prompts.ConfirmParams{
+		Context:      context.Background(),
+		Input:        stdin,
+		Output:       stdout,
+		Message:      question,
+		InitialValue: defaultValue,
+		Active:       "Yes",
+		Inactive:     "No",
+	})
 }
 
-func promptNonNegativeInt(stdin io.ReadCloser, stdout io.WriteCloser, question string, defaultValue int) (int, error) {
-	prompt := promptui.Prompt{
-		Label:     question,
-		Default:   strconv.Itoa(defaultValue),
-		AllowEdit: true,
-		Stdin:     stdin,
-		Stdout:    stdout,
+func promptNonNegativeInt(stdin, stdout *os.File, question string, defaultValue int) (int, error) {
+	answer, err := prompts.Text(prompts.TextParams{
+		Context:      context.Background(),
+		Input:        stdin,
+		Output:       stdout,
+		Message:      question,
+		InitialValue: strconv.Itoa(defaultValue),
+		Required:     true,
 		Validate: func(input string) error {
 			value, err := strconv.Atoi(strings.TrimSpace(input))
 			if err != nil || value < 0 {
@@ -241,81 +220,27 @@ func promptNonNegativeInt(stdin io.ReadCloser, stdout io.WriteCloser, question s
 			}
 			return nil
 		},
-	}
-	answer, err := prompt.Run()
+	})
 	if err != nil {
 		return 0, err
 	}
 	return strconv.Atoi(strings.TrimSpace(answer))
 }
 
-func promptSchemaStoreFailure(stdin io.ReadCloser, stdout io.WriteCloser, defaultValue string) (string, error) {
-	items := []string{
-		dollarlint.SchemaStoreFailureWarn,
-		dollarlint.SchemaStoreFailureError,
-		dollarlint.SchemaStoreFailureSkip,
-	}
-	cursor := 0
-	for i, item := range items {
-		if item == defaultValue {
-			cursor = i
-			break
-		}
-	}
-	prompt := promptui.Select{
-		Label:     "SchemaStore catalog failure policy",
-		Items:     items,
-		CursorPos: cursor,
-		Size:      len(items),
-		Stdin:     stdin,
-		Stdout:    stdout,
-		Templates: &promptui.SelectTemplates{
-			Label:    "{{ . }}",
-			Active:   "> {{ . }}",
-			Inactive: "  {{ . }}",
-			Selected: "{{ . }}",
-			Details:  "warn: continue with a warning\nerror: fail the run\nskip: silently skip SchemaStore inference",
+func promptSchemaStoreFailure(stdin, stdout *os.File, defaultValue string) (string, error) {
+	return prompts.Select(prompts.SelectParams[string]{
+		Context:      context.Background(),
+		Input:        stdin,
+		Output:       stdout,
+		Message:      "SchemaStore catalog failure policy",
+		InitialValue: defaultValue,
+		Options: []*prompts.SelectOption[string]{
+			{Label: "warn", Value: dollarlint.SchemaStoreFailureWarn, Hint: "continue with a warning"},
+			{Label: "error", Value: dollarlint.SchemaStoreFailureError, Hint: "fail the run"},
+			{Label: "skip", Value: dollarlint.SchemaStoreFailureSkip, Hint: "silently skip SchemaStore inference"},
 		},
-	}
-	_, value, err := prompt.Run()
-	return value, err
-}
-
-type readCloser struct {
-	io.Reader
-}
-
-func (readCloser) Close() error {
-	return nil
-}
-
-type writeCloser struct {
-	io.Writer
-}
-
-func (writeCloser) Close() error {
-	return nil
-}
-
-func asReadCloser(reader io.Reader) io.ReadCloser {
-	if closer, ok := reader.(io.ReadCloser); ok {
-		return closer
-	}
-	return readCloser{Reader: reader}
-}
-
-func asWriteCloser(writer io.Writer) io.WriteCloser {
-	if closer, ok := writer.(io.WriteCloser); ok {
-		return closer
-	}
-	return writeCloser{Writer: writer}
-}
-
-func enabledWord(enabled bool) string {
-	if enabled {
-		return "enabled"
-	}
-	return "disabled"
+		Required: true,
+	})
 }
 
 func validateInitOutputPath(target string) error {

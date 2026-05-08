@@ -11,35 +11,39 @@ Install the CLI with Go:
 go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
 ```
 
-Then run it against a repository or config directory:
+Then run it against a repository or directory:
 
 ```sh
 dollarlint .
 ```
 
-To bootstrap a project config, run:
+`validate` is the canonical command. `dollarlint [path]` is a backwards-compatible shortcut for `dollarlint validate [path]`, so either form works in scripts and CI.
+
+## Bootstrap a project config
+
+Most projects work with sensible defaults. When you want a checked-in config:
 
 ```sh
 dollarlint init
 ```
 
-That starts a short terminal interview and creates `.dollarlint.toml` in the current directory. It refuses to overwrite an existing config unless you confirm overwrite or pass `--force`.
+This starts a short terminal interview and writes `.dollarlint.toml` in the current directory. It refuses to overwrite an existing config unless you confirm or pass `--force`. Pass `--defaults` to skip the prompts and accept the defaults plus any flags you supply.
 
 ## Try the examples
 
-This repository includes example JSON, YAML, and TOML files:
+This repository ships with example JSON, YAML, and TOML files:
 
 ```sh
 dollarlint validate ./examples
 ```
 
-There is also a SchemaStore suite with common real-world config files that declare remote schemas from `https://www.schemastore.org`:
+A larger SchemaStore suite exercises common real-world config files against schemas hosted at `https://www.schemastore.org`:
 
 ```sh
 dollarlint validate ./examples/schemastore --locations
 ```
 
-Example text output is grouped by file:
+Default text output is grouped by file:
 
 ```text
 dollarlint found 8 issues in 3 files after 145ms
@@ -55,22 +59,33 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues in 145ms
 
 ## Exit codes
 
-- `0` means no non-ignored issues were found.
-- `1` means validation, schema loading, or parsing issues were found.
-- `2` means the CLI or configuration could not be processed.
+| Code | Meaning |
+| ---- | ------- |
+| `0`  | No non-ignored issues were found. |
+| `1`  | Validation, schema loading, or parsing issues were found. |
+| `2`  | The CLI or configuration could not be processed. |
 
 ## Common commands
 
 ```sh
+# Bootstrap configs
 dollarlint init
 dollarlint init ./packages/api --schema-store
 dollarlint init --output ./packages/api/.dollarlint.toml
 dollarlint init --defaults --schema-store
+
+# Run validation
 dollarlint validate ./config --locations
 dollarlint validate ./config --verbose
 dollarlint validate ./config --json
 dollarlint validate ./config --sarif > dollarlint.sarif
-dollarlint validate . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
+
+# Narrow discovery and pin schemas inline
+dollarlint validate . \
+  --include '**/*.yaml' \
+  --schema 'settings/*.toml=./schemas/settings.schema.json'
+
+# Use SchemaStore matching, with stricter failure handling and more retries
 dollarlint validate . --schema-store
 dollarlint validate . --schema-store --schema-store-failure error --fetch-retries 4
 ```

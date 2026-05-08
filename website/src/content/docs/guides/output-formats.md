@@ -3,6 +3,23 @@ title: Output formats
 description: Choose text, JSON, SARIF, locations, verbosity, and quiet mode.
 ---
 
+`dollarlint` produces one of three output formats per run. Pick the one that matches where the output is going to be read.
+
+| Flag          | Format       | When to use it |
+| ------------- | ------------ | -------------- |
+| _(default)_   | Text         | Interactive runs and pull-request logs. |
+| `--json`      | JSON         | Scripting, dashboards, and custom reporting. |
+| `--sarif`     | SARIF 2.1.0  | GitHub code scanning and other SARIF consumers. |
+
+Modifiers that apply across formats:
+
+| Flag             | Effect |
+| ---------------- | ------ |
+| `--locations`    | Resolve line/column positions for text and JSON. |
+| `--verbose`      | Add schema URI and keyword metadata under each text issue. |
+| `--quiet`        | Use terse text output. |
+| `--show-skipped` | List files skipped because they declared no schema. |
+
 ## Text
 
 The default text output is optimized for scanning. Issues are grouped by file, aligned by location and keyword, and followed by a run summary.
@@ -60,3 +77,5 @@ SARIF locations are best effort:
 - TOML positions come from a conservative source scanner for common tables and keys.
 
 If source mapping cannot resolve a location, validation still succeeds and SARIF falls back to a file-level result. Run-level warnings are emitted as SARIF warning results without file locations.
+
+SARIF and JSON output are written to standard output and are never styled, so it is safe to redirect either to a file or pipe it into another tool.

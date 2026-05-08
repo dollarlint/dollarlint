@@ -56,8 +56,9 @@ jobs:
 
 ## CI tips
 
-- Keep `schema.fetchRemote: true` if your source files depend on remote schema URLs.
-- Use `schema.allowedDomains` in locked-down CI environments to fetch only from approved schema hosts.
-- Pin remote schemas through local mirrors or associations when reproducibility matters more than freshness.
-- Use ignore rules for known migration debt instead of excluding whole directories.
-- Use `--show-skipped` periodically to confirm discovery still matches your expectations.
+- Keep `schema.fetchRemote = true` if your source files depend on remote schema URLs. Tune resilience under `[schema.fetch]` if your CI network is flaky.
+- Use `schema.allowedDomains` in locked-down environments so only approved hosts are contacted.
+- Pin remote schemas through local mirrors or `[[schema.associations]]` when reproducibility matters more than freshness.
+- Prefer `[[ignore]]` rules for known migration debt over excluding whole directories — new issues in the same files remain visible.
+- Run with `--show-skipped` periodically to confirm discovery still matches your expectations.
+- Cache the Go install across runs with `actions/setup-go`'s built-in cache to keep the install step under a second.

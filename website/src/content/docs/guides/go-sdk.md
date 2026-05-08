@@ -3,7 +3,9 @@ title: Go SDK
 description: Use dollarlint from Go code without shelling out to the CLI.
 ---
 
-The CLI is built on a Go SDK exposed by the root package.
+The CLI is a thin wrapper around a Go SDK exposed by the root package. The same engine that powers `dollarlint validate` is available for embedding in your own tools, tests, or CI plugins.
+
+## Run a validation
 
 ```go
 package main
@@ -30,9 +32,11 @@ func main() {
 }
 ```
 
-## Formatting results
+`Lint` is context-aware. Cancel the context to short-circuit long-running validations, including in-flight remote schema fetches.
 
-Use the same formatters as the CLI:
+## Format results
+
+Use the same formatters the CLI uses:
 
 ```go
 text := dollarlint.FormatText(result, cfg.Output)
@@ -40,10 +44,15 @@ jsonBytes, err := dollarlint.FormatJSON(result)
 sarifBytes, err := dollarlint.FormatSARIF(result)
 ```
 
+`FormatText` honors `cfg.Output.Verbose`, `cfg.Output.Quiet`, `cfg.Output.Locations`, and `cfg.Output.ShowSkipped` — the same fields the corresponding CLI flags set.
+
 ## Result shape
 
-The `Result` includes:
+A `Result` contains:
 
-- `Summary` with discovered, validated, skipped, failed, ignored, issue, and duration counts.
-- `Files` with per-file status and schema source.
-- `Issues` with schema keyword, property, instance location, optional source line and column, and ignore metadata.
+- **`Summary`** — discovered, validated, skipped, failed, ignored, and issue counts, plus a wall-clock duration.
+- **`Files`** — per-file status and schema source (`in-file`, `association`, `schema-store`, or `skipped`).
+- **`Issues`** — schema keyword, JSON pointer to the offending property, instance location, optional source line and column, and ignore metadata.
+- **`Warnings`** — non-fatal events such as a temporarily unavailable SchemaStore catalog.
+
+Use `result.HasIssues()` for the same exit-code-friendly signal the CLI uses: it returns `true` only when there are non-ignored validation issues.

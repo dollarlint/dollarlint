@@ -3,9 +3,7 @@ title: Configuration
 description: Configure discovery, schema loading, ignore rules, output, and timeouts.
 ---
 
-`dollarlint` config files are TOML only. The CLI looks for configuration files in the target root:
-
-- `.dollarlint.toml`
+`dollarlint` config files are TOML only. The CLI looks for `.dollarlint.toml` in the target root.
 
 Create a starter config with:
 
@@ -16,7 +14,7 @@ dollarlint init --output ./packages/api/.dollarlint.toml
 dollarlint init --defaults --schema-store
 ```
 
-`init` starts a short terminal interview by default. Use `--defaults` to skip prompts and accept defaults plus any provided flags. It will not overwrite an existing config unless you confirm overwrite or pass `--force`.
+`init` starts a short terminal interview by default. Use `--defaults` to skip prompts and accept defaults plus any flags you pass. It will not overwrite an existing config unless you confirm or pass `--force`.
 
 ## Full example
 
@@ -113,4 +111,23 @@ property = "enabled"
 reason = "legacy files are migrated gradually"
 ```
 
-Ignored issues remain visible in machine-readable output but do not count as failing issues.
+Ignored issues remain visible in machine-readable output but do not count as failing issues, and the run can still exit `0`. Prefer ignore rules over excluding entire directories so that new issues in the same files are still surfaced.
+
+## Timeouts
+
+`timeouts.fetch` caps how long any single remote schema fetch can take. `timeouts.compile` caps how long the JSON Schema compiler may run for a single root schema. The defaults are conservative; raise them if you regularly load large schema bundles such as the Azure ARM catalog.
+
+## Output defaults
+
+The `[output]` table sets defaults for every run, so contributors get the same shape locally that CI does. Each key matches a CLI flag of the same name:
+
+| Key           | Flag             | Effect |
+| ------------- | ---------------- | ------ |
+| `json`        | `--json`         | Emit a single JSON document instead of text. |
+| `sarif`       | `--sarif`        | Emit SARIF 2.1.0 instead of text. |
+| `verbose`     | `--verbose`      | Add schema URI and keyword details under each issue. |
+| `quiet`       | `--quiet`        | Use terse text output. |
+| `locations`   | `--locations`    | Resolve and show line/column positions in text and JSON. |
+| `showSkipped` | `--show-skipped` | List files skipped because they declared no schema. |
+
+CLI flags always win over the config file, so `--quiet` on a single run does not require editing `.dollarlint.toml`.

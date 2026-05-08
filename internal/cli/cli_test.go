@@ -2,7 +2,6 @@ package cli
 
 import (
 	"bytes"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -121,6 +120,9 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 	if !strings.Contains(stdout.String(), "No interactive terminal detected") {
 		t.Fatalf("noninteractive init should explain defaults: %s", stdout.String())
 	}
+	if !strings.Contains(stdout.String(), "Run dollarlint validate . to check your files.") || strings.Contains(stdout.String(), "SchemaStore matching") {
+		t.Fatalf("init success output = %s", stdout.String())
+	}
 	configPath := filepath.Join(dir, ".dollarlint.toml")
 	data, err := os.ReadFile(configPath)
 	if err != nil {
@@ -233,28 +235,26 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 	}
 }
 
-func TestPromptValidationRepeats(t *testing.T) {
-	var stdout bytes.Buffer
-	confirmed, err := promptConfirm(io.NopCloser(strings.NewReader("y\n")), writeCloser{Writer: &stdout}, "Continue?", false)
-	if err != nil {
-		t.Fatalf("promptConfirm: %v", err)
+func TestNormalizeInitOptions(t *testing.T) {
+	opts := defaultInitOptions()
+	opts.schemaStoreFailure = "skip"
+	if err := normalizeInitOptions(&opts); err != nil {
+		t.Fatalf("normalize skip: %v", err)
 	}
-	retries, err := promptNonNegativeInt(io.NopCloser(strings.NewReader("2\n")), writeCloser{Writer: &stdout}, "Retries", 0)
-	if err != nil {
-		t.Fatalf("promptNonNegativeInt: %v", err)
+	if opts.schemaStoreFailure != "skip" {
+		t.Fatalf("failure = %q", opts.schemaStoreFailure)
 	}
-	if !confirmed || retries != 2 {
-		t.Fatalf("confirmed=%v retries=%d", confirmed, retries)
+	opts.schemaStoreStrict = true
+	if err := normalizeInitOptions(&opts); err != nil {
+		t.Fatalf("normalize strict: %v", err)
 	}
-	if !strings.Contains(stdout.String(), "Continue?") || !strings.Contains(stdout.String(), "Retries") {
-		t.Fatalf("prompt output = %q", stdout.String())
+	if opts.schemaStoreFailure != "error" {
+		t.Fatalf("strict should force error, got %q", opts.schemaStoreFailure)
 	}
-	failure, err := promptSchemaStoreFailure(io.NopCloser(strings.NewReader("\n")), writeCloser{Writer: &stdout}, "skip")
-	if err != nil {
-		t.Fatalf("promptSchemaStoreFailure: %v", err)
-	}
-	if failure != "skip" {
-		t.Fatalf("failure = %q", failure)
+	opts.schemaStoreStrict = false
+	opts.schemaStoreFailure = "explode"
+	if err := normalizeInitOptions(&opts); err == nil {
+		t.Fatalf("expected invalid failure policy error")
 	}
 }
 

@@ -1,4 +1,4 @@
-package dollarlint
+package engine
 
 import (
 	"path"

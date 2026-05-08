@@ -27,8 +27,8 @@ dollarlint init --defaults --schema-store
 dollarlint validate .
 ```
 
-`dollarlint [path]` is a backwards-compatible shortcut for
-`dollarlint validate [path]`.
+Bare paths are intentionally not accepted; use the explicit `validate`
+command.
 
 ## 3. Add useful flags
 

@@ -16,11 +16,11 @@ func TestExecuteExitCodes(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["name"],"properties":{"$schema":{"type":"string"},"name":{"type":"string"}}}`)
 	writeFile(t, filepath.Join(dir, "bad.json"), `{"$schema":"./schema.json"}`)
 	var stdout, stderr bytes.Buffer
-	if code := Execute([]string{dir, "--json"}, &stdout, &stderr); code != 1 {
-		t.Fatalf("invalid run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	if code := Execute([]string{dir, "--json"}, &stdout, &stderr); code != 2 {
+		t.Fatalf("bare path exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
-	if !strings.Contains(stdout.String(), `"issues": 1`) {
-		t.Fatalf("json output missing issue count: %s", stdout.String())
+	if !strings.Contains(stderr.String(), "unknown command") && !strings.Contains(stderr.String(), "unknown flag") {
+		t.Fatalf("bare path stderr = %s", stderr.String())
 	}
 	stdout.Reset()
 	stderr.Reset()
@@ -32,15 +32,15 @@ func TestExecuteExitCodes(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{"lint", dir, "--json"}, &stdout, &stderr); code != 1 {
-		t.Fatalf("lint alias exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	if code := Execute([]string{"lint", dir}, &stdout, &stderr); code != 2 {
+		t.Fatalf("lint shortcut exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
-	if !strings.Contains(stdout.String(), `"issues": 1`) {
-		t.Fatalf("lint alias json output missing issue count: %s", stdout.String())
+	if !strings.Contains(stderr.String(), "unknown command") {
+		t.Fatalf("lint shortcut stderr = %s", stderr.String())
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{dir, "--sarif"}, &stdout, &stderr); code != 1 {
+	if code := Execute([]string{"validate", dir, "--sarif"}, &stdout, &stderr); code != 1 {
 		t.Fatalf("sarif run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), `"version": "2.1.0"`) || !strings.Contains(stdout.String(), `"startLine"`) {
@@ -48,7 +48,7 @@ func TestExecuteExitCodes(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{filepath.Join(dir, "missing")}, &stdout, &stderr); code != 2 {
+	if code := Execute([]string{"validate", filepath.Join(dir, "missing")}, &stdout, &stderr); code != 2 {
 		t.Fatalf("fatal run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 }
@@ -57,7 +57,7 @@ func TestExecuteSuccessAndHelpers(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "plain.json"), `{}`)
 	var stdout, stderr bytes.Buffer
-	if code := Execute([]string{dir, "--show-skipped"}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"validate", dir, "--show-skipped"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("success exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), "skipped: plain.json") {
@@ -84,12 +84,12 @@ func TestExecuteRemoteDomainFlags(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "file.json"), `{"$schema":"`+server.URL+`/schema.json"}`)
 	host := mustHost(t, server.URL)
 	var stdout, stderr bytes.Buffer
-	if code := Execute([]string{dir, "--allow-domain", host}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"validate", dir, "--allow-domain", host}, &stdout, &stderr); code != 0 {
 		t.Fatalf("allowed run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{dir, "--block-domain", host}, &stdout, &stderr); code != 1 {
+	if code := Execute([]string{"validate", dir, "--block-domain", host}, &stdout, &stderr); code != 1 {
 		t.Fatalf("blocked run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), "blocked by configuration") {

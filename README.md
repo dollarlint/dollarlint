@@ -15,7 +15,6 @@ go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
 ```sh
 dollarlint init
 dollarlint validate .
-dollarlint .
 dollarlint validate ./config --locations
 dollarlint validate ./config --verbose
 dollarlint validate ./config --json
@@ -24,9 +23,10 @@ dollarlint validate . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/
 dollarlint validate . --schema-store
 dollarlint validate . --schema-store --schema-store-failure error
 dollarlint validate ./examples/schemastore --locations
+dollarlint validate ./examples/azure --locations
 ```
 
-`validate` is the canonical validation command. `dollarlint [path]` remains a backwards-compatible shortcut for `dollarlint validate [path]`.
+`validate` is the canonical validation command. Bare paths are intentionally not accepted; use `dollarlint validate [path]`.
 
 Use `dollarlint init` to interview you and create a starter `.dollarlint.toml` in the current directory. It is safe by default and will not overwrite an existing config unless you confirm overwrite or pass `--force`.
 
@@ -122,10 +122,11 @@ Azure Resource Manager deployment schemas from `schema.management.azure.com` are
 
 ## Examples
 
-The `examples/` directory includes a small local schema demo and a `examples/schemastore/` suite that validates common config files against remote schemas from `https://www.schemastore.org`.
+The `examples/` directory includes a small local schema demo, a `examples/schemastore/` suite that validates common config files against remote schemas from `https://www.schemastore.org`, and Azure ARM deployment templates that exercise remote schema fetching plus ARM resource pruning.
 
 ```sh
 dollarlint validate ./examples/schemastore --locations
+dollarlint validate ./examples/azure --locations
 ```
 
 ## Text Output

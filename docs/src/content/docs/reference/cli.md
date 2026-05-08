@@ -29,8 +29,8 @@ Selected flags:
 
 ### `dollarlint validate [path]`
 
-Validate files under `path` (defaults to `.`). `dollarlint [path]` is a
-backwards-compatible shortcut for `dollarlint validate [path]`.
+Validate files under `path` (defaults to `.`). Bare paths are intentionally
+not accepted; use the explicit `validate` command.
 
 ```sh
 dollarlint validate .

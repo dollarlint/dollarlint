@@ -68,24 +68,21 @@ func NewRootCommand(stdout io.Writer) *cobra.Command {
 
 func NewRootCommandWithIO(stdin io.Reader, stdout io.Writer) *cobra.Command {
 	var configPath string
-	rootOpts := validateOptions{configPath: &configPath, fetchRemote: true, fetchRetries: defaultFetchRetries}
 	cmd := &cobra.Command{
-		Use:           "dollarlint [path]",
+		Use:           "dollarlint",
 		Short:         "Validate JSON, YAML, and TOML files against their declared JSON Schemas",
-		Long:          "dollarlint validates JSON, YAML, and TOML files against their declared JSON Schemas.\n\nRun `dollarlint validate [path]` for the explicit validate command, or `dollarlint [path]` for the backwards-compatible shortcut.",
+		Long:          "dollarlint validates JSON, YAML, and TOML files against their declared JSON Schemas.\n\nRun `dollarlint validate [path]` to validate files.",
 		Version:       version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Args:          cobra.MaximumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return runValidate(cmd, stdout, args, &rootOpts)
+		Args:          cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			_ = cmd.Help()
 		},
 	}
 	cmd.PersistentFlags().StringVar(&configPath, "config", "", "Path to a dollarlint config file")
-	addValidateFlags(cmd, &rootOpts)
 	cmd.AddCommand(newValidateCommand(stdout, &configPath))
 	cmd.AddCommand(newInitCommand(stdin, stdout))
-	cmd.AddCommand(newLintCommand(stdout, &configPath))
 	cmd.AddCommand(newVersionCommand(stdout))
 	return cmd
 }
@@ -96,22 +93,6 @@ func newValidateCommand(stdout io.Writer, configPath *string) *cobra.Command {
 		Use:   "validate [path]",
 		Short: "Validate files against their declared JSON Schemas",
 		Args:  cobra.MaximumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return runValidate(cmd, stdout, args, &opts)
-		},
-	}
-	addValidateFlags(cmd, &opts)
-	return cmd
-}
-
-func newLintCommand(stdout io.Writer, configPath *string) *cobra.Command {
-	opts := validateOptions{configPath: configPath, fetchRemote: true, fetchRetries: defaultFetchRetries}
-	cmd := &cobra.Command{
-		Use:        "lint [path]",
-		Short:      "Deprecated alias for validate",
-		Args:       cobra.MaximumNArgs(1),
-		Deprecated: "use `dollarlint validate` instead",
-		Hidden:     true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runValidate(cmd, stdout, args, &opts)
 		},

@@ -1,0 +1,121 @@
+---
+title: dollarlint
+description: Validate JSON, YAML, and TOML files against the JSON Schema each file declares.
+template: splash
+tableOfContents: false
+hero:
+  tagline: Federal validator for JSON, YAML, and TOML — backed by the schema each file declares.
+---
+
+import { Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
+
+<div class="banknote">
+  <svg class="banknote-bg" viewBox="0 0 800 360" aria-hidden="true" preserveAspectRatio="none">
+    <defs>
+      <pattern id="guilloche" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+        <circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="0.4" opacity="0.35"/>
+        <circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" stroke-width="0.3" opacity="0.3"/>
+        <circle cx="20" cy="20" r="6"  fill="none" stroke="currentColor" stroke-width="0.3" opacity="0.25"/>
+      </pattern>
+      <pattern id="lacework" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <path d="M0 7 H14 M7 0 V14" stroke="currentColor" stroke-width="0.3" opacity="0.25"/>
+      </pattern>
+    </defs>
+    <rect width="800" height="360" fill="url(#guilloche)"/>
+    <rect x="14" y="14" width="772" height="332" fill="none" stroke="currentColor" stroke-width="2"/>
+    <rect x="22" y="22" width="756" height="316" fill="none" stroke="currentColor" stroke-width="0.6" stroke-dasharray="2 2"/>
+    <rect x="30" y="30" width="740" height="300" fill="url(#lacework)"/>
+  </svg>
+
+  <div class="banknote-corners" aria-hidden="true">
+    <span class="corner tl">$</span>
+    <span class="corner tr">$</span>
+    <span class="corner bl">$</span>
+    <span class="corner br">$</span>
+  </div>
+
+  <div class="banknote-inner">
+    <div class="banknote-band">
+      <span>The United Schemas of Validation</span>
+      <span class="serial">SN&nbsp;A·00000001·D</span>
+    </div>
+
+    <div class="banknote-portrait" aria-hidden="true">
+      <svg viewBox="0 0 160 200" class="portrait-svg">
+        <defs>
+          <radialGradient id="oval" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="currentColor" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="80" cy="100" rx="70" ry="92" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <ellipse cx="80" cy="100" rx="62" ry="84" fill="url(#oval)" stroke="currentColor" stroke-width="0.5" stroke-dasharray="1 2"/>
+        <text x="80" y="130" text-anchor="middle" font-family="Iowan Old Style, Palatino, Georgia, serif"
+              font-size="120" font-weight="700" fill="currentColor">$</text>
+        <text x="80" y="170" text-anchor="middle" font-family="Iowan Old Style, Palatino, Georgia, serif"
+              font-size="9" letter-spacing="0.25em" fill="currentColor" opacity="0.85">DOLLARLINT</text>
+      </svg>
+    </div>
+
+    <div class="banknote-content">
+      <p class="eyebrow">Validator note · Series 2025</p>
+      <h1 class="banknote-title">dollar<span>lint</span></h1>
+      <p class="banknote-tag">
+        Validate JSON, YAML, and TOML files against the JSON Schema each file declares.
+      </p>
+      <div class="banknote-actions">
+        <LinkButton href="/guides/introduction/" icon="right-arrow">Get started</LinkButton>
+        <LinkButton href="https://github.com/agorischek/dollarlint" icon="external" variant="minimal">GitHub</LinkButton>
+      </div>
+      <p class="microprint">
+        DOLLARLINTDOLLARLINTDOLLARLINTDOLLARLINT — VALIDATES&nbsp;JSON&nbsp;YAML&nbsp;TOML — DOLLARLINTDOLLARLINTDOLLARLINT
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="ornament" aria-hidden="true">
+  <span></span><span class="seal">$</span><span></span>
+</div>
+
+<section class="denominations">
+  <CardGrid stagger>
+    <Card title="Three formats, one note" icon="document">
+      Lint **JSON**, **YAML**, and **TOML** in a single pass, using the schema each
+      file declares.
+    </Card>
+    <Card title="Engraved for CI" icon="seti:json">
+      Default text grouped by file, plus `--json` and `--sarif` for tooling and
+      GitHub code scanning.
+    </Card>
+    <Card title="SchemaStore reserve" icon="puzzle">
+      Optionally infer schemas for unknown files from the SchemaStore catalog,
+      with allow- and block-lists and bounded retries.
+    </Card>
+    <Card title="Go SDK, legal tender" icon="seti:go">
+      The same engine that powers the CLI is exposed as a small public Go API
+      for embedding in your own tools.
+    </Card>
+  </CardGrid>
+</section>
+
+<div class="ornament" aria-hidden="true">
+  <span></span><span class="seal">★</span><span></span>
+</div>
+
+<section class="ledger">
+  <h2>Open the register</h2>
+
+  ```sh
+  go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
+  dollarlint init
+  dollarlint validate .
+  ```
+
+  Then wire `--sarif` into your CI of choice and let GitHub code scanning
+  spend the findings for you.
+</section>
+
+<p class="treasury-footer" aria-label="footer">
+  THIS NOTE IS LEGAL TENDER FOR ALL SCHEMAS, PUBLIC AND PRIVATE
+</p>

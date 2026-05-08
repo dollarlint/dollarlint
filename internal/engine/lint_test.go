@@ -78,6 +78,21 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	}
 }
 
+func TestLintDurationCanUseExternalStart(t *testing.T) {
+	dir := t.TempDir()
+	cfg := configWithoutSchemaStore()
+	cfg.Discovery.Include = []string{"*.nothing"}
+	startedAt := time.Now().Add(-2 * time.Second)
+
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg, StartedAt: startedAt})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if result.Summary.Duration.Duration < 2*time.Second || result.Summary.DurationNanos < int64(2*time.Second) {
+		t.Fatalf("duration did not include external start: %+v", result.Summary)
+	}
+}
+
 func TestLintRequiresSchemaCoverage(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "schema.schema"), `{"type":"object"}`)

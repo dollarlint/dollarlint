@@ -10,10 +10,10 @@ import DocsLayout from "../layouts/DocsLayout.astro";
   <section class="hero">
     <h1>dollarlint</h1>
     <p class="hero-copy">
-      Check your JSON, YAML, and TOML files against their <code>$schema</code>s, both locally and in CI.
+      <code>$schema</code> validation for JSON, YAML, &amp; TOML, with Schema Store and SARIF support.
     </p>
     <div class="hero-actions">
-      <a class="button primary" href="/guides/quick-start/">Get started</a>
+      <a class="button primary" href="/guides/installation/">Get started</a>
       <a class="button secondary" href="/reference/cli/">Read the CLI reference</a>
     </div>
   </section>
@@ -50,7 +50,7 @@ import DocsLayout from "../layouts/DocsLayout.astro";
       </div>
       <div class="command">
         <code>dollarlint validate . --format sarif --output dollarlint.sarif</code>
-        <p>Generate a CI-friendly code scanning artifact only when you ask for it.</p>
+        <p>Generate a CI-friendly code scanning artifact.</p>
       </div>
     </div>
   </section>

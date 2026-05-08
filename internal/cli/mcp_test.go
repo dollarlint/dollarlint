@@ -18,7 +18,7 @@ func TestServeMCPValidateTool(t *testing.T) {
 		`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"dev"}}}`,
 		`{"jsonrpc":"2.0","method":"notifications/initialized"}`,
 		`{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}`,
-		`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"validate","arguments":{"path":` + quoteJSON(t, dir) + `,"locations":true}}}`,
+		`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"validate","arguments":{"path":` + quoteJSON(t, dir) + `}}}`,
 		"",
 	}, "\n")
 	var stdout, stderr bytes.Buffer
@@ -40,6 +40,11 @@ func TestServeMCPValidateTool(t *testing.T) {
 	tools := listResult["tools"].([]any)
 	if len(tools) != 1 || tools[0].(map[string]any)["name"] != "validate" {
 		t.Fatalf("tools/list result = %+v", listResult)
+	}
+	inputSchema := tools[0].(map[string]any)["inputSchema"].(map[string]any)
+	properties := inputSchema["properties"].(map[string]any)
+	if len(properties) != 1 || properties["path"] == nil {
+		t.Fatalf("input schema properties = %+v", properties)
 	}
 	callResult := responses[2]["result"].(map[string]any)
 	if callResult["isError"] == true {
@@ -72,7 +77,7 @@ func TestServeMCPUnknownTool(t *testing.T) {
 		t.Fatalf("response count = %d output=%s", len(responses), stdout.String())
 	}
 	responseError := responses[0]["error"].(map[string]any)
-	if responseError["code"] != float64(-32602) || !strings.Contains(responseError["message"].(string), "unknown tool") {
+	if responseError["code"] != float64(-32602) || !strings.Contains(responseError["message"].(string), "tool 'missing' not found") {
 		t.Fatalf("error = %+v", responseError)
 	}
 }

@@ -47,7 +47,7 @@ schema = "./schemas/settings.schema.json"`;
     <p>Association globs are matched against each discovered file's path relative to the validation root.</p>
 
     <div class="note">
-      <p>Precedence order: in-file declaration first, then config association, then catalog match. If none of those hit, the file gets skipped.</p>
+      <p>Precedence order: in-file declaration first, then config association, then catalog match. If none of those hit, the file gets skipped unless <code>schemas.requireCoverage = true</code>.</p>
     </div>
   </article>
 </DocsLayout>

@@ -21,7 +21,10 @@ type loaderFunc func(string) (any, error)
 func (f loaderFunc) Load(url string) (any, error) { return f(url) }
 
 func Lint(ctx context.Context, opts Options) (Result, error) {
-	start := time.Now()
+	start := opts.StartedAt
+	if start.IsZero() {
+		start = time.Now()
+	}
 	cfg := opts.Config
 	cfg.ApplyDefaults()
 	root := opts.Root

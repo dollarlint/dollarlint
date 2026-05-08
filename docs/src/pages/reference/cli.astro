@@ -1,5 +1,16 @@
 ---
 import DocsLayout from "../../layouts/DocsLayout.astro";
+
+const mcpConfig = `{
+  "mcpServers": {
+    "dollarlint": {
+      "type": "local",
+      "command": "dollarlint",
+      "args": ["serve", "mcp"],
+      "tools": ["*"]
+    }
+  }
+}`;
 ---
 
 <DocsLayout title="CLI reference" current="/reference/cli/">
@@ -26,6 +37,10 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
         <tr>
           <td><code>dollarlint init [path]</code></td>
           <td>Mint a starter <code>.dollarlint.toml</code> in the target directory.</td>
+        </tr>
+        <tr>
+          <td><code>dollarlint serve mcp</code></td>
+          <td>Start a Model Context Protocol server over stdio so agents can validate files with dollarlint.</td>
         </tr>
         <tr>
           <td><code>dollarlint version</code></td>
@@ -110,5 +125,10 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
         <tr><td><code>--schema-store-failure</code></td><td>Set generated catalog failure policy to <code>warn</code>, <code>error</code>, or <code>skip</code>.</td></tr>
       </tbody>
     </table>
+
+    <h2>MCP server</h2>
+    <p><code>dollarlint serve mcp</code> starts a stdio MCP server. It is meant to be launched by an MCP client, not run directly in a terminal session.</p>
+    <pre><code>{mcpConfig}</code></pre>
+    <p>The server exposes one tool, <code>validate</code>, with one optional argument: <code>path</code>. It loads project config the same way <code>dollarlint validate</code> does, includes source locations automatically, and returns structured JSON with <code>ok</code>, <code>message</code>, and the regular dollarlint <code>result</code> payload.</p>
   </article>
 </DocsLayout>

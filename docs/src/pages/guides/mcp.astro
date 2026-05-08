@@ -1,0 +1,64 @@
+---
+import CodeBlock from "../../components/CodeBlock.astro";
+import DocsLayout from "../../layouts/DocsLayout.astro";
+
+const installedConfig = `{
+  "mcpServers": {
+    "dollarlint": {
+      "type": "local",
+      "command": "dollarlint",
+      "args": ["serve", "mcp"],
+      "tools": ["*"]
+    }
+  }
+}`;
+
+const checkoutConfig = `{
+  "mcpServers": {
+    "dollarlint": {
+      "type": "local",
+      "command": "go",
+      "args": ["run", "./cmd/dollarlint", "serve", "mcp"],
+      "tools": ["*"]
+    }
+  }
+}`;
+
+const validateArguments = `{
+  "path": "examples/basics"
+}`;
+---
+
+<DocsLayout title="MCP server" current="/guides/mcp/">
+  <article class="doc">
+    <header class="doc-header">
+      <span class="eyebrow">Guide</span>
+      <h1>MCP server</h1>
+      <p class="lead">Give agents and editors a structured way to run dollarlint without shelling out through a prompt.</p>
+    </header>
+
+    <h2>Start the server</h2>
+    <p>The MCP server runs over stdio and is designed to be launched by your MCP client.</p>
+    <pre><code>dollarlint serve mcp</code></pre>
+    <p>When developing from a checkout, use <code>go run</code> in the server command until the binary is installed.</p>
+    <pre><code>go run ./cmd/dollarlint serve mcp</code></pre>
+
+    <h2>Configure a client</h2>
+    <p>Most local MCP clients accept a JSON configuration with a command and arguments. For an installed binary:</p>
+    <CodeBlock code={installedConfig} language="json" />
+
+    <p>For GitHub Copilot CLI while working from this repository:</p>
+    <CodeBlock code={checkoutConfig} language="json" />
+
+    <h2>Use the validate tool</h2>
+    <p>The server exposes a single <code>validate</code> tool. It validates JSON, YAML, and TOML files under a path using your dollarlint config, then returns the same result shape as <code>dollarlint validate --format json</code>, wrapped with a boolean <code>ok</code> field.</p>
+    <CodeBlock code={validateArguments} language="json" />
+
+    <p>The only tool argument is <code>path</code>, an optional file or directory to validate. When omitted, dollarlint validates the client-provided working directory. Source locations are included automatically so agents can point fixes at the right line and column.</p>
+
+    <p>Validation issues are not MCP transport errors. A successful tool call can still return <code>"ok": false</code> when files fail schema validation.</p>
+
+    <h2>Configuration</h2>
+    <p>Keep schema associations, discovery rules, fetch policy, excludes, and output preferences in <code>.dollarlint.toml</code>. If an MCP client needs a non-default config file, launch the server with the global <code>--config</code> flag in its command arguments.</p>
+  </article>
+</DocsLayout>

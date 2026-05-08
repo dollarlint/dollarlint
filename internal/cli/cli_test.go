@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestExecuteExitCodes(t *testing.T) {
@@ -109,6 +111,7 @@ func TestExecuteSuccessAndHelpers(t *testing.T) {
 
 func TestExecuteRemoteDomainFlags(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(30 * time.Millisecond)
 		w.Write([]byte(`{"type":"object"}`))
 	}))
 	defer server.Close()
@@ -116,8 +119,19 @@ func TestExecuteRemoteDomainFlags(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "file.json"), `{"$schema":"`+server.URL+`/schema.json"}`)
 	host := mustHost(t, server.URL)
 	var stdout, stderr bytes.Buffer
-	if code := Execute([]string{"validate", dir, "--allow-domain", host}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"validate", dir, "--allow-domain", host, "--format", "json"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("allowed run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	var decoded struct {
+		Summary struct {
+			DurationNanos int64 `json:"durationNanos"`
+		} `json:"summary"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &decoded); err != nil {
+		t.Fatalf("decode json output: %v\n%s", err, stdout.String())
+	}
+	if decoded.Summary.DurationNanos < int64(25*time.Millisecond) {
+		t.Fatalf("printed duration did not include schema fetch: %+v", decoded.Summary)
 	}
 	stdout.Reset()
 	stderr.Reset()

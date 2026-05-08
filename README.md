@@ -2,12 +2,19 @@
 
 `dollarlint` validates source JSON, YAML, and TOML files against the JSON Schema each file declares.
 
-Files without a schema declaration are skipped, but still counted in the run summary so CI output makes discovery behavior clear.
+Files without a schema declaration, config association, or catalog match are skipped by default, but still counted in the run summary so CI output makes discovery behavior clear. Set `schemas.requireCoverage = true` when every included file must be covered.
 
 ## Install
 
 ```sh
 go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
+```
+
+To build from a local checkout:
+
+```sh
+go build -o bin/dollarlint ./cmd/dollarlint
+./bin/dollarlint validate .
 ```
 
 ## CLI
@@ -76,6 +83,7 @@ followSymlinks = false
 [schemas]
 maxDepth = 8
 concurrency = 8
+requireCoverage = false
 
 [schemas.optimizations]
 enabled = true
@@ -128,7 +136,7 @@ Discovery uses safe defaults. Leave `discovery.include` unset to discover JSON, 
 
 By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schemas.fetch.allowedDomains` can restrict remote schemas to specific hosts, and `schemas.fetch.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
 
-Catalog matching is configurable with `schemas.catalogs`. When enabled, files without an explicit schema can be matched by conventional filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional catalog sources. Precedence is explicit in-file schema, then config associations, then catalog matches, then skipped.
+Catalog matching is configurable with `schemas.catalogs`. When enabled, files without an explicit schema can be matched by conventional filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional catalog sources. Precedence is explicit in-file schema, then config associations, then catalog matches, then skipped. Set `schemas.requireCoverage = true` to fail the run when any discovered included file is not covered by one of those schema sources.
 
 Catalog failures are modeled separately from validation issues. By default `schemas.catalogs.failure = "warn"` records a warning, skips catalog inference, still validates explicit/configured schemas, and exits `0` unless validation issues are found. Use `"error"` when catalog availability should fail the run with exit `2`, or `"skip"` for a silent fallback. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
 

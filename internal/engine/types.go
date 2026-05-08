@@ -32,14 +32,14 @@ type DiscoveryConfig struct {
 }
 
 type SchemaConfig struct {
-	Associations  []SchemaAssociation `json:"associations,omitempty" yaml:"associations,omitempty" toml:"associations,omitempty"`
-	Catalogs      CatalogConfig       `json:"catalogs,omitempty" yaml:"catalogs,omitempty" toml:"catalogs,omitempty"`
-	Optimizations OptimizationConfig  `json:"optimizations,omitempty" yaml:"optimizations,omitempty" toml:"optimizations,omitempty"`
-	Fetch         FetchConfig         `json:"fetch,omitempty" yaml:"fetch,omitempty" toml:"fetch,omitempty"`
-	Compile       CompileConfig       `json:"compile,omitempty" yaml:"compile,omitempty" toml:"compile,omitempty"`
-	RequireCoverage bool              `json:"requireCoverage,omitempty" yaml:"requireCoverage,omitempty" toml:"requireCoverage,omitempty"`
-	MaxDepth      int                 `json:"maxDepth,omitempty" yaml:"maxDepth,omitempty" toml:"maxDepth,omitempty"`
-	Concurrency   int                 `json:"concurrency,omitempty" yaml:"concurrency,omitempty" toml:"concurrency,omitempty"`
+	Associations    []SchemaAssociation `json:"associations,omitempty" yaml:"associations,omitempty" toml:"associations,omitempty"`
+	Catalogs        CatalogConfig       `json:"catalogs,omitempty" yaml:"catalogs,omitempty" toml:"catalogs,omitempty"`
+	Optimizations   OptimizationConfig  `json:"optimizations,omitempty" yaml:"optimizations,omitempty" toml:"optimizations,omitempty"`
+	Fetch           FetchConfig         `json:"fetch,omitempty" yaml:"fetch,omitempty" toml:"fetch,omitempty"`
+	Compile         CompileConfig       `json:"compile,omitempty" yaml:"compile,omitempty" toml:"compile,omitempty"`
+	RequireCoverage bool                `json:"requireCoverage,omitempty" yaml:"requireCoverage,omitempty" toml:"requireCoverage,omitempty"`
+	MaxDepth        int                 `json:"maxDepth,omitempty" yaml:"maxDepth,omitempty" toml:"maxDepth,omitempty"`
+	Concurrency     int                 `json:"concurrency,omitempty" yaml:"concurrency,omitempty" toml:"concurrency,omitempty"`
 }
 
 type OptimizationConfig struct {
@@ -102,6 +102,7 @@ type Options struct {
 	Root            string
 	Config          Config
 	SourceLocations bool
+	StartedAt       time.Time
 }
 
 type Result struct {

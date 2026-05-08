@@ -18,22 +18,17 @@ const nav = [
       { href: "/guides/schema-declarations/", label: "Schema declarations" },
       { href: "/guides/ignore-rules/", label: "Ignore rules" },
       { href: "/guides/schemastore/", label: "Catalogs" },
+      { href: "/guides/mcp/", label: "MCP server" },
       { href: "/guides/examples/", label: "Examples" },
     ],
   },
   {
     heading: "Reference",
     links: [
-      { href: "/reference/cli/", label: "CLI reference" },
+      { href: "/reference/cli/", label: "Command Line" },
       { href: "/reference/configuration/", label: "Configuration" },
       { href: "/reference/output/", label: "Output formats" },
       { href: "/reference/exit-codes/", label: "Exit codes" },
-    ],
-  },
-  {
-    heading: "Project",
-    links: [
-      { href: "https://github.com/agorischek/dollarlint", label: "GitHub" },
     ],
   },
 ];
@@ -42,7 +37,7 @@ const currentLabel = nav.flatMap((section) => section.links).find((link) => link
 const currentPageLabel = current === "/guides/" ? "Guides" : currentLabel;
 const slogans = [
   "Put your money where your schema is",
-  "Your configs need an audit",
+  "Time to audit those configs",
   "Balance your config books",
   "Make every schema count",
 ];
@@ -90,11 +85,13 @@ const slogans = [
         const menuPanel = document.querySelector("[data-mobile-menu-panel]");
         const closeMenu = () => {
           menu?.removeAttribute("data-open");
+          document.documentElement.removeAttribute("data-menu-open");
           menuButton?.setAttribute("aria-expanded", "false");
           menuPanel?.setAttribute("hidden", "");
         };
         const openMenu = () => {
           menu?.setAttribute("data-open", "true");
+          document.documentElement.setAttribute("data-menu-open", "true");
           menuButton?.setAttribute("aria-expanded", "true");
           menuPanel?.removeAttribute("hidden");
         };
@@ -117,7 +114,7 @@ const slogans = [
           }
         });
         const slogan = document.querySelector("[data-slogan]");
-        const slogans = ["Put your money where your schema is", "Your configs need an audit", "Balance your config books", "Make every schema count"];
+        const slogans = ["Put your money where your schema is", "Time to audit those configs", "Balance your config books", "Make every schema count"];
         if (slogan) {
           slogan.textContent = slogans[Math.floor(Math.random() * slogans.length)];
         }
@@ -157,26 +154,29 @@ const slogans = [
             </button>
             <div class="mobile-menu-panel" id="mobile-docs-menu" data-mobile-menu-panel hidden>
               <div class="mobile-menu-current">{currentPageLabel}</div>
-              {nav.map((section) => (
-                <nav class="mobile-nav-section" aria-label={`${section.heading} mobile`}>
-                  <div class="nav-heading">{section.heading}</div>
-                  <ul class="nav-list">
-                    {section.links.map((link) => (
-                      <li>
-                        <a class="nav-link" href={link.href} aria-current={current === link.href ? "page" : undefined}>
-                          {link.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-              ))}
+              <div class="mobile-menu-scroll">
+                {nav.map((section) => (
+                  <nav class="mobile-nav-section" aria-label={`${section.heading} mobile`}>
+                    <div class="nav-heading">{section.heading}</div>
+                    <ul class="nav-list">
+                      {section.links.map((link) => (
+                        <li>
+                          <a class="nav-link" href={link.href} aria-current={current === link.href ? "page" : undefined}>
+                            {link.label}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                ))}
+              </div>
               <div class="mobile-theme">
                 <div class="theme-switch" role="group" aria-label="Theme">
                   <button class="theme-button" type="button" data-theme-option="light" aria-pressed="false">Light</button>
                   <button class="theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
                   <button class="theme-button" type="button" data-theme-option="system" aria-pressed="true">System</button>
                 </div>
+                <a class="utility-link" href="https://github.com/agorischek/dollarlint">GitHub</a>
               </div>
             </div>
           </div>
@@ -201,6 +201,7 @@ const slogans = [
             <button class="theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
             <button class="theme-button" type="button" data-theme-option="system" aria-pressed="true">System</button>
           </div>
+          <a class="utility-link" href="https://github.com/agorischek/dollarlint">GitHub</a>
         </div>
       </aside>
       <main class="content">

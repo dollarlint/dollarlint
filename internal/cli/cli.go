@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/agorischek/dollarlint"
 	"github.com/spf13/cobra"
@@ -150,6 +151,7 @@ func addValidateFlags(cmd *cobra.Command, opts *validateOptions) {
 }
 
 func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *validateOptions) error {
+	startedAt := time.Now()
 	root := "."
 	if len(args) == 1 {
 		root = args[0]
@@ -235,7 +237,7 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 	if err != nil {
 		return err
 	}
-	result, err := dollarlint.Lint(context.Background(), dollarlint.Options{Root: root, Config: cfg, SourceLocations: format == outputFormatSARIF})
+	result, err := dollarlint.Lint(context.Background(), dollarlint.Options{Root: root, Config: cfg, SourceLocations: format == outputFormatSARIF, StartedAt: startedAt})
 	if err != nil {
 		return err
 	}

@@ -1,0 +1,101 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+---
+
+<DocsLayout title="Configuration reference" current="/reference/configuration/">
+  <article class="doc">
+    <header class="doc-header">
+      <span class="eyebrow">Reference</span>
+      <h1>Configuration</h1>
+      <p class="lead">dollarlint reads TOML config from <code>.dollarlint.toml</code>. The validate command searches the target root unless <code>--config</code> points to a specific file.</p>
+    </header>
+
+    <h2>Starter config</h2>
+    <pre><code>version = 1
+
+[discovery]
+include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.yml", "**/*.yml", "*.toml", "**/*.toml"]
+exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**", "build", "**/build/**", "coverage", "**/coverage/**"]
+
+[schemas]
+fetchRemote = true
+maxDepth = 8
+concurrency = 8
+azureResourcePruning = true
+
+[schemas.fetch]
+retries = 2
+retryMinWait = "250ms"
+retryMaxWait = "2s"
+
+[schemas.catalogs]
+enabled = false
+failure = "warn"
+strict = false
+
+[[schemas.catalogs.sources]]
+name = "schemastore"
+format = "schemastore"
+url = "https://www.schemastore.org/api/json/catalog.json"
+enabled = true
+
+[[schemas.associations]]
+file = "settings/*.toml"
+schema = "./schemas/settings.schema.json"
+
+[timeouts]
+fetch = "10s"
+compile = "30s"
+
+[output]
+json = false
+sarif = false
+showSkipped = false
+verbose = false
+quiet = false
+locations = false</code></pre>
+
+    <h2>Discovery</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>include</code></td><td>File globs to consider during discovery.</td></tr>
+        <tr><td><code>exclude</code></td><td>File and directory globs to ignore during discovery.</td></tr>
+        <tr><td><code>followSymlinks</code></td><td>Follow symbolic links during discovery.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Schemas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>fetchRemote</code></td><td>Allow fetching HTTP schemas.</td></tr>
+        <tr><td><code>allowedDomains</code></td><td>Restrict remote schemas to exact or wildcard hosts.</td></tr>
+        <tr><td><code>blockedDomains</code></td><td>Deny hosts even when they match the allowlist.</td></tr>
+        <tr><td><code>maxDepth</code></td><td>Maximum external schema reference depth.</td></tr>
+        <tr><td><code>concurrency</code></td><td>Number of concurrent validation workers.</td></tr>
+        <tr><td><code>azureResourcePruning</code></td><td>Prune Azure Resource Manager schemas to referenced resource providers before compilation.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Catalogs</h2>
+    <p>Catalogs map conventional filenames to schemas when a file does not declare <code>$schema</code> and no explicit association matches. SchemaStore is the default catalog source format.</p>
+
+    <h2>Ignore rules</h2>
+    <pre><code>[[ignore]]
+file = "fixtures/*.json"
+keyword = "required"
+property = "legacyName"
+reason = "legacy fixture kept for compatibility"</code></pre>
+  </article>
+</DocsLayout>

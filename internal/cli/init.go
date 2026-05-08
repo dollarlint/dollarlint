@@ -174,10 +174,6 @@ func (p clackPrompter) SchemaStoreFailure(defaultValue string) (string, error) {
 	return promptSchemaStoreFailure(p.stdin, p.stdout, defaultValue)
 }
 
-func interviewInit(stdin, stdout *os.File, opts *initOptions) error {
-	return interviewInitWithPrompter(clackPrompter{stdin: stdin, stdout: stdout}, opts)
-}
-
 func interviewInitWithPrompter(prompter initPrompter, opts *initOptions) error {
 	fetchRemote, err := prompter.Confirm("Allow remote http(s) schema fetching?", opts.fetchRemote)
 	if err != nil {
@@ -189,7 +185,7 @@ func interviewInitWithPrompter(prompter initPrompter, opts *initOptions) error {
 		return err
 	}
 	opts.fetchRetries = retries
-	schemaStore, err := prompter.Confirm("Enable SchemaStore filename matching?", opts.schemaStore)
+	schemaStore, err := prompter.Confirm("Enable catalog filename matching?", opts.schemaStore)
 	if err != nil {
 		return err
 	}
@@ -243,12 +239,12 @@ func promptSchemaStoreFailure(stdin, stdout *os.File, defaultValue string) (stri
 		Context:      context.Background(),
 		Input:        stdin,
 		Output:       stdout,
-		Message:      "SchemaStore catalog failure policy",
+		Message:      "Catalog failure policy",
 		InitialValue: defaultValue,
 		Options: []*prompts.SelectOption[string]{
 			{Label: "warn", Value: dollarlint.SchemaStoreFailureWarn, Hint: "continue with a warning"},
 			{Label: "error", Value: dollarlint.SchemaStoreFailureError, Hint: "fail the run"},
-			{Label: "skip", Value: dollarlint.SchemaStoreFailureSkip, Hint: "silently skip SchemaStore inference"},
+			{Label: "skip", Value: dollarlint.SchemaStoreFailureSkip, Hint: "silently skip catalog inference"},
 		},
 		Required: true,
 	})
@@ -281,7 +277,7 @@ func renderStarterConfig(opts initOptions) ([]byte, error) {
 		SchemaStoreEnabled: opts.schemaStore,
 		SchemaStoreFailure: opts.schemaStoreFailure,
 		SchemaStoreStrict:  opts.schemaStoreStrict,
-		SchemaStoreURL:     dollarlint.DefaultConfig().Schema.SchemaStore.URL,
+		SchemaStoreURL:     dollarlint.DefaultConfig().Schema.Catalogs.Sources[0].URL,
 		FetchRemote:        opts.fetchRemote,
 		FetchRetries:       opts.fetchRetries,
 	}
@@ -307,24 +303,29 @@ version = 1
 include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.yml", "**/*.yml", "*.toml", "**/*.toml"]
 exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**", "build", "**/build/**", "coverage", "**/coverage/**"]
 
-[schema]
+[schemas]
 fetchRemote = {{ .FetchRemote }}
 maxDepth = 8
 concurrency = 8
 azureResourcePruning = true
 
-[schema.fetch]
+[schemas.fetch]
 retries = {{ .FetchRetries }}
 retryMinWait = "250ms"
 retryMaxWait = "2s"
 
-[schema.schemaStore]
+[schemas.catalogs]
 enabled = {{ .SchemaStoreEnabled }}
-url = "{{ .SchemaStoreURL }}"
 failure = "{{ .SchemaStoreFailure }}"
 strict = {{ .SchemaStoreStrict }}
 
-# [[schema.associations]]
+[[schemas.catalogs.sources]]
+name = "schemastore"
+format = "schemastore"
+url = "{{ .SchemaStoreURL }}"
+enabled = true
+
+# [[schemas.associations]]
 # file = "settings/*.toml"
 # schema = "./schemas/settings.schema.json"
 

@@ -1,0 +1,103 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+---
+
+<DocsLayout title="CLI reference" current="/reference/cli/">
+  <article class="doc">
+    <header class="doc-header">
+      <span class="eyebrow">Reference</span>
+      <h1>CLI reference</h1>
+      <p class="lead">Commands and flags for validating files, creating config, and inspecting the installed version.</p>
+    </header>
+
+    <h2>Commands</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Command</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>dollarlint validate [path]</code></td>
+          <td>Validate files under a path. Defaults to the current directory.</td>
+        </tr>
+        <tr>
+          <td><code>dollarlint init [path]</code></td>
+          <td>Create a starter <code>.dollarlint.toml</code> in the target directory.</td>
+        </tr>
+        <tr>
+          <td><code>dollarlint version</code></td>
+          <td>Print the installed version.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Global flags</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Flag</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>--config</code></td>
+          <td>Use an explicit <code>.dollarlint.toml</code> path.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Validate flags</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Flag</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>--json</code></td><td>Write machine-readable JSON output.</td></tr>
+        <tr><td><code>--sarif</code></td><td>Write SARIF 2.1.0 output.</td></tr>
+        <tr><td><code>--locations</code></td><td>Include line and column positions in text and JSON output.</td></tr>
+        <tr><td><code>--verbose</code></td><td>Show expanded issue metadata in text output.</td></tr>
+        <tr><td><code>--quiet</code></td><td>Use terse text output.</td></tr>
+        <tr><td><code>--show-skipped</code></td><td>Show files skipped because they do not declare a schema.</td></tr>
+        <tr><td><code>--include</code></td><td>Add a discovery include glob. Repeatable.</td></tr>
+        <tr><td><code>--exclude</code></td><td>Add a discovery exclude glob. Repeatable.</td></tr>
+        <tr><td><code>--schema</code></td><td>Associate a file glob with a schema as <code>glob=uri</code>. Repeatable.</td></tr>
+        <tr><td><code>--schema-store</code></td><td>Match conventional filenames using the SchemaStore catalog.</td></tr>
+        <tr><td><code>--schema-store-url</code></td><td>Use a SchemaStore catalog URL or local path.</td></tr>
+        <tr><td><code>--schema-store-failure</code></td><td>Set catalog failure policy to <code>warn</code>, <code>error</code>, or <code>skip</code>.</td></tr>
+        <tr><td><code>--max-depth</code></td><td>Set maximum external schema reference depth.</td></tr>
+        <tr><td><code>--fetch-remote</code></td><td>Allow fetching HTTP schemas.</td></tr>
+        <tr><td><code>--fetch-retries</code></td><td>Set retries for transient remote schema fetch failures.</td></tr>
+        <tr><td><code>--allow-domain</code></td><td>Allow remote schemas from a domain. Repeatable.</td></tr>
+        <tr><td><code>--block-domain</code></td><td>Block remote schemas from a domain. Repeatable.</td></tr>
+        <tr><td><code>--fetch-timeout</code></td><td>Set schema fetch timeout, such as <code>10s</code>.</td></tr>
+        <tr><td><code>--compile-timeout</code></td><td>Set schema compile timeout, such as <code>30s</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Init flags</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Flag</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>--output</code>, <code>-o</code></td><td>Path to the <code>.dollarlint.toml</code> file to create.</td></tr>
+        <tr><td><code>--force</code></td><td>Overwrite an existing config file.</td></tr>
+        <tr><td><code>--defaults</code></td><td>Skip prompts and use defaults plus provided flags.</td></tr>
+        <tr><td><code>--fetch-remote</code></td><td>Allow fetching HTTP schemas in the generated config.</td></tr>
+        <tr><td><code>--fetch-retries</code></td><td>Set generated retry count for transient fetch failures.</td></tr>
+        <tr><td><code>--schema-store</code></td><td>Enable the built-in SchemaStore catalog in the generated config.</td></tr>
+        <tr><td><code>--schema-store-failure</code></td><td>Set generated catalog failure policy.</td></tr>
+      </tbody>
+    </table>
+  </article>
+</DocsLayout>

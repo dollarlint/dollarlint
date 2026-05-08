@@ -1,0 +1,46 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+---
+
+<DocsLayout title="Catalogs and SchemaStore" current="/guides/schemastore/">
+  <article class="doc">
+    <header class="doc-header">
+      <span class="eyebrow">Guide</span>
+      <h1>Catalogs and SchemaStore</h1>
+      <p class="lead">Catalog matching lets dollarlint infer schemas for conventional filenames such as common package, tool, and service config files. SchemaStore is the built-in catalog source.</p>
+    </header>
+
+    <h2>Enable catalog matching</h2>
+    <pre><code>dollarlint validate . --schema-store</code></pre>
+
+    <h2>Use a custom catalog</h2>
+    <pre><code>dollarlint validate . --schema-store-url ./catalog.json</code></pre>
+    <p>In config, use <code>schemas.catalogs</code> and one or more <code>schemas.catalogs.sources</code>. Sources currently use the SchemaStore catalog format.</p>
+
+    <h2>Choose the failure policy</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Policy</th>
+          <th>Behavior</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>warn</code></td>
+          <td>Record a warning, skip catalog inference, and keep validating explicit or configured schemas.</td>
+        </tr>
+        <tr>
+          <td><code>error</code></td>
+          <td>Fail the run when the catalog cannot be loaded.</td>
+        </tr>
+        <tr>
+          <td><code>skip</code></td>
+          <td>Skip catalog inference silently when the catalog is unavailable.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <pre><code>dollarlint validate . --schema-store --schema-store-failure error</code></pre>
+  </article>
+</DocsLayout>

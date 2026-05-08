@@ -1,0 +1,48 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+
+const jsonSchema = `{
+  "$schema": "./schema.json",
+  "name": "example"
+}`;
+const yamlDirective = `# yaml-language-server: $schema=./schema.json
+name: example`;
+const yamlRoot = `$schema: ./schema.json
+name: example`;
+const tomlDirective = `#:schema ./schema.json
+name = "example"`;
+const tomlRoot = `"$schema" = "./schema.json"
+name = "example"`;
+const association = `[[schemas.associations]]
+file = "settings/*.toml"
+schema = "./schemas/settings.schema.json"`;
+---
+
+<DocsLayout title="Schema declarations" current="/guides/schema-declarations/">
+  <article class="doc">
+    <header class="doc-header">
+      <span class="eyebrow">Guide</span>
+      <h1>Schema declarations</h1>
+      <p class="lead">dollarlint reads schema declarations from the files it validates. Config-level associations can cover files that do not declare a schema themselves.</p>
+    </header>
+
+    <h2>JSON</h2>
+    <pre><code>{jsonSchema}</code></pre>
+
+    <h2>YAML</h2>
+    <pre><code>{yamlDirective}</code></pre>
+    <pre><code>{yamlRoot}</code></pre>
+
+    <h2>TOML</h2>
+    <pre><code>{tomlDirective}</code></pre>
+    <pre><code>{tomlRoot}</code></pre>
+
+    <h2>Config associations</h2>
+    <p>Use associations when you cannot or do not want to add a declaration to each source file.</p>
+    <pre><code>{association}</code></pre>
+
+    <div class="note">
+      <p>Schema precedence is explicit in-file declaration, then config association, then catalog match, then skipped.</p>
+    </div>
+  </article>
+</DocsLayout>

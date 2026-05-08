@@ -23,7 +23,7 @@ func TestFormatTextGroupedDefault(t *testing.T) {
 
 func TestFormatTextLocationsVerboseSkippedAndQuiet(t *testing.T) {
 	result := textFixtureResult()
-	result.Warnings = []Warning{{Kind: "schemaStoreCatalogUnavailable", Source: "schemastore", Message: "catalog unavailable"}}
+	result.Warnings = []Warning{{Kind: "schemaCatalogUnavailable", Source: "schemastore", Message: "catalog unavailable"}}
 	result.Summary.Warnings = 1
 	text := FormatText(result, OutputConfig{Locations: true, Verbose: true, ShowSkipped: true})
 	assertContains(t, text, "2:7       type")
@@ -36,7 +36,7 @@ func TestFormatTextLocationsVerboseSkippedAndQuiet(t *testing.T) {
 	assertContains(t, text, "skipped: skipped.json (no schema)")
 	locationOnly := FormatText(result, OutputConfig{Locations: true})
 	assertContains(t, locationOnly, "2:7       type")
-	assertContains(t, locationOnly, "got number, want string  /name")
+	assertContains(t, locationOnly, "expected string, received number  /name")
 	quiet := FormatText(result, OutputConfig{Quiet: true})
 	assertContains(t, quiet, "dollarlint found 5 issues in 2 files after 123ms")
 	assertContains(t, quiet, "1 warning")
@@ -100,7 +100,7 @@ func textFixtureResult() Result {
 				InstanceLocation: "/count",
 				Line:             3,
 				Column:           10,
-				Message:          "minimum: got 0, want 1",
+				Message:          "must be >= 1",
 			},
 			{
 				RelativePath:     "a.json",
@@ -111,7 +111,7 @@ func textFixtureResult() Result {
 				InstanceLocation: "/name",
 				Line:             2,
 				Column:           7,
-				Message:          "got number, want string",
+				Message:          "expected string, received number",
 			},
 			{
 				RelativePath:     "b.toml",
@@ -119,7 +119,7 @@ func textFixtureResult() Result {
 				InstanceLocation: "/enabled",
 				Line:             4,
 				Column:           11,
-				Message:          "got string, want boolean",
+				Message:          "expected boolean, received string",
 			},
 			{
 				RelativePath:     "b.toml",
@@ -135,7 +135,7 @@ func textFixtureResult() Result {
 				InstanceLocation: "/",
 				Line:             4,
 				Column:           12,
-				Message:          "missing property \"name\"",
+				Message:          "must have required property \"name\"",
 			},
 			{
 				RelativePath:     "ignored.json",

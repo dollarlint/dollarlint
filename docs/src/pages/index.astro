@@ -1,0 +1,55 @@
+---
+import DocsLayout from "../layouts/DocsLayout.astro";
+---
+
+<DocsLayout
+  title="dollarlint documentation"
+  description="A custom Astro documentation site for the dollarlint CLI."
+  current="/"
+>
+  <section class="hero">
+    <span class="eyebrow">CLI documentation</span>
+    <h1>dollarlint</h1>
+    <p class="hero-copy">
+      Validate JSON, YAML, and TOML files against their declared JSON Schemas.
+      dollarlint keeps config checks explicit, readable, and CI-friendly.
+    </p>
+    <div class="hero-actions">
+      <a class="button primary" href="/guides/quick-start/">Start validating</a>
+      <a class="button secondary" href="/reference/cli/">Read the CLI reference</a>
+    </div>
+  </section>
+
+  <section class="grid" aria-label="Highlights">
+    <article class="card">
+      <h3>Schema-first discovery</h3>
+      <p>Files can declare schemas in JSON, YAML, or TOML. Files without a schema are skipped and reported in the run summary.</p>
+    </article>
+    <article class="card">
+      <h3>CI-ready output</h3>
+      <p>Choose grouped text, structured JSON, or SARIF 2.1.0 for code scanning and automation workflows.</p>
+    </article>
+    <article class="card">
+      <h3>Controlled remote fetching</h3>
+      <p>Use retries, timeouts, allowlists, blocklists, and catalog matching to make remote schema use predictable.</p>
+    </article>
+  </section>
+
+  <section class="doc">
+    <h2>Common commands</h2>
+    <div class="command-list">
+      <div class="command">
+        <code>dollarlint init</code>
+        <p>Create a starter <code>.dollarlint.toml</code> in the current directory.</p>
+      </div>
+      <div class="command">
+        <code>dollarlint validate .</code>
+        <p>Validate discovered JSON, YAML, and TOML files below the current directory.</p>
+      </div>
+      <div class="command">
+        <code>dollarlint validate ./config --locations</code>
+        <p>Show line and column positions in text output.</p>
+      </div>
+    </div>
+  </section>
+</DocsLayout>

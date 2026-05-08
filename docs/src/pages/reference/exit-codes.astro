@@ -1,0 +1,40 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+---
+
+<DocsLayout title="Exit codes" current="/reference/exit-codes/">
+  <article class="doc">
+    <header class="doc-header">
+      <span class="eyebrow">Reference</span>
+      <h1>Exit codes</h1>
+      <p class="lead">dollarlint uses small, predictable exit codes so CI jobs can distinguish validation failures from command failures.</p>
+    </header>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>0</code></td>
+          <td>No non-ignored issues were found.</td>
+        </tr>
+        <tr>
+          <td><code>1</code></td>
+          <td>Validation, schema loading, or parsing issues were found.</td>
+        </tr>
+        <tr>
+          <td><code>2</code></td>
+          <td>The command or configuration could not be used.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="warning">
+      <p>Use <code>--schema-store-failure error</code> when catalog availability should fail the run instead of becoming a warning.</p>
+    </div>
+  </article>
+</DocsLayout>

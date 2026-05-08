@@ -1,0 +1,125 @@
+---
+import "../styles/dollar.css";
+
+const {
+  title = "dollarlint docs",
+  description = "Documentation for the dollarlint CLI.",
+  current = "/",
+} = Astro.props;
+
+const nav = [
+  {
+    heading: "Guides",
+    links: [
+      { href: "/", label: "Overview" },
+      { href: "/guides/installation/", label: "Installation" },
+      { href: "/guides/quick-start/", label: "Quick start" },
+      { href: "/guides/schema-declarations/", label: "Schema declarations" },
+      { href: "/guides/schemastore/", label: "Catalogs" },
+    ],
+  },
+  {
+    heading: "Reference",
+    links: [
+      { href: "/reference/cli/", label: "CLI reference" },
+      { href: "/reference/configuration/", label: "Configuration" },
+      { href: "/reference/output/", label: "Output formats" },
+      { href: "/reference/exit-codes/", label: "Exit codes" },
+    ],
+  },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <script is:inline>
+      const storedTheme = localStorage.getItem("dollarlint-theme") || "system";
+      const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const resolveTheme = (theme) => (theme === "system" ? (themeQuery.matches ? "dark" : "light") : theme);
+      const applyTheme = (theme) => {
+        const resolved = resolveTheme(theme);
+        document.documentElement.dataset.themeChoice = theme;
+        document.documentElement.dataset.theme = resolved;
+        document.documentElement.style.colorScheme = resolved;
+      };
+      applyTheme(storedTheme);
+      themeQuery.addEventListener("change", () => {
+        const currentTheme = localStorage.getItem("dollarlint-theme") || "system";
+        applyTheme(currentTheme);
+      });
+      window.addEventListener("DOMContentLoaded", () => {
+        const buttons = document.querySelectorAll("[data-theme-option]");
+        const setPressed = (theme) => {
+          buttons.forEach((button) => {
+            button.setAttribute("aria-pressed", String(button.dataset.themeOption === theme));
+          });
+        };
+        setPressed(storedTheme);
+        buttons.forEach((button) => {
+          button.addEventListener("click", () => {
+            const theme = button.dataset.themeOption;
+            localStorage.setItem("dollarlint-theme", theme);
+            applyTheme(theme);
+            setPressed(theme);
+          });
+        });
+      });
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700;800&family=Fjord+One&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="site-shell">
+      <aside class="sidebar" aria-label="Documentation">
+        <a class="brand" href="/">
+          <span class="brand-mark" aria-hidden="true">$</span>
+          <span>
+            <span class="brand-title">dollarlint</span>
+            <span class="brand-subtitle">JSON Schema checks for config files</span>
+          </span>
+        </a>
+        {nav.map((section) => (
+          <nav class="nav-section" aria-label={section.heading}>
+            <div class="nav-heading">{section.heading}</div>
+            <ul class="nav-list">
+              {section.links.map((link) => (
+                <li>
+                  <a class="nav-link" href={link.href} aria-current={current === link.href ? "page" : undefined}>
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
+      </aside>
+      <main class="content">
+        <div class="topbar">
+          <div class="theme-switch" role="group" aria-label="Theme">
+            <button class="theme-button" type="button" data-theme-option="light" aria-pressed="false">Light</button>
+            <button class="theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
+            <button class="theme-button" type="button" data-theme-option="system" aria-pressed="true">System</button>
+          </div>
+          <a class="pill" href="https://github.com/agorischek/dollarlint">GitHub</a>
+          <a class="pill" href="/reference/cli/">CLI reference</a>
+        </div>
+        <div class="page">
+          <slot />
+          <footer class="footer">
+            dollarlint validates JSON, YAML, and TOML files against the JSON Schema each file declares.
+          </footer>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

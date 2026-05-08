@@ -17,6 +17,7 @@ const (
 type Config struct {
 	Version   int             `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
 	Discovery DiscoveryConfig `json:"discovery,omitempty" yaml:"discovery,omitempty" toml:"discovery,omitempty"`
+	Schemas   SchemaConfig    `json:"schemas,omitempty" yaml:"schemas,omitempty" toml:"schemas,omitempty"`
 	Schema    SchemaConfig    `json:"schema,omitempty" yaml:"schema,omitempty" toml:"schema,omitempty"`
 	Timeouts  TimeoutConfig   `json:"timeouts,omitempty" yaml:"timeouts,omitempty" toml:"timeouts,omitempty"`
 	Ignore    []IgnoreRule    `json:"ignore,omitempty" yaml:"ignore,omitempty" toml:"ignore,omitempty"`
@@ -31,6 +32,7 @@ type DiscoveryConfig struct {
 
 type SchemaConfig struct {
 	Associations          []SchemaAssociation `json:"associations,omitempty" yaml:"associations,omitempty" toml:"associations,omitempty"`
+	Catalogs              CatalogConfig       `json:"catalogs,omitempty" yaml:"catalogs,omitempty" toml:"catalogs,omitempty"`
 	SchemaStore           SchemaStoreConfig   `json:"schemaStore,omitempty" yaml:"schemaStore,omitempty" toml:"schemaStore,omitempty"`
 	Fetch                 FetchConfig         `json:"fetch,omitempty" yaml:"fetch,omitempty" toml:"fetch,omitempty"`
 	MaxDepth              int                 `json:"maxDepth,omitempty" yaml:"maxDepth,omitempty" toml:"maxDepth,omitempty"`
@@ -48,6 +50,21 @@ type SchemaStoreConfig struct {
 	URL     string `json:"url,omitempty" yaml:"url,omitempty" toml:"url,omitempty"`
 	Failure string `json:"failure,omitempty" yaml:"failure,omitempty" toml:"failure,omitempty"`
 	Strict  bool   `json:"strict,omitempty" yaml:"strict,omitempty" toml:"strict,omitempty"`
+}
+
+type CatalogConfig struct {
+	Enabled bool            `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
+	Failure string          `json:"failure,omitempty" yaml:"failure,omitempty" toml:"failure,omitempty"`
+	Strict  bool            `json:"strict,omitempty" yaml:"strict,omitempty" toml:"strict,omitempty"`
+	Sources []CatalogSource `json:"sources,omitempty" yaml:"sources,omitempty" toml:"sources,omitempty"`
+}
+
+type CatalogSource struct {
+	Name    string `json:"name,omitempty" yaml:"name,omitempty" toml:"name,omitempty"`
+	Format  string `json:"format,omitempty" yaml:"format,omitempty" toml:"format,omitempty"`
+	URL     string `json:"url,omitempty" yaml:"url,omitempty" toml:"url,omitempty"`
+	Path    string `json:"path,omitempty" yaml:"path,omitempty" toml:"path,omitempty"`
+	Enabled *bool  `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
 }
 
 type FetchConfig struct {

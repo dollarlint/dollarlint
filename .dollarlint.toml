@@ -5,24 +5,29 @@ version = 1
 include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.yml", "**/*.yml", "*.toml", "**/*.toml"]
 exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**", "build", "**/build/**", "coverage", "**/coverage/**"]
 
-[schema]
+[schemas]
 fetchRemote = true
 maxDepth = 8
 concurrency = 8
 azureResourcePruning = true
 
-[schema.fetch]
+[schemas.fetch]
 retries = 2
 retryMinWait = "250ms"
 retryMaxWait = "2s"
 
-[schema.schemaStore]
+[schemas.catalogs]
 enabled = true
-url = "https://www.schemastore.org/api/json/catalog.json"
 failure = "warn"
 strict = false
 
-# [[schema.associations]]
+[[schemas.catalogs.sources]]
+name = "schemastore"
+format = "schemastore"
+url = "https://www.schemastore.org/api/json/catalog.json"
+enabled = true
+
+# [[schemas.associations]]
 # file = "settings/*.toml"
 # schema = "./schemas/settings.schema.json"
 

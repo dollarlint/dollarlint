@@ -1,0 +1,29 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+---
+
+<DocsLayout title="Quick start" current="/guides/quick-start/">
+  <article class="doc">
+    <header class="doc-header">
+      <span class="eyebrow">Guide</span>
+      <h1>Quick start</h1>
+      <p class="lead">Initialize a config, validate your files, and choose the output format that matches your workflow.</p>
+    </header>
+
+    <h2>1. Create a config</h2>
+    <pre><code>dollarlint init</code></pre>
+    <p>The interactive setup writes a starter <code>.dollarlint.toml</code>. It will not overwrite an existing config unless you confirm it or pass <code>--force</code>.</p>
+
+    <h2>2. Validate a directory</h2>
+    <pre><code>dollarlint validate .</code></pre>
+    <p>The validate command discovers supported file types, loads each declared schema, and prints grouped results.</p>
+
+    <h2>3. Add locations when fixing issues</h2>
+    <pre><code>dollarlint validate ./config --locations</code></pre>
+    <p>Line and column positions make text and JSON output easier to use during local fixes.</p>
+
+    <h2>4. Use machine-readable output in automation</h2>
+    <pre><code>dollarlint validate . --json
+dollarlint validate . --sarif &gt; dollarlint.sarif</code></pre>
+  </article>
+</DocsLayout>

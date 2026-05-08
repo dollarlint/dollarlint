@@ -33,8 +33,8 @@ func TestSchemaStoreCatalogAssociations(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "plain.json"), `{}`)
 
 	cfg := DefaultConfig()
-	cfg.Schema.SchemaStore.Enabled = true
-	cfg.Schema.SchemaStore.URL = catalogPath
+	cfg.Schema.Catalogs.Enabled = true
+	cfg.Schema.Catalogs.Sources = []CatalogSource{{Name: "company", Format: "schemastore", Path: catalogPath}}
 	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
 	if err != nil {
 		t.Fatalf("Lint: %v", err)
@@ -42,19 +42,19 @@ func TestSchemaStoreCatalogAssociations(t *testing.T) {
 	if result.Summary.Discovered != 5 || result.Summary.Validated != 2 || result.Summary.Skipped != 3 || result.Summary.Issues != 1 {
 		t.Fatalf("summary = %+v", result.Summary)
 	}
-	var sawSchemaStoreSource, sawSkipped bool
+	var sawCatalogSource, sawSkipped bool
 	for _, file := range result.Files {
 		if file.RelativePath == "example.config.json" {
-			if file.SchemaSource != "schemastore:Example conventional config" {
+			if file.SchemaSource != "catalog:company:Example conventional config" {
 				t.Fatalf("schema source = %q", file.SchemaSource)
 			}
-			sawSchemaStoreSource = true
+			sawCatalogSource = true
 		}
 		if file.RelativePath == "plain.json" && file.Status == StatusSkipped {
 			sawSkipped = true
 		}
 	}
-	if !sawSchemaStoreSource || !sawSkipped {
+	if !sawCatalogSource || !sawSkipped {
 		t.Fatalf("files = %+v", result.Files)
 	}
 	if len(result.Issues) != 1 || result.Issues[0].Property != "name" {
@@ -82,14 +82,14 @@ func TestSchemaStorePrecedenceAndDisabledDefault(t *testing.T) {
 		t.Fatalf("default summary = %+v issues=%+v", result.Summary, result.Issues)
 	}
 
-	cfg.Schema.SchemaStore.Enabled = true
-	cfg.Schema.SchemaStore.URL = filepath.Join(dir, "catalog.json")
+	cfg.Schema.Catalogs.Enabled = true
+	cfg.Schema.Catalogs.Sources = []CatalogSource{{Name: "test", Format: "schemastore", Path: filepath.Join(dir, "catalog.json")}}
 	result, err = Lint(context.Background(), Options{Root: dir, Config: cfg})
 	if err != nil {
-		t.Fatalf("Lint schemastore: %v", err)
+		t.Fatalf("Lint catalog: %v", err)
 	}
 	if result.Summary.Issues != 0 {
-		t.Fatalf("explicit schema should win over schemastore: %+v", result.Issues)
+		t.Fatalf("explicit schema should win over catalog match: %+v", result.Issues)
 	}
 	for _, file := range result.Files {
 		if file.RelativePath == "settings.json" && file.SchemaSource != "$schema" {
@@ -102,7 +102,7 @@ func TestSchemaStoreErrors(t *testing.T) {
 	dir := t.TempDir()
 	cache := NewSchemaCache(DefaultConfig())
 	invalidPolicy := Config{Schema: SchemaConfig{SchemaStore: SchemaStoreConfig{Failure: "explode"}}}
-	if _, _, err := schemaStoreCatalogError(invalidPolicy, "boom"); err == nil || !strings.Contains(err.Error(), "unsupported schemaStore failure policy") {
+	if _, _, err := schemaStoreCatalogError(invalidPolicy, CatalogSource{Name: "test"}, "boom"); err == nil || !strings.Contains(err.Error(), "unsupported catalog failure policy") {
 		t.Fatalf("expected invalid failure policy error, got %v", err)
 	}
 	if catalog, warning, err := loadSchemaStoreCatalog(context.Background(), cache, DefaultConfig()); err != nil || warning != nil || catalog != nil {
@@ -132,7 +132,7 @@ func TestSchemaStoreErrors(t *testing.T) {
 		t.Fatalf("warn remote disabled should continue, got %v", err)
 	}
 	if result.Summary.Warnings != 1 || len(result.Warnings) != 1 {
-		t.Fatalf("expected schemastore warning, got %+v warnings=%+v", result.Summary, result.Warnings)
+		t.Fatalf("expected catalog warning, got %+v warnings=%+v", result.Summary, result.Warnings)
 	}
 	cfg.Schema.SchemaStore.Failure = SchemaStoreFailureSkip
 	result, err = Lint(context.Background(), Options{Root: dir, Config: cfg})
@@ -140,7 +140,7 @@ func TestSchemaStoreErrors(t *testing.T) {
 		t.Fatalf("skip remote disabled should continue, got %v", err)
 	}
 	if result.Summary.Warnings != 0 || len(result.Warnings) != 0 {
-		t.Fatalf("expected no schemastore warnings, got %+v warnings=%+v", result.Summary, result.Warnings)
+		t.Fatalf("expected no catalog warnings, got %+v warnings=%+v", result.Summary, result.Warnings)
 	}
 	cfg.Schema.SchemaStore.Failure = ""
 	cfg.Schema.SchemaStore.Strict = true
@@ -168,15 +168,45 @@ func TestSchemaStoreErrors(t *testing.T) {
 	}
 
 	cfg.Schema.SchemaStore.URL = filepath.Join(dir, "missing-catalog.json")
-	if _, err := Lint(context.Background(), Options{Root: dir, Config: cfg}); err == nil || !strings.Contains(err.Error(), "load schemastore catalog") {
+	if _, err := Lint(context.Background(), Options{Root: dir, Config: cfg}); err == nil || !strings.Contains(err.Error(), "load catalog") {
 		t.Fatalf("expected missing catalog error, got %v", err)
 	}
-	if _, err := resolveCatalogURI("%"); err == nil || !strings.Contains(err.Error(), "parse schemastore catalog URL") {
+	if _, err := resolveCatalogURI("%"); err == nil || !strings.Contains(err.Error(), "parse catalog URL") {
 		t.Fatalf("expected bad catalog URL error, got %v", err)
 	}
 	cfg.Schema.SchemaStore.URL = "%"
-	if _, err := Lint(context.Background(), Options{Root: dir, Config: cfg}); err == nil || !strings.Contains(err.Error(), "parse schemastore catalog URL") {
+	if _, err := Lint(context.Background(), Options{Root: dir, Config: cfg}); err == nil || !strings.Contains(err.Error(), "parse catalog URL") {
 		t.Fatalf("expected bad catalog URL lint error, got %v", err)
+	}
+}
+
+func TestSchemaStoreCatalogSourceEdges(t *testing.T) {
+	enabled := true
+	disabled := false
+	sources := enabledSchemaStoreCatalogSources(SchemaConfig{
+		Catalogs: CatalogConfig{
+			Sources: []CatalogSource{
+				{Name: "off", Format: "schemastore", URL: "./off.json", Enabled: &disabled},
+				{URL: "./defaulted.json", Enabled: &enabled},
+				{Name: "custom", Format: "custom", URL: "./custom.json"},
+			},
+		},
+	})
+	if len(sources) != 1 {
+		t.Fatalf("enabled sources = %+v", sources)
+	}
+	if sources[0].Name != "schemastore" || sources[0].Format != "schemastore" || sources[0].URL != "./defaulted.json" {
+		t.Fatalf("defaulted source = %+v", sources[0])
+	}
+
+	cfg := DefaultConfig()
+	cfg.Schema.Catalogs.Enabled = true
+	if catalog, warning, err := loadSchemaStoreCatalogSource(context.Background(), NewSchemaCache(cfg), cfg, CatalogSource{Name: "empty"}); err != nil || warning != nil || catalog != nil {
+		t.Fatalf("empty catalog source = %+v, %+v, %v", catalog, warning, err)
+	}
+	_, warning, err := schemaStoreCatalogError(cfg, CatalogSource{Path: "./catalog.json"}, "boom")
+	if err != nil || warning == nil || warning.Source != "catalog" {
+		t.Fatalf("catalog warning source fallback = %+v, %v", warning, err)
 	}
 }
 

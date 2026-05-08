@@ -47,6 +47,9 @@ func DefaultConfig() Config {
 			},
 		},
 		Schema: SchemaConfig{
+			Catalogs: CatalogConfig{
+				Sources: []CatalogSource{defaultSchemaStoreCatalogSource()},
+			},
 			SchemaStore: SchemaStoreConfig{
 				URL: defaultSchemaStoreCatalogURL,
 			},
@@ -68,6 +71,8 @@ func DefaultConfig() Config {
 
 func (c *Config) ApplyDefaults() {
 	defaults := DefaultConfig()
+	c.Schema = mergeSchemaConfig(c.Schema, c.Schemas)
+	c.Schemas = c.Schema
 	if c.Version == 0 {
 		c.Version = defaults.Version
 	}
@@ -83,6 +88,12 @@ func (c *Config) ApplyDefaults() {
 	if c.Schema.FetchRemote == nil {
 		c.Schema.FetchRemote = defaults.Schema.FetchRemote
 	}
+	if c.Schema.Catalogs.Failure == "" && c.Schema.SchemaStore.Failure != "" {
+		c.Schema.Catalogs.Failure = c.Schema.SchemaStore.Failure
+	}
+	if c.Schema.Catalogs.Strict || c.Schema.SchemaStore.Strict {
+		c.Schema.Catalogs.Strict = true
+	}
 	if c.Schema.SchemaStoreCatalogURL != "" && c.Schema.SchemaStore.URL == "" {
 		c.Schema.SchemaStore.URL = c.Schema.SchemaStoreCatalogURL
 	}
@@ -95,8 +106,23 @@ func (c *Config) ApplyDefaults() {
 	if c.Schema.FetchSchemaStore != nil && *c.Schema.FetchSchemaStore {
 		c.Schema.SchemaStore.Enabled = true
 	}
+	if c.Schema.SchemaStore.Enabled {
+		c.Schema.Catalogs.Enabled = true
+	}
 	if c.Schema.SchemaStore.Failure == "" {
 		c.Schema.SchemaStore.Failure = SchemaStoreFailureWarn
+	}
+	if c.Schema.Catalogs.Failure == "" {
+		c.Schema.Catalogs.Failure = SchemaStoreFailureWarn
+	}
+	if len(c.Schema.Catalogs.Sources) == 0 {
+		source := defaultSchemaStoreCatalogSource()
+		if c.Schema.SchemaStore.URL != "" {
+			source.URL = c.Schema.SchemaStore.URL
+		}
+		c.Schema.Catalogs.Sources = []CatalogSource{source}
+	} else if c.Schema.SchemaStore.URL != "" && c.Schema.SchemaStore.URL != defaultSchemaStoreCatalogURL {
+		c.Schema.Catalogs.Sources = setDefaultCatalogSourceURL(c.Schema.Catalogs.Sources, c.Schema.SchemaStore.URL)
 	}
 	if c.Schema.Fetch.Retries == nil {
 		c.Schema.Fetch.Retries = defaults.Schema.Fetch.Retries
@@ -116,6 +142,72 @@ func (c *Config) ApplyDefaults() {
 	if c.Timeouts.Compile.Duration == 0 {
 		c.Timeouts.Compile = defaults.Timeouts.Compile
 	}
+	c.Schemas = c.Schema
+}
+
+func mergeSchemaConfig(legacy, current SchemaConfig) SchemaConfig {
+	if len(current.Associations) > 0 {
+		legacy.Associations = current.Associations
+	}
+	if current.Catalogs.Enabled || current.Catalogs.Failure != "" || current.Catalogs.Strict || len(current.Catalogs.Sources) > 0 {
+		legacy.Catalogs = current.Catalogs
+	}
+	if current.SchemaStore.Enabled || current.SchemaStore.URL != "" || current.SchemaStore.Failure != "" || current.SchemaStore.Strict {
+		legacy.SchemaStore = current.SchemaStore
+	}
+	if current.Fetch.Retries != nil || current.Fetch.RetryMinWait.Duration != 0 || current.Fetch.RetryMaxWait.Duration != 0 {
+		legacy.Fetch = current.Fetch
+	}
+	if current.MaxDepth != 0 {
+		legacy.MaxDepth = current.MaxDepth
+	}
+	if current.FetchRemote != nil {
+		legacy.FetchRemote = current.FetchRemote
+	}
+	if current.FetchSchemaStore != nil {
+		legacy.FetchSchemaStore = current.FetchSchemaStore
+	}
+	if current.AzureResourcePruning != nil {
+		legacy.AzureResourcePruning = current.AzureResourcePruning
+	}
+	if current.SchemaStoreCatalogURL != "" {
+		legacy.SchemaStoreCatalogURL = current.SchemaStoreCatalogURL
+	}
+	if len(current.AllowedDomains) > 0 {
+		legacy.AllowedDomains = current.AllowedDomains
+	}
+	if len(current.BlockedDomains) > 0 {
+		legacy.BlockedDomains = current.BlockedDomains
+	}
+	if current.Concurrency != 0 {
+		legacy.Concurrency = current.Concurrency
+	}
+	return legacy
+}
+
+func defaultSchemaStoreCatalogSource() CatalogSource {
+	enabled := true
+	return CatalogSource{
+		Name:    "schemastore",
+		Format:  "schemastore",
+		URL:     defaultSchemaStoreCatalogURL,
+		Enabled: &enabled,
+	}
+}
+
+func setDefaultCatalogSourceURL(sources []CatalogSource, catalogURL string) []CatalogSource {
+	for i := range sources {
+		if sources[i].Name == "schemastore" || sources[i].Format == "schemastore" {
+			sources[i].Name = "schemastore"
+			sources[i].Format = "schemastore"
+			sources[i].URL = catalogURL
+			sources[i].Path = ""
+			return sources
+		}
+	}
+	source := defaultSchemaStoreCatalogSource()
+	source.URL = catalogURL
+	return append(sources, source)
 }
 
 func LoadConfig(root, explicitPath string) (Config, string, error) {
@@ -183,6 +275,9 @@ func remoteFetchEnabled(cfg SchemaConfig) bool {
 }
 
 func schemaStoreEnabled(cfg SchemaConfig) bool {
+	if cfg.Catalogs.Enabled {
+		return true
+	}
 	if cfg.SchemaStore.Enabled {
 		return true
 	}
@@ -190,10 +285,13 @@ func schemaStoreEnabled(cfg SchemaConfig) bool {
 }
 
 func schemaStoreFailureMode(cfg SchemaConfig) (string, error) {
-	if cfg.SchemaStore.Strict {
+	if cfg.Catalogs.Strict || cfg.SchemaStore.Strict {
 		return SchemaStoreFailureError, nil
 	}
-	mode := cfg.SchemaStore.Failure
+	mode := cfg.Catalogs.Failure
+	if mode == "" {
+		mode = cfg.SchemaStore.Failure
+	}
 	if mode == "" {
 		mode = SchemaStoreFailureWarn
 	}
@@ -201,7 +299,7 @@ func schemaStoreFailureMode(cfg SchemaConfig) (string, error) {
 	case SchemaStoreFailureWarn, SchemaStoreFailureError, SchemaStoreFailureSkip:
 		return mode, nil
 	default:
-		return "", fmt.Errorf("unsupported schemaStore failure policy %q; expected warn, error, or skip", mode)
+		return "", fmt.Errorf("unsupported catalog failure policy %q; expected warn, error, or skip", mode)
 	}
 }
 

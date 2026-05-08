@@ -161,18 +161,19 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 		cfg.Schema.Associations = append(cfg.Schema.Associations, association)
 	}
 	if cmd.Flags().Changed("schema-store") {
+		cfg.Schema.Catalogs.Enabled = opts.schemaStore
 		cfg.Schema.SchemaStore.Enabled = opts.schemaStore
 	}
 	if opts.schemaStoreURL != "" {
+		cfg.Schema.Catalogs.Enabled = true
 		cfg.Schema.SchemaStore.Enabled = true
-		cfg.Schema.SchemaStore.URL = opts.schemaStoreURL
-		cfg.Schema.SchemaStoreCatalogURL = opts.schemaStoreURL
+		cfg.Schema.Catalogs.Sources = setSchemaStoreCatalogURL(cfg.Schema.Catalogs.Sources, opts.schemaStoreURL)
 	}
 	if opts.schemaStoreFailure != "" {
-		cfg.Schema.SchemaStore.Failure = opts.schemaStoreFailure
+		cfg.Schema.Catalogs.Failure = opts.schemaStoreFailure
 	}
 	if cmd.Flags().Changed("schema-store-strict") {
-		cfg.Schema.SchemaStore.Strict = opts.schemaStoreStrict
+		cfg.Schema.Catalogs.Strict = opts.schemaStoreStrict
 	}
 	if opts.maxDepth > 0 {
 		cfg.Schema.MaxDepth = opts.maxDepth
@@ -238,6 +239,26 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 		return errIssues
 	}
 	return nil
+}
+
+func setSchemaStoreCatalogURL(sources []dollarlint.CatalogSource, catalogURL string) []dollarlint.CatalogSource {
+	enabled := true
+	for i := range sources {
+		if sources[i].Name == "schemastore" || sources[i].Format == "schemastore" {
+			sources[i].Name = "schemastore"
+			sources[i].Format = "schemastore"
+			sources[i].URL = catalogURL
+			sources[i].Path = ""
+			sources[i].Enabled = &enabled
+			return sources
+		}
+	}
+	return append(sources, dollarlint.CatalogSource{
+		Name:    "schemastore",
+		Format:  "schemastore",
+		URL:     catalogURL,
+		Enabled: &enabled,
+	})
 }
 
 func parseAssociation(raw string) (dollarlint.SchemaAssociation, error) {

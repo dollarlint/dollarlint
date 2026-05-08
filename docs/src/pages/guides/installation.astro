@@ -1,0 +1,24 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+---
+
+<DocsLayout title="Install dollarlint" current="/guides/installation/">
+  <article class="doc">
+    <header class="doc-header">
+      <span class="eyebrow">Guide</span>
+      <h1>Installation</h1>
+      <p class="lead">Install the dollarlint command with Go, then run it from any project that contains JSON, YAML, or TOML config files.</p>
+    </header>
+
+    <h2>Install with Go</h2>
+    <pre><code>go install github.com/agorischek/dollarlint/cmd/dollarlint@latest</code></pre>
+
+    <h2>Check the command</h2>
+    <pre><code>dollarlint version
+dollarlint --help</code></pre>
+
+    <div class="note">
+      <p>The CLI expects commands such as <code>dollarlint validate .</code>. Bare paths are not accepted.</p>
+    </div>
+  </article>
+</DocsLayout>

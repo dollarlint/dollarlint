@@ -70,7 +70,7 @@ version = 1
 include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.toml", "**/*.toml"]
 exclude = ["node_modules", "**/node_modules/**", "dist", "**/dist/**"]
 
-[schema]
+[schemas]
 fetchRemote = true
 allowedDomains = ["www.schemastore.org", "raw.githubusercontent.com"]
 blockedDomains = ["untrusted.example.com"]
@@ -78,18 +78,23 @@ azureResourcePruning = true
 maxDepth = 8
 concurrency = 8
 
-[schema.fetch]
+[schemas.fetch]
 retries = 2
 retryMinWait = "250ms"
 retryMaxWait = "2s"
 
-[schema.schemaStore]
+[schemas.catalogs]
 enabled = false
-url = "https://www.schemastore.org/api/json/catalog.json"
 failure = "warn"
 strict = false
 
-[[schema.associations]]
+[[schemas.catalogs.sources]]
+name = "schemastore"
+format = "schemastore"
+url = "https://www.schemastore.org/api/json/catalog.json"
+enabled = true
+
+[[schemas.associations]]
 file = "settings/*.toml"
 schema = "./schemas/settings.schema.json"
 
@@ -112,13 +117,13 @@ quiet = false
 locations = false
 ```
 
-By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schema.allowedDomains` can restrict remote schemas to specific hosts, and `schema.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
+By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schemas.allowedDomains` can restrict remote schemas to specific hosts, and `schemas.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
 
-SchemaStore catalog matching is configurable with `schema.schemaStore`. When enabled, files without an explicit schema can be matched by conventional filename using the SchemaStore catalog or a local SchemaStore-shaped catalog. Precedence is explicit in-file schema, then config associations, then SchemaStore matches, then skipped.
+Catalog matching is configurable with `schemas.catalogs`. When enabled, files without an explicit schema can be matched by conventional filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional catalog sources. Precedence is explicit in-file schema, then config associations, then catalog matches, then skipped.
 
-SchemaStore catalog failures are modeled separately from validation issues. By default `schema.schemaStore.failure = "warn"` records a warning, skips SchemaStore inference, still validates explicit/configured schemas, and exits `0` unless validation issues are found. Use `"error"` when catalog availability should fail the run with exit `2`, or `"skip"` to keep the old silent fallback. `schema.schemaStore.strict = true` remains supported as a legacy alias for `"error"`. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
+Catalog failures are modeled separately from validation issues. By default `schemas.catalogs.failure = "warn"` records a warning, skips catalog inference, still validates explicit/configured schemas, and exits `0` unless validation issues are found. Use `"error"` when catalog availability should fail the run with exit `2`, or `"skip"` for a silent fallback. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
 
-Azure Resource Manager deployment schemas from `schema.management.azure.com` are pruned to the resource provider schemas used by the template before compilation. This avoids compiling the full Azure provider catalog for ordinary ARM templates. Set `schema.azureResourcePruning = false` to disable this Azure-specific optimization.
+Azure Resource Manager deployment schemas from `schema.management.azure.com` are pruned to the resource provider schemas used by the template before compilation. This avoids compiling the full Azure provider catalog for ordinary ARM templates. Set `schemas.azureResourcePruning = false` to disable this Azure-specific optimization.
 
 ## Examples
 
@@ -137,8 +142,8 @@ Default text output is grouped by file:
 dollarlint found 2 issues in 1 file after 47ms
 
 settings.json
-  /name   type      got number, want string
-  /count  minimum   minimum: got 0, want 1
+  /name   type      expected string, received number
+  /count  minimum   must be >= 1
 
 Summary: 4 discovered, 3 validated, 1 skipped, 2 issues in 47ms
 ```
@@ -147,8 +152,8 @@ Use `--locations` to opt into line/column source mapping for text and JSON outpu
 
 ```text
 settings.json
-  3:11  type      got number, want string  /name
-  4:12  minimum   minimum: got 0, want 1   /count
+  3:11  type      expected string, received number  /name
+  4:12  minimum   must be >= 1   /count
 ```
 
 Use `--verbose` to show schema URI and keyword metadata under each issue. Use `--quiet` for terse success output.

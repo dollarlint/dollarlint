@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -193,6 +194,26 @@ func TestValidationIssueHelpers(t *testing.T) {
 	if validationMessage(noKind) == "" {
 		t.Fatalf("expected fallback validation message")
 	}
+	messageCases := map[jsonschema.ErrorKind]string{
+		&kind.Type{Got: "number", Want: []string{"string"}}: "expected string, received number",
+		&kind.MinProperties{Want: 2}:                        "must have at least 2 properties",
+		&kind.MaxProperties{Want: 3}:                        "must have at most 3 properties",
+		&kind.MinItems{Want: 1}:                             "must have at least 1 item",
+		&kind.MaxItems{Want: 4}:                             "must have at most 4 items",
+		&kind.MinLength{Want: 2}:                            "must be at least 2 characters",
+		&kind.MaxLength{Want: 5}:                            "must be at most 5 characters",
+		&kind.Minimum{Want: big.NewRat(1, 1)}:               "must be >= 1",
+		&kind.Maximum{Want: big.NewRat(5, 1)}:               "must be <= 5",
+		&kind.ExclusiveMinimum{Want: big.NewRat(1, 2)}:      "must be > 0.5",
+		&kind.ExclusiveMaximum{Want: big.NewRat(3, 2)}:      "must be < 1.5",
+		&kind.MultipleOf{Want: big.NewRat(25, 10)}:          "must be a multiple of 2.5",
+		&kind.Minimum{}:                                     "must be >= 0",
+	}
+	for errorKind, expected := range messageCases {
+		if got := validationMessage(&jsonschema.ValidationError{ErrorKind: errorKind}); got != expected {
+			t.Fatalf("validationMessage(%T) = %q, want %q", errorKind, got, expected)
+		}
+	}
 	dep := propertyFromKind(&kind.Dependency{Prop: "a"})
 	depReq := propertyFromKind(&kind.DependentRequired{Prop: "b"})
 	if dep != "a" || depReq != "b" || propertyFromKind(nil) != "" {
@@ -257,7 +278,7 @@ func TestLintAppliesSchemaStoreAssociationsWhenEnabled(t *testing.T) {
 	if result.Summary.Validated != 1 || result.Summary.Skipped != 0 || len(result.Issues) != 1 {
 		t.Fatalf("schemastore result = %+v issues=%+v", result.Summary, result.Issues)
 	}
-	if result.Files[0].SchemaSource != "schemastore" || !strings.HasSuffix(result.Files[0].Schema, "/schema.json") {
+	if result.Files[0].SchemaSource != "catalog:schemastore" || !strings.HasSuffix(result.Files[0].Schema, "/schema.json") {
 		t.Fatalf("file schema = %+v", result.Files[0])
 	}
 }

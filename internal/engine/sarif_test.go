@@ -17,14 +17,14 @@ func TestFormatSARIF(t *testing.T) {
 				InstanceLocation: "/name",
 				Line:             3,
 				Column:           12,
-				Message:          "got number, want string",
+				Message:          "expected string, received number",
 			},
 			{
 				RelativePath:     "legacy.json",
 				Keyword:          "required",
 				InstanceLocation: "/",
 				Line:             1,
-				Message:          "missing property \"name\"",
+				Message:          "must have required property \"name\"",
 				Ignored:          true,
 				IgnoreReason:     "legacy",
 			},
@@ -33,7 +33,7 @@ func TestFormatSARIF(t *testing.T) {
 				Message:      "compile schema failed",
 			},
 		},
-		Warnings: []Warning{{Kind: "schemaStoreCatalogUnavailable", Source: "schemastore", Message: "catalog unavailable"}},
+		Warnings: []Warning{{Kind: "schemaCatalogUnavailable", Source: "schemastore", Message: "catalog unavailable"}},
 	}
 	data, err := FormatSARIF(result)
 	if err != nil {
@@ -63,7 +63,7 @@ func TestFormatSARIF(t *testing.T) {
 	if run.Results[2].RuleID != "dollarlint" || run.Results[2].Locations[0].PhysicalLocation.Region != nil {
 		t.Fatalf("file-level result = %+v", run.Results[2])
 	}
-	if run.Results[3].RuleID != "dollarlint.warning.schemaStoreCatalogUnavailable" || run.Results[3].Level != "warning" || len(run.Results[3].Locations) != 0 {
+	if run.Results[3].RuleID != "dollarlint.warning.schemaCatalogUnavailable" || run.Results[3].Level != "warning" || len(run.Results[3].Locations) != 0 {
 		t.Fatalf("warning result = %+v", run.Results[3])
 	}
 	if sarifRuleDescription(Issue{}) != "dollarlint issue" {

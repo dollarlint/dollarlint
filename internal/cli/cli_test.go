@@ -120,7 +120,7 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 	if !strings.Contains(stdout.String(), "No interactive terminal detected") {
 		t.Fatalf("noninteractive init should explain defaults: %s", stdout.String())
 	}
-	if !strings.Contains(stdout.String(), "Run dollarlint validate . to check your files.") || strings.Contains(stdout.String(), "SchemaStore matching") {
+	if !strings.Contains(stdout.String(), "Run dollarlint validate . to check your files.") || strings.Contains(stdout.String(), "Created .dollarlint.toml with") {
 		t.Fatalf("init success output = %s", stdout.String())
 	}
 	configPath := filepath.Join(dir, ".dollarlint.toml")
@@ -129,7 +129,7 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 		t.Fatalf("read generated config: %v", err)
 	}
 	text := string(data)
-	if !strings.Contains(text, "[schema.schemaStore]") || !strings.Contains(text, "enabled = true") || !strings.Contains(text, `failure = "warn"`) || !strings.Contains(text, `retryMinWait = "250ms"`) {
+	if !strings.Contains(text, "[schemas.catalogs]") || !strings.Contains(text, "[[schemas.catalogs.sources]]") || !strings.Contains(text, "enabled = true") || !strings.Contains(text, `failure = "warn"`) || !strings.Contains(text, `retryMinWait = "250ms"`) {
 		t.Fatalf("generated toml = %s", text)
 	}
 	stdout.Reset()
@@ -174,7 +174,7 @@ func TestInitCommandRequiresTOML(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read toml config: %v", err)
 	}
-	if !strings.Contains(string(data), "[schema.schemaStore]") || !strings.Contains(string(data), `failure = "error"`) || !strings.Contains(string(data), "strict = true") {
+	if !strings.Contains(string(data), "[schemas.catalogs]") || !strings.Contains(string(data), `failure = "error"`) || !strings.Contains(string(data), "strict = true") {
 		t.Fatalf("toml config = %s", string(data))
 	}
 	stdout.Reset()
@@ -200,7 +200,7 @@ func TestInitPlainPrompts(t *testing.T) {
 	if opts.fetchRemote || opts.fetchRetries != 4 || !opts.schemaStore || opts.schemaStoreFailure != "error" || opts.schemaStoreStrict {
 		t.Fatalf("opts = %+v", opts)
 	}
-	if strings.Join(prompter.questions, "|") != "Allow remote http(s) schema fetching?|Retries for transient schema fetch failures|Enable SchemaStore filename matching?|schemaStoreFailure" {
+	if strings.Join(prompter.questions, "|") != "Allow remote http(s) schema fetching?|Retries for transient schema fetch failures|Enable catalog filename matching?|schemaStoreFailure" {
 		t.Fatalf("questions = %+v", prompter.questions)
 	}
 }

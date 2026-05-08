@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 	"path"
 	"strings"
 	"time"
@@ -232,7 +233,7 @@ func collectValidationIssues(document *Document, err *jsonschema.ValidationError
 		for _, missing := range typed.Missing {
 			issue := base
 			issue.Property = missing
-			issue.Message = fmt.Sprintf("missing property %q", missing)
+			issue.Message = fmt.Sprintf("must have required property %q", missing)
 			issues = append(issues, issue)
 		}
 	case *kind.AdditionalProperties:
@@ -243,7 +244,7 @@ func collectValidationIssues(document *Document, err *jsonschema.ValidationError
 			issue.Line = 0
 			issue.Column = 0
 			applyIssuePosition(document, &issue)
-			issue.Message = fmt.Sprintf("additional property %q not allowed", property)
+			issue.Message = fmt.Sprintf("must not have additional property %q", property)
 			issues = append(issues, issue)
 		}
 	default:
@@ -318,7 +319,50 @@ func validationMessage(err *jsonschema.ValidationError) string {
 	if err.ErrorKind == nil {
 		return "validation failed"
 	}
+	switch typed := err.ErrorKind.(type) {
+	case *kind.Type:
+		return fmt.Sprintf("expected %s, received %s", strings.Join(typed.Want, " or "), typed.Got)
+	case *kind.MinProperties:
+		return fmt.Sprintf("must have at least %d %s", typed.Want, countNoun(typed.Want, "property", "properties"))
+	case *kind.MaxProperties:
+		return fmt.Sprintf("must have at most %d %s", typed.Want, countNoun(typed.Want, "property", "properties"))
+	case *kind.MinItems:
+		return fmt.Sprintf("must have at least %d %s", typed.Want, countNoun(typed.Want, "item", "items"))
+	case *kind.MaxItems:
+		return fmt.Sprintf("must have at most %d %s", typed.Want, countNoun(typed.Want, "item", "items"))
+	case *kind.MinLength:
+		return fmt.Sprintf("must be at least %d characters", typed.Want)
+	case *kind.MaxLength:
+		return fmt.Sprintf("must be at most %d characters", typed.Want)
+	case *kind.Minimum:
+		return fmt.Sprintf("must be >= %s", ratString(typed.Want))
+	case *kind.Maximum:
+		return fmt.Sprintf("must be <= %s", ratString(typed.Want))
+	case *kind.ExclusiveMinimum:
+		return fmt.Sprintf("must be > %s", ratString(typed.Want))
+	case *kind.ExclusiveMaximum:
+		return fmt.Sprintf("must be < %s", ratString(typed.Want))
+	case *kind.MultipleOf:
+		return fmt.Sprintf("must be a multiple of %s", ratString(typed.Want))
+	}
 	return err.BasicOutput().Error.String()
+}
+
+func countNoun(count int, singular, plural string) string {
+	if count == 1 {
+		return singular
+	}
+	return plural
+}
+
+func ratString(value *big.Rat) string {
+	if value == nil {
+		return "0"
+	}
+	if value.IsInt() {
+		return value.Num().String()
+	}
+	return strings.TrimRight(strings.TrimRight(value.FloatString(6), "0"), ".")
 }
 
 func issueForError(file DiscoveredFile, schema string, err error) Issue {

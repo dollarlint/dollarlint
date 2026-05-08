@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/pelletier/go-toml/v2"
@@ -14,7 +13,6 @@ import (
 
 var defaultConfigFiles = []string{
 	".dollarlint.toml",
-	"dollarlint.toml",
 }
 
 func DefaultConfig() Config {
@@ -144,8 +142,8 @@ func resolveConfigPath(root, explicitPath string) (string, error) {
 		if !filepath.IsAbs(path) {
 			path = filepath.Join(root, path)
 		}
-		if strings.ToLower(filepath.Ext(path)) != ".toml" {
-			return "", fmt.Errorf("unsupported config format %s; dollarlint config must be TOML", filepath.Ext(path))
+		if !isConfigFileName(path) {
+			return "", fmt.Errorf("unsupported config file %s; dollarlint config must be named .dollarlint.toml", filepath.Base(path))
 		}
 		if _, err := os.Stat(path); err != nil {
 			return "", fmt.Errorf("config %s: %w", path, err)
@@ -164,15 +162,17 @@ func resolveConfigPath(root, explicitPath string) (string, error) {
 }
 
 func decodeConfig(path string, data []byte, out *Config) error {
-	switch ext := strings.ToLower(filepath.Ext(path)); ext {
-	case ".toml":
-		if err := toml.Unmarshal(data, out); err != nil {
-			return fmt.Errorf("decode config %s: %w", path, err)
-		}
-	default:
-		return fmt.Errorf("unsupported config format %s; dollarlint config must be TOML", ext)
+	if !isConfigFileName(path) {
+		return fmt.Errorf("unsupported config file %s; dollarlint config must be named .dollarlint.toml", filepath.Base(path))
+	}
+	if err := toml.Unmarshal(data, out); err != nil {
+		return fmt.Errorf("decode config %s: %w", path, err)
 	}
 	return nil
+}
+
+func isConfigFileName(path string) bool {
+	return filepath.Base(path) == ".dollarlint.toml"
 }
 
 func remoteFetchEnabled(cfg SchemaConfig) bool {

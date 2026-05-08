@@ -72,6 +72,14 @@ func TestLoadConfigDefaultsAndTOML(t *testing.T) {
 	if path != "" || cfg.Output.JSON {
 		t.Fatalf("non-toml config should be ignored: path=%q cfg=%+v", path, cfg)
 	}
+	writeFile(t, filepath.Join(dir, "dollarlint.toml"), "output = { json = true }\n")
+	cfg, path, err = LoadConfig(dir, "")
+	if err != nil {
+		t.Fatalf("LoadConfig ignored no-dot toml: %v", err)
+	}
+	if path != "" || cfg.Output.JSON {
+		t.Fatalf("no-dot toml config should be ignored: path=%q cfg=%+v", path, cfg)
+	}
 	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), `
 version = 1
 
@@ -125,7 +133,7 @@ keyword = "type"
 	if len(cfg.Discovery.Include) == 0 || len(cfg.Ignore) != 1 {
 		t.Fatalf("defaults or ignore missing: %+v", cfg)
 	}
-	customPath := filepath.Join(dir, "custom.toml")
+	customPath := filepath.Join(dir, "nested", ".dollarlint.toml")
 	writeFile(t, customPath, `
 version = 1
 [schema]
@@ -134,9 +142,9 @@ maxDepth = 4
 file = "*.toml"
 schema = "./schema.json"
 `)
-	cfg, path, err = LoadConfig(dir, "custom.toml")
+	cfg, path, err = LoadConfig(dir, "nested/.dollarlint.toml")
 	if err != nil {
-		t.Fatalf("LoadConfig custom toml: %v", err)
+		t.Fatalf("LoadConfig explicit toml: %v", err)
 	}
 	if path != customPath || cfg.Schema.MaxDepth != 4 || len(cfg.Schema.Associations) != 1 {
 		t.Fatalf("toml cfg = %s %+v", path, cfg)
@@ -165,7 +173,7 @@ schema = "./schema.json"
 
 func TestLoadConfigErrors(t *testing.T) {
 	dir := t.TempDir()
-	if _, _, err := LoadConfig(dir, "missing.toml"); err == nil {
+	if _, _, err := LoadConfig(dir, ".dollarlint.toml"); err == nil {
 		t.Fatalf("expected missing explicit config error")
 	}
 	badTOML := filepath.Join(dir, ".dollarlint.toml")
@@ -177,6 +185,11 @@ func TestLoadConfigErrors(t *testing.T) {
 	writeFile(t, jsonConfig, `{"output":{"json":true}}`)
 	if _, _, err := LoadConfig(dir, jsonConfig); err == nil {
 		t.Fatalf("expected explicit json config rejection")
+	}
+	noDotConfig := filepath.Join(dir, "dollarlint.toml")
+	writeFile(t, noDotConfig, "version = 1\n")
+	if _, _, err := LoadConfig(dir, noDotConfig); err == nil {
+		t.Fatalf("expected explicit no-dot toml config rejection")
 	}
 	unsupported := filepath.Join(dir, "config.ini")
 	writeFile(t, unsupported, "")

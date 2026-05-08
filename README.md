@@ -32,7 +32,7 @@ Use `dollarlint init` to interview you and create a starter `.dollarlint.toml` i
 ```sh
 dollarlint init
 dollarlint init ./packages/api --schema-store
-dollarlint init --output dollarlint.toml
+dollarlint init --output ./packages/api/.dollarlint.toml
 dollarlint init --defaults --schema-store
 ```
 
@@ -59,7 +59,6 @@ Config-level schema associations can validate files that do not declare a schema
 `dollarlint` config files are TOML only. The CLI searches the target root for:
 
 - `.dollarlint.toml`
-- `dollarlint.toml`
 
 Example:
 

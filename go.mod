@@ -4,7 +4,6 @@ go 1.21.0
 
 require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0
-	github.com/charmbracelet/huh v0.6.0
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/dlclark/regexp2 v1.11.0
 	github.com/hashicorp/go-retryablehttp v0.7.7

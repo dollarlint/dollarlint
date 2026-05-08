@@ -6,14 +6,13 @@ description: Configure discovery, schema loading, ignore rules, output, and time
 `dollarlint` config files are TOML only. The CLI looks for configuration files in the target root:
 
 - `.dollarlint.toml`
-- `dollarlint.toml`
 
 Create a starter config with:
 
 ```sh
 dollarlint init
 dollarlint init ./packages/api --schema-store
-dollarlint init --output dollarlint.toml
+dollarlint init --output ./packages/api/.dollarlint.toml
 dollarlint init --defaults --schema-store
 ```
 

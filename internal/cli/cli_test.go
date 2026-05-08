@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bufio"
 	"bytes"
 	"net/http"
 	"net/http/httptest"
@@ -163,7 +164,7 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 func TestInitCommandRequiresTOML(t *testing.T) {
 	dir := t.TempDir()
 	var stdout, stderr bytes.Buffer
-	tomlPath := filepath.Join(dir, "nested", "dollarlint.toml")
+	tomlPath := filepath.Join(dir, "nested", ".dollarlint.toml")
 	if code := Execute([]string{"init", "--output", tomlPath, "--schema-store-strict"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("toml init exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
@@ -176,11 +177,88 @@ func TestInitCommandRequiresTOML(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{"init", dir, "--output", "dollarlint.json"}, &stdout, &stderr); code != 2 {
+	if code := Execute([]string{"init", dir, "--output", "dollarlint.toml"}, &stdout, &stderr); code != 2 {
 		t.Fatalf("expected unsupported inferred format failure, exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
-	if !strings.Contains(stderr.String(), "must be TOML") {
-		t.Fatalf("non-toml init stderr = %s", stderr.String())
+	if !strings.Contains(stderr.String(), ".dollarlint.toml") {
+		t.Fatalf("wrong-name init stderr = %s", stderr.String())
+	}
+}
+
+func TestInitPlainPrompts(t *testing.T) {
+	input := bufio.NewReader(strings.NewReader("n\n4\n\ny\n"))
+	opts := defaultInitOptions()
+	var stdout bytes.Buffer
+	if err := interviewInit(input, &stdout, &opts); err != nil {
+		t.Fatalf("interviewInit: %v", err)
+	}
+	if opts.fetchRemote || opts.fetchRetries != 4 || !opts.schemaStore || !opts.schemaStoreStrict {
+		t.Fatalf("opts = %+v", opts)
+	}
+	output := stdout.String()
+	if strings.Contains(output, "┃") || strings.Contains(output, "\x1b[") {
+		t.Fatalf("plain prompts should not include borders or ANSI styling: %q", output)
+	}
+	if !strings.Contains(output, "Allow remote http(s) schema fetching? [Y/n]:") {
+		t.Fatalf("prompt output = %q", output)
+	}
+	if !strings.Contains(output, "Enable SchemaStore filename matching? [Y/n]:") {
+		t.Fatalf("schemastore should default to yes: %q", output)
+	}
+}
+
+func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
+	opts := defaultInitOptions()
+	var promptOutput bytes.Buffer
+	if err := interviewInit(bufio.NewReader(strings.NewReader("\n\nn\n")), &promptOutput, &opts); err != nil {
+		t.Fatalf("interviewInit: %v", err)
+	}
+	if !opts.fetchRemote || opts.fetchRetries != defaultFetchRetries || opts.schemaStore || opts.schemaStoreStrict {
+		t.Fatalf("opts after prompts = %+v", opts)
+	}
+	promptText := promptOutput.String()
+	if !strings.Contains(promptText, "Allow remote http(s) schema fetching? [Y/n]:") {
+		t.Fatalf("fetch remote prompt should reflect defaultInitOptions: %q", promptText)
+	}
+	if !strings.Contains(promptText, "Retries for transient schema fetch failures [2]:") {
+		t.Fatalf("retry prompt should reflect defaultInitOptions: %q", promptText)
+	}
+	if !strings.Contains(promptText, "Enable SchemaStore filename matching? [Y/n]:") {
+		t.Fatalf("schemastore prompt should reflect defaultInitOptions: %q", promptText)
+	}
+	data, err := renderStarterConfig(defaultInitOptions())
+	if err != nil {
+		t.Fatalf("renderStarterConfig: %v", err)
+	}
+	config := string(data)
+	for _, expected := range []string{
+		"fetchRemote = true",
+		`retries = 2`,
+		"enabled = true",
+		"strict = false",
+	} {
+		if !strings.Contains(config, expected) {
+			t.Fatalf("default config missing %q:\n%s", expected, config)
+		}
+	}
+}
+
+func TestPromptValidationRepeats(t *testing.T) {
+	input := bufio.NewReader(strings.NewReader("maybe\ny\n-1\n2\n"))
+	var stdout bytes.Buffer
+	confirmed, err := promptConfirm(input, &stdout, "Continue?", false)
+	if err != nil {
+		t.Fatalf("promptConfirm: %v", err)
+	}
+	retries, err := promptNonNegativeInt(input, &stdout, "Retries", 0)
+	if err != nil {
+		t.Fatalf("promptNonNegativeInt: %v", err)
+	}
+	if !confirmed || retries != 2 {
+		t.Fatalf("confirmed=%v retries=%d", confirmed, retries)
+	}
+	if !strings.Contains(stdout.String(), "Please answer y or n.") || !strings.Contains(stdout.String(), "Please enter a non-negative integer.") {
+		t.Fatalf("validation output = %q", stdout.String())
 	}
 }
 

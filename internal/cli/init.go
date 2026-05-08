@@ -1,16 +1,18 @@
 package cli
 
 import (
+	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
 
 	"github.com/agorischek/dollarlint"
-	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
 )
 
@@ -32,8 +34,17 @@ type initTemplateData struct {
 	FetchRetries       int
 }
 
+func defaultInitOptions() initOptions {
+	return initOptions{
+		output:       ".dollarlint.toml",
+		fetchRemote:  true,
+		fetchRetries: defaultFetchRetries,
+		schemaStore:  true,
+	}
+}
+
 func newInitCommand(stdin io.Reader, stdout io.Writer) *cobra.Command {
-	opts := initOptions{output: ".dollarlint.toml", fetchRemote: true, fetchRetries: defaultFetchRetries}
+	opts := defaultInitOptions()
 	cmd := &cobra.Command{
 		Use:   "init [path]",
 		Short: "Create a starter dollarlint config file",
@@ -43,12 +54,12 @@ func newInitCommand(stdin io.Reader, stdout io.Writer) *cobra.Command {
 			return runInit(cmd, stdin, stdout, args, opts)
 		},
 	}
-	cmd.Flags().StringVarP(&opts.output, "output", "o", ".dollarlint.toml", "TOML config file path to create")
+	cmd.Flags().StringVarP(&opts.output, "output", "o", ".dollarlint.toml", "Path to .dollarlint.toml to create")
 	cmd.Flags().BoolVar(&opts.force, "force", false, "Overwrite an existing config file")
 	cmd.Flags().BoolVar(&opts.defaults, "defaults", false, "Skip prompts and use defaults plus provided flags")
-	cmd.Flags().BoolVar(&opts.fetchRemote, "fetch-remote", true, "Allow fetching http(s) schemas in the generated config")
-	cmd.Flags().IntVar(&opts.fetchRetries, "fetch-retries", defaultFetchRetries, "Retries for transient remote schema fetch failures in the generated config")
-	cmd.Flags().BoolVar(&opts.schemaStore, "schema-store", false, "Enable SchemaStore catalog filename matching in the generated config")
+	cmd.Flags().BoolVar(&opts.fetchRemote, "fetch-remote", opts.fetchRemote, "Allow fetching http(s) schemas in the generated config")
+	cmd.Flags().IntVar(&opts.fetchRetries, "fetch-retries", opts.fetchRetries, "Retries for transient remote schema fetch failures in the generated config")
+	cmd.Flags().BoolVar(&opts.schemaStore, "schema-store", opts.schemaStore, "Enable SchemaStore catalog filename matching in the generated config")
 	cmd.Flags().BoolVar(&opts.schemaStoreStrict, "schema-store-strict", false, "Fail validation when the SchemaStore catalog cannot be loaded")
 	return cmd
 }
@@ -58,11 +69,16 @@ func runInit(cmd *cobra.Command, stdin io.Reader, stdout io.Writer, args []strin
 	if len(args) == 1 {
 		root = args[0]
 	}
-	if shouldInterviewInit(stdin, stdout, opts) {
-		if err := interviewInit(stdin, stdout, &opts); err != nil {
+	interactive := isInteractiveIO(stdin, stdout)
+	var promptReader *bufio.Reader
+	if interactive {
+		promptReader = bufio.NewReader(stdin)
+	}
+	if !opts.defaults && interactive {
+		if err := interviewInit(promptReader, stdout, &opts); err != nil {
 			return err
 		}
-	} else if !opts.defaults && !isInteractiveIO(stdin, stdout) {
+	} else if !opts.defaults && !interactive {
 		fmt.Fprintln(stdout, "No interactive terminal detected; using init defaults. Pass --defaults to silence this message.")
 	}
 	target := opts.output
@@ -81,7 +97,17 @@ func runInit(cmd *cobra.Command, stdin io.Reader, stdout io.Writer, args []strin
 	}
 	if !opts.force {
 		if _, err := os.Stat(target); err == nil {
-			return fmt.Errorf("config %s already exists; use --force to overwrite", target)
+			if !opts.defaults && interactive {
+				overwrite, promptErr := promptConfirm(promptReader, stdout, "Overwrite existing .dollarlint.toml?", false)
+				if promptErr != nil {
+					return promptErr
+				}
+				if !overwrite {
+					return fmt.Errorf("config %s already exists; use --force to overwrite", target)
+				}
+			} else {
+				return fmt.Errorf("config %s already exists; use --force to overwrite", target)
+			}
 		} else if !os.IsNotExist(err) {
 			return fmt.Errorf("check config %s: %w", target, err)
 		}
@@ -95,10 +121,6 @@ func runInit(cmd *cobra.Command, stdin io.Reader, stdout io.Writer, args []strin
 	}
 	fmt.Fprintf(stdout, "Created %s\n", target)
 	return nil
-}
-
-func shouldInterviewInit(stdin io.Reader, stdout io.Writer, opts initOptions) bool {
-	return !opts.defaults && isInteractiveIO(stdin, stdout)
 }
 
 func isInteractiveIO(stdin io.Reader, stdout io.Writer) bool {
@@ -118,59 +140,82 @@ func isTerminalFile(file *os.File) bool {
 	return err == nil && info.Mode()&os.ModeCharDevice != 0
 }
 
-func interviewInit(stdin io.Reader, stdout io.Writer, opts *initOptions) error {
-	form := huh.NewForm(
-		huh.NewGroup(
-			huh.NewInput().
-				Title("Where should dollarlint write the config?").
-				Description("Relative paths are resolved from the init target directory.").
-				Value(&opts.output).
-				Validate(func(value string) error {
-					if strings.TrimSpace(value) == "" {
-						return fmt.Errorf("config path is required")
-					}
-					return nil
-				}),
-		),
-		huh.NewGroup(
-			huh.NewConfirm().
-				Title("Allow remote http(s) schema fetching?").
-				Description("Recommended for SchemaStore and common editor-provided schema URLs.").
-				Affirmative("Yes").
-				Negative("No").
-				Value(&opts.fetchRemote),
-			huh.NewSelect[int]().
-				Title("How many times should transient schema fetches be retried?").
-				Options(
-					huh.NewOption("None", 0),
-					huh.NewOption("2 retries (recommended)", 2),
-					huh.NewOption("4 retries", 4),
-				).
-				Value(&opts.fetchRetries),
-			huh.NewConfirm().
-				Title("Enable SchemaStore filename matching?").
-				Description("This lets conventional files like package.json use catalog schemas without declaring $schema.").
-				Affirmative("Enable").
-				Negative("Skip").
-				Value(&opts.schemaStore),
-			huh.NewConfirm().
-				Title("Fail if the SchemaStore catalog cannot be loaded?").
-				Description("Most projects should leave this off so catalog outages do not block explicit schema validation.").
-				Affirmative("Strict").
-				Negative("Best effort").
-				Value(&opts.schemaStoreStrict),
-			huh.NewConfirm().
-				Title("Overwrite the config if it already exists?").
-				Affirmative("Overwrite").
-				Negative("Keep existing").
-				Value(&opts.force),
-		),
-	)
-	if err := form.WithInput(stdin).WithOutput(stdout).Run(); err != nil {
+func interviewInit(reader *bufio.Reader, stdout io.Writer, opts *initOptions) error {
+	fetchRemote, err := promptConfirm(reader, stdout, "Allow remote http(s) schema fetching?", opts.fetchRemote)
+	if err != nil {
 		return err
 	}
-	opts.output = strings.TrimSpace(opts.output)
+	opts.fetchRemote = fetchRemote
+	retries, err := promptNonNegativeInt(reader, stdout, "Retries for transient schema fetch failures", opts.fetchRetries)
+	if err != nil {
+		return err
+	}
+	opts.fetchRetries = retries
+	schemaStore, err := promptConfirm(reader, stdout, "Enable SchemaStore filename matching?", opts.schemaStore)
+	if err != nil {
+		return err
+	}
+	opts.schemaStore = schemaStore
+	if opts.schemaStore {
+		strict, err := promptConfirm(reader, stdout, "Fail if the SchemaStore catalog cannot be loaded?", opts.schemaStoreStrict)
+		if err != nil {
+			return err
+		}
+		opts.schemaStoreStrict = strict
+	}
 	return nil
+}
+
+func promptConfirm(reader *bufio.Reader, stdout io.Writer, question string, defaultValue bool) (bool, error) {
+	suffix := "[y/N]"
+	if defaultValue {
+		suffix = "[Y/n]"
+	}
+	for {
+		answer, err := promptLine(reader, stdout, fmt.Sprintf("%s %s", question, suffix))
+		if err != nil {
+			return false, err
+		}
+		switch strings.ToLower(answer) {
+		case "":
+			return defaultValue, nil
+		case "y", "yes":
+			return true, nil
+		case "n", "no":
+			return false, nil
+		default:
+			fmt.Fprintln(stdout, "Please answer y or n.")
+		}
+	}
+}
+
+func promptNonNegativeInt(reader *bufio.Reader, stdout io.Writer, question string, defaultValue int) (int, error) {
+	for {
+		answer, err := promptLine(reader, stdout, fmt.Sprintf("%s [%d]", question, defaultValue))
+		if err != nil {
+			return 0, err
+		}
+		if answer == "" {
+			return defaultValue, nil
+		}
+		value, err := strconv.Atoi(answer)
+		if err == nil && value >= 0 {
+			return value, nil
+		}
+		fmt.Fprintln(stdout, "Please enter a non-negative integer.")
+	}
+}
+
+func promptLine(reader *bufio.Reader, stdout io.Writer, prompt string) (string, error) {
+	fmt.Fprintf(stdout, "%s: ", prompt)
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		if errors.Is(err, io.EOF) && line != "" {
+			return strings.TrimSpace(line), nil
+		}
+		return "", err
+	}
+	return strings.TrimSpace(line), nil
 }
 
 func enabledWord(enabled bool) string {
@@ -181,8 +226,8 @@ func enabledWord(enabled bool) string {
 }
 
 func validateInitOutputPath(target string) error {
-	if strings.ToLower(filepath.Ext(target)) != ".toml" {
-		return fmt.Errorf("unsupported config format %s; dollarlint config must be TOML", filepath.Ext(target))
+	if filepath.Base(target) != ".dollarlint.toml" {
+		return fmt.Errorf("unsupported config file %s; dollarlint config must be named .dollarlint.toml", filepath.Base(target))
 	}
 	return nil
 }

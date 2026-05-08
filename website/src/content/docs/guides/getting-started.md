@@ -64,7 +64,7 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues in 145ms
 ```sh
 dollarlint init
 dollarlint init ./packages/api --schema-store
-dollarlint init --output dollarlint.toml
+dollarlint init --output ./packages/api/.dollarlint.toml
 dollarlint init --defaults --schema-store
 dollarlint validate ./config --locations
 dollarlint validate ./config --verbose

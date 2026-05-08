@@ -82,6 +82,9 @@
         "compile": {
           "$ref": "#/$defs/compile"
         },
+        "requireCoverage": {
+          "type": "boolean"
+        },
         "maxDepth": {
           "type": "integer",
           "minimum": 0

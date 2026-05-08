@@ -37,6 +37,7 @@ type SchemaConfig struct {
 	Optimizations OptimizationConfig  `json:"optimizations,omitempty" yaml:"optimizations,omitempty" toml:"optimizations,omitempty"`
 	Fetch         FetchConfig         `json:"fetch,omitempty" yaml:"fetch,omitempty" toml:"fetch,omitempty"`
 	Compile       CompileConfig       `json:"compile,omitempty" yaml:"compile,omitempty" toml:"compile,omitempty"`
+	RequireCoverage bool              `json:"requireCoverage,omitempty" yaml:"requireCoverage,omitempty" toml:"requireCoverage,omitempty"`
 	MaxDepth      int                 `json:"maxDepth,omitempty" yaml:"maxDepth,omitempty" toml:"maxDepth,omitempty"`
 	Concurrency   int                 `json:"concurrency,omitempty" yaml:"concurrency,omitempty" toml:"concurrency,omitempty"`
 }

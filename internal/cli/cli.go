@@ -91,6 +91,7 @@ func NewRootCommandWithIO(stdin io.Reader, stdout io.Writer) *cobra.Command {
 	cmd.PersistentFlags().StringVar(&configPath, "config", "", "Path to a dollarlint config file")
 	cmd.AddCommand(newValidateCommand(stdout, &configPath))
 	cmd.AddCommand(newInitCommand(stdin, stdout))
+	cmd.AddCommand(newServeCommand(stdin, stdout, &configPath))
 	cmd.AddCommand(newVersionCommand(stdout))
 	return cmd
 }

@@ -96,6 +96,7 @@ followSymlinks = true
 
 [schemas]
 maxDepth = 3
+requireCoverage = true
 
 [schemas.optimizations]
 enabled = true
@@ -154,6 +155,9 @@ keyword = "type"
 	}
 	if remoteFetchEnabled(cfg.Schemas) || cfg.Schemas.MaxDepth != 3 || cfg.Schemas.Fetch.Timeout.Duration != 2*time.Second {
 		t.Fatalf("toml cfg not decoded/defaulted: %+v", cfg)
+	}
+	if !cfg.Schemas.RequireCoverage {
+		t.Fatalf("schema coverage requirement not decoded: %+v", cfg.Schemas)
 	}
 	if !cfg.Schemas.Catalogs.Enabled || cfg.Schemas.Catalogs.Failure != "skip" || len(cfg.Schemas.Catalogs.Sources) != 1 || cfg.Schemas.Catalogs.Sources[0].Path != "./catalog.json" {
 		t.Fatalf("catalogs not decoded: %+v", cfg.Schemas.Catalogs)

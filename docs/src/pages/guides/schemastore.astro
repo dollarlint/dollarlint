@@ -1,5 +1,22 @@
 ---
+import CodeBlock from "../../components/CodeBlock.astro";
 import DocsLayout from "../../layouts/DocsLayout.astro";
+
+const catalogConfig = `[schemas.catalogs]
+enabled = true
+failure = "warn"
+
+[[schemas.catalogs.sources]]
+name = "company"
+format = "schemastore"
+path = "./catalog.json"
+enabled = true
+
+[[schemas.catalogs.sources]]
+name = "schemastore"
+format = "schemastore"
+url = "https://www.schemastore.org/api/json/catalog.json"
+enabled = true`;
 ---
 
 <DocsLayout title="Catalogs and SchemaStore" current="/guides/schemastore/">
@@ -18,21 +35,7 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <pre><code>dollarlint validate . --schema-store-url ./catalog.json</code></pre>
     <p>In config, use <code>schemas.catalogs</code> and one or more <code>schemas.catalogs.sources</code>. Sources follow the SchemaStore catalog format, including a top-level <code>schemas</code> array with <code>fileMatch</code> and <code>url</code> entries.</p>
 
-    <pre><code>[schemas.catalogs]
-enabled = true
-failure = "warn"
-
-[[schemas.catalogs.sources]]
-name = "company"
-format = "schemastore"
-path = "./catalog.json"
-enabled = true
-
-[[schemas.catalogs.sources]]
-name = "schemastore"
-format = "schemastore"
-url = "https://www.schemastore.org/api/json/catalog.json"
-enabled = true</code></pre>
+    <CodeBlock code={catalogConfig} language="toml" />
 
     <p>A source must use exactly one of <code>url</code> or <code>path</code>. Relative schema URLs inside a catalog are resolved relative to that catalog.</p>
 

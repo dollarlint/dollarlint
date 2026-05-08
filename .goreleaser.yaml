@@ -4,7 +4,7 @@ project_name: dollarlint
 
 before:
   hooks:
-    - go mod tidy
+    - go test -short ./...
 
 builds:
   - id: dollarlint
@@ -33,6 +33,16 @@ archives:
       {{- .Arch }}
     formats:
       - tar.gz
+    files:
+      - README.md
+      - LICENSE*
+      - schemas/dollarlint.schema.json
+      - src: examples/basics/*
+        dst: examples/basics
+      - src: examples/schemastore/*
+        dst: examples/schemastore
+      - src: examples/azure/*
+        dst: examples/azure
     format_overrides:
       - goos: windows
         formats:

@@ -314,7 +314,7 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 			t.Fatalf("default config missing %q:\n%s", expected, config)
 		}
 	}
-	if strings.Contains(config, "fetchRemote") || strings.Contains(config, "strict =") || strings.Contains(config, "[timeouts]") {
+	if strings.Contains(config, "fetchRemote") || strings.Contains(config, "strict =") || strings.Contains(config, "[timeouts]") || strings.Contains(config, "include = [") {
 		t.Fatalf("default config contains removed keys:\n%s", config)
 	}
 }

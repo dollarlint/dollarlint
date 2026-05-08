@@ -72,7 +72,13 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		result.Files[index].Schema = document.Schema
 		result.Files[index].SchemaSource = document.SchemaSource
 		if document.Schema == "" {
-			result.Summary.Skipped++
+			if cfg.Schemas.RequireCoverage {
+				result.Files[index].Status = StatusError
+				result.Files[index].Message = "file is not covered by an inline schema, config association, or catalog match"
+				addIssue(&result, issueForMissingSchemaCoverage(document))
+			} else {
+				result.Summary.Skipped++
+			}
 			continue
 		}
 		resolved, err := resolveSchemaURI(document.Schema, document.Path)
@@ -371,6 +377,15 @@ func issueForError(file DiscoveredFile, schema string, err error) Issue {
 		RelativePath: file.RelativePath,
 		Schema:       schema,
 		Message:      err.Error(),
+	}
+}
+
+func issueForMissingSchemaCoverage(document *Document) Issue {
+	return Issue{
+		File:         document.Path,
+		RelativePath: document.RelativePath,
+		Keyword:      "schemaCoverage",
+		Message:      "file must declare a schema or match a configured schema association or catalog entry",
 	}
 }
 

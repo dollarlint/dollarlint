@@ -1,20 +1,10 @@
 ---
+import CodeBlock from "../../components/CodeBlock.astro";
 import DocsLayout from "../../layouts/DocsLayout.astro";
----
 
-<DocsLayout title="Configuration reference" current="/reference/configuration/">
-  <article class="doc">
-    <header class="doc-header">
-      <span class="eyebrow">Reference</span>
-      <h1>Configuration</h1>
-      <p class="lead">dollarlint reads TOML config from <code>.dollarlint.toml</code>. Directory validation searches the target root; explicit file validation searches beside the file. Use <code>--config</code> to point at a specific config.</p>
-    </header>
-
-    <h2>Starter config</h2>
-    <pre><code>version = 1
+const starterConfig = `version = 1
 
 [discovery]
-include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.yml", "**/*.yml", "*.toml", "**/*.toml"]
 extendExclude = []
 useDefaultExcludes = true
 respectGitIgnore = true
@@ -67,11 +57,33 @@ locations = false
 file = "fixtures/*.json"
 keyword = "required"
 property = "legacyName"
-reason = "legacy fixture kept for compatibility"</code></pre>
+reason = "legacy fixture kept for compatibility"`;
+
+const associationConfig = `[[schemas.associations]]
+file = "settings/*.toml"
+schema = "./schemas/settings.schema.json"`;
+
+const ignoreConfig = `[[ignore]]
+file = "fixtures/*.json"
+keyword = "required"
+property = "legacyName"
+reason = "legacy fixture kept for compatibility"`;
+---
+
+<DocsLayout title="Configuration reference" current="/reference/configuration/">
+  <article class="doc">
+    <header class="doc-header">
+      <span class="eyebrow">Reference</span>
+      <h1>Configuration</h1>
+      <p class="lead">dollarlint reads TOML config from <code>.dollarlint.toml</code>. Directory validation searches the target root; explicit file validation searches beside the file. Use <code>--config</code> to point at a specific config.</p>
+    </header>
+
+    <h2>Starter config</h2>
+    <CodeBlock code={starterConfig} language="toml" />
     <p>Format and output file are per-run choices — use <code>--format</code> and <code>--output</code> on <code>dollarlint validate</code> whenever you need JSON, SARIF, or a file artifact.</p>
 
     <h2>Discovery</h2>
-    <p>The default include globs cover <code>*.json</code>, <code>*.yaml</code>, <code>*.yml</code>, and <code>*.toml</code> at any depth.</p>
+    <p>Leave <code>include</code> unset to use the built-in JSON, YAML, YML, and TOML discovery defaults. Set it only when you want to replace that default set with custom globs.</p>
     <table>
       <thead>
         <tr>
@@ -80,7 +92,7 @@ reason = "legacy fixture kept for compatibility"</code></pre>
         </tr>
       </thead>
       <tbody>
-        <tr><td><code>include</code></td><td>File globs to consider during discovery.</td></tr>
+        <tr><td><code>include</code></td><td>Optional replacement file globs to consider during discovery.</td></tr>
         <tr><td><code>extendExclude</code></td><td>Additional file and directory globs to ignore, on top of the built-in default excludes.</td></tr>
         <tr><td><code>useDefaultExcludes</code></td><td>Skip common VCS, dependency, generated, cache, and virtual environment directories.</td></tr>
         <tr><td><code>respectGitIgnore</code></td><td>Apply the root <code>.gitignore</code> during directory discovery.</td></tr>
@@ -106,9 +118,7 @@ reason = "legacy fixture kept for compatibility"</code></pre>
 
     <h2>Associations</h2>
     <p>Associations map discovered files to schemas when the file does not declare one itself.</p>
-    <pre><code>[[schemas.associations]]
-file = "settings/*.toml"
-schema = "./schemas/settings.schema.json"</code></pre>
+    <CodeBlock code={associationConfig} language="toml" />
     <p>Association globs are matched against paths relative to the validation root. In-file declarations win over associations.</p>
 
     <h2>Fetch and compile</h2>
@@ -132,6 +142,7 @@ schema = "./schemas/settings.schema.json"</code></pre>
     </table>
 
     <h2>Optimizations</h2>
+    <p>Optimizations reduce expensive schema work without changing validation semantics. They are enabled by default and can be turned off globally or one optimization at a time when you need to debug schema behavior exactly as fetched.</p>
     <table>
       <thead>
         <tr>
@@ -141,7 +152,7 @@ schema = "./schemas/settings.schema.json"</code></pre>
       </thead>
       <tbody>
         <tr><td><code>schemas.optimizations.enabled</code></td><td>Enable or disable schema-specific optimizations as a group.</td></tr>
-        <tr><td><code>schemas.optimizations.azure.pruneResources</code></td><td>Prune Azure Resource Manager schemas to referenced resource providers before compilation.</td></tr>
+        <tr><td><code>schemas.optimizations.azure.pruneResources</code></td><td>For Azure Resource Manager deployment schemas from <code>schema.management.azure.com</code>, compile only the resource provider schemas referenced by the template instead of the full Azure provider catalog. This keeps ordinary ARM template validation much faster. Set it to <code>false</code> if you need to inspect or debug the unpruned schema.</td></tr>
       </tbody>
     </table>
 
@@ -167,11 +178,7 @@ schema = "./schemas/settings.schema.json"</code></pre>
     </table>
 
     <h2>Ignore rules</h2>
-    <pre><code>[[ignore]]
-file = "fixtures/*.json"
-keyword = "required"
-property = "legacyName"
-reason = "legacy fixture kept for compatibility"</code></pre>
+    <CodeBlock code={ignoreConfig} language="toml" />
     <p>Ignore rules match validation issues by file glob, JSON Schema keyword, and property. All configured fields must match; omitted fields act like wildcards. Ignored issues are still reported as ignored and do not make the run fail.</p>
 
     <h2>Output preferences</h2>

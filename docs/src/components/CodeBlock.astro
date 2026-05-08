@@ -1,0 +1,10 @@
+---
+import { highlightCode, type Language } from "../lib/syntax";
+
+const { code, language } = Astro.props as {
+  code: string;
+  language: Language;
+};
+---
+
+<pre class={`code-block language-${language}`}><code set:html={highlightCode(code, language)} /></pre>

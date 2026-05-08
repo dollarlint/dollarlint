@@ -1,4 +1,5 @@
 ---
+import CodeBlock from "../../components/CodeBlock.astro";
 import DocsLayout from "../../layouts/DocsLayout.astro";
 
 const jsonSchema = `{
@@ -23,26 +24,26 @@ schema = "./schemas/settings.schema.json"`;
     <header class="doc-header">
       <span class="eyebrow">Guide</span>
       <h1>Schema declarations</h1>
-      <p class="lead">Every file can declare its own schema — that's where the name comes from. For files that can't (or shouldn't) carry a <code>$schema</code>, config-level associations have you covered.</p>
+      <p class="lead">Every file can declare its own schema. For files that can't (or shouldn't) carry a <code>$schema</code>, config-level associations have you covered.</p>
     </header>
 
     <h2>JSON</h2>
-    <pre><code>{jsonSchema}</code></pre>
+    <CodeBlock code={jsonSchema} language="json" />
     <p>JSON uses the conventional root <code>$schema</code> property.</p>
 
     <h2>YAML</h2>
-    <pre><code>{yamlDirective}</code></pre>
-    <pre><code>{yamlRoot}</code></pre>
+    <CodeBlock code={yamlDirective} language="yaml" />
+    <CodeBlock code={yamlRoot} language="yaml" />
     <p>The comment directive follows the YAML Language Server convention. dollarlint scans the first 25 lines for it before looking for a root <code>$schema</code> key.</p>
 
     <h2>TOML</h2>
-    <pre><code>{tomlDirective}</code></pre>
-    <pre><code>{tomlRoot}</code></pre>
+    <CodeBlock code={tomlDirective} language="toml" />
+    <CodeBlock code={tomlRoot} language="toml" />
     <p>The comment directive follows the Taplo and Even Better TOML convention. A root <code>$schema</code> key also works, but it must be quoted because <code>$</code> is not a bare TOML key character.</p>
 
     <h2>Config associations</h2>
     <p>When you can't — or don't want to — add a declaration to each file, associations let you cover them from your config instead.</p>
-    <pre><code>{association}</code></pre>
+    <CodeBlock code={association} language="toml" />
     <p>Association globs are matched against each discovered file's path relative to the validation root.</p>
 
     <div class="note">

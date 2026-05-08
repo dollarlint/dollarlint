@@ -2,7 +2,7 @@
 
 `dollarlint` validates source JSON, YAML, and TOML files against the JSON Schema each file declares.
 
-It is built as both a CLI and a Go SDK. Files without a schema declaration are skipped, but still counted in the run summary so CI output makes discovery behavior clear.
+Files without a schema declaration are skipped, but still counted in the run summary so CI output makes discovery behavior clear.
 
 ## Install
 
@@ -67,7 +67,6 @@ Example:
 version = 1
 
 [discovery]
-include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.toml", "**/*.toml"]
 extendExclude = ["generated/**"]
 useDefaultExcludes = true
 respectGitIgnore = true
@@ -125,7 +124,7 @@ locations = false
 
 Output format and output file are invocation choices, not persistent config. Use `--format text|json|sarif` and `--output <path>` on `dollarlint validate` when a run needs a machine-readable artifact.
 
-Discovery uses safe defaults. `useDefaultExcludes = true` skips common dependency, generated, cache, and VCS directories like `node_modules`, `vendor`, `dist`, `build`, `.git`, `.venv`, and `.cache`. Add project-specific exclusions with `discovery.extendExclude` rather than copying the default list. `respectGitIgnore = true` applies root `.gitignore` patterns during directory discovery, while `forceExclude = true` also applies excludes to explicitly passed files.
+Discovery uses safe defaults. Leave `discovery.include` unset to discover JSON, YAML, YML, and TOML files at any depth. Set `include` only when you want to replace that default set with custom globs. `useDefaultExcludes = true` skips common dependency, generated, cache, and VCS directories like `node_modules`, `vendor`, `dist`, `build`, `.git`, `.venv`, and `.cache`. Add project-specific exclusions with `discovery.extendExclude` rather than copying the default list. `respectGitIgnore = true` applies root `.gitignore` patterns during directory discovery, while `forceExclude = true` also applies excludes to explicitly passed files.
 
 By default, remote `http(s)` schema fetching is enabled. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schemas.fetch.allowedDomains` can restrict remote schemas to specific hosts, and `schemas.fetch.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches.
 
@@ -186,33 +185,6 @@ dollarlint validate . --format sarif --output dollarlint.sarif
 
 When a validation issue points to something missing, such as a `required` property, SARIF falls back to the nearest parent object location. If source mapping fails for any reason, validation still succeeds and SARIF falls back to file-level results.
 
-## Go SDK
-
-```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/agorischek/dollarlint"
-)
-
-func main() {
-	cfg := dollarlint.DefaultConfig()
-	result, err := dollarlint.Lint(context.Background(), dollarlint.Options{
-		Root:   ".",
-		Config: cfg,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	if result.HasIssues() {
-		log.Fatalf("found %d issues", result.Summary.Issues)
-	}
-}
-```
-
 ## Development
 
 ```sh
@@ -221,4 +193,4 @@ go test -coverprofile=coverage.out ./internal/engine
 go tool cover -func=coverage.out
 ```
 
-The root package is a small public SDK facade. Most implementation lives in `internal/engine`, with CLI wiring in `internal/cli`, so future integrations such as `serve`, LSP, and MCP can share the same validation engine without expanding the public Go API accidentally.
+Most implementation lives in `internal/engine`, with CLI wiring in `internal/cli`, so future integrations such as `serve`, LSP, and MCP can share the same validation engine without expanding the public Go API accidentally.

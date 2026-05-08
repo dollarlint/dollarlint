@@ -293,7 +293,6 @@ const starterTOMLTemplate = `# dollarlint configuration
 version = 1
 
 [discovery]
-include = ["*.json", "**/*.json", "*.yaml", "**/*.yaml", "*.yml", "**/*.yml", "*.toml", "**/*.toml"]
 extendExclude = []
 useDefaultExcludes = true
 respectGitIgnore = true

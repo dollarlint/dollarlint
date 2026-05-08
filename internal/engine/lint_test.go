@@ -78,6 +78,43 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	}
 }
 
+func TestLintRequiresSchemaCoverage(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "schema.schema"), `{"type":"object"}`)
+	writeFile(t, filepath.Join(dir, "catalog.catalog"), `{"schemas":[{"name":"Custom","fileMatch":["cataloged.json"],"url":"./schema.schema"}]}`)
+	writeFile(t, filepath.Join(dir, "inline.json"), `{"$schema":"./schema.schema","name":"ok"}`)
+	writeFile(t, filepath.Join(dir, "associated.yaml"), `name: ok`)
+	writeFile(t, filepath.Join(dir, "cataloged.json"), `{"name":"ok"}`)
+	writeFile(t, filepath.Join(dir, "uncovered.toml"), `name = "missing"`)
+
+	cfg := DefaultConfig()
+	cfg.Discovery.Include = []string{"*.json", "*.yaml", "*.toml"}
+	cfg.Schemas.RequireCoverage = true
+	cfg.Schemas.Associations = []SchemaAssociation{{File: "associated.yaml", Schema: "./schema.schema"}}
+	cfg.Schemas.Catalogs.Enabled = true
+	cfg.Schemas.Catalogs.Sources = []CatalogSource{{Name: "company", Format: "schemastore", Path: filepath.Join(dir, "catalog.catalog")}}
+
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if result.Summary.Discovered != 4 || result.Summary.Validated != 3 || result.Summary.Skipped != 0 || result.Summary.Failed != 1 || result.Summary.Issues != 1 {
+		t.Fatalf("summary counts = %+v", result.Summary)
+	}
+	if len(result.Issues) != 1 || result.Issues[0].RelativePath != "uncovered.toml" || result.Issues[0].Keyword != "schemaCoverage" {
+		t.Fatalf("coverage issue = %+v", result.Issues)
+	}
+	for _, file := range result.Files {
+		if file.RelativePath == "uncovered.toml" {
+			if file.Status != StatusError || !strings.Contains(file.Message, "not covered") {
+				t.Fatalf("uncovered file result = %+v", file)
+			}
+			return
+		}
+	}
+	t.Fatalf("missing uncovered file result: %+v", result.Files)
+}
+
 func TestLintOnlyBuildsRequestedSourceLocations(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["name"],"properties":{"$schema":{"type":"string"},"name":{"type":"string"}}}`)

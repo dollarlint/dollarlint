@@ -16,6 +16,7 @@ const nav = [
       { href: "/guides/installation/", label: "Installation" },
       { href: "/guides/quick-start/", label: "Quick start" },
       { href: "/guides/schema-declarations/", label: "Schema declarations" },
+      { href: "/guides/ignore-rules/", label: "Ignore rules" },
       { href: "/guides/schemastore/", label: "Catalogs" },
       { href: "/guides/examples/", label: "Examples" },
     ],
@@ -29,13 +30,20 @@ const nav = [
       { href: "/reference/exit-codes/", label: "Exit codes" },
     ],
   },
+  {
+    heading: "Project",
+    links: [
+      { href: "https://github.com/agorischek/dollarlint", label: "GitHub" },
+    ],
+  },
 ];
 
 const currentLabel = nav.flatMap((section) => section.links).find((link) => link.href === current)?.label ?? "Menu";
+const currentPageLabel = current === "/guides/" ? "Guides" : currentLabel;
 const slogans = [
   "Put your money where your schema is",
   "Your configs need an audit",
-  "No blank checks for bad config",
+  "Balance your config books",
   "Make every schema count",
 ];
 ---
@@ -109,21 +117,16 @@ const slogans = [
           }
         });
         const slogan = document.querySelector("[data-slogan]");
-        const slogans = ["Put your money where your schema is", "Your configs need an audit", "No blank checks for bad config", "Make every schema count"];
-        let sloganIndex = 0;
-        window.setInterval(() => {
-          if (!slogan) {
-            return;
-          }
-          sloganIndex = (sloganIndex + 1) % slogans.length;
-          slogan.textContent = slogans[sloganIndex];
-        }, 4200);
+        const slogans = ["Put your money where your schema is", "Your configs need an audit", "Balance your config books", "Make every schema count"];
+        if (slogan) {
+          slogan.textContent = slogans[Math.floor(Math.random() * slogans.length)];
+        }
       });
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700;800&family=Fjord+One&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700;800&family=Fjord+One&display=block"
       rel="stylesheet"
     />
     <link rel="icon" href="/favicon.svg" />
@@ -132,45 +135,48 @@ const slogans = [
   <body>
     <div class="site-shell">
       <aside class="sidebar" aria-label="Documentation">
-        <a class="brand" href="/">
-          <Logo class="brand-logo" />
-          <span>
-            <span class="brand-title">dollarlint</span>
-            <span class="brand-subtitle" data-slogan>{slogans[0]}</span>
-          </span>
-        </a>
-        <div class="mobile-menu" data-mobile-menu>
-          <button
-            class="mobile-menu-trigger"
-            type="button"
-            aria-controls="mobile-docs-menu"
-            aria-expanded="false"
-            data-mobile-menu-button
-          >
-            <span>Menu</span>
-            <span>{currentLabel}</span>
-          </button>
-          <div class="mobile-menu-panel" id="mobile-docs-menu" data-mobile-menu-panel hidden>
-            {nav.map((section) => (
-              <nav class="mobile-nav-section" aria-label={`${section.heading} mobile`}>
-                <div class="nav-heading">{section.heading}</div>
-                <ul class="nav-list">
-                  {section.links.map((link) => (
-                    <li>
-                      <a class="nav-link" href={link.href} aria-current={current === link.href ? "page" : undefined}>
-                        {link.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            ))}
-            <div class="mobile-theme">
-              <div class="nav-heading">Theme</div>
-              <div class="theme-switch" role="group" aria-label="Theme">
-                <button class="theme-button" type="button" data-theme-option="light" aria-pressed="false">Light</button>
-                <button class="theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
-                <button class="theme-button" type="button" data-theme-option="system" aria-pressed="true">System</button>
+        <div class="sidebar-header">
+          <a class="brand" href="/">
+            <Logo class="brand-logo" />
+            <span>
+              <span class="brand-title">dollarlint</span>
+              <span class="brand-subtitle" data-slogan>{slogans[0]}</span>
+            </span>
+          </a>
+          <div class="mobile-menu" data-mobile-menu>
+            <button
+              class="mobile-menu-trigger"
+              type="button"
+              aria-label={`Menu, current page: ${currentPageLabel}`}
+              aria-controls="mobile-docs-menu"
+              aria-expanded="false"
+              data-mobile-menu-button
+            >
+              <span class="sr-only">Menu</span>
+              <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+            </button>
+            <div class="mobile-menu-panel" id="mobile-docs-menu" data-mobile-menu-panel hidden>
+              <div class="mobile-menu-current">{currentPageLabel}</div>
+              {nav.map((section) => (
+                <nav class="mobile-nav-section" aria-label={`${section.heading} mobile`}>
+                  <div class="nav-heading">{section.heading}</div>
+                  <ul class="nav-list">
+                    {section.links.map((link) => (
+                      <li>
+                        <a class="nav-link" href={link.href} aria-current={current === link.href ? "page" : undefined}>
+                          {link.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              ))}
+              <div class="mobile-theme">
+                <div class="theme-switch" role="group" aria-label="Theme">
+                  <button class="theme-button" type="button" data-theme-option="light" aria-pressed="false">Light</button>
+                  <button class="theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
+                  <button class="theme-button" type="button" data-theme-option="system" aria-pressed="true">System</button>
+                </div>
               </div>
             </div>
           </div>
@@ -190,7 +196,6 @@ const slogans = [
           </nav>
         ))}
         <div class="sidebar-theme">
-          <div class="nav-heading">Theme</div>
           <div class="theme-switch" role="group" aria-label="Theme">
             <button class="theme-button" type="button" data-theme-option="light" aria-pressed="false">Light</button>
             <button class="theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
@@ -199,15 +204,8 @@ const slogans = [
         </div>
       </aside>
       <main class="content">
-        <div class="topbar">
-          <a class="pill" href="https://github.com/agorischek/dollarlint">GitHub</a>
-          <a class="pill" href="/reference/cli/">CLI reference</a>
-        </div>
         <div class="page">
           <slot />
-          <footer class="footer">
-            dollarlint is open source and free to use. If your configs pass, consider them valid tender.
-          </footer>
         </div>
       </main>
     </div>

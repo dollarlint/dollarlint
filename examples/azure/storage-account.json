@@ -12,8 +12,8 @@
   "resources": [
     {
       "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2023-01-01",
-      "name": "[parameters('storageAccountName')]",
+      "apiVersion": "2021-09-01",
+      "name": "examplestorageacct01",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "Standard_LRS"
@@ -28,7 +28,7 @@
   "outputs": {
     "storageAccountId": {
       "type": "string",
-      "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      "value": "[resourceId('Microsoft.Storage/storageAccounts', 'examplestorageacct01')]"
     }
   }
 }

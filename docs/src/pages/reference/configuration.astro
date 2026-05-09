@@ -91,9 +91,8 @@ reason = "legacy fixture kept for compatibility"`;
         required. Directory validation searches the target root; explicit file validation
         searches beside the file. Each run uses one config by default; set <code
           >configs.mode = "nearest"</code
-        > to let nested <code>.dollarlint.toml</code> files apply to their
-        subtrees. Use <code>--config</code> to point at one explicit config for
-        the whole run.
+        > to let nested <code>.dollarlint.toml</code> files apply to their subtrees.
+        Use <code>--config</code> to point at one explicit config for the whole run.
       </p>
     </header>
 
@@ -117,16 +116,16 @@ reason = "legacy fixture kept for compatibility"`;
       <tbody>
         <tr
           ><td><code>extends</code></td><td
-            >Optional path to another <code>.dollarlint.toml</code> to inherit
-            from. Relative paths resolve from the current config file.</td
+            >Optional path to another <code>.dollarlint.toml</code> to inherit from.
+            Relative paths resolve from the current config file.</td
           ></tr
         >
         <tr
           ><td><code>configs.mode</code></td><td
-            >Use <code>single</code> for one config per run, or <code>nearest</code
+            >Use <code>single</code> for one config per run, or <code
+              >nearest</code
             >
-            to apply nested configs to their subtrees during a parent-directory
-            run.</td
+            to apply nested configs to their subtrees during a parent-directory run.</td
           ></tr
         >
       </tbody>
@@ -143,8 +142,8 @@ reason = "legacy fixture kept for compatibility"`;
       matched against slash-separated paths relative to the config file's
       directory. CLI globs are relative to the validation root. A glob without a
       slash matches basenames at any depth, so <code>*.json</code> matches both
-      <code>package.json</code> and <code>config/settings.json</code>. Use slashes
-      when you want to match a particular relative path shape.
+      <code>package.json</code> and <code>config/settings.json</code>. Use
+      slashes when you want to match a particular relative path shape.
     </p>
     <table>
       <thead>
@@ -204,10 +203,10 @@ reason = "legacy fixture kept for compatibility"`;
 
     <h2>Nested configs</h2>
     <p>
-      Set <code>configs.mode = "nearest"</code> in the run root config when a
-      parent-directory run should apply nested <code>.dollarlint.toml</code>
-      files. Each file uses the closest config at or above its directory. A
-      nested config does not inherit parent settings unless it declares <code
+      Set <code>configs.mode = "nearest"</code> in the run root config when a parent-directory
+      run should apply nested <code>.dollarlint.toml</code>
+      files. Each file uses the closest config at or above its directory. A nested
+      config does not inherit parent settings unless it declares <code
         >extends</code
       >.
     </p>
@@ -223,11 +222,10 @@ extends = "../../.dollarlint.toml"</code></pre>
 
     <h2>Parsing</h2>
     <p>
-      JSON parsing defaults to <code>auto</code>: <code>.json</code> files are
-      parsed as strict JSON first, then retried as JSONC when strict parsing
-      fails, so comments and trailing commas work in projects whose existing
-      tools accept them. Files ending in <code>.jsonc</code> always use JSONC
-      parsing.
+      JSON parsing defaults to <code>auto</code>: <code>.json</code> files are parsed
+      as strict JSON first, then retried as JSONC when strict parsing fails, so comments
+      and trailing commas work in projects whose existing tools accept them. Files
+      ending in <code>.jsonc</code> always use JSONC parsing.
     </p>
     <table>
       <thead>

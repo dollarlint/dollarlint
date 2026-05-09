@@ -3,7 +3,7 @@
 version = 1
 
 [discovery]
-extendExclude = ["examples", "examples/**"]
+exclude = ["examples", "examples/**"]
 useDefaultExcludes = true
 respectGitIgnore = true
 forceExclude = false

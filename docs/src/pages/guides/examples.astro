@@ -26,10 +26,11 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <h2>Nested configs</h2>
     <pre><code>dollarlint validate ./examples/nested-configs --locations</code></pre>
     <p>
-      This fixture enables <code>configs.mode = "nearest"</code>. The root config
-      validates root-level JSON files, while <code>packages/api/.dollarlint.toml</code>
-      extends the root config and overrides the schema association for its
-      subtree.
+      This fixture enables <code>configs.mode = "nearest"</code>. The root
+      config validates root-level JSON files, while <code
+        >packages/api/.dollarlint.toml</code
+      >
+      extends the root config and overrides the schema association for its subtree.
     </p>
 
     <h2>SchemaStore-backed files</h2>
@@ -59,8 +60,8 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
 dollarlint validate ./examples/basics --format sarif --output dollarlint.sarif</code></pre>
     <p>
       Use JSON when a script needs run summaries, relative paths, issue
-      categories, ignored issue details, and line/column metadata. Use SARIF when
-      CI should upload code scanning results.
+      categories, ignored issue details, and line/column metadata. Use SARIF
+      when CI should upload code scanning results.
     </p>
   </article>
 </DocsLayout>

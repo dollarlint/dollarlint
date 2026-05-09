@@ -1,5 +1,14 @@
 ---
+import CopyBlock from "../../components/CopyBlock.astro";
 import DocsLayout from "../../layouts/DocsLayout.astro";
+
+const agentInstallUrl = "https://dollarlint.dev/install/agent/";
+const homebrewInstall = "brew install --cask dollarlint/tap/dollarlint";
+const npmInstall = "npm install -g dollarlint";
+const goInstall =
+  "go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest";
+const verifyInstall = `dollarlint version
+dollarlint --help`;
 ---
 
 <DocsLayout title="Install DollarLint" current="/guides/installation/">
@@ -15,23 +24,22 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     </header>
 
     <h2>Install with an agent</h2>
-    <pre><code>https://dollarlint.dev/install/agent/</code></pre>
     <p>
-      Give this URL to a coding agent that is setting up DollarLint for a
-      repository. The page is intentionally plain and tells the agent how to
-      choose an installer, write config non-interactively, validate, tune noisy
-      behavior, and report the remaining real findings.
+      Give this URL to the coding agent of your choice. The page instructs an
+      agent how to choose an installer, add a config, validate files, tune
+      settings, and report back results.
     </p>
+    <CopyBlock code={agentInstallUrl} />
 
     <h2>Install with Homebrew</h2>
-    <pre><code>brew install --cask dollarlint/tap/dollarlint</code></pre>
+    <CopyBlock code={homebrewInstall} />
     <p>
       Homebrew installs the latest release binary and keeps updates in the same
       workflow as the rest of your command-line tools.
     </p>
 
     <h2>Install with npm</h2>
-    <pre><code>npm install -g dollarlint</code></pre>
+    <CopyBlock code={npmInstall} />
     <p>
       The npm package uses a <code>postinstall</code> script to fetch the matching
       release binary for your platform. npm lifecycle scripts need to be allowed;
@@ -55,15 +63,14 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     </p>
 
     <h2>Install from source with Go</h2>
-    <pre><code>go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest</code></pre>
+    <CopyBlock code={goInstall} />
     <p>
       This builds and installs the <code>dollarlint</code> command from the latest
       module version available to your Go toolchain.
     </p>
 
     <h2>Verify the install</h2>
-    <pre><code>dollarlint version
-dollarlint --help</code></pre>
+    <CopyBlock code={verifyInstall} />
 
     <h2>Run in CI</h2>
     <p>

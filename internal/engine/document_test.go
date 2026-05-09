@@ -84,6 +84,22 @@ name = "ok"
 	}
 }
 
+func TestDecodeTOMLEmptyDocumentsAsObjects(t *testing.T) {
+	for _, raw := range []string{"", "# Defaults are used\n"} {
+		data, err := decodeDocument([]byte(raw), DocumentFormatTOML)
+		if err != nil {
+			t.Fatalf("decodeDocument TOML %q: %v", raw, err)
+		}
+		root, ok := data.(map[string]any)
+		if !ok {
+			t.Fatalf("decodeDocument TOML %q produced %T, want object", raw, data)
+		}
+		if len(root) != 0 {
+			t.Fatalf("decodeDocument TOML %q = %+v, want empty object", raw, root)
+		}
+	}
+}
+
 func TestParseDocumentJSONParsingModes(t *testing.T) {
 	dir := t.TempDir()
 	tsconfig := filepath.Join(dir, "tsconfig.app.json")

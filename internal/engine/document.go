@@ -217,6 +217,9 @@ func decodeDocument(raw []byte, format string) (any, error) {
 		if err := toml.Unmarshal(raw, &value); err != nil {
 			return nil, err
 		}
+		if value == nil {
+			value = map[string]any{}
+		}
 		return toJSONValue(value)
 	default:
 		return nil, fmt.Errorf("unsupported document format %s", format)

@@ -13,7 +13,7 @@ on:
         type: string
   schedule: weekly on monday
 
-description: Run DollarLint against a fresh real-world corpus and publish a weekly report.
+description: Run DollarLint against a fresh real-world corpus and publish a GitHub Discussion summary.
 labels: [automation, real-world-testing]
 
 permissions:
@@ -85,6 +85,7 @@ mcp-servers:
       GOCACHE: /tmp/go-cache
       GOMODCACHE: /tmp/go-mod-cache
     allowed:
+      - real_world_start_testing
       - real_world_history
       - real_world_prepare_corpus
       - real_world_run_corpus
@@ -126,7 +127,8 @@ Run DollarLint against a fresh, bounded set of public repositories, persist the 
 ## Workflow
 
 1. Use the `dollarlint-repo` MCP server first.
-   - Call `real_world_history` to inspect the `reports/real-world-results.json` index and split entry files under `reports/real-world-results/`.
+   - Call `real_world_start_testing` to inspect the `reports/real-world-results.json` index and split entry files under `reports/real-world-results/`.
+   - Follow the `nextStep` guidance returned by each real-world MCP tool.
    - Use it to avoid repositories that have already been tested unless the manual input explicitly asks for a rerun.
 
 2. Choose the corpus.
@@ -181,4 +183,4 @@ Run DollarLint against a fresh, bounded set of public repositories, persist the 
      - Include the tested repository table, DollarLint commit, output artifact path, and workflow run URL.
    - If Discussion creation is unavailable, the safe output may fall back to an issue; mention that the intended destination was a Discussion.
 
-Do not fabricate results. If cloning or validation fails before a meaningful corpus run, publish a short failure report with the blocker, partial artifacts, and the next concrete fix.
+Do not fabricate results. If cloning or validation fails before a meaningful corpus run, request a short GitHub Agentic Workflow summary with the blocker, partial artifacts, and the next concrete fix.

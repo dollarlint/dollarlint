@@ -164,6 +164,72 @@ type realWorldRecordArgs struct {
 	Replace                bool                             `json:"replace"`
 }
 
+func (s *repoServer) handleRealWorldStartTesting(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	var args struct {
+		Title                 string                `json:"title"`
+		Repositories          []realWorldRepository `json:"repositories"`
+		AllowPreviouslyTested bool                  `json:"allowPreviouslyTested"`
+	}
+	_ = request.BindArguments(&args)
+	history, err := loadRealWorldHistory(s.root)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	tested := realWorldTestedRepos(history)
+	repositories := append([]realWorldRepository{}, args.Repositories...)
+	var duplicates []realWorldRepository
+	for i := range repositories {
+		previous := realWorldPreviousEntries(history, repositories[i])
+		if len(previous) == 0 {
+			continue
+		}
+		repositories[i].AlreadyTested = true
+		repositories[i].PreviousEntries = previous
+		duplicates = append(duplicates, repositories[i])
+	}
+	status := s.output(ctx, "git status --short")
+	workingTreeNote := "clean working tree"
+	if hasDirtyStatus(status) {
+		workingTreeNote = "dirty working tree: " + strings.Join(lines(status), "; ")
+	}
+	revision := strings.TrimSpace(s.output(ctx, "git rev-parse HEAD"))
+	ok := len(duplicates) == 0 || args.AllowPreviouslyTested
+	next := realWorldNextChooseRepositories()
+	if len(repositories) > 0 && ok {
+		next = realWorldNextPrepareCorpus(args.Title, repositories, args.AllowPreviouslyTested)
+	}
+	message := "Choose fresh public repositories, then call real_world_prepare_corpus."
+	if len(repositories) > 0 && ok {
+		message = "Candidate repositories are ready; call real_world_prepare_corpus next."
+	}
+	if len(duplicates) > 0 && !args.AllowPreviouslyTested {
+		message = "One or more candidate repositories were already tested; choose replacements or restart with allowPreviouslyTested=true for an intentional rerun."
+		next = realWorldNextChooseRepositories()
+	}
+	return structured(map[string]any{
+		"ok":                    ok,
+		"message":               message,
+		"title":                 args.Title,
+		"dollarlintRevision":    revision,
+		"workingTreeNote":       workingTreeNote,
+		"historyPath":           filepath.Join(s.root, realWorldResultsRelPath),
+		"entriesDir":            filepath.Join(s.root, realWorldResultsDirRelPath),
+		"entryCount":            len(history.Entries),
+		"repoCount":             len(tested),
+		"testedRepos":           tested,
+		"candidateRepositories": repositories,
+		"duplicates":            duplicates,
+		"recordResultContract":  realWorldRecordResultContract(),
+		"rules": []string{
+			"Do not create or update Markdown report files for repository memory.",
+			"Record dependency preparation in dependencyPrep, including skipped or not-needed prep.",
+			"Record recommendations in productRecommendations with strength, recommendation, and rationale.",
+			"Record product changes or decisions in productDecisions; use a no-change note when nothing changed.",
+		},
+		"nextStep": next,
+	})
+}
+
 func (s *repoServer) handleRealWorldHistory(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	var args struct {
 		Repo           string   `json:"repo"`
@@ -202,6 +268,7 @@ func (s *repoServer) handleRealWorldHistory(ctx context.Context, request mcp.Cal
 	if args.IncludeEntries {
 		out["entries"] = history.Entries
 	}
+	out["nextStep"] = realWorldNextChooseRepositories()
 	return structured(out)
 }
 
@@ -234,7 +301,11 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 			"ok":         false,
 			"message":    "one or more repositories were already tested; pass allowPreviouslyTested=true for an intentional rerun",
 			"duplicates": duplicates,
+			"nextStep":   realWorldNextChooseRepositories(),
 		})
+	}
+	if len(repositories) == 0 {
+		return mcp.NewToolResultError("repositories is required; call real_world_start_testing first if you need repository guidance"), nil
 	}
 	corpusDir, err := os.MkdirTemp("", "dollarlint-corpus.")
 	if err != nil {
@@ -305,6 +376,7 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 		"cloneResults":      cloneResults,
 		"buildCommand":      "go build -o bin/dollarlint ./cmd/dollarlint",
 		"validationCommand": realWorldValidationCommand(corpusDir, cacheDir, outputArtifact, true, "warn", 1, "1ms", "1ms", nil),
+		"nextStep":          realWorldNextDependencyPrep(corpusDir, cacheDir, outputArtifact, repositories),
 	})
 }
 
@@ -323,7 +395,7 @@ func (s *repoServer) handleRealWorldRunCorpus(ctx context.Context, request mcp.C
 	}
 	_ = request.BindArguments(&args)
 	if args.CorpusDir == "" {
-		return mcp.NewToolResultError("corpusDir is required"), nil
+		return mcp.NewToolResultError("corpusDir is required; call real_world_prepare_corpus first"), nil
 	}
 	if args.CacheDir == "" {
 		cacheDir, err := os.MkdirTemp("", "dollarlint-cache.")
@@ -368,7 +440,11 @@ func (s *repoServer) handleRealWorldRunCorpus(ctx context.Context, request mcp.C
 		result := s.run(ctx, namedCommand{Name: "go build", Cmd: "go build -o bin/dollarlint ./cmd/dollarlint"})
 		buildResult = &result
 		if !result.Succeeded {
-			return structured(map[string]any{"ok": false, "build": result})
+			return structured(map[string]any{
+				"ok":       false,
+				"build":    result,
+				"nextStep": realWorldNextFixBuild(),
+			})
 		}
 	}
 	p.step("Running real-world corpus validation")
@@ -386,6 +462,7 @@ func (s *repoServer) handleRealWorldRunCorpus(ctx context.Context, request mcp.C
 		"cacheDir":          args.CacheDir,
 		"outputArtifact":    args.OutputArtifact,
 		"validationCommand": realWorldValidationCommand(args.CorpusDir, args.CacheDir, args.OutputArtifact, schemaStore, args.SchemaStoreFailure, *args.FetchRetries, args.FetchRetryMinWait, args.FetchRetryMaxWait, args.ExtraArgs),
+		"nextStep":          realWorldNextTriageAndRecord(args.CorpusDir, args.CacheDir, args.OutputArtifact),
 	}
 	if summary != nil {
 		out["hasIssues"] = summary.Issues.Total > 0
@@ -405,6 +482,9 @@ func (s *repoServer) handleRealWorldRecordResult(ctx context.Context, request mc
 	}
 	entry, err := s.realWorldEntryFromArgs(args)
 	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	if err := validateRealWorldEntryForRecord(entry); err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 	replaced := false
@@ -434,6 +514,7 @@ func (s *repoServer) handleRealWorldRecordResult(ctx context.Context, request mc
 		"entryCount":  len(history.Entries),
 		"repoCount":   len(entry.Repositories),
 		"testedRepos": realWorldTestedRepos(history),
+		"nextStep":    realWorldNextAfterRecord(entry),
 	})
 }
 
@@ -509,6 +590,186 @@ func (s *repoServer) realWorldEntryFromArgs(args realWorldRecordArgs) (realWorld
 		ProductDecisions:       args.ProductDecisions,
 		FollowUp:               args.FollowUp,
 	}, nil
+}
+
+func validateRealWorldEntryForRecord(entry realWorldEntry) error {
+	var missing []string
+	if entry.Title == "" {
+		missing = append(missing, "title")
+	}
+	if entry.DollarLintRevision == "" {
+		missing = append(missing, "dollarlintRevision")
+	}
+	if entry.WorkingTreeNote == "" {
+		missing = append(missing, "workingTreeNote")
+	}
+	if entry.Corpus == "" {
+		missing = append(missing, "corpus")
+	}
+	if entry.CacheDir == "" {
+		missing = append(missing, "cacheDir")
+	}
+	if entry.Command == "" {
+		missing = append(missing, "command")
+	}
+	if entry.OutputArtifact == "" {
+		missing = append(missing, "outputArtifact")
+	}
+	if len(entry.Repositories) == 0 {
+		missing = append(missing, "repositories")
+	}
+	if len(entry.DependencyPrep) == 0 {
+		missing = append(missing, "dependencyPrep")
+	}
+	if len(entry.Findings) == 0 {
+		missing = append(missing, "findings")
+	}
+	if len(entry.ProductRecommendations) == 0 {
+		missing = append(missing, "productRecommendations")
+	}
+	if len(entry.ProductDecisions) == 0 {
+		missing = append(missing, "productDecisions")
+	}
+	if len(entry.FollowUp) == 0 {
+		missing = append(missing, "followUp")
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("real-world result is incomplete; provide %s", strings.Join(missing, ", "))
+	}
+	for i, prep := range entry.DependencyPrep {
+		if prep.Status == "" || prep.Notes == "" {
+			return fmt.Errorf("dependencyPrep[%d] must include status and notes", i)
+		}
+	}
+	for i, recommendation := range entry.ProductRecommendations {
+		if recommendation.Strength != "high" && recommendation.Strength != "med" && recommendation.Strength != "low" {
+			return fmt.Errorf("productRecommendations[%d].strength must be high, med, or low", i)
+		}
+		if recommendation.Recommendation == "" || recommendation.Rationale == "" {
+			return fmt.Errorf("productRecommendations[%d] must include recommendation and rationale", i)
+		}
+	}
+	return nil
+}
+
+func realWorldRecordResultContract() map[string]any {
+	return map[string]any{
+		"required": []string{
+			"title",
+			"dollarlintRevision",
+			"workingTreeNote",
+			"corpus",
+			"cacheDir",
+			"command",
+			"outputArtifact",
+			"repositories",
+			"dependencyPrep",
+			"findings",
+			"productRecommendations",
+			"productDecisions",
+			"followUp",
+		},
+		"dependencyPrep":         "Include every dependency-prep command that ran, failed, timed out, was narrowed, was skipped, or was not needed. Each item needs status and notes.",
+		"productRecommendations": "Use objects with strength high|med|low, recommendation, and rationale.",
+		"productDecisions":       "Use for product changes or decisions made after triage. If none were made, include an explicit no-change decision.",
+		"result":                 "Read automatically from outputArtifact when outputArtifact is provided.",
+		"repositories":           "Read automatically from manifestPath when repositories is omitted and a manifest is available.",
+	}
+}
+
+func realWorldNextChooseRepositories() map[string]any {
+	return map[string]any{
+		"tool": "real_world_prepare_corpus",
+		"why":  "Choose fresh public repositories with diverse ecosystems, then prepare an isolated corpus.",
+		"requiredArgs": []string{
+			"title",
+			"repositories",
+		},
+		"recommendedArgs": map[string]any{
+			"clone": true,
+		},
+	}
+}
+
+func realWorldNextPrepareCorpus(title string, repositories []realWorldRepository, allowPreviouslyTested bool) map[string]any {
+	return map[string]any{
+		"tool": "real_world_prepare_corpus",
+		"why":  "Create the corpus/cache/output paths, flag duplicate repositories, and optionally clone the corpus.",
+		"suggestedArgs": map[string]any{
+			"title":                 title,
+			"repositories":          repositories,
+			"clone":                 true,
+			"allowPreviouslyTested": allowPreviouslyTested,
+		},
+	}
+}
+
+func realWorldNextDependencyPrep(corpusDir, cacheDir, outputArtifact string, repositories []realWorldRepository) map[string]any {
+	return map[string]any{
+		"tool": "real_world_run_corpus",
+		"why":  "First inspect cloned repositories for dependency metadata and record dependencyPrep notes; then run validation.",
+		"beforeCalling": []string{
+			"Inspect each clone for lockfiles, local $schema refs, and node_modules/file schemas that affect validation fidelity.",
+			"Run bounded, script-suppressed dependency prep when realistic.",
+			"Record run/skipped/failed/not-needed prep entries for real_world_record_result.dependencyPrep.",
+		},
+		"suggestedArgs": map[string]any{
+			"corpusDir":      corpusDir,
+			"cacheDir":       cacheDir,
+			"outputArtifact": outputArtifact,
+		},
+		"repositories": repositories,
+	}
+}
+
+func realWorldNextFixBuild() map[string]any {
+	return map[string]any{
+		"tool": "verify",
+		"why":  "The CLI build failed before validation; inspect the build output and fix or report the blocker before recording a sweep.",
+		"suggestedArgs": map[string]any{
+			"profile": "quick",
+		},
+	}
+}
+
+func realWorldNextTriageAndRecord(corpusDir, cacheDir, outputArtifact string) map[string]any {
+	return map[string]any{
+		"tool": "real_world_record_result",
+		"why":  "Triage the JSON output, classify findings, then persist the structured sweep result.",
+		"beforeCalling": []string{
+			"Inspect outputArtifact with jq or another JSON reader.",
+			"Separate parsing, validation, schema, coverage, warning, crash/performance, and output-contract findings.",
+			"Account for dependencyPrep when interpreting missing local schemas.",
+			"Create productRecommendations with strength, recommendation, and rationale.",
+			"Do not create or update Markdown report files.",
+		},
+		"requiredArgs": realWorldRecordResultContract()["required"],
+		"suggestedArgs": map[string]any{
+			"corpus":         corpusDir,
+			"cacheDir":       cacheDir,
+			"outputArtifact": outputArtifact,
+		},
+	}
+}
+
+func realWorldNextAfterRecord(entry realWorldEntry) map[string]any {
+	next := map[string]any{
+		"message": "Real-world result recorded. Use the structured entry as the durable source of truth.",
+		"entryID": entry.ID,
+	}
+	if inGitHubAgenticWorkflow() {
+		next["githubAgenticWorkflow"] = true
+		next["discussion"] = "If this run is a GitHub Agentic Workflow, publish a GitHub Discussion summary from the recorded MCP entry."
+	}
+	return next
+}
+
+func inGitHubAgenticWorkflow() bool {
+	return os.Getenv("GITHUB_AW") == "true" ||
+		os.Getenv("GH_AW") == "true" ||
+		os.Getenv("GH_AW_WORKFLOW_ID") != "" ||
+		os.Getenv("GH_AW_CURRENT_WORKFLOW_REF") != "" ||
+		os.Getenv("GH_AW_CALLER_WORKFLOW_ID") != ""
 }
 
 func loadRealWorldHistory(root string) (realWorldHistory, error) {

@@ -1005,6 +1005,68 @@ pre {
   line-height: 1.6;
 }
 
+.copy-block {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  overflow-x: auto;
+  border: 1px solid var(--code-border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  margin: 1em 0;
+  padding: 12px 12px 12px 18px;
+  color: var(--code-fg);
+  font-family: var(--mono);
+  font-size: 0.93rem;
+  line-height: 1.35;
+}
+
+.copy-block pre {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  overflow-x: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+}
+
+.copy-block code {
+  display: inline-block;
+  transform: translateY(0.04em);
+  color: inherit;
+  font: inherit;
+}
+
+.copy-block-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  min-height: 30px;
+  border: 1px solid var(--code-border);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--code-bg) 72%, var(--gold));
+  color: var(--code-fg);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
+  align-self: center;
+}
+
+.copy-block-button:hover {
+  border-color: color-mix(in srgb, var(--gold) 68%, transparent);
+  color: var(--gold-soft);
+}
+
 .code-block code {
   color: inherit;
 }

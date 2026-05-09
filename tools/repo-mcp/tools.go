@@ -25,6 +25,11 @@ func (s *repoServer) addTools() {
 		"repositories":   arrayStringSchema("Repository names or clone URLs to check."),
 		"includeEntries": map[string]any{"type": "boolean", "description": "Include full structured history entries. Defaults to false."},
 	}), s.handleRealWorldHistory, true)
+	s.addTool("real_world_start_testing", "Start a guided real-world validation sweep, check structured history and candidate duplicates, and return the next MCP tool to call.", schemaObject(map[string]any{
+		"title":                 map[string]any{"type": "string", "description": "Short sweep title."},
+		"repositories":          realWorldRepositoryArraySchema("Candidate repositories to check before preparing the corpus."),
+		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Allow intentional reruns of repositories already present in real-world history."},
+	}), s.handleRealWorldStartTesting, true)
 	s.addToolWithHints("real_world_prepare_corpus", "Create real-world testing temp dirs, flag previously tested repositories, optionally clone repos, and write a corpus manifest.", schemaObject(map[string]any{
 		"title":                 map[string]any{"type": "string", "description": "Short sweep title used for generated paths and manifests."},
 		"repositories":          realWorldRepositoryArraySchema("Repositories planned for the corpus."),

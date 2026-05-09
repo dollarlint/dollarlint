@@ -1,4 +1,0 @@
-interface:
-  display_name: "Real-World Testing"
-  short_description: "Run and record real repo validation sweeps"
-  default_prompt: "Use $real-world-testing to run a real-world validation sweep and persist the structured result through the repo MCP tools."

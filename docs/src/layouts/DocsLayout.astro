@@ -110,6 +110,41 @@ const slogans = [
             setPressed(theme);
           });
         });
+        const copyText = async (value, button) => {
+          if (!value) return;
+          try {
+            if (navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(value);
+            } else {
+              throw new Error("Clipboard API unavailable");
+            }
+            button.textContent = "Copied";
+          } catch {
+            const fallback = document.createElement("textarea");
+            fallback.value = value;
+            fallback.setAttribute("readonly", "");
+            fallback.style.position = "fixed";
+            fallback.style.top = "-1000px";
+            document.body.append(fallback);
+            fallback.select();
+            const legacyDocument =
+              /** @type {{ execCommand(command: string): boolean }} */ (
+                document
+              );
+            button.textContent = legacyDocument.execCommand("copy")
+              ? "Copied"
+              : "Copy failed";
+            fallback.remove();
+          }
+          window.setTimeout(() => {
+            button.textContent = "Copy";
+          }, 1400);
+        };
+        document.querySelectorAll("[data-copy-button]").forEach((button) => {
+          button.addEventListener("click", () => {
+            copyText(button.dataset.copyValue, button);
+          });
+        });
         const menu = document.querySelector("[data-mobile-menu]");
         const menuButton = document.querySelector("[data-mobile-menu-button]");
         const menuPanel = document.querySelector("[data-mobile-menu-panel]");

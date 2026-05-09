@@ -1,0 +1,114 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-copilot-mcp-end-to-end-3-repo-sweep",
+  "date": "2026-05-09",
+  "title": "Copilot MCP end-to-end 3-repo sweep",
+  "dollarlintRevision": "181397f294144cbecd71d77c6ec56523a08dc148",
+  "workingTreeNote": "dirty working tree: D .codex/skills/real-world-testing/SKILL.md;  D .codex/skills/real-world-testing/agents/openai.yaml;  M AGENTS.md;  M tools/repo-mcp/real_world.go;  M tools/repo-mcp/real_world_test.go;  M tools/repo-mcp/tools.go",
+  "corpus": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4061060218",
+  "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.244138965",
+  "command": "XDG_CACHE_HOME=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.244138965\" bin/dollarlint \"validate\" \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4061060218\" \"--schema-store\" \"--schema-store-failure\" \"warn\" \"--fetch-retries\" \"1\" \"--fetch-retry-min-wait\" \"1ms\" \"--fetch-retry-max-wait\" \"1ms\" \"--format\" \"json\" \"--output\" \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-copilot-mcp-end-to-end-3-repo-sweep-3919206883.json\"",
+  "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-copilot-mcp-end-to-end-3-repo-sweep-3919206883.json",
+  "dependencyPrep": [
+    {
+      "repository": "bat",
+      "command": "cargo fetch",
+      "status": "skipped",
+      "notes": "Rust/Cargo project. Runtime deps not needed for config file validation. Cargo.lock present; no install required."
+    },
+    {
+      "repository": "httpx",
+      "command": "pip install -r requirements.txt",
+      "status": "skipped",
+      "notes": "Python project with pyproject.toml and requirements.txt. No local $schema refs found; skipping pip install as it has no effect on config-file validation."
+    },
+    {
+      "repository": "esbuild",
+      "command": "go mod download",
+      "status": "skipped",
+      "notes": "Go module project with go.mod + go.sum. No local schema refs. Skipping go mod download as it does not affect config-file validation."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "bat",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/sharkdp/bat.git",
+      "commit": "f74082cee8c4215e514f13fd4b8182d93e633234",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4061060218/bat",
+      "status": "cloned"
+    },
+    {
+      "name": "httpx",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/encode/httpx.git",
+      "commit": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4061060218/httpx",
+      "status": "cloned"
+    },
+    {
+      "name": "esbuild",
+      "ecosystem": "Go/JavaScript",
+      "cloneURL": "https://github.com/evanw/esbuild.git",
+      "commit": "6a794dff68e6a43539f6da671e3080efdf11ca70",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4061060218/esbuild",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 131,
+    "validated": 65,
+    "skipped": 60,
+    "failed": 6,
+    "issues": {
+      "total": 9,
+      "parsing": 8,
+      "validation": 1,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 183264958
+    }
+  },
+  "findings": [
+    "[bat] 8 parsing issues — all false positives from test fixture directory bat/tests/syntax-tests/. Files intentionally contain ANSI escape codes (\\x1b) embedded in JSON, TOML, YAML, and NDJSON fixtures for bat's own syntax-highlighting test suite, plus bat/tests/examples/longline.json which is a truncated test fixture. Also bat/tests/syntax-tests/source/YAML/example.yaml contains NaN which is valid YAML but not JSON-representable. DollarLint recursively walks into test fixture directories and reports parse failures on intentionally malformed files.",
+    "[bat] 1 validation issue — bat/rustfmt.toml contains only a comment line '# Defaults are used' with no key-value pairs. A comment-only TOML file is semantically an empty document (equivalent to {}) but DollarLint reports 'expected object, received null' against the SchemaStore rustfmt schema. This points to a TOML-to-null mapping bug: a comment-only TOML file should parse to an empty object, not null, so the root-type check should pass.",
+    "[httpx, esbuild] No issues. Both repos validated cleanly. httpx: pyproject.toml and mkdocs.yml matched schemas without errors. esbuild: Go/JavaScript project with minimal config files; most structured config is in Go source files outside DollarLint scope.",
+    "Coverage: 65 of 131 discovered files validated (49.6%); 60 skipped due to no schema match. Skipped files include Cargo.lock, go.sum, go.mod, and many ecosystem-specific files for which SchemaStore has no schema."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "high",
+      "recommendation": "Add exclude-path / glob-ignore patterns to allow users to skip test fixture directories",
+      "rationale": "8 of 9 issues in this sweep are false positives from bat's tests/syntax-tests/ directory, which intentionally holds malformed files. With no way to exclude directories, users of projects like bat will see unavoidable noise. This pattern (intentionally broken test fixtures that happen to carry config-file extensions) is common in developer tooling repos. A .dollarlintignore file or --exclude glob flag would let users suppress these."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Fix TOML parser to return empty object {} instead of null for comment-only or empty TOML files",
+      "rationale": "bat/rustfmt.toml contains only a comment and no key-value pairs. Valid TOML with no key-value pairs is semantically equivalent to an empty table, which should serialize to {} in JSON. DollarLint reports 'expected object, received null', indicating the TOML-to-JSON bridge is producing null rather than {} for this edge case, causing a false validation failure against any schema that has root type:object. This is a correctness bug that will affect any project with a minimal config file pattern."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Detect and skip NDJSON (newline-delimited JSON) files or handle multi-document formats explicitly",
+      "rationale": "bat/tests/syntax-tests/highlighted/JSON/example.ndjson generates 3 separate parse errors (one per line) because DollarLint tries to parse the whole file as a single JSON document. NDJSON is a common format; either silently skip .ndjson files with a notice, treat each line independently, or add an explicit skip rule for multi-document formats."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider documenting or surfacing the 'skipped: no schema' count as a first-class coverage metric",
+      "rationale": "60 of 131 files (46%) were skipped due to no matching schema. For users trying to assess validation completeness, a summary like 'X files had no schema match' is more actionable than seeing them silently absent from output. Exposing this in the summary or as a --coverage-report flag would help users understand their config coverage baseline."
+    }
+  ],
+  "productDecisions": [
+    "No product changes made in this session. Findings are recorded for triage. The comment-only TOML null-parse bug and the test-fixture false-positive pattern are both candidates for the next bug-fix sprint.",
+    "The NDJSON multi-document issue is lower priority given it only surfaces in syntax-test repos, but should be tracked."
+  ],
+  "followUp": [
+    "Investigate and fix the TOML parser null vs {} handling for comment-only TOML files (rustfmt.toml repro in bat@f74082c).",
+    "Design and implement glob-based ignore/exclude patterns (e.g., .dollarlintignore or --exclude flag), prioritizing test fixture directory exclusion.",
+    "Decide whether .ndjson / multi-document JSON should be skipped, multi-parsed, or result in a warning rather than parse errors.",
+    "Evaluate adding a 'no schema match' coverage summary to the default output so users can see how much of their config surface is covered."
+  ]
+}

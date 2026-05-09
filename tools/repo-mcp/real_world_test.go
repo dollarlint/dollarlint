@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -147,6 +148,80 @@ func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
 	}
 	if len(loaded.Entries) != 1 || loaded.Entries[0].Repositories[0].Name != "example" {
 		t.Fatalf("loaded entries = %+v", loaded.Entries)
+	}
+}
+
+func TestValidateRealWorldEntryForRecordRequiresStructuredFields(t *testing.T) {
+	err := validateRealWorldEntryForRecord(realWorldEntry{
+		Title:              "Incomplete",
+		DollarLintRevision: "abc123",
+		WorkingTreeNote:    "clean working tree",
+		Corpus:             "/tmp/corpus",
+		CacheDir:           "/tmp/cache",
+		Command:            "bin/dollarlint validate /tmp/corpus --format json --output /tmp/out.json",
+		OutputArtifact:     "/tmp/out.json",
+		Repositories: []realWorldRepository{{
+			Name:     "example",
+			CloneURL: "https://github.com/example/example.git",
+		}},
+		DependencyPrep: []realWorldDependencyPrep{{
+			Repository: "example",
+			Status:     "not-needed",
+			Notes:      "No local dependency schemas referenced.",
+		}},
+		Findings: []string{"No crashes or output contract issues."},
+	})
+	if err == nil {
+		t.Fatal("expected incomplete entry error")
+	}
+	if !strings.Contains(err.Error(), "productRecommendations") || !strings.Contains(err.Error(), "productDecisions") || !strings.Contains(err.Error(), "followUp") {
+		t.Fatalf("error did not name missing structured fields: %v", err)
+	}
+}
+
+func TestValidateRealWorldEntryForRecordAcceptsCompleteEntry(t *testing.T) {
+	entry := realWorldEntry{
+		Title:              "Complete",
+		DollarLintRevision: "abc123",
+		WorkingTreeNote:    "clean working tree",
+		Corpus:             "/tmp/corpus",
+		CacheDir:           "/tmp/cache",
+		Command:            "bin/dollarlint validate /tmp/corpus --format json --output /tmp/out.json",
+		OutputArtifact:     "/tmp/out.json",
+		Repositories: []realWorldRepository{{
+			Name:     "example",
+			CloneURL: "https://github.com/example/example.git",
+		}},
+		DependencyPrep: []realWorldDependencyPrep{{
+			Repository: "example",
+			Status:     "not-needed",
+			Notes:      "No local dependency schemas referenced.",
+		}},
+		Findings: []string{"No crashes or output contract issues."},
+		ProductRecommendations: []realWorldProductRecommendation{{
+			Strength:       "low",
+			Recommendation: "Keep observing this fixture class.",
+			Rationale:      "The sweep produced a low-volume signal.",
+		}},
+		ProductDecisions: []string{"No product changes made from this sweep."},
+		FollowUp:         []string{"Run another diverse corpus next week."},
+	}
+	if err := validateRealWorldEntryForRecord(entry); err != nil {
+		t.Fatalf("validate complete entry: %v", err)
+	}
+}
+
+func TestRealWorldNextAfterRecordOnlyMentionsDiscussionInAgenticWorkflow(t *testing.T) {
+	t.Setenv("GITHUB_ACTIONS", "true")
+	next := realWorldNextAfterRecord(realWorldEntry{ID: "sample"})
+	if _, ok := next["discussion"]; ok {
+		t.Fatalf("generic GitHub Actions run should not include discussion guidance: %+v", next)
+	}
+
+	t.Setenv("GH_AW_WORKFLOW_ID", "weekly-real-world-testing")
+	next = realWorldNextAfterRecord(realWorldEntry{ID: "sample"})
+	if _, ok := next["discussion"]; !ok {
+		t.Fatalf("GitHub Agentic Workflow run should include discussion guidance: %+v", next)
 	}
 }
 

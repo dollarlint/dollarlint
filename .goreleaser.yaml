@@ -65,6 +65,24 @@ changelog:
   sort: asc
   ai:
     use: openai
+    prompt: |
+      Write the release notes for this release.
+
+      Instructions:
+      - do not use emojis
+      - write a short summary featuring the 2 or 3 most exciting or user-impacting changes, if it makes sense to do so
+      - if many commits update the same dependency, group them in a single line and include the original version and latest version
+      - respond with only the generated release notes, nothing else
+      - format the response as markdown
+      - do not change the original commit messages
+
+      Project name: {{ .ProjectName }}
+      Git repository URL: {{ .GitURL }}
+      Previous version: {{ .PreviousTag }}
+      Version: {{ .Tag }}
+
+      Release notes:
+      {{ .ReleaseNotes }}
   filters:
     exclude:
       - "^docs:"

@@ -229,6 +229,9 @@ func TestSchemaCacheDepthAndLoadErrors(t *testing.T) {
 	if _, err := cache.Load("ftp://example.com/schema.json"); err == nil {
 		t.Fatalf("expected unsupported scheme")
 	}
+	if _, err := cache.loadUncached(context.Background(), "%"); err == nil || !strings.Contains(err.Error(), "parse schema URI") {
+		t.Fatalf("expected schema URI parse error, got %v", err)
+	}
 	empty := "file://"
 	if _, err := cache.Load(empty); err == nil {
 		t.Fatalf("expected empty file URL path")

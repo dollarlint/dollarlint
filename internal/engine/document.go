@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 
 	"github.com/pelletier/go-toml/v2"
 	"github.com/tailscale/hujson"
@@ -357,6 +358,9 @@ func tomlSchemaDirective(raw []byte) string {
 			continue
 		}
 		if schema, ok := strings.CutPrefix(trimmed, "#:schema"); ok {
+			if schema != "" && strings.TrimLeftFunc(schema, unicode.IsSpace) == schema {
+				continue
+			}
 			return strings.TrimSpace(schema)
 		}
 		return ""

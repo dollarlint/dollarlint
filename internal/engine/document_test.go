@@ -115,6 +115,12 @@ func TestParseDocumentErrorsAndHelpers(t *testing.T) {
 	if directive := tomlSchemaDirective([]byte("# just a comment\nname = \"ok\"\n#:schema late\n")); directive != "" {
 		t.Fatalf("late toml directive = %q", directive)
 	}
+	if directive := tomlSchemaDirective([]byte("#:schemaFOO ./bad.json\n#:schema ./good.json\n")); directive != "./good.json" {
+		t.Fatalf("toml directive after malformed directive = %q", directive)
+	}
+	if directive := tomlSchemaDirective([]byte("#:schema\t./tabbed.json\n")); directive != "./tabbed.json" {
+		t.Fatalf("tabbed toml directive = %q", directive)
+	}
 	if len(firstLines([]byte("a\nb\nc"), 2)) != 2 {
 		t.Fatalf("firstLines did not limit")
 	}

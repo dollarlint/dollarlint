@@ -63,6 +63,8 @@ snapshot:
 
 changelog:
   sort: asc
+  ai:
+    use: openai
   filters:
     exclude:
       - "^docs:"

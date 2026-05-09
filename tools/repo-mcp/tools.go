@@ -49,6 +49,19 @@ func (s *repoServer) addTools() {
 		"fetchRetryMaxWait":  map[string]any{"type": "string", "description": "Maximum retry wait. Defaults to 1ms."},
 		"extraArgs":          arrayStringSchema("Additional dollarlint validate arguments."),
 	}), s.handleRealWorldRunCorpus, toolHints{ReadOnly: false, OpenWorld: true})
+	s.addTool("real_world_triage_output", "Sanity-check and triage a DollarLint real-world JSON output artifact, then return grouped findings, draft record fields, and final-response guidance.", schemaObject(map[string]any{
+		"title":                  map[string]any{"type": "string", "description": "Short sweep title. Defaults from manifestPath when available."},
+		"corpusDir":              map[string]any{"type": "string", "description": "Prepared corpus directory."},
+		"cacheDir":               map[string]any{"type": "string", "description": "Cache directory used by the run."},
+		"command":                map[string]any{"type": "string", "description": "Reproducible validation command. Defaults to the standard command when corpus/cache/output are available."},
+		"outputArtifact":         map[string]any{"type": "string", "description": "DollarLint JSON output artifact to triage."},
+		"manifestPath":           map[string]any{"type": "string", "description": "Prepared corpus manifest path. Defaults to <corpusDir>/real-world-manifest.json."},
+		"repositories":           realWorldRepositoryArraySchema("Repositories included in the sweep. Defaults from manifestPath when available."),
+		"dependencyPrep":         realWorldDependencyPrepArraySchema("Dependency preparation commands, skips, failures, and their validation impact."),
+		"productRecommendations": realWorldProductRecommendationArraySchema("Optional product recommendations to use instead of the triage draft."),
+		"productDecisions":       arrayStringSchema("Optional product changes or decisions to use instead of the triage draft."),
+		"followUp":               arrayStringSchema("Optional follow-up notes to use instead of the triage draft."),
+	}), s.handleRealWorldTriageOutput, true)
 	s.addTool("real_world_record_result", "Persist a real-world sweep result to split reports/real-world-results storage and copy the DollarLint JSON output into reports/real-world-artifacts.", schemaObject(map[string]any{
 		"id":                     map[string]any{"type": "string", "description": "Stable entry id. Defaults to a slug from date and title."},
 		"date":                   map[string]any{"type": "string", "description": "Entry date in YYYY-MM-DD. Defaults to today."},

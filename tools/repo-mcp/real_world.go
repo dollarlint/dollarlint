@@ -227,6 +227,7 @@ func (s *repoServer) handleRealWorldStartTesting(ctx context.Context, request mc
 			"Record dependency preparation in dependencyPrep, including skipped or not-needed prep.",
 			"Record recommendations in productRecommendations with strength, recommendation, and rationale.",
 			"Record product changes or decisions in productDecisions; use a no-change note when nothing changed.",
+			"After recording, the final user message must either recommend product changes to consider or state that the product behaved reasonably.",
 		},
 		"nextStep": next,
 	})
@@ -451,6 +452,7 @@ func (s *repoServer) handleRealWorldRunCorpus(ctx context.Context, request mcp.C
 	}
 	p.step("Running real-world corpus validation")
 	validationArgs := realWorldValidationArgs(args.CorpusDir, schemaStore, args.SchemaStoreFailure, *args.FetchRetries, args.FetchRetryMinWait, args.FetchRetryMaxWait, args.OutputArtifact, args.ExtraArgs)
+	validationCommand := realWorldValidationCommand(args.CorpusDir, args.CacheDir, args.OutputArtifact, schemaStore, args.SchemaStoreFailure, *args.FetchRetries, args.FetchRetryMinWait, args.FetchRetryMaxWait, args.ExtraArgs)
 	validation := runProcess(ctx, s.root, []string{"XDG_CACHE_HOME=" + args.CacheDir}, filepath.Join(s.root, "bin/dollarlint"), validationArgs...)
 	summary, warnings, outputErr := readRealWorldOutputSummary(args.OutputArtifact)
 	out := map[string]any{
@@ -463,8 +465,8 @@ func (s *repoServer) handleRealWorldRunCorpus(ctx context.Context, request mcp.C
 		"corpusDir":         args.CorpusDir,
 		"cacheDir":          args.CacheDir,
 		"outputArtifact":    args.OutputArtifact,
-		"validationCommand": realWorldValidationCommand(args.CorpusDir, args.CacheDir, args.OutputArtifact, schemaStore, args.SchemaStoreFailure, *args.FetchRetries, args.FetchRetryMinWait, args.FetchRetryMaxWait, args.ExtraArgs),
-		"nextStep":          realWorldNextTriageAndRecord(args.CorpusDir, args.CacheDir, args.OutputArtifact),
+		"validationCommand": validationCommand,
+		"nextStep":          realWorldNextTriageOutput(args.CorpusDir, args.CacheDir, args.OutputArtifact, validationCommand),
 	}
 	if summary != nil {
 		out["hasIssues"] = summary.Issues.Total > 0
@@ -678,11 +680,12 @@ func realWorldRecordResultContract() map[string]any {
 			"followUp",
 		},
 		"dependencyPrep":          "Include every dependency-prep command that ran, failed, timed out, was narrowed, was skipped, or was not needed. Each item needs status and notes.",
-		"productRecommendations":  "Use objects with strength high|med|low, recommendation, and rationale.",
+		"productRecommendations":  "Use objects with strength high|med|low, recommendation, and rationale. If there is no genuine product change to consider, record an explicit no-change recommendation and use the productBehavedReasonably final-response outcome.",
 		"productDecisions":        "Use for product changes or decisions made after triage. If none were made, include an explicit no-change decision.",
 		"result":                  "Read automatically from outputArtifact when outputArtifact is provided.",
 		"persistedOutputArtifact": "Written automatically from outputArtifact into reports/real-world-artifacts/.",
 		"repositories":            "Read automatically from manifestPath when repositories is omitted and a manifest is available.",
+		"finalResponseContract":   realWorldFinalResponseContract(),
 	}
 }
 
@@ -741,31 +744,42 @@ func realWorldNextFixBuild() map[string]any {
 	}
 }
 
-func realWorldNextTriageAndRecord(corpusDir, cacheDir, outputArtifact string) map[string]any {
+func realWorldNextTriageOutput(corpusDir, cacheDir, outputArtifact, command string) map[string]any {
+	return map[string]any{
+		"tool": "real_world_triage_output",
+		"why":  "Sanity-check the JSON output, group issues/warnings by repository and signal, and draft the structured record fields before persisting.",
+		"suggestedArgs": map[string]any{
+			"corpusDir":      corpusDir,
+			"cacheDir":       cacheDir,
+			"outputArtifact": outputArtifact,
+			"command":        command,
+		},
+	}
+}
+
+func realWorldNextRecordTriagedResult(suggestedArgs map[string]any, missingArgs []string) map[string]any {
 	return map[string]any{
 		"tool": "real_world_record_result",
-		"why":  "Triage the JSON output, classify findings, then persist the structured sweep result.",
+		"why":  "Persist the structured sweep result using the triage output as the draft.",
 		"beforeCalling": []string{
-			"Inspect outputArtifact with jq or another JSON reader.",
-			"Separate parsing, validation, schema, coverage, warning, crash/performance, and output-contract findings.",
-			"Account for dependencyPrep when interpreting missing local schemas.",
-			"Create productRecommendations with strength, recommendation, and rationale.",
+			"Review draftRecord from real_world_triage_output and adjust only with evidence from the JSON artifact or dependencyPrep notes.",
+			"Account for dependencyPrep when interpreting missing local schemas or skipped validation.",
+			"Keep productRecommendations limited to concrete product changes worth considering, or use an explicit no-change recommendation.",
 			"real_world_record_result will persist the raw outputArtifact JSON into reports/real-world-artifacts/ for later per-file triage.",
 			"Do not create or update Markdown report files.",
 		},
-		"requiredArgs": realWorldRecordResultContract()["required"],
-		"suggestedArgs": map[string]any{
-			"corpus":         corpusDir,
-			"cacheDir":       cacheDir,
-			"outputArtifact": outputArtifact,
-		},
+		"requiredArgs":          realWorldRecordResultContract()["required"],
+		"missingArgs":           missingArgs,
+		"suggestedArgs":         suggestedArgs,
+		"finalResponseContract": realWorldFinalResponseContract(),
 	}
 }
 
 func realWorldNextAfterRecord(entry realWorldEntry) map[string]any {
 	next := map[string]any{
-		"message": "Real-world result recorded. Use the structured entry as the durable source of truth.",
-		"entryID": entry.ID,
+		"message":               "Real-world result recorded. Use the structured entry as the durable source of truth.",
+		"entryID":               entry.ID,
+		"finalResponseContract": realWorldFinalResponseContract(),
 	}
 	if inGitHubAgenticWorkflow() {
 		next["githubAgenticWorkflow"] = true

@@ -77,6 +77,112 @@ func TestReadRealWorldOutputSummary(t *testing.T) {
 	}
 }
 
+func TestTriageRealWorldOutputGroupsIssuesAndWarnings(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "result.json")
+	data := `{
+  "summary": {
+    "discovered": 5,
+    "validated": 2,
+    "skipped": 2,
+    "failed": 1,
+    "issues": {"total": 4, "parsing": 1, "validation": 3, "schema": 0, "coverage": 0},
+    "ignored": 0,
+    "warnings": 1,
+    "durationNanos": 99
+  },
+  "files": [
+    {"path": "hugo/hugolib/testdata/fakejson.json", "format": "json", "status": "error", "issues": 1},
+    {"path": "hugo/docs/.github/workflows/markdownlint.yml", "format": "yaml", "status": "validated", "issues": 1},
+    {"path": "hugo/docs/hugo.toml", "format": "toml", "status": "validated", "issues": 2},
+    {"path": "nestjs/.circleci/config.yml", "format": "yaml", "status": "skipped"},
+    {"path": "real-world-manifest.json", "format": "json", "status": "skipped"}
+  ],
+  "issues": [
+    {"path": "hugo/hugolib/testdata/fakejson.json", "category": "parsing", "keyword": "parse", "message": "invalid GIF"},
+    {"path": "hugo/docs/.github/workflows/markdownlint.yml", "category": "validation", "schemaSource": "catalog:schemastore:GitHub Workflow", "keyword": "type", "message": "expected string"},
+    {"path": "hugo/docs/hugo.toml", "category": "validation", "schemaSource": "catalog:schemastore:Hugo", "keyword": "additionalProperties", "message": "must not have additional property sites"},
+    {"path": "hugo/docs/hugo.toml", "category": "validation", "schemaSource": "catalog:schemastore:Hugo", "keyword": "additionalProperties", "message": "must not have additional property mediatype"}
+  ],
+  "warnings": [
+    {"kind": "schemaCatalogSchemaUnavailable", "path": "nestjs/.circleci/config.yml", "schema": "https://www.schemastore.org/circleciconfig.json", "schemaSource": "catalog:schemastore:CircleCI config.yml", "message": "catalog schema could not be used"}
+  ]
+}`
+	if err := os.WriteFile(path, []byte(data), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	triage, err := triageRealWorldOutput(path, []realWorldRepository{
+		{Name: "hugo", CloneURL: "https://github.com/gohugoio/hugo.git", Path: filepath.Join(dir, "hugo")},
+		{Name: "nestjs", CloneURL: "https://github.com/nestjs/nest.git", Path: filepath.Join(dir, "nestjs")},
+	})
+	if err != nil {
+		t.Fatalf("triage output: %v", err)
+	}
+	if triage.Summary == nil || triage.Summary.Issues.Total != 4 {
+		t.Fatalf("summary = %+v", triage.Summary)
+	}
+	if len(triage.WarningGroups) != 1 || triage.WarningGroups[0].Count != 1 {
+		t.Fatalf("warning groups = %+v", triage.WarningGroups)
+	}
+	var fixtureGroup, hugoCatalogGroup bool
+	for _, group := range triage.IssueGroups {
+		if group.Repository == "hugo" && group.Signal == "fixture-data" && group.Count == 1 && group.FixtureSignal {
+			fixtureGroup = true
+		}
+		if group.Repository == "hugo" && group.Signal == "catalog-schema-validation" && group.SchemaSource == "catalog:schemastore:Hugo" && group.Count == 2 {
+			hugoCatalogGroup = true
+		}
+	}
+	if !fixtureGroup || !hugoCatalogGroup {
+		t.Fatalf("issue groups = %+v", triage.IssueGroups)
+	}
+	var hugoRepo *realWorldRepositoryTriage
+	for i := range triage.PerRepository {
+		if triage.PerRepository[i].Repository == "hugo" {
+			hugoRepo = &triage.PerRepository[i]
+			break
+		}
+	}
+	if hugoRepo == nil || hugoRepo.IssueCount != 4 || hugoRepo.FixtureIssueCount != 1 || hugoRepo.ProductSignalIssueCount != 3 {
+		t.Fatalf("hugo repo triage = %+v", hugoRepo)
+	}
+	if len(triage.Findings) == 0 || !strings.Contains(triage.Findings[0], "discovered 5 files") {
+		t.Fatalf("findings = %+v", triage.Findings)
+	}
+	if len(triage.ProductRecommendations) == 0 || triage.FinalResponseContract["required"] == "" {
+		t.Fatalf("recommendations=%+v finalResponseContract=%+v", triage.ProductRecommendations, triage.FinalResponseContract)
+	}
+}
+
+func TestTriageRealWorldOutputRejectsCountMismatch(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "result.json")
+	data := `{
+  "summary": {
+    "discovered": 1,
+    "validated": 1,
+    "skipped": 0,
+    "failed": 0,
+    "issues": {"total": 2, "parsing": 0, "validation": 2, "schema": 0, "coverage": 0},
+    "warnings": 0
+  },
+  "files": [
+    {"path": "repo/config.json", "format": "json", "status": "validated", "issues": 1}
+  ],
+  "issues": [
+    {"path": "repo/config.json", "category": "validation", "keyword": "type", "message": "expected string"}
+  ],
+  "warnings": []
+}`
+	if err := os.WriteFile(path, []byte(data), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := triageRealWorldOutput(path, nil); err == nil || !strings.Contains(err.Error(), "summary.issues.total=2") {
+		t.Fatalf("expected count mismatch error, got %v", err)
+	}
+}
+
 func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
 	root := t.TempDir()
 	history := realWorldHistory{

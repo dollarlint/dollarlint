@@ -1,0 +1,2837 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json",
+  "formatVersion": 1,
+  "root": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2004350901",
+  "summary": {
+    "discovered": 314,
+    "validated": 257,
+    "skipped": 56,
+    "failed": 1,
+    "issues": {
+      "total": 6,
+      "parsing": 1,
+      "validation": 5,
+      "schema": 0,
+      "coverage": 0
+    },
+    "ignored": 0,
+    "warnings": 2,
+    "durationNanos": 1137455459
+  },
+  "files": [
+    {
+      "path": "hugo/.circleci/config.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/circleciconfig.json",
+      "schemaSource": "catalog:schemastore:CircleCI config.yml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0,
+      "message": "catalog schema could not be used; skipped catalog-inferred validation after schema compile failure"
+    },
+    {
+      "path": "hugo/.gemini/config.yaml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/.github/ISSUE_TEMPLATE/config.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-issue-config.json",
+      "schemaSource": "catalog:schemastore:GitHub Issue Template configuration",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/.github/dependabot.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/dependabot-2.0.json",
+      "schemaSource": "catalog:schemastore:dependabot-v2.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/.github/workflows/image.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/.github/workflows/stale.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/.github/workflows/test.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/.cspell.json",
+      "format": "jsonc",
+      "schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/packages/cspell-types/cspell.schema.json",
+      "schemaSource": "catalog:schemastore:CSpell (cspell.json)",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/.github/ISSUE_TEMPLATE/config.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-issue-config.json",
+      "schemaSource": "catalog:schemastore:GitHub Issue Template configuration",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/.github/workflows/codeql-analysis.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/.github/workflows/markdownlint.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 1,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/.github/workflows/spellcheck.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/.github/workflows/stale.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/.markdownlint-cli2.yaml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/assets/jsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/jsconfig.json",
+      "schemaSource": "catalog:schemastore:jsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/data/articles.toml",
+      "format": "toml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/data/docs.yaml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/data/embedded_template_urls.toml",
+      "format": "toml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/data/homepagetweets.toml",
+      "format": "toml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/data/keywords.yaml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/data/page_filters.yaml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/data/sponsors.toml",
+      "format": "toml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/hugo.toml",
+      "format": "toml",
+      "schema": "https://www.schemastore.org/hugo.json",
+      "schemaSource": "catalog:schemastore:Hugo",
+      "status": "validated",
+      "issues": 3,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/hugoreleaser.yaml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/netlify.toml",
+      "format": "toml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/package.hugo.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 1,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/static/manifest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/docs/static/shared/examples/data/books.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/hugolib/testdata/fakejson.json",
+      "format": "",
+      "status": "error",
+      "issues": 0,
+      "ignored": 0,
+      "message": "parse /var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2004350901/hugo/hugolib/testdata/fakejson.json: hujson: line 1, column 1: invalid literal: GIF89a"
+    },
+    {
+      "path": "hugo/hugolib/testdata/fruits.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/hugoreleaser.yaml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/internal/warpc/genwebp/deps/parson/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/internal/warpc/js/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/media/testdata/resource.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "hugo/snap/snapcraft.yaml",
+      "format": "yaml",
+      "schema": "https://raw.githubusercontent.com/canonical/snapcraft/main/schema/snapcraft.json",
+      "schemaSource": "catalog:schemastore:Snapcraft",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/.circleci/config.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/circleciconfig.json",
+      "schemaSource": "catalog:schemastore:CircleCI config.yml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0,
+      "message": "catalog schema could not be used; skipped catalog-inferred validation after schema compile failure"
+    },
+    {
+      "path": "nestjs/.commitlintrc.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/commitlintrc.json",
+      "schemaSource": "catalog:schemastore:commitlint (.commitlintrc)",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/.github/FUNDING.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-funding.json",
+      "schemaSource": "catalog:schemastore:GitHub Funding",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/.github/ISSUE_TEMPLATE/Bug_report.yml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/.github/ISSUE_TEMPLATE/Feature_request.yml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/.github/ISSUE_TEMPLATE/Regression.yml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/.github/ISSUE_TEMPLATE/Suggestion_improve_performance.yml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/.github/ISSUE_TEMPLATE/config.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-issue-config.json",
+      "schemaSource": "catalog:schemastore:GitHub Issue Template configuration",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/.github/dependabot.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/dependabot-2.0.json",
+      "schemaSource": "catalog:schemastore:dependabot-v2.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/.github/lock.yml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/.github/workflows/codeql-analysis.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/auto-mock/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/cors/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/discovery/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/docker-compose.yml",
+      "format": "yaml",
+      "schema": "https://raw.githubusercontent.com/compose-spec/compose-go/master/schema/compose-spec.json",
+      "schemaSource": "catalog:schemastore:docker-compose.yml",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/graphql-code-first/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/graphql-schema-first/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/hello-world/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/hooks/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/injector/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/inspector/e2e/fixtures/post-init-graph.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/inspector/e2e/fixtures/pre-init-graph.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/inspector/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/lazy-modules/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/microservices/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/module-utils/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/mongoose/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/nest-application/app-locals/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/nest-application/get-url/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/nest-application/global-prefix/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/nest-application/listen/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/nest-application/raw-body/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/nest-application/sse/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/nest-application/use-body-parser/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/repl/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/scopes/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/send-files/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/testing-module-override/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/typeorm/ormconfig.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/typeorm/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/versioning/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/integration/websockets/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/lerna.json",
+      "format": "json",
+      "schema": "nestjs/node_modules/lerna/schemas/lerna-schema.json",
+      "schemaSource": "$schema",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/package-lock.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/common/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/common/test/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/common/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/common/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/core/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/core/test/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/core/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/core/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/microservices/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/microservices/test/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/microservices/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/microservices/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-express/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-express/test/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-express/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-express/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-fastify/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-fastify/test/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-fastify/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-fastify/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-socket.io/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-socket.io/test/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-socket.io/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-socket.io/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-ws/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-ws/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/platform-ws/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/testing/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/testing/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/testing/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/websockets/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/websockets/test/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/websockets/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/packages/websockets/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/renovate.json",
+      "format": "json",
+      "schema": "https://docs.renovatebot.com/renovate-schema.json",
+      "schemaSource": "catalog:schemastore:Renovate",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/01-cats-app/e2e/jest-e2e.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/01-cats-app/jest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/01-cats-app/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/01-cats-app/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/01-cats-app/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/02-gateways/e2e/jest-e2e.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/02-gateways/jest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/02-gateways/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/02-gateways/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/02-gateways/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/03-microservices/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/03-microservices/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/03-microservices/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/04-grpc/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/04-grpc/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/04-grpc/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/04-grpc/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/05-sql-typeorm/docker-compose.yml",
+      "format": "yaml",
+      "schema": "https://raw.githubusercontent.com/compose-spec/compose-go/master/schema/compose-spec.json",
+      "schemaSource": "catalog:schemastore:docker-compose.yml",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/05-sql-typeorm/jest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/05-sql-typeorm/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/05-sql-typeorm/test/jest-e2e.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/05-sql-typeorm/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/05-sql-typeorm/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/06-mongoose/docker-compose.yml",
+      "format": "yaml",
+      "schema": "https://raw.githubusercontent.com/compose-spec/compose-go/master/schema/compose-spec.json",
+      "schemaSource": "catalog:schemastore:docker-compose.yml",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/06-mongoose/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/06-mongoose/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/06-mongoose/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/07-sequelize/docker-compose.yml",
+      "format": "yaml",
+      "schema": "https://raw.githubusercontent.com/compose-spec/compose-go/master/schema/compose-spec.json",
+      "schemaSource": "catalog:schemastore:docker-compose.yml",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/07-sequelize/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/07-sequelize/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/07-sequelize/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/08-webpack/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/08-webpack/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/08-webpack/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/08-webpack/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/09-babel-example/jsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/jsconfig.json",
+      "schemaSource": "catalog:schemastore:jsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/09-babel-example/nodemon.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nodemon.json",
+      "schemaSource": "catalog:schemastore:nodemon.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/09-babel-example/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/10-fastify/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/10-fastify/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/10-fastify/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/11-swagger/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/11-swagger/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/11-swagger/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/11-swagger/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/12-graphql-schema-first/e2e/jest-e2e.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/12-graphql-schema-first/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/12-graphql-schema-first/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/12-graphql-schema-first/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/12-graphql-schema-first/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/13-mongo-typeorm/docker-compose.yml",
+      "format": "yaml",
+      "schema": "https://raw.githubusercontent.com/compose-spec/compose-go/master/schema/compose-spec.json",
+      "schemaSource": "catalog:schemastore:docker-compose.yml",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/13-mongo-typeorm/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/13-mongo-typeorm/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/13-mongo-typeorm/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/14-mongoose-base/docker-compose.yml",
+      "format": "yaml",
+      "schema": "https://raw.githubusercontent.com/compose-spec/compose-go/master/schema/compose-spec.json",
+      "schemaSource": "catalog:schemastore:docker-compose.yml",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/14-mongoose-base/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/14-mongoose-base/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/14-mongoose-base/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/15-mvc/nodemon.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nodemon.json",
+      "schemaSource": "catalog:schemastore:nodemon.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/15-mvc/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/15-mvc/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/15-mvc/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/16-gateways-ws/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/16-gateways-ws/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/16-gateways-ws/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/17-mvc-fastify/nodemon.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nodemon.json",
+      "schemaSource": "catalog:schemastore:nodemon.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/17-mvc-fastify/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/17-mvc-fastify/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/17-mvc-fastify/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/18-context/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/18-context/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/18-context/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/19-auth-jwt/e2e/jest-e2e.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/19-auth-jwt/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/19-auth-jwt/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/19-auth-jwt/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/19-auth-jwt/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/20-cache/jest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/20-cache/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/20-cache/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/20-cache/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/21-serializer/jest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/21-serializer/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/21-serializer/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/21-serializer/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/22-graphql-prisma/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/22-graphql-prisma/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/22-graphql-prisma/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/22-graphql-prisma/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/23-graphql-code-first/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/23-graphql-code-first/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/23-graphql-code-first/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/23-graphql-code-first/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/24-serve-static/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/24-serve-static/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/24-serve-static/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/25-dynamic-modules/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/25-dynamic-modules/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/25-dynamic-modules/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/25-dynamic-modules/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/26-queues/docker-compose.yml",
+      "format": "yaml",
+      "schema": "https://raw.githubusercontent.com/compose-spec/compose-go/master/schema/compose-spec.json",
+      "schemaSource": "catalog:schemastore:docker-compose.yml",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/26-queues/e2e/jest-e2e.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/26-queues/jest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/26-queues/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/26-queues/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/26-queues/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/26-queues/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/27-scheduling/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/27-scheduling/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/27-scheduling/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/27-scheduling/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/28-sse/jest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/28-sse/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/28-sse/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/28-sse/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/28-sse/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/29-file-upload/e2e/jest-e2e.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/29-file-upload/jest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/29-file-upload/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/29-file-upload/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/29-file-upload/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/30-event-emitter/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/30-event-emitter/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/30-event-emitter/test/jest-e2e.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/30-event-emitter/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/30-event-emitter/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/gateway/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/gateway/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/gateway/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/gateway/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/posts-application/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/posts-application/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/posts-application/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/posts-application/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/users-application/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/users-application/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/users-application/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/31-graphql-federation-code-first/users-application/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/gateway/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/gateway/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/gateway/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/gateway/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/posts-application/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/posts-application/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/posts-application/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/posts-application/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/users-application/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/users-application/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/users-application/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/32-graphql-federation-schema-first/users-application/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/33-graphql-mercurius/nest-cli.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/nest-cli.json",
+      "schemaSource": "catalog:schemastore:nest-cli",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/33-graphql-mercurius/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/33-graphql-mercurius/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/33-graphql-mercurius/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/34-using-esm-packages/nest-cli.json",
+      "format": "json",
+      "schema": "https://json.schemastore.org/nest-cli",
+      "schemaSource": "$schema",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/34-using-esm-packages/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/34-using-esm-packages/test/jest-e2e.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/34-using-esm-packages/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/34-using-esm-packages/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/35-use-esm-package-after-node22/nest-cli.json",
+      "format": "json",
+      "schema": "https://json.schemastore.org/nest-cli",
+      "schemaSource": "$schema",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/35-use-esm-package-after-node22/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/35-use-esm-package-after-node22/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/35-use-esm-package-after-node22/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/36-hmr-esm/e2e/jest-e2e.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/36-hmr-esm/jest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/36-hmr-esm/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/36-hmr-esm/tsconfig.build.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/sample/36-hmr-esm/tsconfig.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/tools/benchmarks/package-lock.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/tools/benchmarks/package.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/tools/benchmarks/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig",
+      "schemaSource": "$schema",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/tools/gulp/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/tsconfig.json",
+      "format": "jsonc",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "nestjs/tsconfig.spec.json",
+      "format": "json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/FUNDING.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-funding.json",
+      "schemaSource": "catalog:schemastore:GitHub Funding",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/ISSUE_TEMPLATE/config.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-issue-config.json",
+      "schemaSource": "catalog:schemastore:GitHub Issue Template configuration",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/chronographer.yml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/config.yml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/dependabot.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/dependabot-2.0.json",
+      "schemaSource": "catalog:schemastore:dependabot-v2.json",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/labels.toml",
+      "format": "toml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/patchback.yml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/workflows/deploy.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/workflows/doc-check-links.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/workflows/prepare-release-pr.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/workflows/stale.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/workflows/test.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.github/workflows/update-plugin-list.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.pre-commit-config.yaml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/pre-commit-config.json",
+      "schemaSource": "catalog:schemastore:.pre-commit-config.yml",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/.readthedocs.yaml",
+      "format": "yaml",
+      "schema": "https://raw.githubusercontent.com/readthedocs/readthedocs.org/master/readthedocs/rtd_tests/fixtures/spec/v2/schema.json",
+      "schemaSource": "catalog:schemastore:Read the Docs",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/codecov.yml",
+      "format": "yaml",
+      "schema": "https://www.schemastore.org/codecov.json",
+      "schemaSource": "catalog:schemastore:Codecov configuration files",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/doc/en/example/.ruff.toml",
+      "format": "toml",
+      "schema": "https://www.schemastore.org/ruff.json",
+      "schemaSource": "catalog:schemastore:Ruff",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/doc/en/example/customdirectory/tests/manifest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/doc/en/example/nonpython/test_simple.yaml",
+      "format": "yaml",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/pyproject.toml",
+      "format": "toml",
+      "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+      "schemaSource": "catalog:schemastore:PyProject",
+      "status": "validated",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "pytest/testing/example_scripts/customdirectory/tests/manifest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    },
+    {
+      "path": "real-world-manifest.json",
+      "format": "json",
+      "status": "skipped",
+      "issues": 0,
+      "ignored": 0
+    }
+  ],
+  "issues": [
+    {
+      "path": "hugo/hugolib/testdata/fakejson.json",
+      "category": "parsing",
+      "keyword": "parse",
+      "message": "parse /var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2004350901/hugo/hugolib/testdata/fakejson.json: hujson: line 1, column 1: invalid literal: GIF89a",
+      "hint": "This file is not valid JSON/JSONC despite its .json extension; rename it, exclude it, or use .jsonl/.ndjson for record streams."
+    },
+    {
+      "path": "hugo/docs/.github/workflows/markdownlint.yml",
+      "schema": "https://www.schemastore.org/github-workflow.json",
+      "schemaSource": "catalog:schemastore:GitHub Workflow",
+      "category": "validation",
+      "keyword": "type",
+      "keywordLocation": "/type",
+      "property": "globs",
+      "instanceLocation": "/jobs/lint/steps/1/with/globs",
+      "line": 14,
+      "column": 15,
+      "message": "expected string, received null"
+    },
+    {
+      "path": "hugo/docs/hugo.toml",
+      "schema": "https://www.schemastore.org/hugo.json",
+      "schemaSource": "catalog:schemastore:Hugo",
+      "category": "validation",
+      "keyword": "additionalProperties",
+      "keywordLocation": "/additionalProperties",
+      "property": "sites",
+      "instanceLocation": "/module/mounts/1/sites",
+      "line": 95,
+      "column": 5,
+      "message": "must not have additional property \"sites\""
+    },
+    {
+      "path": "hugo/docs/hugo.toml",
+      "schema": "https://www.schemastore.org/hugo.json",
+      "schemaSource": "catalog:schemastore:Hugo",
+      "category": "validation",
+      "keyword": "additionalProperties",
+      "keywordLocation": "/additionalProperties",
+      "property": "mediatype",
+      "instanceLocation": "/outputFormats/headers/mediatype",
+      "line": 108,
+      "column": 22,
+      "message": "must not have additional property \"mediatype\""
+    },
+    {
+      "path": "hugo/docs/hugo.toml",
+      "schema": "https://www.schemastore.org/hugo.json",
+      "schemaSource": "catalog:schemastore:Hugo",
+      "category": "validation",
+      "keyword": "additionalProperties",
+      "keywordLocation": "/additionalProperties",
+      "property": "mediatype",
+      "instanceLocation": "/outputFormats/redir/mediatype",
+      "line": 104,
+      "column": 19,
+      "message": "must not have additional property \"mediatype\""
+    },
+    {
+      "path": "hugo/docs/package.json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "category": "validation",
+      "keyword": "pattern",
+      "keywordLocation": "/pattern",
+      "property": "name",
+      "instanceLocation": "/name",
+      "line": 2,
+      "column": 11,
+      "message": "'hugoDocs' does not match pattern '^(?:(?:@(?:[a-z0-9-*~][a-z0-9-*._~]*)?/[a-z0-9-._~])|[a-z0-9-~])[a-z0-9-._~]*$'"
+    }
+  ],
+  "ignoredIssues": [],
+  "warnings": [
+    {
+      "kind": "schemaCatalogSchemaUnavailable",
+      "source": "catalog:schemastore:CircleCI config.yml",
+      "path": "hugo/.circleci/config.yml",
+      "schema": "https://www.schemastore.org/circleciconfig.json",
+      "schemaSource": "catalog:schemastore:CircleCI config.yml",
+      "message": "Catalog schema could not be used for hugo/.circleci/config.yml. The inferred schema https://www.schemastore.org/circleciconfig.json failed to compile, so DollarLint skipped catalog-inferred validation for this file; this is not a finding in the file.",
+      "hint": "Technical details: catalog schema compile failed for hugo/.circleci/config.yml using https://www.schemastore.org/circleciconfig.json: \"https://raw.githubusercontent.com/CircleCI-Public/circleci-yaml-language-server/refs/heads/main/schema.json#\" is not valid against metaschema: jsonschema validation failed with 'http://json-schema.org/draft-07/schema#'\n- at '/properties/version/enum': items at 0 and 1 are equal"
+    },
+    {
+      "kind": "schemaCatalogSchemaUnavailable",
+      "source": "catalog:schemastore:CircleCI config.yml",
+      "path": "nestjs/.circleci/config.yml",
+      "schema": "https://www.schemastore.org/circleciconfig.json",
+      "schemaSource": "catalog:schemastore:CircleCI config.yml",
+      "message": "Catalog schema could not be used for nestjs/.circleci/config.yml. The inferred schema https://www.schemastore.org/circleciconfig.json failed to compile, so DollarLint skipped catalog-inferred validation for this file; this is not a finding in the file.",
+      "hint": "Technical details: catalog schema compile failed for nestjs/.circleci/config.yml using https://www.schemastore.org/circleciconfig.json: \"https://raw.githubusercontent.com/CircleCI-Public/circleci-yaml-language-server/refs/heads/main/schema.json#\" is not valid against metaschema: jsonschema validation failed with 'http://json-schema.org/draft-07/schema#'\n- at '/properties/version/enum': items at 0 and 1 are equal"
+    }
+  ]
+}

@@ -87,6 +87,7 @@ mcp-servers:
       - real_world_history
       - real_world_prepare_corpus
       - real_world_run_corpus
+      - real_world_triage_output
       - real_world_record_result
 
 env:
@@ -160,13 +161,14 @@ Run DollarLint against a fresh, bounded set of public repositories, persist the 
    - Nonzero validation exit code 1 is expected when real issues are found. Treat crashes, missing output JSON, hangs, and unexplained warnings as higher-severity product signals.
 
 4. Triage the output.
-   - Inspect the DollarLint JSON output artifact with `jq`.
-   - Separate parsing, validation, schema, coverage, warnings, crashes, performance, and output-contract findings.
-   - Decide whether each finding is a real third-party issue, expected test fixture data, SchemaStore mismatch, parser compatibility gap, confusing output/reporting problem, or DollarLint bug.
-   - Summarize product recommendations before finishing the run. Each recommendation must include a strength label of `high`, `med`, or `low`, based on frequency, severity, reproducibility, and expected user impact.
+   - Call `real_world_triage_output` with the prepared `corpusDir`, `cacheDir`, `outputArtifact`, `manifestPath` when available, validation command, repositories, and dependency prep entries.
+   - Let the MCP tool sanity-check output counts and group parsing, validation, schema, coverage, warning, crash/performance, and output-contract signals by repository.
+   - If `real_world_triage_output` returns an error, resolve the output/schema mismatch or record a blocker instead of proceeding from a hand-written Markdown report.
+   - Use `draftRecord` as the starting point for the structured result. Adjust it only with evidence from the JSON artifact, dependency prep notes, or repository context.
+   - Product recommendations must include a strength label of `high`, `med`, or `low`, based on frequency, severity, reproducibility, and expected user impact. If there is no genuine product change to consider, use an explicit no-change recommendation in the record.
 
 5. Persist repository memory.
-   - Call `real_world_record_result` with the title, corpus, cache directory, command, output artifact, repositories, dependency prep entries, findings, `productRecommendations` objects with `high`/`med`/`low` strength and rationale, product changes/decisions in `productDecisions`, and follow-up notes.
+   - Call `real_world_record_result` with the title, corpus, cache directory, command, output artifact, repositories, dependency prep entries, findings, `productRecommendations` objects with `high`/`med`/`low` strength and rationale, product changes/decisions in `productDecisions`, and follow-up notes from the triage tool's `draftRecord`.
    - `real_world_record_result` automatically copies the raw DollarLint JSON output into `reports/real-world-artifacts/` and stores the repo-relative path as `persistedOutputArtifact`; use that durable artifact for later per-file triage.
    - Do not create or update Markdown report files in the repository. Durable repository memory belongs in the MCP structured result.
    - If files changed, request a pull request through the configured `create-pull-request` safe output. Keep the PR title concise and mention the structured result entry.
@@ -181,5 +183,11 @@ Run DollarLint against a fresh, bounded set of public repositories, persist the 
      - Put verbose per-file details and raw warnings inside `<details>` blocks.
      - Include the tested repository table, DollarLint commit, persisted output artifact path, temp output artifact path, and workflow run URL.
    - If Discussion creation is unavailable, the safe output may fall back to an issue; mention that the intended destination was a Discussion.
+
+7. Final response.
+   - The final message back to the user must choose exactly one outcome:
+     - Recommend product changes to consider, with strength and rationale grounded in the MCP triage/record result.
+     - State that the product behaved reasonably, with a brief explanation of why no product change is recommended.
+   - Do not finish with only raw counts, run mechanics, or a generic summary.
 
 Do not fabricate results. If cloning or validation fails before a meaningful corpus run, request a short GitHub Agentic Workflow summary with the blocker, partial artifacts, and the next concrete fix.

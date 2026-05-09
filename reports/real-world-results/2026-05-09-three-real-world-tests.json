@@ -1,0 +1,118 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-three-real-world-tests",
+  "date": "2026-05-09",
+  "title": "three-real-world-tests",
+  "dollarlintRevision": "b36112e6f1e226dfe39918da33a0910e04e6988f",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2004350901",
+  "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.4080451971",
+  "command": "XDG_CACHE_HOME=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.4080451971\" bin/dollarlint \"validate\" \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2004350901\" \"--schema-store\" \"--schema-store-failure\" \"warn\" \"--fetch-retries\" \"1\" \"--fetch-retry-min-wait\" \"1ms\" \"--fetch-retry-max-wait\" \"1ms\" \"--format\" \"json\" \"--output\" \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-three-real-world-tests-168901610.json\"",
+  "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-three-real-world-tests-168901610.json",
+  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-three-real-world-tests.dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "pytest",
+      "command": "Inspect lockfiles and $schema references with rg; no install run.",
+      "status": "not-needed",
+      "notes": "No $schema references or lockfile-backed local schemas were found. Dependency installation would not improve validation fidelity for the discovered pytest files."
+    },
+    {
+      "repository": "nestjs",
+      "command": "npm ci --ignore-scripts --no-audit --fund=false",
+      "status": "run",
+      "notes": "Installed root dependencies with scripts suppressed so lerna.json could validate against node_modules/lerna/schemas/lerna-schema.json. npm emitted peer/deprecation warnings only and completed successfully.",
+      "output": "added 2079 packages in 6s; npm reported peer dependency and deprecation warnings, but exit code was 0."
+    },
+    {
+      "repository": "hugo",
+      "command": "Inspect lockfiles and $schema references with rg; no install run.",
+      "status": "not-needed",
+      "notes": "No $schema references or package-manager lockfiles indicated local schema dependencies. Existing Go/Node package metadata was sufficient for catalog-backed validation."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "pytest",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/pytest-dev/pytest.git",
+      "commit": "b10612810dc6f3614385f6456ddc5e7c8277e15b",
+      "notes": "Mature Python project with pyproject and CI/config surface.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2004350901/pytest",
+      "status": "cloned"
+    },
+    {
+      "name": "nestjs",
+      "ecosystem": "TypeScript/Node",
+      "cloneURL": "https://github.com/nestjs/nest.git",
+      "commit": "d69b14a85e100a689499e03190459b3d59ecd87b",
+      "notes": "Large TypeScript framework with package, lint, and test configuration.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2004350901/nestjs",
+      "status": "cloned"
+    },
+    {
+      "name": "hugo",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/gohugoio/hugo.git",
+      "commit": "70112392058e71877404d1a5248b11e3a57ab66c",
+      "notes": "Go static site generator with mixed build and CI configuration.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2004350901/hugo",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 314,
+    "validated": 257,
+    "skipped": 56,
+    "failed": 1,
+    "issues": {
+      "total": 6,
+      "parsing": 1,
+      "validation": 5,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 2,
+    "duration": {
+      "nanos": 1137455459
+    }
+  },
+  "findings": [
+    "Build succeeded with go build -o bin/dollarlint ./cmd/dollarlint; validation completed in about 1.14s over 314 discovered files.",
+    "Overall result: 257 validated, 56 skipped, 1 failed; 6 issues total (1 parsing, 5 validation), 0 schema issues, 0 coverage issues, 2 warnings.",
+    "pytest result: 14 validated and 7 skipped; no issues or warnings observed.",
+    "nestjs result: 226 validated and 30 skipped; no file issues observed. The root lerna.json local node_modules schema was available after dependency prep. One CircleCI catalog schema compile warning was reported for .circleci/config.yml.",
+    "hugo result: 17 validated, 18 skipped, and 1 error. hugolib/testdata/fakejson.json is a GIF payload with a .json extension, producing the single parsing issue.",
+    "hugo validation findings: docs/.github/workflows/markdownlint.yml sets with.globs to null where the GitHub Workflow schema expects a string; docs/package.json uses name hugoDocs, which violates the package.json lowercase-name pattern; docs/hugo.toml produced three Hugo schema additionalProperties findings for module.mounts.sites and outputFormats.*.mediatype.",
+    "Two warnings came from SchemaStore CircleCI schema compilation for hugo/.circleci/config.yml and nestjs/.circleci/config.yml; both were correctly treated as warnings/skipped catalog validation rather than file findings.",
+    "No DollarLint crash, malformed JSON output, or obvious output-contract regression was observed."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "med",
+      "recommendation": "Deduplicate repeated catalog schema compile warnings by schema/source in summary output while preserving per-file detail in JSON.",
+      "rationale": "The same CircleCI SchemaStore compile failure appeared for both Hugo and NestJS. Current behavior is correct, but repeated external-schema warnings can distract users during broad corpus sweeps."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider an opt-in fixture or binary-content ignore affordance for obvious non-text payloads with config-like extensions under testdata/fixture paths.",
+      "rationale": "Hugo includes a GIF file named fakejson.json specifically as test data. Reporting it as invalid JSON is technically correct, so this should remain opt-in and conservative."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Review whether common skipped project config filenames such as jest.json and jest-e2e.json have safe SchemaStore matches worth enabling.",
+      "rationale": "NestJS had many skipped Jest-style JSON files. They were not failures, but a targeted catalog-match expansion could improve useful coverage if schemas are reliable."
+    }
+  ],
+  "productDecisions": [
+    "No product code or configuration changes were made during this sweep.",
+    "Keep invalid .json parse failures visible by default; the Hugo fakejson.json case is useful signal unless users opt into ignores.",
+    "Keep external catalog schema compile failures classified as warnings, not validation findings."
+  ],
+  "followUp": [
+    "If noise reduction becomes a priority, prototype warning deduplication around repeated schemaCatalogSchemaUnavailable entries.",
+    "Optionally run a focused catalog-coverage pass on skipped Jest and project-specific config filenames before adding any new filename heuristics.",
+    "No immediate blocker was found in pytest, NestJS, or Hugo validation behavior."
+  ]
+}

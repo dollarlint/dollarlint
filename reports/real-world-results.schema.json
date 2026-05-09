@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dollarlint/dollarlint/reports/real-world-results.schema.json",
+  "title": "DollarLint real-world test results",
+  "description": "Structured history for DollarLint real-world repository sweeps.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "entries"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "./real-world-results.schema.json"
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "date",
+        "title",
+        "dollarlintRevision",
+        "corpus",
+        "command",
+        "outputArtifact",
+        "repositories"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dollarlintRevision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workingTreeNote": {
+          "type": "string"
+        },
+        "corpus": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cacheDir": {
+          "type": "string"
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outputArtifact": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repositories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/repository"
+          }
+        },
+        "result": {
+          "$ref": "#/$defs/result"
+        },
+        "beforeResult": {
+          "$ref": "#/$defs/result"
+        },
+        "findings": {
+          "$ref": "#/$defs/stringList"
+        },
+        "productDecisions": {
+          "$ref": "#/$defs/stringList"
+        },
+        "followUp": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "cloneURL"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ecosystem": {
+          "type": "string"
+        },
+        "cloneURL": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "alreadyTested": {
+          "type": "boolean"
+        },
+        "previousEntries": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "discovered",
+        "validated",
+        "skipped",
+        "failed",
+        "issues",
+        "warnings"
+      ],
+      "properties": {
+        "discovered": {
+          "$ref": "#/$defs/count"
+        },
+        "validated": {
+          "$ref": "#/$defs/count"
+        },
+        "skipped": {
+          "$ref": "#/$defs/count"
+        },
+        "failed": {
+          "$ref": "#/$defs/count"
+        },
+        "issues": {
+          "$ref": "#/$defs/issueSummary"
+        },
+        "ignored": {
+          "$ref": "#/$defs/count"
+        },
+        "warnings": {
+          "$ref": "#/$defs/count"
+        },
+        "duration": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "nanos": {
+              "$ref": "#/$defs/count"
+            }
+          }
+        }
+      }
+    },
+    "issueSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "parsing", "validation", "schema", "coverage"],
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/count"
+        },
+        "parsing": {
+          "$ref": "#/$defs/count"
+        },
+        "validation": {
+          "$ref": "#/$defs/count"
+        },
+        "schema": {
+          "$ref": "#/$defs/count"
+        },
+        "coverage": {
+          "$ref": "#/$defs/count"
+        }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

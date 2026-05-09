@@ -46,7 +46,26 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
       </p>
     </div>
 
-    <h2>3. Pinpoint issues with locations</h2>
+    <h2>3. Prepare whole-repository runs</h2>
+    <p>
+      Some projects keep schemas in installed dependencies, such as <code
+        >node_modules</code
+      >. If configs use local <code>$schema</code> paths into those dependencies,
+      install the project dependencies before validating so DollarLint sees the same
+      schema context as the project tools.
+    </p>
+    <p>
+      Full-repository runs also discover test fixtures, snapshots, generated
+      baselines, and partial config fragments. Keep those visible when you want
+      a broad audit, or exclude them narrowly when you want application config
+      only.
+    </p>
+    <pre><code>dollarlint validate . \
+  --exclude 'testdata/**' \
+  --exclude 'fixtures/**' \
+  --exclude '**/*.snapshot.json'</code></pre>
+
+    <h2>4. Pinpoint issues with locations</h2>
     <pre><code>dollarlint validate ./config --locations</code></pre>
     <p>
       Line and column positions are available for text output with <code
@@ -55,7 +74,7 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
       scanning tools can point at the closest source location.
     </p>
 
-    <h2>4. Cash out machine-readable output</h2>
+    <h2>5. Cash out machine-readable output</h2>
     <pre><code>dollarlint validate . --format json
 dollarlint validate . --format sarif --output dollarlint.sarif</code></pre>
     <p>

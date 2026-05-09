@@ -81,6 +81,7 @@ func validationForSchemaFailure(document *Document, cfg Config, phase string, er
 			Schema:       document.Schema,
 			Keyword:      issueKeywordSchema,
 			Message:      message,
+			Hint:         hintForSchemaFailure(document, message),
 		}}}
 	}
 	mode, modeErr := catalogFailureMode(cfg.Schemas)
@@ -120,6 +121,26 @@ func catalogSchemaSkippedMessage(phase string) string {
 
 func isCatalogSchemaSource(source string) bool {
 	return source == "catalog" || strings.HasPrefix(source, "catalog:")
+}
+
+func hintForSchemaFailure(document *Document, message string) string {
+	lowerMessage := strings.ToLower(message)
+	if !strings.Contains(lowerMessage, "no such file or directory") ||
+		!strings.Contains(lowerMessage, "read schema ") {
+		return ""
+	}
+	schema := ""
+	if document != nil {
+		schema = document.Schema
+	}
+	lowerSchema := strings.ToLower(schema)
+	if strings.HasPrefix(lowerSchema, "file://") || strings.Contains(lowerMessage, "file://") {
+		if strings.Contains(lowerSchema, "/node_modules/") || strings.Contains(lowerMessage, "/node_modules/") {
+			return "The referenced local schema file is missing. If a project dependency provides it, install dependencies before validating, or exclude files whose tool schemas are unavailable."
+		}
+		return "The referenced local schema file is missing. Check the $schema path, install the dependency that provides it, or exclude files whose local schemas are unavailable."
+	}
+	return ""
 }
 
 func compileSchema(ctx context.Context, cache *SchemaCache, cfg Config, schemaURI string, documentData any) (*jsonschema.Schema, error) {

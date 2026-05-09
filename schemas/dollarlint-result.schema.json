@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json",
+  "title": "DollarLint validation result",
+  "description": "Machine-readable JSON output produced by dollarlint validate --format json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "formatVersion",
+    "root",
+    "summary",
+    "files",
+    "issues",
+    "ignoredIssues",
+    "warnings"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json"
+    },
+    "formatVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "root": {
+      "type": "string"
+    },
+    "summary": {
+      "$ref": "#/$defs/summary"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/file"
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/issue"
+      }
+    },
+    "ignoredIssues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/issue"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/warning"
+      }
+    }
+  },
+  "$defs": {
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "discovered",
+        "validated",
+        "skipped",
+        "failed",
+        "issues",
+        "ignored",
+        "warnings",
+        "durationNanos"
+      ],
+      "properties": {
+        "discovered": {
+          "$ref": "#/$defs/count"
+        },
+        "validated": {
+          "$ref": "#/$defs/count"
+        },
+        "skipped": {
+          "$ref": "#/$defs/count"
+        },
+        "failed": {
+          "$ref": "#/$defs/count"
+        },
+        "issues": {
+          "$ref": "#/$defs/issueSummary"
+        },
+        "ignored": {
+          "$ref": "#/$defs/count"
+        },
+        "warnings": {
+          "$ref": "#/$defs/count"
+        },
+        "durationNanos": {
+          "$ref": "#/$defs/count"
+        }
+      }
+    },
+    "issueSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "parsing", "validation", "schema", "coverage"],
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/count"
+        },
+        "parsing": {
+          "$ref": "#/$defs/count"
+        },
+        "validation": {
+          "$ref": "#/$defs/count"
+        },
+        "schema": {
+          "$ref": "#/$defs/count"
+        },
+        "coverage": {
+          "$ref": "#/$defs/count"
+        }
+      }
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "format", "status", "issues", "ignored"],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["json", "jsonc", "json5", "jsonl", "yaml", "toml"]
+        },
+        "schema": {
+          "type": "string"
+        },
+        "schemaSource": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["validated", "skipped", "error"]
+        },
+        "issues": {
+          "$ref": "#/$defs/count"
+        },
+        "ignored": {
+          "$ref": "#/$defs/count"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "category", "message"],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "schemaSource": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["parsing", "validation", "schema", "coverage"]
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "keywordLocation": {
+          "type": "string"
+        },
+        "property": {
+          "type": "string"
+        },
+        "instanceLocation": {
+          "type": "string"
+        },
+        "line": {
+          "$ref": "#/$defs/count"
+        },
+        "column": {
+          "$ref": "#/$defs/count"
+        },
+        "message": {
+          "type": "string"
+        },
+        "hint": {
+          "type": "string"
+        },
+        "ignoreReason": {
+          "type": "string"
+        }
+      }
+    },
+    "warning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "message"],
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "schemaSource": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "hint": {
+          "type": "string"
+        }
+      }
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

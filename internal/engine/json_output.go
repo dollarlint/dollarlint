@@ -8,6 +8,7 @@ import (
 )
 
 type jsonResult struct {
+	Schema        string           `json:"$schema"`
 	FormatVersion int              `json:"formatVersion"`
 	Root          string           `json:"root"`
 	Summary       jsonSummary      `json:"summary"`
@@ -115,6 +116,7 @@ func newJSONResult(result Result) jsonResult {
 	}
 
 	return jsonResult{
+		Schema:        JSONResultSchema,
 		FormatVersion: JSONFormatVersion,
 		Root:          result.Root,
 		Summary:       newJSONSummary(result.Summary),

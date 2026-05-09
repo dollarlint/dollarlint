@@ -18,10 +18,12 @@ import (
 
 const (
 	realWorldResultsRelPath = "reports/real-world-results.json"
+	realWorldResultsSchema  = "./real-world-results.schema.json"
 	realWorldManifestName   = "real-world-manifest.json"
 )
 
 type realWorldHistory struct {
+	Schema        string           `json:"$schema,omitempty"`
 	SchemaVersion int              `json:"schemaVersion"`
 	Entries       []realWorldEntry `json:"entries"`
 }
@@ -147,6 +149,7 @@ func (s *repoServer) handleRealWorldHistory(ctx context.Context, request mcp.Cal
 	}
 	out := map[string]any{
 		"path":          filepath.Join(s.root, realWorldResultsRelPath),
+		"schema":        history.Schema,
 		"schemaVersion": history.SchemaVersion,
 		"entryCount":    len(history.Entries),
 		"repoCount":     len(tested),
@@ -466,7 +469,7 @@ func loadRealWorldHistory(root string) (realWorldHistory, error) {
 	path := filepath.Join(root, realWorldResultsRelPath)
 	data, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
-		return realWorldHistory{SchemaVersion: 1}, nil
+		return realWorldHistory{Schema: realWorldResultsSchema, SchemaVersion: 1}, nil
 	}
 	if err != nil {
 		return realWorldHistory{}, err
@@ -478,10 +481,16 @@ func loadRealWorldHistory(root string) (realWorldHistory, error) {
 	if history.SchemaVersion == 0 {
 		history.SchemaVersion = 1
 	}
+	if history.Schema == "" {
+		history.Schema = realWorldResultsSchema
+	}
 	return history, nil
 }
 
 func saveRealWorldHistory(root string, history realWorldHistory) error {
+	if history.Schema == "" {
+		history.Schema = realWorldResultsSchema
+	}
 	if history.SchemaVersion == 0 {
 		history.SchemaVersion = 1
 	}

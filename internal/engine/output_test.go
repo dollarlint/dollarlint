@@ -2,9 +2,13 @@ package engine
 
 import (
 	"encoding/json"
+	"net/url"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 func TestFormatTextGroupedDefault(t *testing.T) {
@@ -146,7 +150,8 @@ func TestFormatJSONContract(t *testing.T) {
 		}
 	}
 	var decoded struct {
-		FormatVersion int `json:"formatVersion"`
+		Schema        string `json:"$schema"`
+		FormatVersion int    `json:"formatVersion"`
 		Summary       struct {
 			DurationNanos int64        `json:"durationNanos"`
 			Issues        IssueSummary `json:"issues"`
@@ -182,7 +187,7 @@ func TestFormatJSONContract(t *testing.T) {
 	if err := json.Unmarshal(data, &decoded); err != nil {
 		t.Fatalf("json output invalid: %v\n%s", err, text)
 	}
-	if decoded.FormatVersion != JSONFormatVersion || decoded.Summary.DurationNanos != int64(123*time.Millisecond) || decoded.Summary.Issues.Total != 1 {
+	if decoded.Schema != JSONResultSchema || decoded.FormatVersion != JSONFormatVersion || decoded.Summary.DurationNanos != int64(123*time.Millisecond) || decoded.Summary.Issues.Total != 1 {
 		t.Fatalf("json summary = %+v version=%d", decoded.Summary, decoded.FormatVersion)
 	}
 	if len(decoded.Files) != 1 || decoded.Files[0].Path != "config.json" || decoded.Files[0].Schema != "schema.json" || decoded.Files[0].SchemaSource != "$schema" || decoded.Files[0].Issues != 1 || decoded.Files[0].Ignored != 1 {
@@ -197,6 +202,7 @@ func TestFormatJSONContract(t *testing.T) {
 	if len(decoded.Warnings) != 1 || decoded.Warnings[0].Path != "config.json" || decoded.Warnings[0].Schema == "" || decoded.Warnings[0].SchemaSource == "" || decoded.Warnings[0].Hint == "" {
 		t.Fatalf("json warnings = %+v", decoded.Warnings)
 	}
+	validateResultSchema(t, data)
 
 	data, err = FormatJSON(Result{})
 	if err != nil {
@@ -207,6 +213,27 @@ func TestFormatJSONContract(t *testing.T) {
 		if !strings.Contains(text, expected) {
 			t.Fatalf("empty json missing %q:\n%s", expected, text)
 		}
+	}
+	validateResultSchema(t, data)
+}
+
+func validateResultSchema(t *testing.T, data []byte) {
+	t.Helper()
+	schemaPath, err := filepath.Abs("../../schemas/dollarlint-result.schema.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	schemaURI := (&url.URL{Scheme: "file", Path: filepath.ToSlash(schemaPath)}).String()
+	schema, err := jsonschema.NewCompiler().Compile(schemaURI)
+	if err != nil {
+		t.Fatalf("compile result schema: %v", err)
+	}
+	var value any
+	if err := json.Unmarshal(data, &value); err != nil {
+		t.Fatalf("decode result json: %v", err)
+	}
+	if err := schema.Validate(value); err != nil {
+		t.Fatalf("result json does not match schema: %v\n%s", err, string(data))
 	}
 }
 

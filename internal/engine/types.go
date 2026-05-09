@@ -8,7 +8,10 @@ const (
 	StatusError     = "error"
 )
 
-const JSONFormatVersion = 1
+const (
+	JSONFormatVersion = 1
+	JSONResultSchema  = "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json"
+)
 
 const (
 	issueKeywordParse  = "parse"

@@ -2,7 +2,7 @@
 
 This report records DollarLint sweeps against real public repositories. Before starting a new sweep, check the repository tables below and avoid retesting the same projects unless the goal is an intentional before/after comparison.
 
-Structured sweep history is also stored in `reports/real-world-results.json`; prefer the repo MCP `real_world_history` tool for duplicate checks and queries.
+Structured sweep history is also stored in `reports/real-world-results.json` and declared by `reports/real-world-results.schema.json`; prefer the repo MCP `real_world_history` tool for duplicate checks and queries.
 
 ## 2026-05-09 - Initial 10-Repo Corpus
 
@@ -214,3 +214,68 @@ Structured sweep history is also stored in `reports/real-world-results.json`; pr
 - Implemented the warning-copy follow-up in `internal/engine/validation_compile.go`: warn-mode catalog schema failures now lead with a plain-language message that the inferred schema could not be used and this is not a finding in the file, while preserving compiler details in `warning.hint`.
 - Verified the follow-up with `go test ./internal/engine -run TestSchemaStoreMatchedSchemaFailurePolicy -count=1`, repo quick verification (`go test ./...` and `go vet ./...`), and a rerun against `/tmp/dollarlint-corpus.CtwOPD` to inspect the JSON warning shape.
 - If Vercel schema warnings recur across additional real projects, consider testing whether permissive schema compilation or a targeted upstream report would improve catalog-backed validation without hiding broken schemas.
+
+## 2026-05-09 - Fresh 5-Repo Config Sweep
+
+- DollarLint revision: `2dc177328588108815b51f713032270315e8419d` with unrelated untracked setup/editor files present (`.gitattributes`, `.github/agents/`, `.github/workflows/copilot-setup-steps.yml`, `.vscode/`).
+- Corpus: `/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4217735361`
+- Dependency prep: none; this sweep used raw shallow clones and did not install target-repo dependencies before validation.
+- Command: `XDG_CACHE_HOME="/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3334137466" bin/dollarlint validate "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4217735361" --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-fresh-5-repo-config-sweep-1156465496.json"`
+- Output artifact: `/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-fresh-5-repo-config-sweep-1156465496.json`
+
+### Repositories
+
+| Repo | Ecosystem | Clone URL | Repo commit | Notes |
+| --- | --- | --- | --- | --- |
+| vite | TypeScript/Vite | https://github.com/vitejs/vite.git | `cf0ff4154b26cffbf18541ade1a50818842731d3` | Empty/malformed test fixtures plus package/pnpm workspace fixture schema mismatches. |
+| react | JavaScript/React | https://github.com/facebook/react.git | `d5736f098edee62c44f27b053e6e48f5fa443803` | No file issues; catalog schema warnings for Vercel and CircleCI inferred schemas. |
+| ansible | Python/YAML | https://github.com/ansible/ansible.git | `b7c0900272fd428f336f30714089e3916fcc10f9` | High-volume Ansible task/playbook/meta schema noise in integration fixtures. |
+| grafana | Go/TypeScript | https://github.com/grafana/grafana.git | `a0cc3f51fb9be55db3d3742a85c9411f067bd201` | Broken testdata, Docker Compose fragments, plugin/OpenAPI fixtures, and missing local Nx/Lerna schemas. |
+| deno | Rust/TypeScript | https://github.com/denoland/deno.git | `d6212d40304e3d50f3337bfff0a627f11916b5f0` | Empty/malformed fixture JSON/YAML and intentionally unusual tsconfig/package/jsr fixtures. |
+
+### Result
+
+| Metric | Count |
+| --- | ---: |
+| Discovered | 8106 |
+| Validated | 3184 |
+| Skipped | 4854 |
+| Failed | 68 |
+| Issues | 935 |
+| Parsing issues | 68 |
+| Validation issues | 836 |
+| Schema issues | 31 |
+| Coverage issues | 0 |
+| Ignored issues | 0 |
+| Warnings | 2 |
+
+### Finding Breakdown
+
+| Repo | Total | Parsing | Validation | Schema | Notes |
+| --- | ---: | ---: | ---: | ---: | --- |
+| vite | 6 | 2 | 4 | 0 | Empty/malformed fixture JSON plus package and pnpm workspace fixture validation mismatches. |
+| react | 0 | 0 | 0 | 0 | No file issues; two catalog schema-unavailable warnings. |
+| ansible | 711 | 32 | 679 | 0 | Mostly Ansible task/playbook/meta schema validation noise in integration fixtures; parse findings are deliberately invalid JSON/YAML fixtures. |
+| grafana | 175 | 8 | 136 | 31 | Empty/broken testdata, Docker Compose fragments, plugin/OpenAPI fixture mismatches, and missing local `node_modules` schemas. |
+| deno | 43 | 26 | 17 | 0 | Empty/malformed test fixture JSON/YAML, shebang JSON fixtures, package-name casing fixtures, and tsconfig enum mismatches. |
+
+### Findings
+
+- React produced no file issues; only catalog schema-unavailable warnings for the known Vercel draft-04 incompatibility and a CircleCI schema metaschema problem.
+- Ansible produced a large number of validation findings because SchemaStore's Ansible task/playbook/meta schemas are stricter than many integration fixture patterns, especially boolean `yes` values and test-only task shapes.
+- Grafana exposed two distinct expected-noise classes: missing local `node_modules` schemas from `$schema` references because dependencies were not installed, and partial Docker Compose block files that are not standalone compose documents.
+- Deno and Vite mostly reinforced existing fixture behavior: empty files, deliberately malformed configs, shebang JSON, and edge-case package/tsconfig fixtures should remain visible in full-repository sweeps.
+- No crashes, hangs, unexplained warnings, output-contract regressions, or unclassified skipped-file problems appeared in this sweep.
+
+### Product Decisions
+
+- Keep reporting intentionally malformed fixture files and partial config fragments in full-repository sweeps; users can exclude those paths when they want application-only validation.
+- Consider improving schema issue hints for missing local `file://` schemas so users can tell that dependencies such as `node_modules` were not installed before validation.
+- Treat the high-volume Ansible task-schema findings as schema/project mismatch and reporting-noise pressure, not a parser fix.
+- Keep watching recurring catalog schema compile failures. The Vercel warning is already tracked; CircleCI's duplicate enum metaschema failure is a new recurrence candidate if it appears in more repos.
+
+### Follow-up
+
+- Structured result recorded in `reports/real-world-results.json`.
+- Updated the real-world testing skill after this sweep to require context-sensitive dependency prep before validation when dependencies affect schema/config fidelity.
+- No product code changes were made during this sweep.

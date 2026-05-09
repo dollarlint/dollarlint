@@ -1,4 +1,5 @@
 {
+  "$schema": "./real-world-results.schema.json",
   "schemaVersion": 1,
   "entries": [
     {
@@ -192,20 +193,6 @@
           "notes": "Same Forgejo issue-template SchemaStore mismatch pattern."
         }
       ],
-      "beforeResult": {
-        "discovered": 2079,
-        "validated": 894,
-        "skipped": 1164,
-        "failed": 21,
-        "issues": {
-          "total": 54,
-          "parsing": 21,
-          "validation": 32,
-          "schema": 1,
-          "coverage": 0
-        },
-        "warnings": 2
-      },
       "result": {
         "discovered": 2079,
         "validated": 898,
@@ -219,6 +206,20 @@
           "coverage": 0
         },
         "warnings": 0
+      },
+      "beforeResult": {
+        "discovered": 2079,
+        "validated": 894,
+        "skipped": 1164,
+        "failed": 21,
+        "issues": {
+          "total": 54,
+          "parsing": 21,
+          "validation": 32,
+          "schema": 1,
+          "coverage": 0
+        },
+        "warnings": 2
       },
       "findings": [
         "Avalonia had UTF-8 BOM-prefixed configuration files; those should parse normally.",
@@ -326,6 +327,100 @@
         "Implemented the warning-copy follow-up in internal/engine/validation_compile.go: warn-mode catalog schema failures now lead with a plain-language message that the inferred schema could not be used and this is not a finding in the file, while preserving compiler details in warning.hint.",
         "Verified the follow-up with go test ./internal/engine -run TestSchemaStoreMatchedSchemaFailurePolicy -count=1, repo quick verification (go test ./... and go vet ./...), and a rerun against /tmp/dollarlint-corpus.CtwOPD to inspect the JSON warning shape.",
         "If Vercel schema warnings recur across additional real projects, consider testing whether permissive schema compilation or a targeted upstream report would improve catalog-backed validation without hiding broken schemas."
+      ]
+    },
+    {
+      "id": "2026-05-09-fresh-5-repo-config-sweep",
+      "date": "2026-05-09",
+      "title": "Fresh 5-Repo Config Sweep",
+      "dollarlintRevision": "2dc177328588108815b51f713032270315e8419d",
+      "workingTreeNote": "dirty working tree: ?? .gitattributes; ?? .github/agents/; ?? .github/workflows/copilot-setup-steps.yml; ?? .vscode/",
+      "corpus": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4217735361",
+      "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3334137466",
+      "command": "XDG_CACHE_HOME=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3334137466\" bin/dollarlint validate \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4217735361\" --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-fresh-5-repo-config-sweep-1156465496.json\"",
+      "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-fresh-5-repo-config-sweep-1156465496.json",
+      "repositories": [
+        {
+          "name": "vite",
+          "ecosystem": "TypeScript/Vite",
+          "cloneURL": "https://github.com/vitejs/vite.git",
+          "commit": "cf0ff4154b26cffbf18541ade1a50818842731d3",
+          "notes": "Frontend tooling repo with package, CI, TypeScript, and workspace configuration.",
+          "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4217735361/vite",
+          "status": "cloned"
+        },
+        {
+          "name": "react",
+          "ecosystem": "JavaScript/React",
+          "cloneURL": "https://github.com/facebook/react.git",
+          "commit": "d5736f098edee62c44f27b053e6e48f5fa443803",
+          "notes": "Large JavaScript monorepo with fixture and package metadata coverage.",
+          "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4217735361/react",
+          "status": "cloned"
+        },
+        {
+          "name": "ansible",
+          "ecosystem": "Python/YAML",
+          "cloneURL": "https://github.com/ansible/ansible.git",
+          "commit": "b7c0900272fd428f336f30714089e3916fcc10f9",
+          "notes": "Automation project with substantial YAML and CI configuration.",
+          "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4217735361/ansible",
+          "status": "cloned"
+        },
+        {
+          "name": "grafana",
+          "ecosystem": "Go/TypeScript",
+          "cloneURL": "https://github.com/grafana/grafana.git",
+          "commit": "a0cc3f51fb9be55db3d3742a85c9411f067bd201",
+          "notes": "Observability app with Go, Node, CI, and deployment-oriented configuration.",
+          "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4217735361/grafana",
+          "status": "cloned"
+        },
+        {
+          "name": "deno",
+          "ecosystem": "Rust/TypeScript",
+          "cloneURL": "https://github.com/denoland/deno.git",
+          "commit": "d6212d40304e3d50f3337bfff0a627f11916b5f0",
+          "notes": "Runtime repo with TypeScript, JSON, workflow, and tooling configuration.",
+          "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4217735361/deno",
+          "status": "cloned"
+        }
+      ],
+      "result": {
+        "discovered": 8106,
+        "validated": 3184,
+        "skipped": 4854,
+        "failed": 68,
+        "issues": {
+          "total": 935,
+          "parsing": 68,
+          "validation": 836,
+          "schema": 31,
+          "coverage": 0
+        },
+        "warnings": 2,
+        "duration": {
+          "nanos": 8152833541
+        }
+      },
+      "findings": [
+        "React produced no file issues; only catalog schema-unavailable warnings for the known Vercel draft-04 incompatibility and a CircleCI schema metaschema problem.",
+        "Ansible produced 711 issues, mostly SchemaStore Ansible task/playbook/meta validation noise in integration test fixtures; the 32 parse failures were deliberately malformed JSON/YAML fixture files.",
+        "Grafana produced 175 issues: 8 deliberately broken/empty testdata parse failures, 31 missing local schema loads for uninstalled Nx/Lerna node_modules schemas because dependency prep was not run, and many validation issues from Docker Compose fragments and Grafana plugin/OpenAPI fixtures that are not standalone catalog documents.",
+        "Deno produced 43 issues, mostly empty/malformed test fixture JSON/YAML and tsconfig/package/jsr validation mismatches in intentionally unusual compatibility fixtures.",
+        "Vite produced 6 issues from empty or malformed test fixtures plus package/pnpm workspace fixture validation mismatches.",
+        "No crashes, hangs, unexplained warnings, output-contract regressions, or unclassified skipped-file problems appeared in this sweep."
+      ],
+      "productDecisions": [
+        "Keep reporting intentionally malformed fixture files and partial config fragments in full-repository sweeps; these are useful signals but should be handled by project config/exclusions rather than hidden globally.",
+        "Consider improving schema issue hints for missing local file:// schemas so users can tell that dependencies such as node_modules were not installed before validation.",
+        "The repeated Ansible task-schema noise suggests full-repository sweeps may benefit from clearer branch-error grouping or docs guidance for test fixture directories, not a parser fix.",
+        "The recurring Vercel catalog schema warning remains a third-party schema compatibility signal already recorded in prior sweeps; CircleCI schema metaschema failure should be watched if it recurs."
+      ],
+      "followUp": [
+        "No product code changes were made during this sweep.",
+        "Structured result recorded in reports/real-world-results.json; narrative report entry appended to reports/REAL-WORLD-TESTS.md.",
+        "Updated the real-world testing skill after this sweep to require context-sensitive dependency prep before validation when dependencies affect schema/config fidelity."
       ]
     }
   ]

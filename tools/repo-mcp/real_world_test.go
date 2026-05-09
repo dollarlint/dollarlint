@@ -75,6 +75,35 @@ func TestReadRealWorldOutputSummary(t *testing.T) {
 	}
 }
 
+func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
+	root := t.TempDir()
+	history := realWorldHistory{
+		Entries: []realWorldEntry{{
+			ID:                 "sample",
+			Date:               "2026-05-09",
+			Title:              "Sample",
+			DollarLintRevision: "abc123",
+			Corpus:             "/tmp/corpus",
+			Command:            "bin/dollarlint validate /tmp/corpus",
+			OutputArtifact:     "/tmp/out.json",
+			Repositories: []realWorldRepository{{
+				Name:     "example",
+				CloneURL: "https://github.com/example/example.git",
+			}},
+		}},
+	}
+	if err := saveRealWorldHistory(root, history); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := loadRealWorldHistory(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if loaded.Schema != realWorldResultsSchema || loaded.SchemaVersion != 1 {
+		t.Fatalf("loaded history = %+v", loaded)
+	}
+}
+
 func TestCreateRealWorldOutputPath(t *testing.T) {
 	path, err := createRealWorldOutputPath("My Sweep", "")
 	if err != nil {

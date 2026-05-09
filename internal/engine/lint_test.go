@@ -419,6 +419,26 @@ func TestLintParseSchemaAndPrimeErrors(t *testing.T) {
 	}
 }
 
+func TestLintMissingDependencySchemaHint(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "project.json"), `{"$schema":"./node_modules/tool/schema.json","name":"app"}`)
+	result, err := Lint(context.Background(), Options{Root: dir, Config: configWithoutSchemaStore()})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if len(result.Issues) != 1 {
+		t.Fatalf("issues = %+v", result.Issues)
+	}
+	issue := result.Issues[0]
+	if issue.Keyword != issueKeywordSchema || !strings.Contains(issue.Message, "schema load failed") {
+		t.Fatalf("schema issue = %+v", issue)
+	}
+	if !strings.Contains(issue.Hint, "install dependencies before validating") ||
+		!strings.Contains(issue.Hint, "tool schemas are unavailable") {
+		t.Fatalf("hint = %q", issue.Hint)
+	}
+}
+
 func TestLintRootAndDiscoveryErrorEdges(t *testing.T) {
 	result, err := Lint(context.Background(), Options{Config: Config{Discovery: DiscoveryConfig{Include: []string{"*.nothing"}}}})
 	if err != nil {

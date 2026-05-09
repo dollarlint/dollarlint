@@ -105,6 +105,10 @@ npms:
     license: MIT
     repository: https://github.com/dollarlint/dollarlint
     bugs: https://github.com/dollarlint/dollarlint/issues
+    files:
+      - glob: npm/README.md
+        name_template: README.md
+      - glob: LICENSE
     access: public
 
 brews:

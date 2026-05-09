@@ -2,9 +2,9 @@
 
 # dollarlint
 
-`dollarlint` validates source JSON, JSONC, JSON5, JSON Lines, YAML, and TOML files against JSON Schema.
+`dollarlint` validates JSON (including JSONC, JSON5, JSON Lines), YAML, and TOML files against JSON Schemas.
 
-Files without a schema declaration, config association, built-in association, or catalog match are skipped by default, but still counted in the run summary so CI output makes discovery behavior clear. Set `schemas.requireCoverage = true` when every included file must be covered.
+By default, files that do not resolve to a schema are skipped and reported in the summary. If you want every included file to be covered, set `schemas.requireCoverage = true`.
 
 ## Install
 
@@ -12,8 +12,7 @@ Files without a schema declaration, config association, built-in association, or
 go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
 ```
 
-After the first npm-backed release is published, you can also install the CLI
-with npm:
+After the first npm-backed release is published, you can also install with npm:
 
 ```sh
 npm install -g dollarlint
@@ -26,25 +25,18 @@ go build -o bin/dollarlint ./cmd/dollarlint
 ./bin/dollarlint validate .
 ```
 
-## CLI
+## Quick start
 
 ```sh
 dollarlint init
 dollarlint validate .
-dollarlint validate ./config --locations
-dollarlint validate ./config --verbose
-dollarlint validate ./config --format json
-dollarlint validate ./config --format sarif --output dollarlint.sarif
-dollarlint validate . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
-dollarlint validate . --schema-store
-dollarlint validate . --schema-store --schema-store-failure error
-dollarlint validate ./examples/schemastore --locations
-dollarlint validate ./examples/azure --locations
 ```
 
-`validate` is the canonical validation command. Bare paths are intentionally not accepted; use `dollarlint validate [path]`.
+`dollarlint init` creates a starter `.dollarlint.toml` in the current directory. It is safe by default and will not overwrite an existing file unless you confirm or pass `--force`.
 
-Use `dollarlint init` to interview you and create a starter `.dollarlint.toml` in the current directory. It is safe by default and will not overwrite an existing config unless you confirm overwrite or pass `--force`.
+## Common commands
+
+### Initialize configuration
 
 ```sh
 dollarlint init
@@ -53,13 +45,28 @@ dollarlint init --output ./packages/api/.dollarlint.toml
 dollarlint init --defaults --schema-store
 ```
 
+### Validate files
+
+```sh
+dollarlint validate .
+dollarlint validate ./config --locations
+dollarlint validate ./config --verbose
+dollarlint validate ./config --format json
+dollarlint validate ./config --format sarif --output dollarlint.sarif
+dollarlint validate . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
+dollarlint validate . --schema-store
+dollarlint validate . --schema-store --schema-store-failure error
+```
+
+Use `dollarlint validate <path>` for all validation runs. Bare paths are not accepted.
+
 Exit codes:
 
 - `0`: no non-ignored issues
 - `1`: validation, schema loading, or parsing issues were found
 - `2`: CLI/configuration error
 
-## Schema Declarations
+## Schema declarations
 
 Supported in-file conventions:
 
@@ -76,9 +83,7 @@ Config-level schema associations can validate files that do not declare a schema
 
 ## Configuration
 
-`dollarlint` config files are TOML only. The CLI searches the target root for:
-
-- `.dollarlint.toml`
+`dollarlint` configuration is TOML only. For each run, the CLI looks for `.dollarlint.toml` in the target root.
 
 Example:
 
@@ -144,19 +149,55 @@ locations = false
 branchErrors = "best"
 ```
 
-Output format and output file are invocation choices, not persistent config. Use `--format text|json|sarif` and `--output <path>` on `dollarlint validate` when a run needs a machine-readable artifact.
+Output format and artifact location are run-time options, not persistent config. Use `--format text|json|sarif` and `--output <path>` on `dollarlint validate` when you need machine-readable output.
 
-Discovery uses safe defaults. Leave `discovery.include` unset to discover JSON, JSONC, JSON5, JSON Lines (`.jsonl` and `.ndjson`), YAML, YML, and TOML files at any depth. Set `include` only when you want to replace that default set with custom discovery globs. A glob without a slash matches basenames at any depth, so `*.json` matches both `package.json` and `config/settings.json`; use slashes when you want to anchor a pattern to part of the relative path. `useDefaultExcludes = true` skips common dependency, generated, cache, and VCS directories like `node_modules`, `vendor`, `dist`, `build`, `.git`, `.venv`, and `.cache`. Add project-specific exclusions with `discovery.extendExclude` rather than copying the default list. `respectGitIgnore = true` applies root `.gitignore` patterns during directory discovery, while `forceExclude = true` also applies excludes to explicitly passed files.
+### Discovery defaults
 
-By default, remote `http(s)` schema fetching is enabled and successful remote schemas/catalogs are cached on disk for repeat runs. Set `schemas.fetch.cache = false` or pass `--no-schema-cache` when cache-free fetching is needed. Transient network failures, `408`, `425`, `429`, and retryable `5xx` responses are retried with bounded backoff. `schemas.fetch.allowedDomains` can restrict remote schemas to specific hosts, and `schemas.fetch.blockedDomains` can deny hosts even when they otherwise match the allowlist. Leave `allowedDomains` empty to allow any remote schema host, and use entries such as `schemas.example.com` or `*.example.com` for exact or wildcard host matches. If you allowlist SchemaStore, prefer `*.schemastore.org` or include both `www.schemastore.org` and `json.schemastore.org`.
+If `discovery.include` is unset, dollarlint discovers JSON, JSONC, JSON5, JSON Lines (`.jsonl` and `.ndjson`), YAML, YML, and TOML files at any depth.
 
-Catalog matching is configurable with `schemas.catalogs`. When enabled, files without an explicit schema can be matched by conventional filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional catalog sources. Precedence is explicit in-file schema, then config associations, then dollarlint's built-in `.dollarlint.toml` association, then catalog matches, then skipped. Set `schemas.requireCoverage = true` to fail the run when any discovered included file is not covered by one of those schema sources.
+- Set `discovery.include` only when you want to replace the default file set.
+- A glob without a slash matches basenames at any depth (`*.json` matches `package.json` and `config/settings.json`).
+- `useDefaultExcludes = true` skips common dependency, generated, cache, and VCS directories (`node_modules`, `vendor`, `dist`, `build`, `.git`, `.venv`, `.cache`).
+- `discovery.extendExclude` adds project-specific excludes on top of defaults.
+- `respectGitIgnore = true` applies root `.gitignore` patterns during directory discovery.
+- `forceExclude = true` also applies excludes to explicitly passed files.
 
-dollarlint automatically validates discovered `.dollarlint.toml` files against its embedded config schema. Users can override that by adding an in-file schema declaration or a config association for `.dollarlint.toml`.
+### Remote schema fetching
 
-Catalog failures are modeled separately from validation issues. By default `schemas.catalogs.failure = "warn"` records a warning, skips catalog inference, still validates explicit/configured schemas, and exits `0` unless validation issues are found. Use `"error"` when catalog availability should fail the run with exit `2`, or `"skip"` for a silent fallback. Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
+Remote `http(s)` schema fetching is enabled by default, and successful schemas/catalogs are cached on disk.
 
-Azure Resource Manager deployment schemas from `schema.management.azure.com` are pruned to the resource provider schemas used by the template before compilation. This avoids compiling the full Azure provider catalog for ordinary ARM templates. Set `schemas.optimizations.azure.pruneResources = false` to disable this Azure-specific optimization, or `schemas.optimizations.enabled = false` to disable all schema optimizations.
+- Set `schemas.fetch.cache = false` or pass `--no-schema-cache` to disable caching.
+- Transient network failures (`408`, `425`, `429`, retryable `5xx`) are retried with bounded backoff.
+- `schemas.fetch.allowedDomains` restricts allowed hosts.
+- `schemas.fetch.blockedDomains` denies hosts even if they otherwise match the allowlist.
+- Leave `allowedDomains` empty to allow any remote schema host.
+- For SchemaStore, prefer `*.schemastore.org` or include both `www.schemastore.org` and `json.schemastore.org`.
+
+### Catalog matching and coverage
+
+When `schemas.catalogs.enabled = true`, files without explicit schemas can match by filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional sources.
+
+Precedence is:
+1. in-file schema declaration
+2. config association
+3. dollarlint's built-in `.dollarlint.toml` association
+4. catalog match
+5. skipped
+
+Set `schemas.requireCoverage = true` to fail the run when any discovered included file is not covered by one of those sources.
+
+dollarlint also validates discovered `.dollarlint.toml` files against its embedded config schema. You can override that with an in-file schema declaration or a config association for `.dollarlint.toml`.
+
+Catalog failures are separate from validation issues. With `schemas.catalogs.failure = "warn"` (default), dollarlint records a warning, skips catalog inference, still validates explicit/configured schemas, and exits `0` unless validation issues exist. Use `"error"` to fail with exit `2`, or `"skip"` for a silent fallback.
+
+Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
+
+### Azure optimization
+
+Azure Resource Manager deployment schemas from `schema.management.azure.com` are pruned to the resource provider schemas used by the template before compilation. This avoids compiling the full Azure provider catalog for typical ARM templates.
+
+- Set `schemas.optimizations.azure.pruneResources = false` to disable Azure pruning.
+- Set `schemas.optimizations.enabled = false` to disable all schema optimizations.
 
 ## Examples
 
@@ -167,7 +208,7 @@ dollarlint validate ./examples/schemastore --locations
 dollarlint validate ./examples/azure --locations
 ```
 
-## Text Output
+## Text output
 
 Default text output is grouped by file:
 

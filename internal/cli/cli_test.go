@@ -392,6 +392,7 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 		"[schemas.compile]",
 		`timeout = "30s"`,
 		`failure = "warn"`,
+		`branchErrors = "best"`,
 	} {
 		if !strings.Contains(config, expected) {
 			t.Fatalf("default config missing %q:\n%s", expected, config)

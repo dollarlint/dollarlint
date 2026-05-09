@@ -519,6 +519,66 @@ func TestValidationIssuesDedupeRepeatedLeaves(t *testing.T) {
 	}
 }
 
+func TestLintBranchErrorsOutputMode(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "schema.json"), `{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "$schema": {"type": "string"},
+        "kind": {"const": "widget"},
+        "name": {"type": "string"}
+      }
+    },
+    {
+      "type": "object",
+      "required": ["label"],
+      "properties": {
+        "$schema": {"type": "string"},
+        "kind": {"const": "gadget"},
+        "label": {"type": "string"}
+      }
+    }
+  ]
+}`)
+	writeFile(t, filepath.Join(dir, "bad.json"), `{"$schema":"./schema.json","kind":"widget"}`)
+
+	cfg := configWithoutSchemaStore()
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint branch best: %v", err)
+	}
+	if result.Summary.Issues != 1 || result.Issues[0].Property != "name" {
+		t.Fatalf("best branch result = %+v issues=%+v", result.Summary, result.Issues)
+	}
+
+	cfg.Output.BranchErrors = BranchErrorsAll
+	result, err = Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint branch all: %v", err)
+	}
+	if result.Summary.Issues != 3 {
+		t.Fatalf("all branch result = %+v issues=%+v", result.Summary, result.Issues)
+	}
+	var sawName, sawKind, sawLabel bool
+	for _, issue := range result.Issues {
+		switch issue.Property {
+		case "name":
+			sawName = true
+		case "kind":
+			sawKind = true
+		case "label":
+			sawLabel = true
+		}
+	}
+	if !sawName || !sawKind || !sawLabel {
+		t.Fatalf("all branch issues = %+v", result.Issues)
+	}
+}
+
 func TestIgnoreMatching(t *testing.T) {
 	issue := Issue{RelativePath: "nested/file.json", Keyword: "type", KeywordLocation: "/properties/name/type", Property: "name", InstanceLocation: "/name"}
 	if !ignoreMatches(issue, IgnoreRule{File: "**/*.json", Keyword: "/properties/name/type", Property: "/name"}) {

@@ -29,6 +29,13 @@
       "title": "Fresh 5-Repo Config Sweep",
       "path": "reports/real-world-results/2026-05-09-fresh-5-repo-config-sweep.json",
       "repoCount": 5
+    },
+    {
+      "id": "2026-05-09-5-repo-diverse-corpus-build-infrastructure-blocker",
+      "date": "2026-05-09",
+      "title": "5-Repo Diverse Corpus — Build Infrastructure Blocker",
+      "path": "reports/real-world-results/2026-05-09-5-repo-diverse-corpus-build-infrastructure-blocker.json",
+      "repoCount": 5
     }
   ]
 }

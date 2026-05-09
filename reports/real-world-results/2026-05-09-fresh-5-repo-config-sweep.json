@@ -10,6 +10,12 @@
   "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3334137466",
   "command": "XDG_CACHE_HOME=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3334137466\" bin/dollarlint validate \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.4217735361\" --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-fresh-5-repo-config-sweep-1156465496.json\"",
   "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-fresh-5-repo-config-sweep-1156465496.json",
+  "dependencyPrep": [
+    {
+      "status": "skipped",
+      "notes": "This sweep used raw shallow clones and did not install target-repo dependencies before validation; missing local node_modules schemas were interpreted as dependency-prep limitations rather than target-repo invalidity."
+    }
+  ],
   "repositories": [
     {
       "name": "vite",
@@ -92,11 +98,5 @@
     "No product code changes were made during this sweep.",
     "Structured result recorded in split reports/real-world-results storage.",
     "Updated the real-world testing skill after this sweep to require context-sensitive dependency prep before validation when dependencies affect schema/config fidelity."
-  ],
-  "dependencyPrep": [
-    {
-      "status": "skipped",
-      "notes": "This sweep used raw shallow clones and did not install target-repo dependencies before validation; missing local node_modules schemas were interpreted as dependency-prep limitations rather than target-repo invalidity."
-    }
   ]
 }

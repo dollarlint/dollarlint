@@ -1,0 +1,94 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-5-repo-diverse-corpus-build-infrastructure-blocker",
+  "date": "2026-05-09",
+  "title": "5-Repo Diverse Corpus — Build Infrastructure Blocker",
+  "dollarlintRevision": "",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.1906115068",
+  "cacheDir": "/tmp/dollarlint-cache.2042739371",
+  "command": "XDG_CACHE_HOME=\"/tmp/dollarlint-cache.2042739371\" bin/dollarlint validate \"/tmp/dollarlint-corpus.1906115068\" --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output \"/tmp/dollarlint-5-repo-diverse-corpus-3780257639.json\"",
+  "outputArtifact": "",
+  "dependencyPrep": [
+    {
+      "command": "go build -o bin/dollarlint ./cmd/dollarlint",
+      "status": "failed",
+      "notes": "All 5 repos were successfully shallow-cloned. Build of DollarLint itself failed before validation could begin. No validation output was produced. Previous runs all occurred on macOS with a populated module cache; this is the first run on a GitHub Actions Linux runner. The MCP server appears unable to exec the Go compiler.",
+      "error": "exitCode 1, duration 0s — immediate failure, likely missing GOMODCACHE or GOROOT not accessible to the MCP server subprocess in the Linux CI environment",
+      "output": "exitCode:1, duration:0s"
+    }
+  ],
+  "repositories": [
+    {
+      "name": "gitea",
+      "ecosystem": "Go/TypeScript",
+      "cloneURL": "https://github.com/go-gitea/gitea.git",
+      "commit": "0a3aaeafe7bef9d6935422f4b91c77c216c01b21",
+      "path": "/tmp/dollarlint-corpus.1906115068/gitea",
+      "status": "cloned"
+    },
+    {
+      "name": "prettier",
+      "ecosystem": "JavaScript/Node",
+      "cloneURL": "https://github.com/prettier/prettier.git",
+      "commit": "f3db616d83899fbbe7901fe2ddfc334e5c20cebf",
+      "path": "/tmp/dollarlint-corpus.1906115068/prettier",
+      "status": "cloned"
+    },
+    {
+      "name": "fastapi",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/fastapi/fastapi.git",
+      "commit": "622b6356b5102113d0074083ac23c82367f4284b",
+      "path": "/tmp/dollarlint-corpus.1906115068/fastapi",
+      "status": "cloned"
+    },
+    {
+      "name": "neovim",
+      "ecosystem": "C/Lua",
+      "cloneURL": "https://github.com/neovim/neovim.git",
+      "commit": "b44c2bdd16226f6caa5324d91f1ae9781ffdc12b",
+      "path": "/tmp/dollarlint-corpus.1906115068/neovim",
+      "status": "cloned"
+    },
+    {
+      "name": "pnpm",
+      "ecosystem": "TypeScript/Node",
+      "cloneURL": "https://github.com/pnpm/pnpm.git",
+      "commit": "e1e29c1520f6ca5e7737c0e806ad2e3cd32b4c71",
+      "path": "/tmp/dollarlint-corpus.1906115068/pnpm",
+      "status": "cloned"
+    }
+  ],
+  "findings": [
+    "BLOCKER: go build failed with exitCode 1, duration 0s — immediate failure in the Linux CI environment. DollarLint binary could not be produced, so no validation was run against any of the 5 corpus repos (gitea, prettier, fastapi, neovim, pnpm).",
+    "All 5 repo clones succeeded: gitea, prettier, fastapi, neovim, pnpm.",
+    "Previous weekly runs all succeeded on macOS (developer machine) with a pre-populated Go module cache. This is the first run on a GitHub Actions Linux runner where no GOMODCACHE exists.",
+    "The MCP server (dollarlint-repo) running as an HTTP service at 127.0.0.1:8080 appears to not inherit the GOROOT/PATH environment set by the workflow runner, causing the go binary to fail immediately.",
+    "Proxy.golang.org and sum.golang.org are in the allowed-domains list, so module downloads would succeed if the Go compiler could be invoked.",
+    "Recommendation: pre-build the DollarLint binary as part of the workflow setup steps before the agent session, or ensure GOROOT and GOMODCACHE are accessible to the MCP server's subprocess environment."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "high",
+      "recommendation": "Pre-build the dollarlint binary (e.g., via a workflow `go build` step before the agent runs) so that the MCP server's real_world_run_corpus tool can use the pre-built artifact with build:false.",
+      "rationale": "The MCP server subprocess cannot reliably execute go build in the Linux CI environment. Building the binary in a dedicated pre-step sidesteps this entirely and is more reliable across environments."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Add a GOMODCACHE setup step or cache the Go module cache in the workflow so that go build can succeed in CI without downloading modules each run.",
+      "rationale": "Even if the GOROOT issue is fixed, a cold module cache means downloading all dependencies on every run, which is slow and fragile."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Document that real_world_run_corpus build:true requires the MCP server to have access to go in PATH with GOROOT and GOMODCACHE configured; add an explicit error message when go cannot be found.",
+      "rationale": "The current 0-second exitCode:1 failure gives no diagnostic output, making it hard to understand what went wrong."
+    }
+  ],
+  "followUp": [
+    "Fix the CI setup so go build works: either pre-build in a workflow step, or ensure the MCP server inherits the correct Go environment (GOROOT, GOPATH, PATH)",
+    "Retry this same corpus (gitea, prettier, fastapi, neovim, pnpm) once the build infrastructure is resolved",
+    "Consider adding a smoke-test step that verifies bin/dollarlint --version before the agent session begins"
+  ]
+}

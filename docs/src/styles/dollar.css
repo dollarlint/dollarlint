@@ -705,12 +705,6 @@ h1 {
   gap: 10px;
 }
 
-.install-command-line > span {
-  flex: 0 0 auto;
-  color: var(--gold);
-  font-weight: 700;
-}
-
 .install-actions {
   display: flex;
   flex: 0 0 auto;

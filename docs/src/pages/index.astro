@@ -82,7 +82,7 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
         <div class="install-panel-body">
           <p class="install-prompt">Give your agent this URL</p>
           <div class="install-command-line">
-            <span aria-hidden="true">URL</span><code>{agentInstallUrl}</code>
+            <code>{agentInstallUrl}</code>
           </div>
         </div>
         <div class="install-actions">
@@ -190,17 +190,35 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
       hero.querySelectorAll("[data-install-copy]").forEach((button) => {
         button.addEventListener("click", async () => {
           const command = button.parentElement
+            ?.closest("[data-install-panel]")
             ?.querySelector("code")
             ?.textContent?.trim();
           if (!command) return;
           try {
-            await navigator.clipboard.writeText(command);
+            if (navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(command);
+            } else {
+              throw new Error("Clipboard API unavailable");
+            }
             button.textContent = "Copied";
             window.setTimeout(() => {
               button.textContent = "Copy";
             }, 1400);
           } catch {
-            button.textContent = "Copy failed";
+            const fallback = document.createElement("textarea");
+            fallback.value = command;
+            fallback.setAttribute("readonly", "");
+            fallback.style.position = "fixed";
+            fallback.style.top = "-1000px";
+            document.body.append(fallback);
+            fallback.select();
+            const legacyDocument =
+              /** @type {{ execCommand(command: string): boolean }} */ (
+                document
+              );
+            const copied = legacyDocument.execCommand("copy");
+            fallback.remove();
+            button.textContent = copied ? "Copied" : "Copy failed";
             window.setTimeout(() => {
               button.textContent = "Copy";
             }, 1400);

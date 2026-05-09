@@ -3,7 +3,7 @@ package dollarlint
 import (
 	"time"
 
-	"github.com/agorischek/dollarlint/internal/engine"
+	"github.com/dollarlint/dollarlint/internal/engine"
 )
 
 const (

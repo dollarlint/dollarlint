@@ -7,7 +7,7 @@ import (
 	"io"
 	"log"
 
-	"github.com/agorischek/dollarlint"
+	"github.com/dollarlint/dollarlint"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/spf13/cobra"

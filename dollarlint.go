@@ -3,7 +3,7 @@ package dollarlint
 import (
 	"context"
 
-	"github.com/agorischek/dollarlint/internal/engine"
+	"github.com/dollarlint/dollarlint/internal/engine"
 )
 
 func DefaultConfig() Config {

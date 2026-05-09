@@ -98,7 +98,7 @@ func FormatSARIF(result Result) ([]byte, error) {
 		Runs: []sarifRun{{
 			Tool: sarifTool{Driver: sarifDriver{
 				Name:           "dollarlint",
-				InformationURI: "https://github.com/agorischek/dollarlint",
+				InformationURI: "https://github.com/dollarlint/dollarlint",
 				Rules:          sarifRules(result),
 			}},
 			Results: sarifResults(result),

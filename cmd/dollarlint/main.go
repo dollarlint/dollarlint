@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/agorischek/dollarlint/internal/cli"
+	"github.com/dollarlint/dollarlint/internal/cli"
 )
 
 func main() {

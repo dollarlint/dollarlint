@@ -9,7 +9,7 @@ By default, files that do not resolve to a schema are skipped and reported in th
 ## Install
 
 ```sh
-go install github.com/agorischek/dollarlint/cmd/dollarlint@latest
+go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest
 ```
 
 After the first npm-backed release is published, you can also install with npm:

@@ -6,7 +6,7 @@ project_name: dollarlint
 
 metadata:
   license: MIT
-  homepage: https://github.com/agorischek/dollarlint
+  homepage: https://github.com/dollarlint/dollarlint
   description: Validate JSON-family, YAML, and TOML files against their declared JSON Schemas.
 
 before:
@@ -20,7 +20,7 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags:
-      - -s -w -X github.com/agorischek/dollarlint/internal/cli.version={{ .Version }}
+      - -s -w -X github.com/dollarlint/dollarlint/internal/cli.version={{ .Version }}
     goos:
       - darwin
       - linux
@@ -74,7 +74,7 @@ npms:
       - dollarlint
     name: dollarlint
     description: Validate JSON-family, YAML, and TOML files against their declared JSON Schemas.
-    homepage: https://github.com/agorischek/dollarlint
+    homepage: https://github.com/dollarlint/dollarlint
     keywords:
       - cli
       - json-schema
@@ -83,11 +83,11 @@ npms:
       - toml
       - validation
     license: MIT
-    repository: https://github.com/agorischek/dollarlint
-    bugs: https://github.com/agorischek/dollarlint/issues
+    repository: https://github.com/dollarlint/dollarlint
+    bugs: https://github.com/dollarlint/dollarlint/issues
     access: public
 
 release:
   github:
-    owner: agorischek
+    owner: dollarlint
     name: dollarlint

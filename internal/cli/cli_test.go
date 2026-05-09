@@ -29,7 +29,7 @@ func TestExecuteExitCodes(t *testing.T) {
 	if code := Execute([]string{"validate", dir, "--format", "json"}, &stdout, &stderr); code != 1 {
 		t.Fatalf("validate command exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
-	if !strings.Contains(stdout.String(), `"issues": 1`) {
+	if !strings.Contains(stdout.String(), `"total": 1`) {
 		t.Fatalf("validate command json output missing issue count: %s", stdout.String())
 	}
 	stdout.Reset()
@@ -196,7 +196,7 @@ func TestExecuteDiscoveryFlags(t *testing.T) {
 	if code := Execute([]string{"validate", dir, "--format", "json", "--exclude", "generated/**"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("default discovery exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
-	if !strings.Contains(stdout.String(), `"issues": 0`) {
+	if !strings.Contains(stdout.String(), `"total": 0`) {
 		t.Fatalf("default discovery output = %s", stdout.String())
 	}
 	stdout.Reset()
@@ -204,7 +204,7 @@ func TestExecuteDiscoveryFlags(t *testing.T) {
 	if code := Execute([]string{"validate", dir, "--format", "json", "--no-gitignore", "--exclude", "generated/**"}, &stdout, &stderr); code != 1 {
 		t.Fatalf("no-gitignore exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
-	if !strings.Contains(stdout.String(), `"issues": 1`) {
+	if !strings.Contains(stdout.String(), `"total": 1`) {
 		t.Fatalf("no-gitignore output = %s", stdout.String())
 	}
 	stdout.Reset()
@@ -212,7 +212,7 @@ func TestExecuteDiscoveryFlags(t *testing.T) {
 	if code := Execute([]string{"validate", dir, "--format", "json", "--no-default-excludes", "--exclude", "generated/**"}, &stdout, &stderr); code != 1 {
 		t.Fatalf("no-default-excludes exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
-	if !strings.Contains(stdout.String(), `"issues": 1`) {
+	if !strings.Contains(stdout.String(), `"total": 1`) {
 		t.Fatalf("no-default-excludes output = %s", stdout.String())
 	}
 	writeFile(t, filepath.Join(dir, "target.json"), `{"$schema":"./schema.json"}`)

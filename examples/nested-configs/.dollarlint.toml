@@ -1,0 +1,11 @@
+version = 1
+
+[configs]
+mode = "nearest"
+
+[discovery]
+include = ["*.json"]
+
+[[schemas.associations]]
+file = "*.json"
+schema = "./schemas/root.schema"

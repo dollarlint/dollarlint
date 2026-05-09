@@ -8,9 +8,9 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
       <span class="eyebrow">Guide</span>
       <h1>Examples</h1>
       <p class="lead">
-        The repository includes local-schema, SchemaStore, and Azure ARM
-        examples so you can test the main workflows without inventing fixtures
-        from scratch.
+        The repository includes local-schema, nested-config, SchemaStore, and
+        Azure ARM examples so you can test the main workflows without inventing
+        fixtures from scratch.
       </p>
     </header>
 
@@ -21,6 +21,15 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
       plus one file without a schema to demonstrate skipped-file accounting.
       JSONC, JSON5, and JSON Lines use the same validation flow when included in
       your own fixtures.
+    </p>
+
+    <h2>Nested configs</h2>
+    <pre><code>dollarlint validate ./examples/nested-configs --locations</code></pre>
+    <p>
+      This fixture enables <code>configs.mode = "nearest"</code>. The root config
+      validates root-level JSON files, while <code>packages/api/.dollarlint.toml</code>
+      extends the root config and overrides the schema association for its
+      subtree.
     </p>
 
     <h2>SchemaStore-backed files</h2>

@@ -3,7 +3,8 @@ package engine
 import "strings"
 
 func applyIgnore(issue *Issue, rules []IgnoreRule) {
-	for _, rule := range rules {
+	for i := len(rules) - 1; i >= 0; i-- {
+		rule := rules[i]
 		if ignoreMatches(*issue, rule) {
 			issue.Ignored = true
 			issue.IgnoreReason = rule.Reason

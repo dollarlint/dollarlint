@@ -50,7 +50,7 @@ func (s *repoServer) handleProjectMap(ctx context.Context, request mcp.CallToolR
 			"internal/engine/sarif.go",
 		},
 		"docs":      "docs",
-		"examples":  []string{"examples/basics", "examples/schemastore", "examples/azure"},
+		"examples":  []string{"examples/basics", "examples/nested-configs", "examples/schemastore", "examples/azure"},
 		"release":   []string{".goreleaser.yaml", ".github/workflows/prepare-release.yml", ".github/workflows/release.yml"},
 		"keyChecks": []string{"go test ./...", "go vet ./...", "npm run build in docs", "go run github.com/goreleaser/goreleaser/v2@latest check"},
 	})
@@ -114,8 +114,18 @@ func (s *repoServer) handleDiagnoseValidation(ctx context.Context, request mcp.C
 		cfg.Output.BranchErrors = args.BranchErrors
 	}
 	cfg.Output.Locations = true
+	overlay := func(config *dollarlint.Config) error {
+		if len(args.Include) > 0 {
+			config.Discovery.Include = args.Include
+		}
+		if args.BranchErrors != "" {
+			config.Output.BranchErrors = args.BranchErrors
+		}
+		config.Output.Locations = true
+		return nil
+	}
 	p.step("Running validation")
-	result, err := dollarlint.Lint(ctx, dollarlint.Options{Root: s.root, Config: cfg, SourceLocations: true})
+	result, err := dollarlint.Lint(ctx, dollarlint.Options{Root: s.root, Config: cfg, ConfigPath: configPath, ConfigOverlay: overlay, SourceLocations: true})
 	if err != nil {
 		return structured(map[string]any{"ok": false, "error": err.Error(), "classification": classifyError(err.Error()), "configPath": configPath})
 	}
@@ -166,7 +176,15 @@ func (s *repoServer) handleAzurePruningReport(ctx context.Context, request mcp.C
 	if args.BranchErrors != "" {
 		cfg.Output.BranchErrors = args.BranchErrors
 	}
-	result, lintErr := dollarlint.Lint(ctx, dollarlint.Options{Root: s.root, Config: cfg, SourceLocations: true})
+	overlay := func(config *dollarlint.Config) error {
+		config.Discovery.Include = []string{rel}
+		config.Output.Locations = true
+		if args.BranchErrors != "" {
+			config.Output.BranchErrors = args.BranchErrors
+		}
+		return nil
+	}
+	result, lintErr := dollarlint.Lint(ctx, dollarlint.Options{Root: s.root, Config: cfg, ConfigPath: configPath, ConfigOverlay: overlay, SourceLocations: true})
 	p.step("Building report")
 	report := map[string]any{
 		"file":             rel,

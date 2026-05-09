@@ -433,10 +433,19 @@ func addIssue(result *Result, issue Issue) {
 		result.Summary.Ignored++
 		return
 	}
-	result.Summary.Issues++
-	if issue.Keyword == issueKeywordParse {
-		result.Summary.IssueCounts.Parse++
-	} else {
-		result.Summary.IssueCounts.Schema++
+	addIssueSummary(&result.Summary.Issues, issue)
+}
+
+func addIssueSummary(summary *IssueSummary, issue Issue) {
+	summary.Total++
+	switch issue.Keyword {
+	case issueKeywordParse:
+		summary.Parsing++
+	case issueKeywordSchema:
+		summary.Schema++
+	case "schemaCoverage":
+		summary.Coverage++
+	default:
+		summary.Validation++
 	}
 }

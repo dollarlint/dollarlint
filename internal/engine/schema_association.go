@@ -6,7 +6,8 @@ func applySchemaAssociation(document *Document, associations []SchemaAssociation
 	if document.Schema != "" {
 		return
 	}
-	for _, association := range associations {
+	for i := len(associations) - 1; i >= 0; i-- {
+		association := associations[i]
 		if association.File == "" || association.Schema == "" {
 			continue
 		}

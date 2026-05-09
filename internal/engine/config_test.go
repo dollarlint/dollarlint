@@ -272,6 +272,123 @@ schema = "./schema.json"
 	}
 }
 
+func TestLoadConfigExtendsMergesWithPresence(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), `
+[discovery]
+include = ["*.json"]
+exclude = ["generated/**"]
+useDefaultExcludes = true
+forceExclude = true
+
+[schemas]
+requireCoverage = true
+maxDepth = 4
+
+[schemas.catalogs]
+enabled = true
+failure = "error"
+
+[[schemas.catalogs.sources]]
+name = "company"
+format = "schemastore"
+path = "./catalog.json"
+
+[[schemas.associations]]
+file = "*.json"
+schema = "./root.schema"
+
+[[ignore]]
+file = "*.json"
+reason = "parent"
+
+[output]
+locations = true
+`)
+	childPath := filepath.Join(dir, "packages", "api", ".dollarlint.toml")
+	writeFile(t, childPath, `
+extends = "../../.dollarlint.toml"
+
+[discovery]
+include = []
+exclude = ["fixtures/**"]
+useDefaultExcludes = false
+forceExclude = false
+
+[schemas]
+requireCoverage = false
+
+[schemas.catalogs]
+enabled = false
+
+[[schemas.catalogs.sources]]
+name = "company"
+format = "schemastore"
+path = "./child-catalog.json"
+enabled = false
+
+[[schemas.associations]]
+file = "*.yaml"
+schema = "./child.schema"
+
+[[ignore]]
+file = "*.yaml"
+reason = "child"
+
+[output]
+locations = false
+`)
+	cfg, path, err := LoadConfig(dir, "packages/api/.dollarlint.toml")
+	if err != nil {
+		t.Fatalf("LoadConfig extends: %v", err)
+	}
+	if path != childPath {
+		t.Fatalf("path = %s", path)
+	}
+	if cfg.Extends != "" {
+		t.Fatalf("resolved config should clear extends, got %q", cfg.Extends)
+	}
+	if cfg.Discovery.Include == nil || len(cfg.Discovery.Include) != 0 {
+		t.Fatalf("child empty include should replace parent: %+v", cfg.Discovery)
+	}
+	if len(cfg.Discovery.Exclude) != 2 || cfg.Discovery.Exclude[0] != "generated/**" || cfg.Discovery.Exclude[1] != "packages/api/fixtures/**" {
+		t.Fatalf("exclude merge = %+v", cfg.Discovery.Exclude)
+	}
+	if discoveryUseDefaultExcludes(cfg.Discovery) || cfg.Discovery.ForceExclude {
+		t.Fatalf("presence-aware boolean override failed: %+v", cfg.Discovery)
+	}
+	if cfg.Schemas.RequireCoverage || cfg.Schemas.MaxDepth != 4 {
+		t.Fatalf("schema merge = %+v", cfg.Schemas)
+	}
+	if cfg.Schemas.Catalogs.Enabled || cfg.Schemas.Catalogs.Failure != "error" || len(cfg.Schemas.Catalogs.Sources) != 1 {
+		t.Fatalf("catalog merge = %+v", cfg.Schemas.Catalogs)
+	}
+	if cfg.Schemas.Catalogs.Sources[0].Path != filepath.Join(dir, "packages", "api", "child-catalog.json") || cfg.Schemas.Catalogs.Sources[0].Enabled == nil || *cfg.Schemas.Catalogs.Sources[0].Enabled {
+		t.Fatalf("catalog source override = %+v", cfg.Schemas.Catalogs.Sources[0])
+	}
+	if len(cfg.Schemas.Associations) != 2 ||
+		cfg.Schemas.Associations[0].File != "*.json" ||
+		cfg.Schemas.Associations[1].File != "packages/api/**/*.yaml" ||
+		!strings.HasSuffix(cfg.Schemas.Associations[1].Schema, "/packages/api/child.schema") {
+		t.Fatalf("association merge = %+v", cfg.Schemas.Associations)
+	}
+	if len(cfg.Ignore) != 2 || cfg.Ignore[1].File != "packages/api/**/*.yaml" {
+		t.Fatalf("ignore merge = %+v", cfg.Ignore)
+	}
+	if cfg.Output.Locations {
+		t.Fatalf("output boolean override failed: %+v", cfg.Output)
+	}
+}
+
+func TestLoadConfigExtendsCycle(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), `extends = "nested/.dollarlint.toml"`)
+	writeFile(t, filepath.Join(dir, "nested", ".dollarlint.toml"), `extends = "../.dollarlint.toml"`)
+	if _, _, err := LoadConfig(dir, ""); err == nil || !strings.Contains(err.Error(), "extends cycle") {
+		t.Fatalf("expected extends cycle error, got %v", err)
+	}
+}
+
 func TestLoadConfigErrors(t *testing.T) {
 	dir := t.TempDir()
 	if _, _, err := LoadConfig(dir, ".dollarlint.toml"); err == nil {

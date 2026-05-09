@@ -30,13 +30,24 @@ const (
 	BranchErrorsAll  = "all"
 )
 
+const (
+	ConfigModeSingle  = "single"
+	ConfigModeNearest = "nearest"
+)
+
 type Config struct {
 	Version   int             `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
+	Extends   string          `json:"extends,omitempty" yaml:"extends,omitempty" toml:"extends,omitempty"`
+	Configs   ConfigsConfig   `json:"configs,omitempty" yaml:"configs,omitempty" toml:"configs,omitempty"`
 	Discovery DiscoveryConfig `json:"discovery,omitempty" yaml:"discovery,omitempty" toml:"discovery,omitempty"`
 	Parsing   ParsingConfig   `json:"parsing,omitempty" yaml:"parsing,omitempty" toml:"parsing,omitempty"`
 	Schemas   SchemaConfig    `json:"schemas,omitempty" yaml:"schemas,omitempty" toml:"schemas,omitempty"`
 	Ignore    []IgnoreRule    `json:"ignore,omitempty" yaml:"ignore,omitempty" toml:"ignore,omitempty"`
 	Output    OutputConfig    `json:"output,omitempty" yaml:"output,omitempty" toml:"output,omitempty"`
+}
+
+type ConfigsConfig struct {
+	Mode string `json:"mode,omitempty" yaml:"mode,omitempty" toml:"mode,omitempty"`
 }
 
 type DiscoveryConfig struct {
@@ -128,9 +139,14 @@ type IgnoreRule struct {
 type Options struct {
 	Root            string
 	Config          Config
+	ConfigPath      string
+	ExplicitConfig  bool
+	ConfigOverlay   ConfigOverlay
 	SourceLocations bool
 	StartedAt       time.Time
 }
+
+type ConfigOverlay func(*Config) error
 
 type Result struct {
 	Root     string       `json:"root"`
@@ -141,21 +157,23 @@ type Result struct {
 }
 
 type Summary struct {
-	Discovered    int         `json:"discovered"`
-	Validated     int         `json:"validated"`
-	Skipped       int         `json:"skipped"`
-	Failed        int         `json:"failed"`
-	Issues        int         `json:"issues"`
-	IssueCounts   IssueCounts `json:"issueCounts"`
-	Ignored       int         `json:"ignored"`
-	Warnings      int         `json:"warnings"`
-	Duration      Duration    `json:"duration,omitempty"`
-	DurationNanos int64       `json:"durationNanos,omitempty"`
+	Discovered    int          `json:"discovered"`
+	Validated     int          `json:"validated"`
+	Skipped       int          `json:"skipped"`
+	Failed        int          `json:"failed"`
+	Issues        IssueSummary `json:"issues"`
+	Ignored       int          `json:"ignored"`
+	Warnings      int          `json:"warnings"`
+	Duration      Duration     `json:"duration,omitempty"`
+	DurationNanos int64        `json:"durationNanos,omitempty"`
 }
 
-type IssueCounts struct {
-	Parse  int `json:"parse"`
-	Schema int `json:"schema"`
+type IssueSummary struct {
+	Total      int `json:"total"`
+	Parsing    int `json:"parsing"`
+	Validation int `json:"validation"`
+	Schema     int `json:"schema"`
+	Coverage   int `json:"coverage"`
 }
 
 type FileResult struct {
@@ -193,7 +211,7 @@ type Warning struct {
 }
 
 func (r Result) HasIssues() bool {
-	return r.Summary.Issues > 0
+	return r.Summary.Issues.Total > 0
 }
 
 func (r Result) HasWarnings() bool {

@@ -23,7 +23,13 @@ const (
 	BranchErrorsAll  = engine.BranchErrorsAll
 )
 
+const (
+	ConfigModeSingle  = engine.ConfigModeSingle
+	ConfigModeNearest = engine.ConfigModeNearest
+)
+
 type Config = engine.Config
+type ConfigsConfig = engine.ConfigsConfig
 type DiscoveryConfig = engine.DiscoveryConfig
 type SchemaConfig = engine.SchemaConfig
 type CatalogConfig = engine.CatalogConfig
@@ -36,6 +42,7 @@ type CompileConfig = engine.CompileConfig
 type OutputConfig = engine.OutputConfig
 type IgnoreRule = engine.IgnoreRule
 type Options = engine.Options
+type ConfigOverlay = engine.ConfigOverlay
 type Result = engine.Result
 type Summary = engine.Summary
 type FileResult = engine.FileResult

@@ -88,15 +88,28 @@ func (s mcpServer) validate(ctx context.Context, args mcpValidateArguments) (mcp
 	if s.configPath != nil {
 		configPath = *s.configPath
 	}
-	cfg, _, err := dollarlint.LoadConfig(root, configPath)
+	cfg, loadedConfigPath, err := dollarlint.LoadConfig(root, configPath)
 	if err != nil {
 		return mcpValidateResponse{}, err
 	}
-	if len(args.Include) > 0 {
-		cfg.Discovery.Include = args.Include
+	overlay := func(config *dollarlint.Config) error {
+		if len(args.Include) > 0 {
+			config.Discovery.Include = args.Include
+		}
+		config.Output.Locations = true
+		return nil
 	}
-	cfg.Output.Locations = true
-	result, err := dollarlint.Lint(ctx, dollarlint.Options{Root: root, Config: cfg, SourceLocations: true})
+	if err := overlay(&cfg); err != nil {
+		return mcpValidateResponse{}, err
+	}
+	result, err := dollarlint.Lint(ctx, dollarlint.Options{
+		Root:            root,
+		Config:          cfg,
+		ConfigPath:      loadedConfigPath,
+		ExplicitConfig:  configPath != "",
+		ConfigOverlay:   overlay,
+		SourceLocations: true,
+	})
 	if err != nil {
 		return mcpValidateResponse{}, err
 	}

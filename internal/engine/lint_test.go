@@ -44,7 +44,7 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	if result.Summary.Discovered != 5 || result.Summary.Validated != 4 || result.Summary.Skipped != 1 {
 		t.Fatalf("summary counts = %+v", result.Summary)
 	}
-	if result.Summary.Ignored != 1 || result.Summary.Issues != 3 || result.Summary.IssueCounts.Schema != 3 || result.Summary.IssueCounts.Parse != 0 || !result.HasIssues() {
+	if result.Summary.Ignored != 1 || result.Summary.Issues.Total != 3 || result.Summary.Issues.Validation != 3 || result.Summary.Issues.Parsing != 0 || !result.HasIssues() {
 		t.Fatalf("issue counts = %+v issues=%+v", result.Summary, result.Issues)
 	}
 	if result.Summary.Duration.Duration <= 0 || result.Summary.DurationNanos <= 0 {
@@ -65,7 +65,7 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 		t.Fatalf("missing expected issues: %+v", result.Issues)
 	}
 	text := FormatText(result, OutputConfig{ShowSkipped: true})
-	if !strings.Contains(text, "dollarlint found 3 schema issues in 2 files") || !strings.Contains(text, "skipped: skip.yaml") {
+	if !strings.Contains(text, "dollarlint found 3 validation issues in 2 files") || !strings.Contains(text, "skipped: skip.yaml") {
 		t.Fatalf("text output = %s", text)
 	}
 	data, err := FormatJSON(result)
@@ -93,6 +93,105 @@ func TestLintDurationCanUseExternalStart(t *testing.T) {
 	}
 }
 
+func TestLintNearestNestedConfigAppliesChildPolicy(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "root.schema"), `{
+  "type": "object",
+  "required": ["root"],
+  "properties": {"$schema": {"type": "string"}, "root": {"type": "boolean"}}
+}`)
+	writeFile(t, filepath.Join(dir, "root.json"), `{"root": true}`)
+	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), `
+[configs]
+mode = "nearest"
+
+[discovery]
+include = ["*.json"]
+
+[[schemas.associations]]
+file = "*.json"
+schema = "./root.schema"
+`)
+	writeFile(t, filepath.Join(dir, "packages", "api", "child.schema"), `{
+  "type": "object",
+  "required": ["child"],
+  "properties": {"$schema": {"type": "string"}, "child": {"type": "boolean"}}
+}`)
+	writeFile(t, filepath.Join(dir, "packages", "api", "child.json"), `{"child": true}`)
+	writeFile(t, filepath.Join(dir, "packages", "api", ".dollarlint.toml"), `
+[discovery]
+include = ["*.json"]
+
+[[schemas.associations]]
+file = "*.json"
+schema = "./child.schema"
+`)
+
+	cfg, configPath, err := LoadConfig(dir, "")
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg, ConfigPath: configPath})
+	if err != nil {
+		t.Fatalf("Lint nearest: %v", err)
+	}
+	if result.Summary.Discovered != 2 || result.Summary.Validated != 2 || result.Summary.Issues.Total != 0 {
+		t.Fatalf("nearest summary = %+v issues=%+v", result.Summary, result.Issues)
+	}
+	for _, file := range result.Files {
+		if file.RelativePath == "packages/api/child.json" {
+			if !strings.HasSuffix(file.Schema, "/packages/api/child.schema") {
+				t.Fatalf("child file used wrong schema: %+v", file)
+			}
+			return
+		}
+	}
+	t.Fatalf("missing child file: %+v", result.Files)
+}
+
+func TestLintExplicitConfigSuppressesNearestDiscovery(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "root.schema"), `{
+  "type": "object",
+  "required": ["root"],
+  "properties": {"$schema": {"type": "string"}, "root": {"type": "boolean"}}
+}`)
+	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), `
+[configs]
+mode = "nearest"
+
+[discovery]
+include = ["*.json"]
+
+[[schemas.associations]]
+file = "*.json"
+schema = "./root.schema"
+`)
+	writeFile(t, filepath.Join(dir, "nested", "child.schema"), `{
+  "type": "object",
+  "required": ["child"],
+  "properties": {"$schema": {"type": "string"}, "child": {"type": "boolean"}}
+}`)
+	writeFile(t, filepath.Join(dir, "nested", ".dollarlint.toml"), `
+[[schemas.associations]]
+file = "*.json"
+schema = "./child.schema"
+`)
+	writeFile(t, filepath.Join(dir, "nested", "child.json"), `{"child": true}`)
+
+	cfg, configPath, err := LoadConfig(dir, "")
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg, ConfigPath: configPath, ExplicitConfig: true})
+	if err != nil {
+		t.Fatalf("Lint explicit: %v", err)
+	}
+	if result.Summary.Issues.Total == 0 {
+		t.Fatalf("expected explicit config to ignore nested config, result=%+v", result)
+	}
+}
+
 func TestLintRequiresSchemaCoverage(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "schema.schema"), `{"type":"object"}`)
@@ -113,7 +212,7 @@ func TestLintRequiresSchemaCoverage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint: %v", err)
 	}
-	if result.Summary.Discovered != 4 || result.Summary.Validated != 3 || result.Summary.Skipped != 0 || result.Summary.Failed != 1 || result.Summary.Issues != 1 {
+	if result.Summary.Discovered != 4 || result.Summary.Validated != 3 || result.Summary.Skipped != 0 || result.Summary.Failed != 1 || result.Summary.Issues.Total != 1 {
 		t.Fatalf("summary counts = %+v", result.Summary)
 	}
 	if len(result.Issues) != 1 || result.Issues[0].RelativePath != "uncovered.toml" || result.Issues[0].Keyword != "schemaCoverage" {
@@ -138,7 +237,7 @@ func TestLintAppliesBuiltinDollarlintConfigSchema(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint: %v", err)
 	}
-	if result.Summary.Discovered != 1 || result.Summary.Validated != 1 || result.Summary.Skipped != 0 || result.Summary.Issues != 0 {
+	if result.Summary.Discovered != 1 || result.Summary.Validated != 1 || result.Summary.Skipped != 0 || result.Summary.Issues.Total != 0 {
 		t.Fatalf("summary counts = %+v issues=%+v", result.Summary, result.Issues)
 	}
 	if len(result.Files) != 1 || result.Files[0].Schema != builtinDollarlintConfigSchemaURI || result.Files[0].SchemaSource != builtinDollarlintConfigSchemaSource {
@@ -150,7 +249,7 @@ func TestLintAppliesBuiltinDollarlintConfigSchema(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint invalid config: %v", err)
 	}
-	if result.Summary.Issues == 0 {
+	if result.Summary.Issues.Total == 0 {
 		t.Fatalf("expected invalid config issue, result = %+v", result)
 	}
 }
@@ -227,7 +326,7 @@ func TestLintValidatesJSONVariants(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint json variants: %v", err)
 	}
-	if result.Summary.Discovered != 4 || result.Summary.Validated != 2 || result.Summary.Skipped != 2 || result.Summary.Issues != 1 {
+	if result.Summary.Discovered != 4 || result.Summary.Validated != 2 || result.Summary.Skipped != 2 || result.Summary.Issues.Total != 1 {
 		t.Fatalf("json variants summary = %+v issues=%+v", result.Summary, result.Issues)
 	}
 	if len(result.Issues) != 1 || result.Issues[0].RelativePath != "config.jsonc" || result.Issues[0].Property != "name" || result.Issues[0].Line != 4 || result.Issues[0].Column == 0 {
@@ -266,7 +365,7 @@ func TestLintValidatesJSONLinesAsIndependentDocuments(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint jsonl: %v", err)
 	}
-	if result.Summary.Discovered != 1 || result.Summary.Validated != 1 || result.Summary.Failed != 1 || result.Summary.Issues != 4 {
+	if result.Summary.Discovered != 1 || result.Summary.Validated != 1 || result.Summary.Failed != 1 || result.Summary.Issues.Total != 4 {
 		t.Fatalf("jsonl summary = %+v issues=%+v", result.Summary, result.Issues)
 	}
 	if len(result.Files) != 1 || result.Files[0].Status != StatusError || result.Files[0].Format != DocumentFormatJSONLines {
@@ -300,7 +399,7 @@ func TestLintParseSchemaAndPrimeErrors(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint: %v", err)
 	}
-	if result.Summary.Issues == 0 {
+	if result.Summary.Issues.Total == 0 {
 		t.Fatalf("expected parse/schema issues")
 	}
 	var parseIssue, loadIssue, compileIssue bool
@@ -338,7 +437,7 @@ func TestLintRootAndDiscoveryErrorEdges(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint bad URI: %v", err)
 	}
-	if result.Summary.Failed != 1 || result.Summary.Issues != 1 {
+	if result.Summary.Failed != 1 || result.Summary.Issues.Total != 1 {
 		t.Fatalf("bad URI result = %+v", result)
 	}
 }
@@ -554,7 +653,7 @@ func TestLintBranchErrorsOutputMode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint branch best: %v", err)
 	}
-	if result.Summary.Issues != 1 || result.Issues[0].Property != "name" {
+	if result.Summary.Issues.Total != 1 || result.Issues[0].Property != "name" {
 		t.Fatalf("best branch result = %+v issues=%+v", result.Summary, result.Issues)
 	}
 
@@ -563,7 +662,7 @@ func TestLintBranchErrorsOutputMode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint branch all: %v", err)
 	}
-	if result.Summary.Issues != 3 {
+	if result.Summary.Issues.Total != 3 {
 		t.Fatalf("all branch result = %+v issues=%+v", result.Summary, result.Issues)
 	}
 	var sawName, sawKind, sawLabel bool

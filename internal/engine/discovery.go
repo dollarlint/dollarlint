@@ -123,11 +123,7 @@ type discoveryExcluder struct {
 }
 
 func newDiscoveryExcluder(root string, rootIsDir bool, cfg DiscoveryConfig) (discoveryExcluder, error) {
-	excluder := discoveryExcluder{}
-	if discoveryUseDefaultExcludes(cfg) {
-		excluder.patterns = append(excluder.patterns, defaultDiscoveryExcludes...)
-	}
-	excluder.patterns = append(excluder.patterns, cfg.Exclude...)
+	excluder := newDiscoveryPatternExcluder(cfg)
 	if discoveryRespectGitIgnore(cfg) && rootIsDir {
 		rules, err := loadGitIgnoreRules(root)
 		if err != nil {

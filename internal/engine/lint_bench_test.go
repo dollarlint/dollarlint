@@ -26,7 +26,7 @@ func BenchmarkLintLocalSharedSchema(b *testing.B) {
 		if err != nil {
 			b.Fatalf("Lint: %v", err)
 		}
-		if result.Summary.Validated != 180 || result.Summary.Issues != 0 {
+		if result.Summary.Validated != 180 || result.Summary.Issues.Total != 0 {
 			b.Fatalf("unexpected result: %+v", result.Summary)
 		}
 	}
@@ -53,7 +53,7 @@ func BenchmarkLintMixedSlowRemoteSchema(b *testing.B) {
 		if err != nil {
 			b.Fatalf("Lint: %v", err)
 		}
-		if result.Summary.Validated != 161 || result.Summary.Issues != 0 {
+		if result.Summary.Validated != 161 || result.Summary.Issues.Total != 0 {
 			b.Fatalf("unexpected result: %+v", result.Summary)
 		}
 	}
@@ -85,7 +85,7 @@ func BenchmarkLintLargeCatalog(b *testing.B) {
 		if err != nil {
 			b.Fatalf("Lint: %v", err)
 		}
-		if result.Summary.Validated != 220 || result.Summary.Issues != 0 {
+		if result.Summary.Validated != 220 || result.Summary.Issues.Total != 0 {
 			b.Fatalf("unexpected result: %+v", result.Summary)
 		}
 	}

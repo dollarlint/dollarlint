@@ -86,12 +86,14 @@ func exampleCommands(suite, format string, locations bool) ([]namedCommand, erro
 		return []namedCommand{command("./examples/basics")}, nil
 	case "schemastore":
 		return []namedCommand{command("./examples/schemastore")}, nil
+	case "nested-configs":
+		return []namedCommand{command("./examples/nested-configs")}, nil
 	case "azure":
 		return []namedCommand{command("./examples/azure")}, nil
 	case "repo-config":
 		return []namedCommand{command(". --include .dollarlint.toml")}, nil
 	case "all":
-		return []namedCommand{command("./examples/basics"), command("./examples/schemastore"), command("./examples/azure"), command(". --include .dollarlint.toml")}, nil
+		return []namedCommand{command("./examples/basics"), command("./examples/nested-configs"), command("./examples/schemastore"), command("./examples/azure"), command(". --include .dollarlint.toml")}, nil
 	default:
 		return nil, fmt.Errorf("unknown example suite %q", suite)
 	}

@@ -250,9 +250,11 @@ func filesWithIssues(result Result) int {
 }
 
 type issueCounts struct {
-	Total  int
-	Parse  int
-	Schema int
+	Total      int
+	Parsing    int
+	Validation int
+	Schema     int
+	Coverage   int
 }
 
 func countIssues(result Result) issueCounts {
@@ -261,36 +263,74 @@ func countIssues(result Result) issueCounts {
 		if issue.Ignored {
 			continue
 		}
-		counts.Total++
-		if issue.Keyword == issueKeywordParse {
-			counts.Parse++
-		} else {
-			counts.Schema++
-		}
+		addIssueCounts(&counts, issue)
 	}
-	if counts.Total == 0 && result.Summary.Issues > 0 {
-		counts.Total = result.Summary.Issues
-		counts.Parse = result.Summary.IssueCounts.Parse
-		counts.Schema = result.Summary.IssueCounts.Schema
+	if counts.Total == 0 && result.Summary.Issues.Total > 0 {
+		counts.Total = result.Summary.Issues.Total
+		counts.Parsing = result.Summary.Issues.Parsing
+		counts.Validation = result.Summary.Issues.Validation
+		counts.Schema = result.Summary.Issues.Schema
+		counts.Coverage = result.Summary.Issues.Coverage
 	}
 	return counts
+}
+
+func addIssueCounts(counts *issueCounts, issue Issue) {
+	counts.Total++
+	switch issue.Keyword {
+	case issueKeywordParse:
+		counts.Parsing++
+	case issueKeywordSchema:
+		counts.Schema++
+	case "schemaCoverage":
+		counts.Coverage++
+	default:
+		counts.Validation++
+	}
 }
 
 func issueCountLabel(result Result) string {
 	counts := countIssues(result)
 	if counts.Total == 0 {
-		if result.Summary.Issues > 0 {
-			return fmt.Sprintf("%d issue%s", result.Summary.Issues, plural(result.Summary.Issues))
-		}
 		return "0 issues"
 	}
-	if counts.Parse == 0 {
+	parts := issueCategoryLabels(counts)
+	if len(parts) == 1 {
+		return singleIssueCategoryLabel(counts)
+	}
+	return fmt.Sprintf("%d issues (%s)", counts.Total, strings.Join(parts, ", "))
+}
+
+func singleIssueCategoryLabel(counts issueCounts) string {
+	switch {
+	case counts.Parsing > 0:
+		return fmt.Sprintf("%d parsing issue%s", counts.Parsing, plural(counts.Parsing))
+	case counts.Validation > 0:
+		return fmt.Sprintf("%d validation issue%s", counts.Validation, plural(counts.Validation))
+	case counts.Schema > 0:
 		return fmt.Sprintf("%d schema issue%s", counts.Schema, plural(counts.Schema))
+	case counts.Coverage > 0:
+		return fmt.Sprintf("%d coverage issue%s", counts.Coverage, plural(counts.Coverage))
+	default:
+		return fmt.Sprintf("%d issue%s", counts.Total, plural(counts.Total))
 	}
-	if counts.Schema == 0 {
-		return fmt.Sprintf("%d parse issue%s", counts.Parse, plural(counts.Parse))
+}
+
+func issueCategoryLabels(counts issueCounts) []string {
+	var parts []string
+	if counts.Parsing > 0 {
+		parts = append(parts, fmt.Sprintf("%d parsing", counts.Parsing))
 	}
-	return fmt.Sprintf("%d issues (%d parse, %d schema)", counts.Total, counts.Parse, counts.Schema)
+	if counts.Validation > 0 {
+		parts = append(parts, fmt.Sprintf("%d validation", counts.Validation))
+	}
+	if counts.Schema > 0 {
+		parts = append(parts, fmt.Sprintf("%d schema", counts.Schema))
+	}
+	if counts.Coverage > 0 {
+		parts = append(parts, fmt.Sprintf("%d coverage", counts.Coverage))
+	}
+	return parts
 }
 
 func plural(count int) string {

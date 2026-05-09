@@ -1,0 +1,4 @@
+{
+  "serviceName": "api",
+  "replicas": 2
+}

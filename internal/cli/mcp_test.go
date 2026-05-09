@@ -57,12 +57,13 @@ func TestServeMCPValidateTool(t *testing.T) {
 	}
 	result := structured["result"].(map[string]any)
 	summary := result["summary"].(map[string]any)
-	if summary["issues"] != float64(1) {
+	issues := summary["issues"].(map[string]any)
+	if issues["total"] != float64(1) {
 		t.Fatalf("summary = %+v", summary)
 	}
 	content := callResult["content"].([]any)
 	text := content[0].(map[string]any)["text"].(string)
-	if !strings.Contains(text, `"ok":false`) || !strings.Contains(text, `"issues":1`) {
+	if !strings.Contains(text, `"ok":false`) || !strings.Contains(text, `"total":1`) {
 		t.Fatalf("content text = %s", text)
 	}
 }

@@ -295,6 +295,9 @@ func executeInitTemplate(raw string, data initTemplateData) ([]byte, error) {
 const starterTOMLTemplate = `# dollarlint configuration
 version = 1
 
+[configs]
+mode = "single"
+
 [discovery]
 exclude = []
 useDefaultExcludes = true

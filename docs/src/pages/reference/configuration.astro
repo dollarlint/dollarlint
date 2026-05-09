@@ -5,6 +5,9 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
 const starterConfig = `# dollarlint configuration
 version = 1
 
+[configs]
+mode = "single"
+
 [discovery]
 exclude = []
 useDefaultExcludes = true
@@ -85,10 +88,11 @@ reason = "legacy fixture kept for compatibility"`;
       <p class="lead">
         A <code>.dollarlint.toml</code> config is recommended for projects, but not
         required. Directory validation searches the target root; explicit file validation
-        searches beside the file. Each run uses one config; nested <code
-          >.dollarlint.toml</code
-        > files are not applied as separate project configs during a parent-directory
-        run. Use <code>--config</code> to point at a specific config.
+        searches beside the file. Each run uses one config by default; set <code
+          >configs.mode = "nearest"</code
+        > to let nested <code>.dollarlint.toml</code> files apply to their
+        subtrees. Use <code>--config</code> to point at one explicit config for
+        the whole run.
       </p>
     </header>
 
@@ -100,6 +104,32 @@ reason = "legacy fixture kept for compatibility"`;
       > on <code>dollarlint validate</code> whenever you need JSON, SARIF, or a file
       artifact.
     </p>
+
+    <h2>Config selection</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          ><td><code>extends</code></td><td
+            >Optional path to another <code>.dollarlint.toml</code> to inherit
+            from. Relative paths resolve from the current config file.</td
+          ></tr
+        >
+        <tr
+          ><td><code>configs.mode</code></td><td
+            >Use <code>single</code> for one config per run, or <code>nearest</code
+            >
+            to apply nested configs to their subtrees during a parent-directory
+            run.</td
+          ></tr
+        >
+      </tbody>
+    </table>
 
     <h2>Discovery</h2>
     <p>
@@ -171,6 +201,25 @@ reason = "legacy fixture kept for compatibility"`;
       resolved from the directory containing <code>.dollarlint.toml</code>.
     </p>
 
+    <h2>Nested configs</h2>
+    <p>
+      Set <code>configs.mode = "nearest"</code> in the run root config when a
+      parent-directory run should apply nested <code>.dollarlint.toml</code>
+      files. Each file uses the closest config at or above its directory. A
+      nested config does not inherit parent settings unless it declares <code
+        >extends</code
+      >.
+    </p>
+    <pre><code>[configs]
+mode = "nearest"
+
+# in packages/api/.dollarlint.toml
+extends = "../../.dollarlint.toml"</code></pre>
+    <p>
+      Passing <code>--config</code> keeps single-config behavior for that run and
+      suppresses nested config discovery.
+    </p>
+
     <h2>Parsing</h2>
     <p>
       JSON parsing defaults to <code>auto</code>: <code>.json</code> files are
@@ -237,8 +286,8 @@ reason = "legacy fixture kept for compatibility"`;
     </p>
     <CodeBlock code={associationConfig} language="toml" />
     <p>
-      Association globs are matched against paths relative to the validation
-      root and use the same basename-any-depth behavior as discovery globs.
+      Association globs in config are matched relative to the config file's
+      directory and use the same basename-any-depth behavior as discovery globs.
       In-file declarations win over associations.
     </p>
 

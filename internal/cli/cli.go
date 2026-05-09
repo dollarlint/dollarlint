@@ -162,10 +162,46 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 	if err := validateExplicitTarget(root); err != nil {
 		return err
 	}
-	cfg, _, err := dollarlint.LoadConfig(root, *opts.configPath)
+	cfg, configPath, err := dollarlint.LoadConfig(root, *opts.configPath)
 	if err != nil {
 		return err
 	}
+	overlay := func(config *dollarlint.Config) error {
+		return applyValidateConfigOptions(cmd, opts, config)
+	}
+	if err := overlay(&cfg); err != nil {
+		return err
+	}
+	format, err := validateOutputFormat(opts.format)
+	if err != nil {
+		return err
+	}
+	result, err := dollarlint.Lint(context.Background(), dollarlint.Options{
+		Root:            root,
+		Config:          cfg,
+		ConfigPath:      configPath,
+		ExplicitConfig:  *opts.configPath != "",
+		ConfigOverlay:   overlay,
+		SourceLocations: format == outputFormatSARIF,
+		StartedAt:       startedAt,
+	})
+	if err != nil {
+		return err
+	}
+	data, err := formatValidateResult(result, cfg.Output, format)
+	if err != nil {
+		return err
+	}
+	if err := writeValidateOutput(stdout, opts.outputPath, data); err != nil {
+		return err
+	}
+	if result.HasIssues() {
+		return errIssues
+	}
+	return nil
+}
+
+func applyValidateConfigOptions(cmd *cobra.Command, opts *validateOptions, cfg *dollarlint.Config) error {
 	if len(opts.includes) > 0 {
 		cfg.Discovery.Include = opts.includes
 	}
@@ -243,24 +279,6 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 	cfg.Output.Verbose = cfg.Output.Verbose || opts.verbose
 	cfg.Output.Quiet = cfg.Output.Quiet || opts.quiet
 	cfg.Output.Locations = cfg.Output.Locations || opts.locations
-	format, err := validateOutputFormat(opts.format)
-	if err != nil {
-		return err
-	}
-	result, err := dollarlint.Lint(context.Background(), dollarlint.Options{Root: root, Config: cfg, SourceLocations: format == outputFormatSARIF, StartedAt: startedAt})
-	if err != nil {
-		return err
-	}
-	data, err := formatValidateResult(result, cfg.Output, format)
-	if err != nil {
-		return err
-	}
-	if err := writeValidateOutput(stdout, opts.outputPath, data); err != nil {
-		return err
-	}
-	if result.HasIssues() {
-		return errIssues
-	}
 	return nil
 }
 

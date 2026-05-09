@@ -39,7 +39,7 @@ func TestSchemaStoreCatalogAssociations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint: %v", err)
 	}
-	if result.Summary.Discovered != 5 || result.Summary.Validated != 2 || result.Summary.Skipped != 3 || result.Summary.Issues != 1 {
+	if result.Summary.Discovered != 5 || result.Summary.Validated != 2 || result.Summary.Skipped != 3 || result.Summary.Issues.Total != 1 {
 		t.Fatalf("summary = %+v", result.Summary)
 	}
 	var sawCatalogSource, sawSkipped bool
@@ -78,7 +78,7 @@ func TestSchemaStorePrecedenceAndDisabledDefault(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint default: %v", err)
 	}
-	if result.Summary.Validated != 1 || result.Summary.Issues != 0 {
+	if result.Summary.Validated != 1 || result.Summary.Issues.Total != 0 {
 		t.Fatalf("default summary = %+v issues=%+v", result.Summary, result.Issues)
 	}
 
@@ -88,7 +88,7 @@ func TestSchemaStorePrecedenceAndDisabledDefault(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint catalog: %v", err)
 	}
-	if result.Summary.Issues != 0 {
+	if result.Summary.Issues.Total != 0 {
 		t.Fatalf("explicit schema should win over catalog match: %+v", result.Issues)
 	}
 	for _, file := range result.Files {
@@ -199,7 +199,7 @@ func TestSchemaStoreMatchedSchemaFailurePolicy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("warn catalog schema failure should continue, got %v", err)
 	}
-	if result.Summary.Issues != 0 || result.Summary.Warnings != 1 || result.Summary.Validated != 0 || result.Summary.Skipped != 1 {
+	if result.Summary.Issues.Total != 0 || result.Summary.Warnings != 1 || result.Summary.Validated != 0 || result.Summary.Skipped != 1 {
 		t.Fatalf("warn catalog schema failure summary = %+v issues=%+v warnings=%+v", result.Summary, result.Issues, result.Warnings)
 	}
 	if !strings.Contains(result.Warnings[0].Message, "catalog schema compile failed") || result.Warnings[0].Kind != "schemaCatalogSchemaUnavailable" {
@@ -211,7 +211,7 @@ func TestSchemaStoreMatchedSchemaFailurePolicy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("skip catalog schema failure should continue, got %v", err)
 	}
-	if result.Summary.Issues != 0 || result.Summary.Warnings != 0 || result.Summary.Validated != 0 || result.Summary.Skipped != 1 {
+	if result.Summary.Issues.Total != 0 || result.Summary.Warnings != 0 || result.Summary.Validated != 0 || result.Summary.Skipped != 1 {
 		t.Fatalf("skip catalog schema failure summary = %+v issues=%+v warnings=%+v", result.Summary, result.Issues, result.Warnings)
 	}
 

@@ -123,7 +123,7 @@ Use `dollarlint validate <path>` for all validation runs. Bare paths are not acc
 Exit codes:
 
 - `0`: no non-ignored issues
-- `1`: validation, schema loading, or parsing issues were found
+- `1`: validation, schema loading, coverage, or parsing issues were found
 - `2`: CLI/configuration error
 
 ## Schema declarations
@@ -143,12 +143,15 @@ Config-level schema associations can validate files that do not declare a schema
 
 ## Configuration
 
-DollarLint configuration is TOML only. For each run, the CLI looks for one `.dollarlint.toml` in the target root, or beside an explicitly passed file. Nested `.dollarlint.toml` files are not applied as separate project configs during a single parent-directory run.
+DollarLint configuration is TOML only. For each run, the CLI looks for one `.dollarlint.toml` in the target root, or beside an explicitly passed file. By default, that one config applies to the whole run. Set `configs.mode = "nearest"` in the root config to let nested `.dollarlint.toml` files apply to their own subtrees. A nested config inherits only when it declares `extends`.
 
 Example:
 
 ```toml
 version = 1
+
+[configs]
+mode = "single"
 
 [discovery]
 exclude = ["generated/**"]
@@ -228,6 +231,23 @@ If `discovery.include` is unset, DollarLint discovers JSON, JSONC, JSON5, JSON L
 
 Config-authored discovery, association, and ignore globs are relative to the directory containing `.dollarlint.toml`. CLI globs such as `--include`, `--exclude`, and `--schema` are relative to the validation root. Relative schema and local catalog paths in config are also resolved from the config file's directory.
 
+### Nested configs and extends
+
+Use `extends` when a config should inherit another config:
+
+```toml
+extends = "../../.dollarlint.toml"
+```
+
+Use nearest mode in the root config when a parent-directory run should apply nested configs:
+
+```toml
+[configs]
+mode = "nearest"
+```
+
+In nearest mode, each file uses the closest `.dollarlint.toml` at or above its directory. A nested config does not implicitly inherit parent settings; add `extends` when you want shared defaults. Passing `--config` uses that explicit config for the whole run and suppresses nested config discovery.
+
 ### JSON parsing
 
 `parsing.json.mode = "auto"` is the default. `.json` files are parsed as strict JSON first, then retried as JSONC when strict parsing fails, so comments and trailing commas work in projects whose existing tools accept them.
@@ -275,9 +295,10 @@ Azure Resource Manager deployment schemas from `schema.management.azure.com` are
 
 ## Examples
 
-The `examples/` directory includes a small local schema demo, a `examples/schemastore/` suite that validates common config files against remote schemas from `https://www.schemastore.org`, and Azure ARM deployment templates that exercise remote schema fetching plus ARM resource pruning.
+The `examples/` directory includes a small local schema demo, a nested-config demo, a `examples/schemastore/` suite that validates common config files against remote schemas from `https://www.schemastore.org`, and Azure ARM deployment templates that exercise remote schema fetching plus ARM resource pruning.
 
 ```sh
+dollarlint validate ./examples/nested-configs --locations
 dollarlint validate ./examples/schemastore --locations
 dollarlint validate ./examples/azure --locations
 ```
@@ -287,13 +308,13 @@ dollarlint validate ./examples/azure --locations
 Default text output is grouped by file:
 
 ```text
-dollarlint found 2 issues in 1 file after 47ms
+dollarlint found 2 validation issues in 1 file after 47ms
 
 settings.json
   /name   type      expected string, received number
   /count  minimum   must be >= 1
 
-Summary: 4 discovered, 3 validated, 1 skipped, 2 issues in 47ms
+Summary: 4 discovered, 3 validated, 1 skipped, 2 validation issues in 47ms
 ```
 
 Use `--locations` to opt into line/column source mapping for text and JSON output:

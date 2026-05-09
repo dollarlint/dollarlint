@@ -19,14 +19,48 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 	if root == "" {
 		root = "."
 	}
-	files, err := DiscoverFiles(root, cfg.Discovery)
+	mode, err := configMode(cfg.Configs)
 	if err != nil {
 		return Result{}, err
 	}
+	wantSourceLocations := opts.SourceLocations || cfg.Output.Locations
+	var result Result
+	if mode == ConfigModeNearest && !opts.ExplicitConfig {
+		configPath := opts.ConfigPath
+		if configPath == "" {
+			if resolved, resolveErr := resolveConfigPath(root, ""); resolveErr != nil {
+				return Result{}, resolveErr
+			} else {
+				configPath = resolved
+			}
+		}
+		configuredFiles, err := discoverConfiguredFiles(root, cfg, configPath, opts.ConfigOverlay, cfg.Output)
+		if err != nil {
+			return Result{}, err
+		}
+		result, err = lintConfiguredFileGroups(ctx, root, configuredFiles, wantSourceLocations)
+		if err != nil {
+			return Result{}, err
+		}
+	} else {
+		files, err := DiscoverFiles(root, cfg.Discovery)
+		if err != nil {
+			return Result{}, err
+		}
+		result, err = lintDiscoveredFiles(ctx, root, files, cfg, wantSourceLocations)
+		if err != nil {
+			return Result{}, err
+		}
+	}
+	result.Summary.Duration = NewDuration(time.Since(start))
+	result.Summary.DurationNanos = result.Summary.Duration.Nanoseconds()
+	return result, nil
+}
+
+func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFile, cfg Config, wantSourceLocations bool) (Result, error) {
 	result := Result{Root: root}
 	cache := NewSchemaCache(cfg)
 	catalogLoad := loadSchemaStoreCatalogAsync(ctx, cache, cfg)
-	wantSourceLocations := opts.SourceLocations || cfg.Output.Locations
 	parsedDocuments := parseDocuments(files, cfg, wantSourceLocations)
 	loadedCatalog := <-catalogLoad
 	if loadedCatalog.err != nil {
@@ -138,7 +172,54 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 			result.Summary.Failed++
 		}
 	}
-	result.Summary.Duration = NewDuration(time.Since(start))
-	result.Summary.DurationNanos = result.Summary.Duration.Nanoseconds()
 	return result, nil
+}
+
+func lintConfiguredFileGroups(ctx context.Context, root string, files []configuredFile, wantSourceLocations bool) (Result, error) {
+	result := Result{Root: root}
+	type fileGroup struct {
+		config     Config
+		configPath string
+		files      []DiscoveredFile
+	}
+	var groups []fileGroup
+	groupIndexes := map[string]int{}
+	for _, file := range files {
+		key := file.configPath
+		if key == "" {
+			key = "<default>"
+		}
+		index, ok := groupIndexes[key]
+		if !ok {
+			index = len(groups)
+			groupIndexes[key] = index
+			groups = append(groups, fileGroup{config: file.config, configPath: file.configPath})
+		}
+		groups[index].files = append(groups[index].files, file.file)
+	}
+	for _, group := range groups {
+		partial, err := lintDiscoveredFiles(ctx, root, group.files, group.config, wantSourceLocations)
+		if err != nil {
+			return Result{}, err
+		}
+		mergeResult(&result, partial)
+	}
+	return result, nil
+}
+
+func mergeResult(result *Result, partial Result) {
+	result.Summary.Discovered += partial.Summary.Discovered
+	result.Summary.Validated += partial.Summary.Validated
+	result.Summary.Skipped += partial.Summary.Skipped
+	result.Summary.Failed += partial.Summary.Failed
+	result.Summary.Issues.Total += partial.Summary.Issues.Total
+	result.Summary.Issues.Parsing += partial.Summary.Issues.Parsing
+	result.Summary.Issues.Validation += partial.Summary.Issues.Validation
+	result.Summary.Issues.Schema += partial.Summary.Issues.Schema
+	result.Summary.Issues.Coverage += partial.Summary.Issues.Coverage
+	result.Summary.Ignored += partial.Summary.Ignored
+	result.Summary.Warnings += partial.Summary.Warnings
+	result.Files = append(result.Files, partial.Files...)
+	result.Issues = append(result.Issues, partial.Issues...)
+	result.Warnings = append(result.Warnings, partial.Warnings...)
 }

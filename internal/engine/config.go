@@ -27,6 +27,9 @@ func DefaultConfig() Config {
 	retries := 2
 	return Config{
 		Version: 1,
+		Configs: ConfigsConfig{
+			Mode: ConfigModeSingle,
+		},
 		Discovery: DiscoveryConfig{
 			Include: []string{
 				"*.json", "**/*.json",
@@ -78,6 +81,9 @@ func (c *Config) ApplyDefaults() {
 	defaults := DefaultConfig()
 	if c.Version == 0 {
 		c.Version = defaults.Version
+	}
+	if c.Configs.Mode == "" {
+		c.Configs.Mode = defaults.Configs.Mode
 	}
 	if c.Discovery.Include == nil {
 		c.Discovery.Include = append([]string(nil), defaults.Discovery.Include...)
@@ -155,15 +161,10 @@ func LoadConfig(root, explicitPath string) (Config, string, error) {
 	if path == "" {
 		return cfg, "", nil
 	}
-	data, err := os.ReadFile(path)
+	loaded, err := loadResolvedConfig(searchRoot, path, nil)
 	if err != nil {
-		return cfg, "", fmt.Errorf("read config %s: %w", path, err)
-	}
-	loaded := Config{}
-	if err := decodeConfig(path, data, &loaded); err != nil {
 		return cfg, "", err
 	}
-	normalizeConfigAuthoredPaths(&loaded, searchRoot, path)
 	if err := validateConfigValues(loaded); err != nil {
 		return cfg, "", err
 	}
@@ -172,6 +173,14 @@ func LoadConfig(root, explicitPath string) (Config, string, error) {
 }
 
 func validateConfigValues(cfg Config) error {
+	if cfg.Extends != "" && !isConfigFileName(cfg.Extends) {
+		return fmt.Errorf("extends must reference a .dollarlint.toml file")
+	}
+	if cfg.Configs.Mode != "" {
+		if _, err := configMode(cfg.Configs); err != nil {
+			return err
+		}
+	}
 	if cfg.Schemas.MaxDepth < 0 {
 		return fmt.Errorf("schemas.maxDepth must be >= 0")
 	}
@@ -256,6 +265,281 @@ func decodeConfig(path string, data []byte, out *Config) error {
 		return fmt.Errorf("decode config %s: %w", path, err)
 	}
 	return nil
+}
+
+type configPresence map[string]bool
+
+func (p configPresence) has(path string) bool {
+	return p != nil && p[path]
+}
+
+func loadResolvedConfig(root, path string, stack []string) (Config, error) {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return Config{}, fmt.Errorf("config %s: %w", path, err)
+	}
+	for _, seen := range stack {
+		if seen == abs {
+			return Config{}, fmt.Errorf("config extends cycle includes %s", abs)
+		}
+	}
+	loaded, presence, err := loadConfigFile(root, abs)
+	if err != nil {
+		return Config{}, err
+	}
+	if loaded.Extends == "" {
+		return loaded, nil
+	}
+	extendsPath, err := resolveExtendsPath(abs, loaded.Extends)
+	if err != nil {
+		return Config{}, err
+	}
+	base, err := loadResolvedConfig(root, extendsPath, append(stack, abs))
+	if err != nil {
+		return Config{}, err
+	}
+	merged := mergeConfigs(base, loaded, presence)
+	merged.Extends = ""
+	return merged, nil
+}
+
+func loadConfigFile(root, path string) (Config, configPresence, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return Config{}, nil, fmt.Errorf("read config %s: %w", path, err)
+	}
+	loaded := Config{}
+	if err := decodeConfig(path, data, &loaded); err != nil {
+		return Config{}, nil, err
+	}
+	presence, err := decodeConfigPresence(path, data)
+	if err != nil {
+		return Config{}, nil, err
+	}
+	normalizeConfigAuthoredPaths(&loaded, root, path)
+	if err := validateConfigValues(loaded); err != nil {
+		return Config{}, nil, err
+	}
+	return loaded, presence, nil
+}
+
+func decodeConfigPresence(path string, data []byte) (configPresence, error) {
+	var raw map[string]any
+	if err := toml.Unmarshal(data, &raw); err != nil {
+		return nil, fmt.Errorf("decode config %s: %w", path, err)
+	}
+	presence := configPresence{}
+	collectConfigPresence("", raw, presence)
+	return presence, nil
+}
+
+func collectConfigPresence(prefix string, value any, presence configPresence) {
+	switch typed := value.(type) {
+	case map[string]any:
+		for key, child := range typed {
+			path := key
+			if prefix != "" {
+				path = prefix + "." + key
+			}
+			presence[path] = true
+			collectConfigPresence(path, child, presence)
+		}
+	case []map[string]any:
+		for _, child := range typed {
+			collectConfigPresence(prefix, child, presence)
+		}
+	case []any:
+		for _, child := range typed {
+			collectConfigPresence(prefix, child, presence)
+		}
+	}
+}
+
+func resolveExtendsPath(configPath, extends string) (string, error) {
+	extends = strings.TrimSpace(extends)
+	if !isConfigFileName(extends) {
+		return "", fmt.Errorf("extends must reference a .dollarlint.toml file")
+	}
+	if filepath.IsAbs(extends) {
+		return extends, nil
+	}
+	return filepath.Join(filepath.Dir(configPath), extends), nil
+}
+
+func mergeConfigs(parent, child Config, childPresence configPresence) Config {
+	merged := parent
+	if childPresence.has("version") {
+		merged.Version = child.Version
+	}
+	if childPresence.has("configs.mode") {
+		merged.Configs.Mode = child.Configs.Mode
+	}
+	mergeDiscoveryConfig(&merged.Discovery, child.Discovery, childPresence)
+	mergeParsingConfig(&merged.Parsing, child.Parsing, childPresence)
+	mergeSchemaConfig(&merged.Schemas, child.Schemas, childPresence)
+	if childPresence.has("ignore") {
+		merged.Ignore = append(append([]IgnoreRule(nil), parent.Ignore...), child.Ignore...)
+	}
+	mergeOutputConfig(&merged.Output, child.Output, childPresence)
+	return merged
+}
+
+func mergeDiscoveryConfig(parent *DiscoveryConfig, child DiscoveryConfig, presence configPresence) {
+	if presence.has("discovery.include") {
+		parent.Include = child.Include
+	}
+	if presence.has("discovery.exclude") {
+		parent.Exclude = append(append([]string(nil), parent.Exclude...), child.Exclude...)
+	}
+	if presence.has("discovery.useDefaultExcludes") {
+		parent.UseDefaultExcludes = child.UseDefaultExcludes
+	}
+	if presence.has("discovery.respectGitIgnore") {
+		parent.RespectGitIgnore = child.RespectGitIgnore
+	}
+	if presence.has("discovery.forceExclude") {
+		parent.ForceExclude = child.ForceExclude
+	}
+	if presence.has("discovery.followSymlinks") {
+		parent.FollowSymlinks = child.FollowSymlinks
+	}
+}
+
+func mergeParsingConfig(parent *ParsingConfig, child ParsingConfig, presence configPresence) {
+	if presence.has("parsing.json.mode") {
+		parent.JSON.Mode = child.JSON.Mode
+	}
+}
+
+func mergeSchemaConfig(parent *SchemaConfig, child SchemaConfig, presence configPresence) {
+	if presence.has("schemas.associations") {
+		parent.Associations = append(append([]SchemaAssociation(nil), parent.Associations...), child.Associations...)
+	}
+	if presence.has("schemas.catalogs.enabled") {
+		parent.Catalogs.Enabled = child.Catalogs.Enabled
+	}
+	if presence.has("schemas.catalogs.failure") {
+		parent.Catalogs.Failure = child.Catalogs.Failure
+	}
+	if presence.has("schemas.catalogs.sources") {
+		parent.Catalogs.Sources = mergeCatalogSources(parent.Catalogs.Sources, child.Catalogs.Sources)
+	}
+	if presence.has("schemas.optimizations.enabled") {
+		parent.Optimizations.Enabled = child.Optimizations.Enabled
+	}
+	if presence.has("schemas.optimizations.azure.pruneResources") {
+		parent.Optimizations.Azure.PruneResources = child.Optimizations.Azure.PruneResources
+	}
+	if presence.has("schemas.fetch.enabled") {
+		parent.Fetch.Enabled = child.Fetch.Enabled
+	}
+	if presence.has("schemas.fetch.cache") {
+		parent.Fetch.Cache = child.Fetch.Cache
+	}
+	if presence.has("schemas.fetch.timeout") {
+		parent.Fetch.Timeout = child.Fetch.Timeout
+	}
+	if presence.has("schemas.fetch.retries") {
+		parent.Fetch.Retries = child.Fetch.Retries
+	}
+	if presence.has("schemas.fetch.retryMinWait") {
+		parent.Fetch.RetryMinWait = child.Fetch.RetryMinWait
+	}
+	if presence.has("schemas.fetch.retryMaxWait") {
+		parent.Fetch.RetryMaxWait = child.Fetch.RetryMaxWait
+	}
+	if presence.has("schemas.fetch.allowedDomains") {
+		parent.Fetch.AllowedDomains = append(append([]string(nil), parent.Fetch.AllowedDomains...), child.Fetch.AllowedDomains...)
+	}
+	if presence.has("schemas.fetch.blockedDomains") {
+		parent.Fetch.BlockedDomains = append(append([]string(nil), parent.Fetch.BlockedDomains...), child.Fetch.BlockedDomains...)
+	}
+	if presence.has("schemas.compile.timeout") {
+		parent.Compile.Timeout = child.Compile.Timeout
+	}
+	if presence.has("schemas.requireCoverage") {
+		parent.RequireCoverage = child.RequireCoverage
+	}
+	if presence.has("schemas.maxDepth") {
+		parent.MaxDepth = child.MaxDepth
+	}
+	if presence.has("schemas.concurrency") {
+		parent.Concurrency = child.Concurrency
+	}
+}
+
+func mergeCatalogSources(parent, child []CatalogSource) []CatalogSource {
+	out := append([]CatalogSource(nil), parent...)
+	indexes := map[string]int{}
+	for i, source := range out {
+		if key := catalogSourceMergeKey(source); key != "" {
+			indexes[key] = i
+		}
+	}
+	for _, source := range child {
+		key := catalogSourceMergeKey(source)
+		if key == "" {
+			out = append(out, source)
+			continue
+		}
+		if index, ok := indexes[key]; ok {
+			out[index] = mergeCatalogSource(out[index], source)
+			continue
+		}
+		indexes[key] = len(out)
+		out = append(out, source)
+	}
+	return out
+}
+
+func catalogSourceMergeKey(source CatalogSource) string {
+	if source.Name != "" {
+		return source.Name
+	}
+	if source.Format == "" || source.Format == "schemastore" {
+		return "schemastore"
+	}
+	return ""
+}
+
+func mergeCatalogSource(parent, child CatalogSource) CatalogSource {
+	merged := parent
+	if child.Name != "" {
+		merged.Name = child.Name
+	}
+	if child.Format != "" {
+		merged.Format = child.Format
+	}
+	if child.URL != "" {
+		merged.URL = child.URL
+		merged.Path = ""
+	}
+	if child.Path != "" {
+		merged.Path = child.Path
+		merged.URL = ""
+	}
+	if child.Enabled != nil {
+		merged.Enabled = child.Enabled
+	}
+	return merged
+}
+
+func mergeOutputConfig(parent *OutputConfig, child OutputConfig, presence configPresence) {
+	if presence.has("output.showSkipped") {
+		parent.ShowSkipped = child.ShowSkipped
+	}
+	if presence.has("output.verbose") {
+		parent.Verbose = child.Verbose
+	}
+	if presence.has("output.quiet") {
+		parent.Quiet = child.Quiet
+	}
+	if presence.has("output.locations") {
+		parent.Locations = child.Locations
+	}
+	if presence.has("output.branchErrors") {
+		parent.BranchErrors = child.BranchErrors
+	}
 }
 
 func isConfigFileName(path string) bool {
@@ -359,6 +643,19 @@ func remoteFetchCacheEnabled(cfg FetchConfig) bool {
 
 func catalogEnabled(cfg SchemaConfig) bool {
 	return cfg.Catalogs.Enabled
+}
+
+func configMode(cfg ConfigsConfig) (string, error) {
+	mode := cfg.Mode
+	if mode == "" {
+		mode = ConfigModeSingle
+	}
+	switch mode {
+	case ConfigModeSingle, ConfigModeNearest:
+		return mode, nil
+	default:
+		return "", fmt.Errorf("unsupported config mode %q; expected single or nearest", mode)
+	}
 }
 
 func catalogFailureMode(cfg SchemaConfig) (string, error) {

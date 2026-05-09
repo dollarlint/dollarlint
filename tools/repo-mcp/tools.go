@@ -12,7 +12,7 @@ func (s *repoServer) addTools() {
 		"profile": enumSchema([]string{"quick", "full", "docs", "release", "examples", "ci"}, "Verification profile to run."),
 	}), s.handleVerify, false)
 	s.addTool("run_example", "Run dollarlint against a named example suite and return structured validation output.", schemaObject(map[string]any{
-		"suite":     enumSchema([]string{"basics", "schemastore", "azure", "repo-config", "all"}, "Example suite to validate."),
+		"suite":     enumSchema([]string{"basics", "nested-configs", "schemastore", "azure", "repo-config", "all"}, "Example suite to validate."),
 		"format":    enumSchema([]string{"text", "json", "sarif"}, "Output format. Defaults to text."),
 		"locations": map[string]any{"type": "boolean", "description": "Include source locations. Defaults to true."},
 	}), s.handleRunExample, true)

@@ -33,10 +33,21 @@ func (s *repoServer) addTools() {
 	s.addToolWithHints("real_world_prepare_corpus", "Create real-world testing temp dirs, flag previously tested repositories, optionally clone repos, and write a corpus manifest.", schemaObject(map[string]any{
 		"title":                 map[string]any{"type": "string", "description": "Short sweep title used for generated paths and manifests."},
 		"repositories":          realWorldRepositoryArraySchema("Repositories planned for the corpus."),
-		"clone":                 map[string]any{"type": "boolean", "description": "When true, run shallow git clones into the prepared corpus directory. Defaults to false."},
+		"clone":                 map[string]any{"type": "boolean", "description": "When true, start managed shallow git clones in the background and write incremental manifest updates. Defaults to false."},
 		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Allow intentional reruns of repositories already present in real-world history."},
 		"outputName":            map[string]any{"type": "string", "description": "Optional output JSON filename or absolute path."},
+		"concurrency":           map[string]any{"type": "integer", "description": "Maximum repository clone jobs to run at once. Defaults to 4; capped at 12."},
+		"waitForFirstResult":    map[string]any{"type": "boolean", "description": "When true, keep this call open until the first repository is cloned and dependency-prep inspected. Defaults to false so validation can start immediately."},
 	}), s.handleRealWorldPrepareCorpus, toolHints{ReadOnly: false, OpenWorld: true})
+	s.addTool("real_world_next_prepared_repo", "Wait with progress notifications until the next repository is cloned and dependency-prep inspected.", schemaObject(map[string]any{
+		"runID": map[string]any{"type": "string", "description": "Managed corpus preparation run id returned by real_world_prepare_corpus."},
+	}), s.handleRealWorldNextPreparedRepo, false)
+	s.addTool("real_world_prepare_status", "Return the current status of a managed real-world corpus preparation run.", schemaObject(map[string]any{
+		"runID": map[string]any{"type": "string", "description": "Managed corpus preparation run id returned by real_world_prepare_corpus."},
+	}), s.handleRealWorldPrepareStatus, true)
+	s.addToolWithHints("real_world_cancel_prepare", "Cancel a managed real-world corpus preparation run.", schemaObject(map[string]any{
+		"runID": map[string]any{"type": "string", "description": "Managed corpus preparation run id returned by real_world_prepare_corpus."},
+	}), s.handleRealWorldCancelPrepare, toolHints{ReadOnly: false})
 	s.addTool("real_world_inspect_corpus", "Scan prepared real-world clones for lockfiles, dependency manifests, and local or remote $schema refs, then draft script-suppressed dependency-prep notes.", schemaObject(map[string]any{
 		"corpusDir":      map[string]any{"type": "string", "description": "Prepared corpus directory."},
 		"cacheDir":       map[string]any{"type": "string", "description": "Cache directory to carry forward to real_world_start_validation. Defaults from manifestPath when available."},
@@ -50,8 +61,13 @@ func (s *repoServer) addTools() {
 		"waitForFirstResult": map[string]any{"type": "boolean", "description": "When true, keep this tool call open with progress notifications until the first repository result is ready. Defaults to true."},
 	}), s.handleRealWorldStartValidation, toolHints{ReadOnly: false, OpenWorld: true})
 	s.addTool("real_world_next_validation_result", "Wait with progress notifications until the next per-repository real-world validation result is ready.", schemaObject(map[string]any{
-		"runID": map[string]any{"type": "string", "description": "Managed validation run id returned by real_world_start_validation."},
+		"runID":    map[string]any{"type": "string", "description": "Managed validation run id returned by real_world_start_validation."},
+		"feedback": realWorldValidationFeedbackSchema("Structured feedback for the previously delivered repository result. Required before the tool will advance to the next result."),
 	}), s.handleRealWorldNextValidationResult, false)
+	s.addTool("real_world_record_validation_feedback", "Record structured feedback for a delivered per-repository validation result without waiting for the next result.", schemaObject(map[string]any{
+		"runID":    map[string]any{"type": "string", "description": "Managed validation run id returned by real_world_start_validation."},
+		"feedback": realWorldValidationFeedbackSchema("Structured feedback for a delivered repository result."),
+	}), s.handleRealWorldRecordValidationFeedback, false)
 	s.addTool("real_world_validation_status", "Return the current status of a managed per-repository real-world validation run.", schemaObject(map[string]any{
 		"runID": map[string]any{"type": "string", "description": "Managed validation run id returned by real_world_start_validation."},
 	}), s.handleRealWorldValidationStatus, true)
@@ -86,6 +102,7 @@ func (s *repoServer) addTools() {
 		"manifestPath":           map[string]any{"type": "string", "description": "Prepared corpus manifest path. Defaults to <corpusDir>/real-world-manifest.json."},
 		"repositories":           realWorldRepositoryArraySchema("Repositories included in the sweep. Defaults from manifestPath when available."),
 		"dependencyPrep":         realWorldDependencyPrepArraySchema("Dependency preparation commands, skips, failures, and their validation impact."),
+		"validationFeedback":     realWorldValidationFeedbackArraySchema("Per-repository feedback ledger from managed validation. Required for compaction-safe final recommendations."),
 		"productRecommendations": realWorldProductRecommendationArraySchema("Optional product recommendations to use instead of the triage draft."),
 		"productDecisions":       arrayStringSchema("Optional product changes or decisions to use instead of the triage draft."),
 		"followUp":               arrayStringSchema("Optional follow-up notes to use instead of the triage draft."),
@@ -103,6 +120,7 @@ func (s *repoServer) addTools() {
 		"manifestPath":           map[string]any{"type": "string", "description": "Prepared corpus manifest path. Defaults to <corpus>/real-world-manifest.json."},
 		"repositories":           realWorldRepositoryArraySchema("Repositories included in the sweep."),
 		"dependencyPrep":         realWorldDependencyPrepArraySchema("Dependency preparation commands, skips, failures, and their validation impact."),
+		"validationFeedback":     realWorldValidationFeedbackArraySchema("Per-repository feedback ledger from managed validation."),
 		"findings":               arrayStringSchema("Triaged findings."),
 		"productRecommendations": realWorldProductRecommendationArraySchema("Product recommendations from the sweep, with strength and rationale."),
 		"productDecisions":       arrayStringSchema("Product changes or decisions made after the sweep."),
@@ -225,6 +243,33 @@ func realWorldProductRecommendationArraySchema(description string) map[string]an
 				"recommendation": map[string]any{"type": "string", "description": "Recommended product action."},
 				"rationale":      map[string]any{"type": "string", "description": "Why this recommendation follows from the sweep."},
 			},
+		},
+	}
+}
+
+func realWorldValidationFeedbackArraySchema(description string) map[string]any {
+	return map[string]any{
+		"type":        "array",
+		"description": description,
+		"items":       realWorldValidationFeedbackSchema("Per-repository validation feedback."),
+	}
+}
+
+func realWorldValidationFeedbackSchema(description string) map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"description":          description,
+		"additionalProperties": false,
+		"required":             []string{"repository", "outcome"},
+		"properties": map[string]any{
+			"repository":             map[string]any{"type": "string", "description": "Repository name exactly as returned in the validation result."},
+			"outcome":                enumSchema([]string{realWorldFeedbackBehavedReasonably, realWorldFeedbackProductSignal, realWorldFeedbackBlocked}, "Whether DollarLint behaved reasonably, exposed a product signal, or the repo result was blocked/uninterpretable."),
+			"findings":               arrayStringSchema("Evidence from this repository result."),
+			"productRecommendations": realWorldProductRecommendationArraySchema("Concrete product changes worth considering from this repository result."),
+			"productDecisions":       arrayStringSchema("Product changes or decisions already made from this repository result."),
+			"caveats":                arrayStringSchema("Caveats that affect interpretation of this repository result."),
+			"followUp":               arrayStringSchema("Follow-up work suggested by this repository result."),
+			"notes":                  map[string]any{"type": "string", "description": "Brief interpretation of the result, especially when no product change is recommended."},
 		},
 	}
 }

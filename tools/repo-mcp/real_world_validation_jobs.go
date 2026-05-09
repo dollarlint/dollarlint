@@ -41,7 +41,13 @@ type realWorldStartValidationArgs struct {
 }
 
 type realWorldNextValidationResultArgs struct {
-	RunID string `json:"runID"`
+	RunID    string                       `json:"runID"`
+	Feedback *realWorldValidationFeedback `json:"feedback"`
+}
+
+type realWorldRecordValidationFeedbackArgs struct {
+	RunID    string                      `json:"runID"`
+	Feedback realWorldValidationFeedback `json:"feedback"`
 }
 
 type realWorldFinishValidationArgs struct {
@@ -84,12 +90,14 @@ type realWorldValidationRun struct {
 	results chan realWorldRepoValidationResult
 	done    chan struct{}
 
-	mu          sync.Mutex
-	completedAt *time.Time
-	completed   int
-	delivered   int
-	failed      int
-	resultsByID map[string]realWorldRepoValidationResult
+	mu            sync.Mutex
+	completedAt   *time.Time
+	completed     int
+	delivered     int
+	failed        int
+	resultsByID   map[string]realWorldRepoValidationResult
+	deliveredByID map[string]realWorldRepoValidationResult
+	feedbackByID  map[string]realWorldValidationFeedback
 }
 
 type realWorldRepoValidationResult struct {
@@ -111,21 +119,25 @@ type realWorldRepoValidationResult struct {
 }
 
 type realWorldValidationSnapshot struct {
-	RunID          string `json:"runID"`
-	CorpusDir      string `json:"corpusDir"`
-	CacheDir       string `json:"cacheDir"`
-	OutputArtifact string `json:"outputArtifact"`
-	ManifestPath   string `json:"manifestPath"`
-	OutputDir      string `json:"outputDir"`
-	Total          int    `json:"total"`
-	Completed      int    `json:"completed"`
-	Delivered      int    `json:"delivered"`
-	Failed         int    `json:"failed"`
-	Running        int    `json:"running"`
-	Ready          int    `json:"ready"`
-	Complete       bool   `json:"complete"`
-	StartedAt      string `json:"startedAt"`
-	CompletedAt    string `json:"completedAt,omitempty"`
+	RunID                       string   `json:"runID"`
+	CorpusDir                   string   `json:"corpusDir"`
+	CacheDir                    string   `json:"cacheDir"`
+	OutputArtifact              string   `json:"outputArtifact"`
+	ManifestPath                string   `json:"manifestPath"`
+	OutputDir                   string   `json:"outputDir"`
+	Total                       int      `json:"total"`
+	Completed                   int      `json:"completed"`
+	Delivered                   int      `json:"delivered"`
+	Failed                      int      `json:"failed"`
+	Running                     int      `json:"running"`
+	Ready                       int      `json:"ready"`
+	FeedbackRecorded            int      `json:"feedbackRecorded"`
+	FeedbackMissing             int      `json:"feedbackMissing"`
+	FeedbackMissingRepositories []string `json:"feedbackMissingRepositories,omitempty"`
+	FeedbackComplete            bool     `json:"feedbackComplete"`
+	Complete                    bool     `json:"complete"`
+	StartedAt                   string   `json:"startedAt"`
+	CompletedAt                 string   `json:"completedAt,omitempty"`
 }
 
 type realWorldMergedOutput struct {
@@ -217,12 +229,55 @@ func (s *repoServer) handleRealWorldNextValidationResult(ctx context.Context, re
 	if !ok {
 		return mcp.NewToolResultError(fmt.Sprintf("validation run %q was not found", args.RunID)), nil
 	}
+	if args.Feedback != nil {
+		if err := run.recordFeedback(*args.Feedback); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
+	}
+	if missing := run.missingFeedback(); len(missing) > 0 {
+		return structured(map[string]any{
+			"ok":                        false,
+			"message":                   "record validation feedback for the delivered repository result before waiting for another result",
+			"run":                       run.snapshot(),
+			"missingFeedback":           missing,
+			"feedbackContract":          realWorldValidationFeedbackContract(),
+			"validationFeedback":        run.validationFeedback(),
+			"validationFeedbackSummary": realWorldValidationFeedbackSummary(run.validationFeedback()),
+			"nextStep":                  realWorldNextValidationResultWithFeedback(run.ID, missing[0]),
+		})
+	}
 	out, err := s.realWorldWaitForValidationResult(ctx, request, run)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 	out["ok"] = true
 	return structured(out)
+}
+
+func (s *repoServer) handleRealWorldRecordValidationFeedback(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	var args realWorldRecordValidationFeedbackArgs
+	_ = request.BindArguments(&args)
+	if args.RunID == "" {
+		return mcp.NewToolResultError("runID is required; call real_world_start_validation first"), nil
+	}
+	if s.realWorldRuns == nil {
+		return mcp.NewToolResultError(fmt.Sprintf("validation run %q was not found", args.RunID)), nil
+	}
+	run, ok := s.realWorldRuns.get(args.RunID)
+	if !ok {
+		return mcp.NewToolResultError(fmt.Sprintf("validation run %q was not found", args.RunID)), nil
+	}
+	if err := run.recordFeedback(args.Feedback); err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	return structured(map[string]any{
+		"ok":                        true,
+		"message":                   "validation feedback recorded",
+		"run":                       run.snapshot(),
+		"validationFeedback":        run.validationFeedback(),
+		"validationFeedbackSummary": realWorldValidationFeedbackSummary(run.validationFeedback()),
+		"nextStep":                  realWorldValidationNextStep(run),
+	})
 }
 
 func (s *repoServer) handleRealWorldValidationStatus(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -258,13 +313,26 @@ func (s *repoServer) handleRealWorldFinishValidation(_ context.Context, request 
 	if !ok {
 		return mcp.NewToolResultError(fmt.Sprintf("validation run %q was not found", args.RunID)), nil
 	}
+	run.refreshFromManifest()
 	snapshot := run.snapshot()
 	if !snapshot.Complete || snapshot.Ready > 0 {
 		return structured(map[string]any{
 			"ok":       false,
 			"message":  "validation still has running or undelivered per-repository results; call real_world_next_validation_result and keep the tool call open for progress",
 			"run":      snapshot,
-			"nextStep": realWorldNextValidationResult(run.ID),
+			"nextStep": realWorldValidationNextStep(run),
+		})
+	}
+	if missing := run.missingFeedback(); len(missing) > 0 {
+		return structured(map[string]any{
+			"ok":                        false,
+			"message":                   "validation has delivered repository results without recorded feedback; record feedback before finishing",
+			"run":                       run.snapshot(),
+			"missingFeedback":           missing,
+			"feedbackContract":          realWorldValidationFeedbackContract(),
+			"validationFeedback":        run.validationFeedback(),
+			"validationFeedbackSummary": realWorldValidationFeedbackSummary(run.validationFeedback()),
+			"nextStep":                  realWorldNextValidationResultWithFeedback(run.ID, missing[0]),
 		})
 	}
 	outputArtifact := nonEmpty(args.OutputArtifact, run.OutputArtifact)
@@ -277,17 +345,19 @@ func (s *repoServer) handleRealWorldFinishValidation(_ context.Context, request 
 		command = realWorldManagedValidationCommand(run)
 	}
 	return structured(map[string]any{
-		"ok":                true,
-		"run":               run.snapshot(),
-		"summary":           summary,
-		"corpusDir":         run.CorpusDir,
-		"cacheDir":          run.CacheDir,
-		"outputArtifact":    outputArtifact,
-		"manifestPath":      run.ManifestPath,
-		"repositories":      run.Repositories,
-		"dependencyPrep":    run.DependencyPrep,
-		"validationCommand": command,
-		"nextStep":          realWorldNextTriageOutput(run.CorpusDir, run.CacheDir, outputArtifact, run.ManifestPath, command, run.Repositories, run.DependencyPrep),
+		"ok":                        true,
+		"run":                       run.snapshot(),
+		"summary":                   summary,
+		"corpusDir":                 run.CorpusDir,
+		"cacheDir":                  run.CacheDir,
+		"outputArtifact":            outputArtifact,
+		"manifestPath":              run.ManifestPath,
+		"repositories":              run.Repositories,
+		"dependencyPrep":            run.DependencyPrep,
+		"validationFeedback":        run.validationFeedback(),
+		"validationFeedbackSummary": realWorldValidationFeedbackSummary(run.validationFeedback()),
+		"validationCommand":         command,
+		"nextStep":                  realWorldNextTriageOutput(run.CorpusDir, run.CacheDir, outputArtifact, run.ManifestPath, command, run.Repositories, run.DependencyPrep, run.validationFeedback()),
 	})
 }
 
@@ -340,6 +410,9 @@ func (s *repoServer) startRealWorldValidationRun(ctx context.Context, args realW
 			return nil, nil, err
 		}
 		repositories = manifest.Repositories
+		if len(args.DependencyPrep) == 0 {
+			args.DependencyPrep = manifest.DependencyPrep
+		}
 	}
 	if len(repositories) == 0 {
 		return nil, nil, fmt.Errorf("repositories is required")
@@ -380,6 +453,8 @@ func (s *repoServer) startRealWorldValidationRun(ctx context.Context, args realW
 		results:        make(chan realWorldRepoValidationResult, len(repositories)),
 		done:           make(chan struct{}),
 		resultsByID:    map[string]realWorldRepoValidationResult{},
+		deliveredByID:  map[string]realWorldRepoValidationResult{},
+		feedbackByID:   map[string]realWorldValidationFeedback{},
 	}
 	if s.realWorldRuns == nil {
 		s.realWorldRuns = newRealWorldRunRegistry()
@@ -433,6 +508,12 @@ func (run *realWorldValidationRun) start(root string) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			started := time.Now()
+			readyRepo, readyErr := run.waitForRepositoryReady(repo)
+			if readyErr != nil {
+				run.finishRepo(realWorldRepositoryNotReadyValidationResult(repo, readyRepo, readyErr, started))
+				return
+			}
 			select {
 			case sem <- struct{}{}:
 				defer func() { <-sem }()
@@ -440,7 +521,7 @@ func (run *realWorldValidationRun) start(root string) {
 				run.finishRepo(realWorldCanceledValidationResult(repo))
 				return
 			}
-			run.finishRepo(run.validateRepo(root, repo))
+			run.finishRepo(run.validateRepo(root, readyRepo))
 		}()
 	}
 	go func() {
@@ -462,6 +543,16 @@ func (run *realWorldValidationRun) validateRepo(root string, repo realWorldRepos
 		Path:       repo.Path,
 		StartedAt:  started.UTC().Format(time.RFC3339),
 	}
+	readyRepo, readyErr := run.waitForRepositoryReady(repo)
+	if readyErr != nil {
+		result.Path = readyRepo.Path
+		result.FinishedAt = time.Now().UTC().Format(time.RFC3339)
+		result.Error = readyErr.Error()
+		result.Duration = time.Since(started).Round(time.Millisecond).String()
+		return result
+	}
+	repo = readyRepo
+	result.Path = repo.Path
 	if repo.Path == "" {
 		result.FinishedAt = time.Now().UTC().Format(time.RFC3339)
 		result.Error = "repository path is empty"
@@ -504,6 +595,71 @@ func (run *realWorldValidationRun) validateRepo(root string, repo realWorldRepos
 	return result
 }
 
+func (run *realWorldValidationRun) waitForRepositoryReady(repo realWorldRepository) (realWorldRepository, error) {
+	if repo.Status == "cloned" && realWorldRepoPathReady(repo.Path) {
+		return repo, nil
+	}
+	if run.ManifestPath == "" {
+		return repo, nil
+	}
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+	for {
+		manifest, err := readRealWorldManifest(run.ManifestPath)
+		if err == nil {
+			if matched, ok := realWorldManifestRepository(manifest, repo); ok {
+				repo = matched
+			}
+			switch repo.Status {
+			case "cloned":
+				if realWorldRepoPathReady(repo.Path) {
+					return repo, nil
+				}
+			case "error", "canceled":
+				return repo, fmt.Errorf("repository preparation %s: %s", repo.Status, nonEmpty(repo.Error, "clone did not produce a prepared repository"))
+			}
+			if !manifest.PreparationManaged || manifest.PreparationComplete {
+				if realWorldRepoPathReady(repo.Path) {
+					return repo, nil
+				}
+				return repo, fmt.Errorf("repository was not prepared before validation: status=%s path=%s", nonEmpty(repo.Status, "unknown"), repo.Path)
+			}
+		} else if realWorldRepoPathReady(repo.Path) {
+			return repo, nil
+		}
+		select {
+		case <-run.ctx.Done():
+			return repo, fmt.Errorf("validation canceled while waiting for repository preparation")
+		case <-ticker.C:
+		}
+	}
+}
+
+func realWorldRepoPathReady(path string) bool {
+	if path == "" {
+		return false
+	}
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
+}
+
+func realWorldManifestRepository(manifest realWorldManifest, repo realWorldRepository) (realWorldRepository, bool) {
+	key := slugify(nonEmpty(repo.Name, repoNameFromURL(repo.CloneURL), filepath.Base(repo.Path)))
+	for _, candidate := range manifest.Repositories {
+		candidateKey := slugify(nonEmpty(candidate.Name, repoNameFromURL(candidate.CloneURL), filepath.Base(candidate.Path)))
+		if candidateKey != "" && candidateKey == key {
+			return candidate, true
+		}
+		if repo.CloneURL != "" && candidate.CloneURL == repo.CloneURL {
+			return candidate, true
+		}
+		if repo.Path != "" && candidate.Path == repo.Path {
+			return candidate, true
+		}
+	}
+	return realWorldRepository{}, false
+}
+
 func (run *realWorldValidationRun) finishRepo(result realWorldRepoValidationResult) {
 	key := slugify(result.Repository)
 	run.mu.Lock()
@@ -529,10 +685,25 @@ func realWorldCanceledValidationResult(repo realWorldRepository) realWorldRepoVa
 	}
 }
 
-func (run *realWorldValidationRun) markDelivered() {
+func realWorldRepositoryNotReadyValidationResult(original, ready realWorldRepository, err error, started time.Time) realWorldRepoValidationResult {
+	now := time.Now().UTC().Format(time.RFC3339)
+	name := nonEmpty(ready.Name, original.Name, repoNameFromURL(nonEmpty(ready.CloneURL, original.CloneURL)), filepath.Base(nonEmpty(ready.Path, original.Path)))
+	return realWorldRepoValidationResult{
+		Repository: name,
+		Path:       nonEmpty(ready.Path, original.Path),
+		StartedAt:  started.UTC().Format(time.RFC3339),
+		FinishedAt: now,
+		Error:      err.Error(),
+		Duration:   time.Since(started).Round(time.Millisecond).String(),
+	}
+}
+
+func (run *realWorldValidationRun) markDelivered(result realWorldRepoValidationResult) {
+	key := slugify(result.Repository)
 	run.mu.Lock()
 	defer run.mu.Unlock()
 	run.delivered++
+	run.deliveredByID[key] = result
 }
 
 func (run *realWorldValidationRun) snapshot() realWorldValidationSnapshot {
@@ -543,22 +714,94 @@ func (run *realWorldValidationRun) snapshot() realWorldValidationSnapshot {
 		completedAt = run.completedAt.UTC().Format(time.RFC3339)
 	}
 	total := len(run.Repositories)
+	missingFeedback := run.missingFeedbackLocked()
 	return realWorldValidationSnapshot{
-		RunID:          run.ID,
-		CorpusDir:      run.CorpusDir,
-		CacheDir:       run.CacheDir,
-		OutputArtifact: run.OutputArtifact,
-		ManifestPath:   run.ManifestPath,
-		OutputDir:      run.OutputDir,
-		Total:          total,
-		Completed:      run.completed,
-		Delivered:      run.delivered,
-		Failed:         run.failed,
-		Running:        total - run.completed,
-		Ready:          len(run.results),
-		Complete:       run.completed == total,
-		StartedAt:      run.StartedAt.UTC().Format(time.RFC3339),
-		CompletedAt:    completedAt,
+		RunID:                       run.ID,
+		CorpusDir:                   run.CorpusDir,
+		CacheDir:                    run.CacheDir,
+		OutputArtifact:              run.OutputArtifact,
+		ManifestPath:                run.ManifestPath,
+		OutputDir:                   run.OutputDir,
+		Total:                       total,
+		Completed:                   run.completed,
+		Delivered:                   run.delivered,
+		Failed:                      run.failed,
+		Running:                     total - run.completed,
+		Ready:                       len(run.results),
+		FeedbackRecorded:            len(run.feedbackByID),
+		FeedbackMissing:             len(missingFeedback),
+		FeedbackMissingRepositories: missingFeedback,
+		FeedbackComplete:            len(missingFeedback) == 0,
+		Complete:                    run.completed == total,
+		StartedAt:                   run.StartedAt.UTC().Format(time.RFC3339),
+		CompletedAt:                 completedAt,
+	}
+}
+
+func (run *realWorldValidationRun) recordFeedback(feedback realWorldValidationFeedback) error {
+	if err := validateRealWorldValidationFeedback(feedback); err != nil {
+		return err
+	}
+	key := slugify(feedback.Repository)
+	run.mu.Lock()
+	defer run.mu.Unlock()
+	result, ok := run.deliveredByID[key]
+	if !ok {
+		if _, exists := run.resultsByID[key]; exists {
+			return fmt.Errorf("validation feedback for %q cannot be recorded until that repository result has been delivered", feedback.Repository)
+		}
+		return fmt.Errorf("validation feedback references unknown or undelivered repository %q", feedback.Repository)
+	}
+	feedback.Repository = result.Repository
+	run.feedbackByID[key] = feedback
+	return nil
+}
+
+func (run *realWorldValidationRun) missingFeedback() []string {
+	run.mu.Lock()
+	defer run.mu.Unlock()
+	return run.missingFeedbackLocked()
+}
+
+func (run *realWorldValidationRun) missingFeedbackLocked() []string {
+	missing := make([]string, 0, len(run.deliveredByID))
+	for key, result := range run.deliveredByID {
+		if _, ok := run.feedbackByID[key]; !ok {
+			missing = append(missing, result.Repository)
+		}
+	}
+	sort.Strings(missing)
+	return missing
+}
+
+func (run *realWorldValidationRun) validationFeedback() []realWorldValidationFeedback {
+	run.mu.Lock()
+	defer run.mu.Unlock()
+	feedback := make([]realWorldValidationFeedback, 0, len(run.feedbackByID))
+	for _, item := range run.feedbackByID {
+		feedback = append(feedback, item)
+	}
+	sort.Slice(feedback, func(i, j int) bool {
+		return feedback[i].Repository < feedback[j].Repository
+	})
+	return feedback
+}
+
+func (run *realWorldValidationRun) refreshFromManifest() {
+	if run.ManifestPath == "" {
+		return
+	}
+	manifest, err := readRealWorldManifest(run.ManifestPath)
+	if err != nil {
+		return
+	}
+	run.mu.Lock()
+	defer run.mu.Unlock()
+	if len(manifest.Repositories) > 0 {
+		run.Repositories = manifest.Repositories
+	}
+	if len(manifest.DependencyPrep) > 0 {
+		run.DependencyPrep = manifest.DependencyPrep
 	}
 }
 
@@ -574,24 +817,30 @@ func (s *repoServer) realWorldWaitForValidationResult(ctx context.Context, reque
 			if !ok {
 				snapshot := run.snapshot()
 				return map[string]any{
-					"run":       snapshot,
-					"complete":  true,
-					"message":   "validation run has no more per-repo results",
-					"nextStep":  realWorldValidationNextStep(run),
-					"result":    nil,
-					"resultOK":  false,
-					"delivered": snapshot.Delivered,
+					"run":                       snapshot,
+					"complete":                  true,
+					"message":                   "validation run has no more per-repo results",
+					"feedbackContract":          realWorldValidationFeedbackContract(),
+					"validationFeedback":        run.validationFeedback(),
+					"validationFeedbackSummary": realWorldValidationFeedbackSummary(run.validationFeedback()),
+					"nextStep":                  realWorldValidationNextStep(run),
+					"result":                    nil,
+					"resultOK":                  false,
+					"delivered":                 snapshot.Delivered,
 				}, nil
 			}
-			run.markDelivered()
+			run.markDelivered(result)
 			snapshot := run.snapshot()
 			return map[string]any{
-				"run":       snapshot,
-				"complete":  snapshot.Complete && snapshot.Ready == 0,
-				"result":    result,
-				"resultOK":  result.Accepted,
-				"nextStep":  realWorldValidationNextStep(run),
-				"delivered": snapshot.Delivered,
+				"run":                       snapshot,
+				"complete":                  snapshot.Complete && snapshot.Ready == 0,
+				"result":                    result,
+				"resultOK":                  result.Accepted,
+				"feedbackContract":          realWorldValidationFeedbackContract(),
+				"validationFeedback":        run.validationFeedback(),
+				"validationFeedbackSummary": realWorldValidationFeedbackSummary(run.validationFeedback()),
+				"nextStep":                  realWorldValidationNextStep(run),
+				"delivered":                 snapshot.Delivered,
 			}, nil
 		case <-ticker.C:
 			snapshot := run.snapshot()
@@ -609,6 +858,9 @@ func realWorldValidationProgressMessage(run *realWorldValidationRun, snapshot re
 
 func realWorldValidationNextStep(run *realWorldValidationRun) map[string]any {
 	snapshot := run.snapshot()
+	if len(snapshot.FeedbackMissingRepositories) > 0 {
+		return realWorldNextValidationResultWithFeedback(run.ID, snapshot.FeedbackMissingRepositories[0])
+	}
 	if snapshot.Complete && snapshot.Ready == 0 {
 		return realWorldNextFinishValidation(run.ID)
 	}
@@ -622,10 +874,50 @@ func realWorldNextValidationResult(runID string) map[string]any {
 		"beforeCalling": []string{
 			"Do not poll with shell sleep loops.",
 			"Keep this tool call open while validation is running; it will send progress notifications and return the next completed repository result.",
-			"Review each returned result, then call this tool again until nextStep asks for real_world_finish_validation.",
+			"Review each returned result, then call this tool again with feedback for that result until nextStep asks for real_world_finish_validation.",
 		},
 		"suggestedArgs": map[string]any{
 			"runID": runID,
+		},
+	}
+}
+
+func realWorldNextValidationResultWithFeedback(runID, repository string) map[string]any {
+	return map[string]any{
+		"tool": "real_world_next_validation_result",
+		"why":  "Record structured feedback for the previously delivered repository result, then wait with progress notifications for the next result.",
+		"beforeCalling": []string{
+			"Do not poll with shell sleep loops.",
+			"Review the delivered repository result and record whether it revealed a product signal, behaved reasonably, or was blocked.",
+			"Pass feedback in this call so the tool can keep waiting for the next completed repository result.",
+			"If you only need to record feedback without waiting, call real_world_record_validation_feedback instead.",
+		},
+		"feedbackContract": realWorldValidationFeedbackContract(),
+		"suggestedArgs": map[string]any{
+			"runID": runID,
+			"feedback": map[string]any{
+				"repository": repository,
+				"outcome":    realWorldFeedbackBehavedReasonably,
+				"findings":   []string{},
+				"notes":      "DollarLint handled this repository result reasonably; no product change is recommended from this repo alone.",
+			},
+		},
+	}
+}
+
+func realWorldNextRecordValidationFeedback(runID, repository string) map[string]any {
+	return map[string]any{
+		"tool":             "real_world_record_validation_feedback",
+		"why":              "Record structured feedback for a delivered repository result without waiting for another result.",
+		"feedbackContract": realWorldValidationFeedbackContract(),
+		"suggestedArgs": map[string]any{
+			"runID": runID,
+			"feedback": map[string]any{
+				"repository": repository,
+				"outcome":    realWorldFeedbackBehavedReasonably,
+				"findings":   []string{},
+				"notes":      "DollarLint handled this repository result reasonably; no product change is recommended from this repo alone.",
+			},
 		},
 	}
 }
@@ -634,9 +926,45 @@ func realWorldNextFinishValidation(runID string) map[string]any {
 	return map[string]any{
 		"tool": "real_world_finish_validation",
 		"why":  "Merge completed per-repository validation artifacts into the standard real-world JSON artifact for triage and recording.",
+		"beforeCalling": []string{
+			"Only finish after every delivered repository result has validationFeedback recorded.",
+		},
 		"suggestedArgs": map[string]any{
 			"runID": runID,
 		},
+	}
+}
+
+func realWorldValidationFeedbackContract() map[string]any {
+	return map[string]any{
+		"required": []string{
+			"repository",
+			"outcome",
+		},
+		"outcome":                "Use behaved-reasonably when DollarLint handled the repo sensibly, product-signal when the result suggests a product change to consider, or blocked when the repo result could not be interpreted.",
+		"evidence":               "Include findings, notes, caveats, follow-up, or productRecommendations so the final answer can be reconstructed after context compaction.",
+		"productRecommendations": "Only include concrete product changes worth considering. Each recommendation needs strength high|med|low, recommendation, and rationale.",
+		"finalUse":               "real_world_finish_validation and real_world_triage_output carry this ledger into the draft record; the final user response should use it instead of relying on conversation memory.",
+	}
+}
+
+func realWorldValidationFeedbackSummary(feedback []realWorldValidationFeedback) map[string]any {
+	counts := map[string]int{
+		realWorldFeedbackBehavedReasonably: 0,
+		realWorldFeedbackProductSignal:     0,
+		realWorldFeedbackBlocked:           0,
+	}
+	recommendations := 0
+	for _, item := range feedback {
+		counts[item.Outcome]++
+		recommendations += len(item.ProductRecommendations)
+	}
+	return map[string]any{
+		"total":                  len(feedback),
+		"behavedReasonably":      counts[realWorldFeedbackBehavedReasonably],
+		"productSignals":         counts[realWorldFeedbackProductSignal],
+		"blocked":                counts[realWorldFeedbackBlocked],
+		"productRecommendations": recommendations,
 	}
 }
 

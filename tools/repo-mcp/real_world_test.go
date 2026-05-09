@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestRealWorldHistoryQueriesRepositories(t *testing.T) {
@@ -272,6 +274,115 @@ func TestRealWorldInspectCorpusDraftsDependencyPrep(t *testing.T) {
 	}
 }
 
+func TestRealWorldPrepareRunStreamsManifestAndDependencyPrep(t *testing.T) {
+	root := t.TempDir()
+	fakeBin := filepath.Join(root, "bin")
+	if err := os.MkdirAll(fakeBin, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	fakeGit := filepath.Join(fakeBin, "git")
+	fakeGitScript := `#!/bin/sh
+if [ "$1" = "clone" ]; then
+  target=""
+  for arg in "$@"; do target="$arg"; done
+  mkdir -p "$target/config"
+  printf '{"name":"fake"}' > "$target/package.json"
+  printf '{"$schema":"./schema.json"}' > "$target/config/tool.json"
+  printf '{"type":"object"}' > "$target/config/schema.json"
+  exit 0
+fi
+if [ "$1" = "rev-parse" ]; then
+  echo deadbeef
+  exit 0
+fi
+exit 1
+`
+	if err := os.WriteFile(fakeGit, []byte(fakeGitScript), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", fakeBin+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	corpus := filepath.Join(root, "corpus")
+	cache := filepath.Join(root, "cache")
+	output := filepath.Join(root, "out.json")
+	server := &repoServer{root: root, realWorldPrepareRuns: newRealWorldPrepareRegistry()}
+	run, err := server.startRealWorldPrepareRun(realWorldStartPrepareArgs{
+		Title:          "Streaming",
+		CorpusDir:      corpus,
+		CacheDir:       cache,
+		OutputArtifact: output,
+		Repositories: []realWorldRepository{
+			{Name: "one", CloneURL: "https://github.com/example/one.git"},
+			{Name: "two", CloneURL: "https://github.com/example/two.git"},
+		},
+		Concurrency: 2,
+	})
+	if err != nil {
+		t.Fatalf("start prepare run: %v", err)
+	}
+	for i := 0; i < 2; i++ {
+		select {
+		case result := <-run.results:
+			if !result.Succeeded || result.DependencyPrep == nil || result.DependencyPrep.Status != "needs-review" {
+				t.Fatalf("prepare result = %+v", result)
+			}
+			run.markDelivered()
+		case <-time.After(5 * time.Second):
+			t.Fatal("timed out waiting for prepare result")
+		}
+	}
+	select {
+	case <-run.done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for prepare completion")
+	}
+	manifest, err := readRealWorldManifest(run.ManifestPath)
+	if err != nil {
+		t.Fatalf("read manifest: %v", err)
+	}
+	if !manifest.PreparationManaged || !manifest.PreparationComplete || manifest.PreparationRunID != run.ID {
+		t.Fatalf("manifest preparation fields = %+v", manifest)
+	}
+	if len(manifest.Repositories) != 2 || manifest.Repositories[0].Status != "cloned" || manifest.Repositories[0].Commit != "deadbeef" {
+		t.Fatalf("manifest repositories = %+v", manifest.Repositories)
+	}
+	if len(manifest.DependencyPrep) != 2 || len(manifest.DependencyPrepInspection) != 2 || !manifest.DependencyPrepNeedsReview {
+		t.Fatalf("manifest dependency prep = prep %+v inspection %+v", manifest.DependencyPrep, manifest.DependencyPrepInspection)
+	}
+}
+
+func TestRealWorldValidationRefreshesDependencyPrepFromManifest(t *testing.T) {
+	dir := t.TempDir()
+	manifestPath := filepath.Join(dir, realWorldManifestName)
+	if err := writeJSONFile(manifestPath, realWorldManifest{
+		SchemaVersion:  1,
+		CorpusDir:      dir,
+		CacheDir:       filepath.Join(dir, "cache"),
+		OutputArtifact: filepath.Join(dir, "out.json"),
+		Repositories: []realWorldRepository{{
+			Name:     "example",
+			CloneURL: "https://github.com/example/example.git",
+			Path:     filepath.Join(dir, "example"),
+			Status:   "cloned",
+		}},
+		DependencyPrep: []realWorldDependencyPrep{{
+			Repository: "example",
+			Status:     "not-needed",
+			Notes:      "No local schema refs.",
+		}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	run := &realWorldValidationRun{
+		ManifestPath: manifestPath,
+		ctx:          context.Background(),
+	}
+	run.refreshFromManifest()
+	if len(run.Repositories) != 1 || len(run.DependencyPrep) != 1 {
+		t.Fatalf("run after refresh = repos %+v prep %+v", run.Repositories, run.DependencyPrep)
+	}
+}
+
 func TestRealWorldSuggestedPrepCommandsSuppressScripts(t *testing.T) {
 	commands := realWorldSuggestedPrepCommands(realWorldDependencyPrepScan{Lockfiles: []string{
 		"package-lock.json",
@@ -324,6 +435,11 @@ func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
 				Status:     "skipped",
 				Notes:      "No lockfile present.",
 			}},
+			ValidationFeedback: []realWorldValidationFeedback{{
+				Repository: "example",
+				Outcome:    realWorldFeedbackBehavedReasonably,
+				Notes:      "DollarLint handled the repo reasonably.",
+			}},
 			Repositories: []realWorldRepository{{
 				Name:     "example",
 				CloneURL: "https://github.com/example/example.git",
@@ -369,6 +485,9 @@ func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
 	if len(entryFile.DependencyPrep) != 1 || entryFile.DependencyPrep[0].Status != "skipped" {
 		t.Fatalf("dependency prep = %+v", entryFile.DependencyPrep)
 	}
+	if len(entryFile.ValidationFeedback) != 1 || entryFile.ValidationFeedback[0].Outcome != realWorldFeedbackBehavedReasonably {
+		t.Fatalf("validation feedback = %+v", entryFile.ValidationFeedback)
+	}
 	if len(entryFile.ProductRecommendations) != 1 || entryFile.ProductRecommendations[0].Strength != "low" {
 		t.Fatalf("product recommendations = %+v", entryFile.ProductRecommendations)
 	}
@@ -407,7 +526,7 @@ func TestValidateRealWorldEntryForRecordRequiresStructuredFields(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected incomplete entry error")
 	}
-	if !strings.Contains(err.Error(), "productRecommendations") || !strings.Contains(err.Error(), "productDecisions") || !strings.Contains(err.Error(), "followUp") {
+	if !strings.Contains(err.Error(), "validationFeedback") || !strings.Contains(err.Error(), "productRecommendations") || !strings.Contains(err.Error(), "productDecisions") || !strings.Contains(err.Error(), "followUp") {
 		t.Fatalf("error did not name missing structured fields: %v", err)
 	}
 }
@@ -430,6 +549,11 @@ func TestValidateRealWorldEntryForRecordAcceptsCompleteEntry(t *testing.T) {
 			Status:     "not-needed",
 			Notes:      "No local dependency schemas referenced.",
 		}},
+		ValidationFeedback: []realWorldValidationFeedback{{
+			Repository: "example",
+			Outcome:    realWorldFeedbackBehavedReasonably,
+			Notes:      "DollarLint handled the repo reasonably.",
+		}},
 		Findings: []string{"No crashes or output contract issues."},
 		ProductRecommendations: []realWorldProductRecommendation{{
 			Strength:       "low",
@@ -441,6 +565,59 @@ func TestValidateRealWorldEntryForRecordAcceptsCompleteEntry(t *testing.T) {
 	}
 	if err := validateRealWorldEntryForRecord(entry); err != nil {
 		t.Fatalf("validate complete entry: %v", err)
+	}
+}
+
+func TestRealWorldValidationFeedbackLedger(t *testing.T) {
+	result := realWorldRepoValidationResult{Repository: "example", Accepted: true}
+	run := &realWorldValidationRun{
+		ID:            "run",
+		Repositories:  []realWorldRepository{{Name: "example"}},
+		resultsByID:   map[string]realWorldRepoValidationResult{"example": result},
+		deliveredByID: map[string]realWorldRepoValidationResult{},
+		feedbackByID:  map[string]realWorldValidationFeedback{},
+	}
+	if err := run.recordFeedback(realWorldValidationFeedback{
+		Repository: "example",
+		Outcome:    realWorldFeedbackBehavedReasonably,
+		Notes:      "Looks fine.",
+	}); err == nil {
+		t.Fatal("expected feedback before delivery to be rejected")
+	}
+
+	run.markDelivered(result)
+	snapshot := run.snapshot()
+	if snapshot.FeedbackMissing != 1 || snapshot.FeedbackRecorded != 0 || len(snapshot.FeedbackMissingRepositories) != 1 {
+		t.Fatalf("snapshot before feedback = %+v", snapshot)
+	}
+	next := realWorldValidationNextStep(run)
+	if next["tool"] != "real_world_next_validation_result" {
+		t.Fatalf("next step before feedback = %+v", next)
+	}
+
+	err := run.recordFeedback(realWorldValidationFeedback{
+		Repository: "example",
+		Outcome:    realWorldFeedbackProductSignal,
+		Findings:   []string{"The repository result exposed a concrete product signal."},
+		ProductRecommendations: []realWorldProductRecommendation{{
+			Strength:       "med",
+			Recommendation: "Improve this behavior.",
+			Rationale:      "The product signal was reproducible in this repository.",
+		}},
+	})
+	if err != nil {
+		t.Fatalf("record feedback: %v", err)
+	}
+	if missing := run.missingFeedback(); len(missing) != 0 {
+		t.Fatalf("missing feedback = %+v", missing)
+	}
+	feedback := run.validationFeedback()
+	if len(feedback) != 1 || feedback[0].Repository != "example" || feedback[0].Outcome != realWorldFeedbackProductSignal {
+		t.Fatalf("feedback = %+v", feedback)
+	}
+	snapshot = run.snapshot()
+	if snapshot.FeedbackMissing != 0 || snapshot.FeedbackRecorded != 1 || !snapshot.FeedbackComplete {
+		t.Fatalf("snapshot after feedback = %+v", snapshot)
 	}
 }
 

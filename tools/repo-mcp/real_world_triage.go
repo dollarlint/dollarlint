@@ -21,6 +21,7 @@ type realWorldTriageArgs struct {
 	ManifestPath           string                           `json:"manifestPath"`
 	Repositories           []realWorldRepository            `json:"repositories"`
 	DependencyPrep         []realWorldDependencyPrep        `json:"dependencyPrep"`
+	ValidationFeedback     []realWorldValidationFeedback    `json:"validationFeedback"`
 	ProductRecommendations []realWorldProductRecommendation `json:"productRecommendations"`
 	ProductDecisions       []string                         `json:"productDecisions"`
 	FollowUp               []string                         `json:"followUp"`
@@ -60,16 +61,18 @@ type realWorldOutputFile struct {
 }
 
 type realWorldTriage struct {
-	OutputArtifact         string                           `json:"outputArtifact"`
-	Summary                *realWorldResult                 `json:"summary,omitempty"`
-	PerRepository          []realWorldRepositoryTriage      `json:"perRepository"`
-	IssueGroups            []realWorldIssueGroup            `json:"issueGroups"`
-	WarningGroups          []realWorldWarningGroup          `json:"warningGroups"`
-	Findings               []string                         `json:"findings"`
-	ProductRecommendations []realWorldProductRecommendation `json:"productRecommendations"`
-	ProductDecisions       []string                         `json:"productDecisions"`
-	FollowUp               []string                         `json:"followUp"`
-	FinalResponseContract  map[string]any                   `json:"finalResponseContract"`
+	OutputArtifact            string                           `json:"outputArtifact"`
+	Summary                   *realWorldResult                 `json:"summary,omitempty"`
+	PerRepository             []realWorldRepositoryTriage      `json:"perRepository"`
+	IssueGroups               []realWorldIssueGroup            `json:"issueGroups"`
+	WarningGroups             []realWorldWarningGroup          `json:"warningGroups"`
+	ValidationFeedback        []realWorldValidationFeedback    `json:"validationFeedback,omitempty"`
+	ValidationFeedbackSummary map[string]any                   `json:"validationFeedbackSummary,omitempty"`
+	Findings                  []string                         `json:"findings"`
+	ProductRecommendations    []realWorldProductRecommendation `json:"productRecommendations"`
+	ProductDecisions          []string                         `json:"productDecisions"`
+	FollowUp                  []string                         `json:"followUp"`
+	FinalResponseContract     map[string]any                   `json:"finalResponseContract"`
 }
 
 type realWorldRepositoryTriage struct {
@@ -143,6 +146,9 @@ func (s *repoServer) handleRealWorldTriageOutput(_ context.Context, request mcp.
 			if len(repositories) == 0 {
 				repositories = manifest.Repositories
 			}
+			if len(args.DependencyPrep) == 0 {
+				args.DependencyPrep = manifest.DependencyPrep
+			}
 		}
 	}
 	if args.OutputArtifact == "" {
@@ -151,11 +157,17 @@ func (s *repoServer) handleRealWorldTriageOutput(_ context.Context, request mcp.
 	if args.Command == "" && args.CorpusDir != "" && args.CacheDir != "" {
 		args.Command = realWorldValidationCommand(args.CorpusDir, args.CacheDir, args.OutputArtifact, true, "warn", 1, "1ms", "1ms", nil)
 	}
+	for i, feedback := range args.ValidationFeedback {
+		if err := validateRealWorldValidationFeedback(feedback); err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("validationFeedback[%d]: %v", i, err)), nil
+		}
+	}
 
 	triage, err := triageRealWorldOutput(args.OutputArtifact, repositories)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
+	applyRealWorldValidationFeedback(&triage, args.ValidationFeedback)
 	if len(args.ProductRecommendations) > 0 {
 		triage.ProductRecommendations = args.ProductRecommendations
 	}
@@ -175,6 +187,7 @@ func (s *repoServer) handleRealWorldTriageOutput(_ context.Context, request mcp.
 		"manifestPath":           manifestPath,
 		"repositories":           repositories,
 		"dependencyPrep":         args.DependencyPrep,
+		"validationFeedback":     args.ValidationFeedback,
 		"findings":               triage.Findings,
 		"productRecommendations": triage.ProductRecommendations,
 		"productDecisions":       triage.ProductDecisions,
@@ -182,17 +195,19 @@ func (s *repoServer) handleRealWorldTriageOutput(_ context.Context, request mcp.
 	}
 	missingArgs := realWorldTriageDraftRecordMissing(args, repositories)
 	return structured(map[string]any{
-		"ok":                    true,
-		"outputArtifact":        args.OutputArtifact,
-		"manifestPath":          manifestPath,
-		"summary":               triage.Summary,
-		"perRepository":         triage.PerRepository,
-		"issueGroups":           triage.IssueGroups,
-		"warningGroups":         triage.WarningGroups,
-		"draftRecord":           draftRecord,
-		"draftRecordMissing":    missingArgs,
-		"finalResponseContract": triage.FinalResponseContract,
-		"nextStep":              realWorldNextRecordTriagedResult(draftRecord, missingArgs),
+		"ok":                        true,
+		"outputArtifact":            args.OutputArtifact,
+		"manifestPath":              manifestPath,
+		"summary":                   triage.Summary,
+		"perRepository":             triage.PerRepository,
+		"issueGroups":               triage.IssueGroups,
+		"warningGroups":             triage.WarningGroups,
+		"validationFeedback":        triage.ValidationFeedback,
+		"validationFeedbackSummary": triage.ValidationFeedbackSummary,
+		"draftRecord":               draftRecord,
+		"draftRecordMissing":        missingArgs,
+		"finalResponseContract":     triage.FinalResponseContract,
+		"nextStep":                  realWorldNextRecordTriagedResult(draftRecord, missingArgs),
 	})
 }
 
@@ -224,6 +239,54 @@ func triageRealWorldOutput(outputArtifact string, repositories []realWorldReposi
 		FollowUp:               followUp,
 		FinalResponseContract:  realWorldFinalResponseContract(),
 	}, nil
+}
+
+func applyRealWorldValidationFeedback(triage *realWorldTriage, feedback []realWorldValidationFeedback) {
+	if len(feedback) == 0 {
+		return
+	}
+	triage.ValidationFeedback = append([]realWorldValidationFeedback{}, feedback...)
+	triage.ValidationFeedbackSummary = realWorldValidationFeedbackSummary(feedback)
+	triage.Findings = append([]string{realWorldValidationFeedbackFinding(feedback)}, triage.Findings...)
+	var feedbackRecommendations []realWorldProductRecommendation
+	var feedbackDecisions []string
+	var feedbackFollowUp []string
+	for _, item := range feedback {
+		feedbackRecommendations = append(feedbackRecommendations, item.ProductRecommendations...)
+		feedbackDecisions = append(feedbackDecisions, item.ProductDecisions...)
+		feedbackFollowUp = append(feedbackFollowUp, item.FollowUp...)
+	}
+	if len(feedbackRecommendations) > 0 {
+		triage.ProductRecommendations = appendNonNoChangeRecommendations(triage.ProductRecommendations, feedbackRecommendations)
+	}
+	if len(feedbackDecisions) > 0 {
+		triage.ProductDecisions = append(triage.ProductDecisions, feedbackDecisions...)
+	}
+	if len(feedbackFollowUp) > 0 {
+		triage.FollowUp = append(triage.FollowUp, feedbackFollowUp...)
+	}
+}
+
+func realWorldValidationFeedbackFinding(feedback []realWorldValidationFeedback) string {
+	summary := realWorldValidationFeedbackSummary(feedback)
+	return fmt.Sprintf("Agent validation feedback ledger: %d repo(s) behaved reasonably, %d repo(s) produced product signals, and %d repo(s) were blocked or uninterpretable.",
+		summary["behavedReasonably"], summary["productSignals"], summary["blocked"])
+}
+
+func appendNonNoChangeRecommendations(existing, additional []realWorldProductRecommendation) []realWorldProductRecommendation {
+	out := make([]realWorldProductRecommendation, 0, len(existing)+len(additional))
+	for _, recommendation := range existing {
+		if isNoChangeRecommendation(recommendation) {
+			continue
+		}
+		out = append(out, recommendation)
+	}
+	out = append(out, additional...)
+	return out
+}
+
+func isNoChangeRecommendation(recommendation realWorldProductRecommendation) bool {
+	return strings.HasPrefix(strings.ToLower(recommendation.Recommendation), "no product change")
 }
 
 func readRealWorldOutputDetails(path string) (realWorldOutputDetails, error) {
@@ -552,6 +615,9 @@ func realWorldTriageDraftRecordMissing(args realWorldTriageArgs, repositories []
 	}
 	if len(args.DependencyPrep) == 0 {
 		missing = append(missing, "dependencyPrep")
+	}
+	if len(args.ValidationFeedback) == 0 {
+		missing = append(missing, "validationFeedback")
 	}
 	return missing
 }

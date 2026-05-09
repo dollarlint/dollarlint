@@ -86,9 +86,13 @@ mcp-servers:
       - real_world_start_testing
       - real_world_history
       - real_world_prepare_corpus
+      - real_world_next_prepared_repo
+      - real_world_prepare_status
+      - real_world_cancel_prepare
       - real_world_inspect_corpus
       - real_world_start_validation
       - real_world_next_validation_result
+      - real_world_record_validation_feedback
       - real_world_validation_status
       - real_world_finish_validation
       - real_world_cancel_validation
@@ -160,26 +164,28 @@ Run DollarLint against a fresh, bounded set of public repositories, persist the 
    - If the default pool is exhausted, pick other well-known public repositories with distinct ecosystems and conventional config files.
 
 3. Prepare and run.
-   - Call `real_world_prepare_corpus` with `clone: true`.
+   - Call `real_world_prepare_corpus` with `clone: true`. This starts managed clone and dependency-prep inspection jobs in the background and returns a manifest immediately.
    - If it reports duplicates, choose replacements unless this was an intentional manual rerun.
-   - Use the MCP dependency-prep first pass from `dependencyPrepInspection`, `dependencyPrep`, and `prepSecurityPolicy`; call `real_world_inspect_corpus` only if you need to re-run that scan.
+   - Do not wait for the full corpus to clone before validation. Use the returned `nextStep` and call `real_world_start_validation` with the prepared `corpusDir`, `cacheDir`, `outputArtifact`, `manifestPath`, `build: false`, and `waitForFirstResult: true`; validation will wait inside the tool for repositories that are still being prepared.
+   - Use dependency-prep first-pass notes from the managed preparation manifest and `real_world_finish_validation`; call `real_world_next_prepared_repo` only if you specifically need to inspect clone/dependency-prep details before validation reaches that repo, and call `real_world_inspect_corpus` only if you need to re-run the scan.
    - Never run dependency lifecycle scripts, postinstall hooks, package-manager plugins, or repository install scripts during dependency prep.
    - If any dependency-prep entry has `status: needs-review`, run a bounded prep command only when lifecycle scripts are disabled and it is needed for local `$schema` fidelity. Otherwise replace it with an explicit skipped/not-needed note.
-   - The workflow pre-builds `bin/dollarlint` in a deterministic pre-agent step. Call `real_world_start_validation` with the prepared `corpusDir`, `cacheDir`, `outputArtifact`, `manifestPath`, `dependencyPrep`, `build: false`, and `waitForFirstResult: true`.
-   - Do not use shell sleep loops to monitor validation. For long validation work, keep `real_world_start_validation` or `real_world_next_validation_result` open; those tool calls send progress notifications and return per-repository results as they complete.
-   - After each per-repository result, review the product signal from that repository while the remaining jobs continue. Then call `real_world_next_validation_result` again until `nextStep` asks for `real_world_finish_validation`.
+   - The workflow pre-builds `bin/dollarlint` in a deterministic pre-agent step.
+   - Do not use shell sleep loops to monitor corpus prep or validation. For long work, keep `real_world_start_validation`, `real_world_next_validation_result`, or `real_world_next_prepared_repo` open; those tool calls send progress notifications and return per-repository results as they complete.
+   - After each per-repository result, review the product signal from that repository while the remaining jobs continue. Record `validationFeedback` for that repository in the next `real_world_next_validation_result` call, or call `real_world_record_validation_feedback` if you need to record feedback without waiting.
+   - Continue calling `real_world_next_validation_result` with feedback for the previously delivered result until `nextStep` asks for `real_world_finish_validation`.
    - Call `real_world_finish_validation` to merge completed per-repository artifacts into the standard JSON `outputArtifact` before triage.
    - Nonzero validation exit code 1 is expected when real issues are found. Treat crashes, missing output JSON, hangs, and unexplained warnings as higher-severity product signals.
 
 4. Triage the output.
-   - Call `real_world_triage_output` with the prepared `corpusDir`, `cacheDir`, `outputArtifact`, `manifestPath` when available, validation command, repositories, and dependency prep entries.
+   - Call `real_world_triage_output` with the prepared `corpusDir`, `cacheDir`, `outputArtifact`, `manifestPath` when available, validation command, repositories, dependency prep entries, and `validationFeedback` from `real_world_finish_validation`.
    - Let the MCP tool sanity-check output counts and group parsing, validation, schema, coverage, warning, crash/performance, and output-contract signals by repository.
    - If `real_world_triage_output` returns an error, resolve the output/schema mismatch or record a blocker instead of proceeding from a hand-written Markdown report.
-   - Use `draftRecord` as the starting point for the structured result. Adjust it only with evidence from the JSON artifact, dependency prep notes, or repository context.
+   - Use `draftRecord` as the starting point for the structured result. Adjust it only with evidence from the JSON artifact, dependency prep notes, validation feedback, or repository context.
    - Product recommendations must include a strength label of `high`, `med`, or `low`, based on frequency, severity, reproducibility, and expected user impact. If there is no genuine product change to consider, use an explicit no-change recommendation in the record.
 
 5. Persist repository memory.
-   - Call `real_world_record_result` with the title, corpus, cache directory, command, output artifact, repositories, dependency prep entries, findings, `productRecommendations` objects with `high`/`med`/`low` strength and rationale, product changes/decisions in `productDecisions`, and follow-up notes from the triage tool's `draftRecord`.
+   - Call `real_world_record_result` with the title, corpus, cache directory, command, output artifact, repositories, dependency prep entries, validation feedback, findings, `productRecommendations` objects with `high`/`med`/`low` strength and rationale, product changes/decisions in `productDecisions`, and follow-up notes from the triage tool's `draftRecord`.
    - `real_world_record_result` automatically copies the raw DollarLint JSON output into `reports/real-world-artifacts/`, stores the repo-relative path as `persistedOutputArtifact`, and cleans managed temp corpus/cache dirs after recording succeeds; use that durable artifact for later per-file triage.
    - Do not create or update Markdown report files in the repository. Durable repository memory belongs in the MCP structured result.
    - If files changed, request a pull request through the configured `create-pull-request` safe output. Keep the PR title concise and mention the structured result entry.

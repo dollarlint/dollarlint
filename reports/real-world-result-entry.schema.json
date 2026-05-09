@@ -76,6 +76,12 @@
         "$ref": "#/$defs/dependencyPrep"
       }
     },
+    "validationFeedback": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/validationFeedback"
+      }
+    },
     "result": {
       "$ref": "#/$defs/result"
     },
@@ -178,6 +184,42 @@
         "rationale": {
           "type": "string",
           "minLength": 1
+        }
+      }
+    },
+    "validationFeedback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "outcome"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "type": "string",
+          "enum": ["behaved-reasonably", "product-signal", "blocked"]
+        },
+        "findings": {
+          "$ref": "#/$defs/stringList"
+        },
+        "productRecommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/productRecommendation"
+          }
+        },
+        "productDecisions": {
+          "$ref": "#/$defs/stringList"
+        },
+        "caveats": {
+          "$ref": "#/$defs/stringList"
+        },
+        "followUp": {
+          "$ref": "#/$defs/stringList"
+        },
+        "notes": {
+          "type": "string"
         }
       }
     },

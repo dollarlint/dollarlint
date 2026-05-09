@@ -12,9 +12,10 @@ import (
 const serverName = "dollarlint-repo"
 
 type repoServer struct {
-	root          string
-	mcp           *server.MCPServer
-	realWorldRuns *realWorldRunRegistry
+	root                 string
+	mcp                  *server.MCPServer
+	realWorldRuns        *realWorldRunRegistry
+	realWorldPrepareRuns *realWorldPrepareRegistry
 }
 
 func main() {
@@ -22,7 +23,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	rs := &repoServer{root: root, realWorldRuns: newRealWorldRunRegistry()}
+	rs := &repoServer{
+		root:                 root,
+		realWorldRuns:        newRealWorldRunRegistry(),
+		realWorldPrepareRuns: newRealWorldPrepareRegistry(),
+	}
 	rs.mcp = server.NewMCPServer(
 		serverName,
 		"0.1.0",

@@ -129,6 +129,50 @@ brews:
     test: |
       system "#{bin}/dollarlint", "--version"
 
+winget:
+  - name: DollarLint
+    package_name: DollarLint
+    package_identifier: DollarLint.DollarLint
+    publisher: DollarLint
+    publisher_url: https://github.com/dollarlint
+    publisher_support_url: https://github.com/dollarlint/dollarlint/issues
+    short_description: Validate JSON-family, YAML, and TOML files against their declared JSON Schemas.
+    description: DollarLint validates JSON, JSONC, JSON5, JSON Lines, YAML, and TOML files against JSON Schemas.
+    homepage: https://github.com/dollarlint/dollarlint
+    license: MIT
+    license_url: https://github.com/dollarlint/dollarlint/blob/main/LICENSE
+    release_notes: "{{ .Changelog }}"
+    release_notes_url: "https://github.com/dollarlint/dollarlint/releases/tag/{{ .Tag }}"
+    tags:
+      - cli
+      - json-schema
+      - json
+      - yaml
+      - toml
+      - validation
+    ids:
+      - dollarlint
+    use: archive
+    goamd64: v1
+    commit_msg_template: "DollarLint.DollarLint: {{ .Tag }}"
+    repository:
+      owner: dollarlint
+      name: winget-pkgs
+      branch: "dollarlint-{{ .Version }}"
+      token: "{{ .Env.WINGET_GITHUB_TOKEN }}"
+      token_type: github
+      pull_request:
+        enabled: true
+        draft: false
+        check_boxes: true
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
+    commit_author:
+      name: dollarlint-release
+      email: release@dollarlint.dev
+
 release:
   github:
     owner: dollarlint

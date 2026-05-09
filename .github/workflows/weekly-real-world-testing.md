@@ -48,8 +48,8 @@ network:
     - "changie.dev"
 
 tools:
-  startup-timeout: 240
-  timeout: 300
+  startup-timeout: 300
+  timeout: 1800
   edit:
   bash:
     - date

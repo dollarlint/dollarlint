@@ -169,6 +169,7 @@ Run DollarLint against a fresh, bounded set of public repositories, persist the 
 
 5. Persist repository memory.
    - Call `real_world_record_result` with the title, corpus, cache directory, command, output artifact, repositories, dependency prep entries, findings, `productRecommendations` objects with `high`/`med`/`low` strength and rationale, product changes/decisions in `productDecisions`, and follow-up notes.
+   - `real_world_record_result` automatically copies the raw DollarLint JSON output into `reports/real-world-artifacts/` and stores the repo-relative path as `persistedOutputArtifact`; use that durable artifact for later per-file triage.
    - Do not create or update Markdown report files in the repository. Durable repository memory belongs in the MCP structured result.
    - If files changed, request a pull request through the configured `create-pull-request` safe output. Keep the PR title concise and mention the structured result entry.
 
@@ -180,7 +181,7 @@ Run DollarLint against a fresh, bounded set of public repositories, persist the 
      - Use `###` and `####` headings only.
      - Keep the summary, result counts, notable findings, and product recommendations with `high`/`med`/`low` strength labels visible.
      - Put verbose per-file details and raw warnings inside `<details>` blocks.
-     - Include the tested repository table, DollarLint commit, output artifact path, and workflow run URL.
+     - Include the tested repository table, DollarLint commit, persisted output artifact path, temp output artifact path, and workflow run URL.
    - If Discussion creation is unavailable, the safe output may fall back to an issue; mention that the intended destination was a Discussion.
 
 Do not fabricate results. If cloning or validation fails before a meaningful corpus run, request a short GitHub Agentic Workflow summary with the blocker, partial artifacts, and the next concrete fix.

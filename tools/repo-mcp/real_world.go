@@ -19,6 +19,7 @@ import (
 const (
 	realWorldResultsRelPath       = "reports/real-world-results.json"
 	realWorldResultsDirRelPath    = "reports/real-world-results"
+	realWorldArtifactsDirRelPath  = "reports/real-world-artifacts"
 	realWorldResultsSchema        = "./real-world-results.schema.json"
 	realWorldEntrySchema          = "../real-world-result-entry.schema.json"
 	realWorldHistorySchemaVersion = 3
@@ -52,23 +53,24 @@ type realWorldEntryFile struct {
 }
 
 type realWorldEntry struct {
-	ID                     string                           `json:"id"`
-	Date                   string                           `json:"date"`
-	Title                  string                           `json:"title"`
-	DollarLintRevision     string                           `json:"dollarlintRevision"`
-	WorkingTreeNote        string                           `json:"workingTreeNote,omitempty"`
-	Corpus                 string                           `json:"corpus"`
-	CacheDir               string                           `json:"cacheDir,omitempty"`
-	Command                string                           `json:"command"`
-	OutputArtifact         string                           `json:"outputArtifact"`
-	DependencyPrep         []realWorldDependencyPrep        `json:"dependencyPrep,omitempty"`
-	Repositories           []realWorldRepository            `json:"repositories"`
-	Result                 *realWorldResult                 `json:"result,omitempty"`
-	BeforeResult           *realWorldResult                 `json:"beforeResult,omitempty"`
-	Findings               []string                         `json:"findings,omitempty"`
-	ProductRecommendations []realWorldProductRecommendation `json:"productRecommendations,omitempty"`
-	ProductDecisions       []string                         `json:"productDecisions,omitempty"`
-	FollowUp               []string                         `json:"followUp,omitempty"`
+	ID                      string                           `json:"id"`
+	Date                    string                           `json:"date"`
+	Title                   string                           `json:"title"`
+	DollarLintRevision      string                           `json:"dollarlintRevision"`
+	WorkingTreeNote         string                           `json:"workingTreeNote,omitempty"`
+	Corpus                  string                           `json:"corpus"`
+	CacheDir                string                           `json:"cacheDir,omitempty"`
+	Command                 string                           `json:"command"`
+	OutputArtifact          string                           `json:"outputArtifact"`
+	PersistedOutputArtifact string                           `json:"persistedOutputArtifact,omitempty"`
+	DependencyPrep          []realWorldDependencyPrep        `json:"dependencyPrep,omitempty"`
+	Repositories            []realWorldRepository            `json:"repositories"`
+	Result                  *realWorldResult                 `json:"result,omitempty"`
+	BeforeResult            *realWorldResult                 `json:"beforeResult,omitempty"`
+	Findings                []string                         `json:"findings,omitempty"`
+	ProductRecommendations  []realWorldProductRecommendation `json:"productRecommendations,omitempty"`
+	ProductDecisions        []string                         `json:"productDecisions,omitempty"`
+	FollowUp                []string                         `json:"followUp,omitempty"`
 }
 
 type realWorldDependencyPrep struct {
@@ -487,6 +489,11 @@ func (s *repoServer) handleRealWorldRecordResult(ctx context.Context, request mc
 	if err := validateRealWorldEntryForRecord(entry); err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
+	persistedOutputArtifact, err := persistRealWorldOutputArtifact(s.root, entry)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	entry.PersistedOutputArtifact = persistedOutputArtifact
 	replaced := false
 	for i := range history.Entries {
 		if history.Entries[i].ID != entry.ID {
@@ -506,15 +513,16 @@ func (s *repoServer) handleRealWorldRecordResult(ctx context.Context, request mc
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 	return structured(map[string]any{
-		"ok":          true,
-		"path":        filepath.Join(s.root, realWorldResultsRelPath),
-		"entryPath":   filepath.Join(s.root, realWorldEntryRelPath(entry)),
-		"entry":       entry,
-		"replaced":    replaced,
-		"entryCount":  len(history.Entries),
-		"repoCount":   len(entry.Repositories),
-		"testedRepos": realWorldTestedRepos(history),
-		"nextStep":    realWorldNextAfterRecord(entry),
+		"ok":                      true,
+		"path":                    filepath.Join(s.root, realWorldResultsRelPath),
+		"entryPath":               filepath.Join(s.root, realWorldEntryRelPath(entry)),
+		"entry":                   entry,
+		"persistedOutputArtifact": filepath.Join(s.root, entry.PersistedOutputArtifact),
+		"replaced":                replaced,
+		"entryCount":              len(history.Entries),
+		"repoCount":               len(entry.Repositories),
+		"testedRepos":             realWorldTestedRepos(history),
+		"nextStep":                realWorldNextAfterRecord(entry),
 	})
 }
 
@@ -669,11 +677,12 @@ func realWorldRecordResultContract() map[string]any {
 			"productDecisions",
 			"followUp",
 		},
-		"dependencyPrep":         "Include every dependency-prep command that ran, failed, timed out, was narrowed, was skipped, or was not needed. Each item needs status and notes.",
-		"productRecommendations": "Use objects with strength high|med|low, recommendation, and rationale.",
-		"productDecisions":       "Use for product changes or decisions made after triage. If none were made, include an explicit no-change decision.",
-		"result":                 "Read automatically from outputArtifact when outputArtifact is provided.",
-		"repositories":           "Read automatically from manifestPath when repositories is omitted and a manifest is available.",
+		"dependencyPrep":          "Include every dependency-prep command that ran, failed, timed out, was narrowed, was skipped, or was not needed. Each item needs status and notes.",
+		"productRecommendations":  "Use objects with strength high|med|low, recommendation, and rationale.",
+		"productDecisions":        "Use for product changes or decisions made after triage. If none were made, include an explicit no-change decision.",
+		"result":                  "Read automatically from outputArtifact when outputArtifact is provided.",
+		"persistedOutputArtifact": "Written automatically from outputArtifact into reports/real-world-artifacts/.",
+		"repositories":            "Read automatically from manifestPath when repositories is omitted and a manifest is available.",
 	}
 }
 
@@ -741,6 +750,7 @@ func realWorldNextTriageAndRecord(corpusDir, cacheDir, outputArtifact string) ma
 			"Separate parsing, validation, schema, coverage, warning, crash/performance, and output-contract findings.",
 			"Account for dependencyPrep when interpreting missing local schemas.",
 			"Create productRecommendations with strength, recommendation, and rationale.",
+			"real_world_record_result will persist the raw outputArtifact JSON into reports/real-world-artifacts/ for later per-file triage.",
 			"Do not create or update Markdown report files.",
 		},
 		"requiredArgs": realWorldRecordResultContract()["required"],
@@ -891,6 +901,39 @@ func realWorldEntryRelPath(entry realWorldEntry) string {
 		name = "entry"
 	}
 	return filepath.ToSlash(filepath.Join(realWorldResultsDirRelPath, name+".json"))
+}
+
+func realWorldArtifactRelPath(entry realWorldEntry) string {
+	name := slugify(entry.ID)
+	if name == "" {
+		name = slugify(entry.Date + "-" + entry.Title)
+	}
+	if name == "" {
+		name = "entry"
+	}
+	return filepath.ToSlash(filepath.Join(realWorldArtifactsDirRelPath, name+".dollarlint.json"))
+}
+
+func persistRealWorldOutputArtifact(root string, entry realWorldEntry) (string, error) {
+	if entry.OutputArtifact == "" {
+		return "", nil
+	}
+	data, err := os.ReadFile(entry.OutputArtifact)
+	if err != nil {
+		return "", fmt.Errorf("read output artifact %s: %w", entry.OutputArtifact, err)
+	}
+	if !json.Valid(data) {
+		return "", fmt.Errorf("read output artifact %s: invalid JSON", entry.OutputArtifact)
+	}
+	relPath := realWorldArtifactRelPath(entry)
+	path := filepath.Join(root, relPath)
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return "", err
+	}
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		return "", err
+	}
+	return relPath, nil
 }
 
 func readRealWorldManifest(path string) (realWorldManifest, error) {

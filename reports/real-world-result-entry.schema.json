@@ -60,6 +60,10 @@
       "type": "string",
       "minLength": 1
     },
+    "persistedOutputArtifact": {
+      "type": "string",
+      "pattern": "^reports/real-world-artifacts/[^/]+\\.dollarlint\\.json$"
+    },
     "repositories": {
       "type": "array",
       "items": {

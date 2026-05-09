@@ -49,7 +49,7 @@ func (s *repoServer) addTools() {
 		"fetchRetryMaxWait":  map[string]any{"type": "string", "description": "Maximum retry wait. Defaults to 1ms."},
 		"extraArgs":          arrayStringSchema("Additional dollarlint validate arguments."),
 	}), s.handleRealWorldRunCorpus, toolHints{ReadOnly: false, OpenWorld: true})
-	s.addTool("real_world_record_result", "Persist a real-world sweep result to split reports/real-world-results storage, reading summary counts from a DollarLint JSON artifact when provided.", schemaObject(map[string]any{
+	s.addTool("real_world_record_result", "Persist a real-world sweep result to split reports/real-world-results storage and copy the DollarLint JSON output into reports/real-world-artifacts.", schemaObject(map[string]any{
 		"id":                     map[string]any{"type": "string", "description": "Stable entry id. Defaults to a slug from date and title."},
 		"date":                   map[string]any{"type": "string", "description": "Entry date in YYYY-MM-DD. Defaults to today."},
 		"title":                  map[string]any{"type": "string", "description": "Short sweep title."},

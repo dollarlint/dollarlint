@@ -81,13 +81,14 @@ func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
 	root := t.TempDir()
 	history := realWorldHistory{
 		Entries: []realWorldEntry{{
-			ID:                 "sample",
-			Date:               "2026-05-09",
-			Title:              "Sample",
-			DollarLintRevision: "abc123",
-			Corpus:             "/tmp/corpus",
-			Command:            "bin/dollarlint validate /tmp/corpus",
-			OutputArtifact:     "/tmp/out.json",
+			ID:                      "sample",
+			Date:                    "2026-05-09",
+			Title:                   "Sample",
+			DollarLintRevision:      "abc123",
+			Corpus:                  "/tmp/corpus",
+			Command:                 "bin/dollarlint validate /tmp/corpus",
+			OutputArtifact:          "/tmp/out.json",
+			PersistedOutputArtifact: "reports/real-world-artifacts/sample.dollarlint.json",
 			DependencyPrep: []realWorldDependencyPrep{{
 				Repository: "example",
 				Command:    "npm ci --ignore-scripts",
@@ -132,6 +133,9 @@ func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
 	}
 	if entryFile.Schema != realWorldEntrySchema || entryFile.SchemaVersion != realWorldHistorySchemaVersion || entryFile.ID != "sample" {
 		t.Fatalf("entry file = %+v", entryFile)
+	}
+	if entryFile.PersistedOutputArtifact != "reports/real-world-artifacts/sample.dollarlint.json" {
+		t.Fatalf("persisted output artifact = %q", entryFile.PersistedOutputArtifact)
 	}
 	if len(entryFile.DependencyPrep) != 1 || entryFile.DependencyPrep[0].Status != "skipped" {
 		t.Fatalf("dependency prep = %+v", entryFile.DependencyPrep)
@@ -235,5 +239,44 @@ func TestCreateRealWorldOutputPath(t *testing.T) {
 	}
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
 		t.Fatalf("output path should be reserved but not created, stat err=%v", err)
+	}
+}
+
+func TestPersistRealWorldOutputArtifactCopiesRawJSON(t *testing.T) {
+	root := t.TempDir()
+	srcDir := t.TempDir()
+	src := filepath.Join(srcDir, "out.json")
+	raw := []byte(`{"summary":{"discovered":1},"files":[{"path":"repo/config.json"}]}`)
+	if err := os.WriteFile(src, raw, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	rel, err := persistRealWorldOutputArtifact(root, realWorldEntry{
+		ID:             "2026-05-09 Sample Sweep",
+		OutputArtifact: src,
+	})
+	if err != nil {
+		t.Fatalf("persist output artifact: %v", err)
+	}
+	expectedRel := "reports/real-world-artifacts/2026-05-09-sample-sweep.dollarlint.json"
+	if rel != expectedRel {
+		t.Fatalf("rel path = %q, want %q", rel, expectedRel)
+	}
+	got, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != string(raw) {
+		t.Fatalf("persisted output changed: %s", got)
+	}
+}
+
+func TestPersistRealWorldOutputArtifactRejectsInvalidJSON(t *testing.T) {
+	root := t.TempDir()
+	src := filepath.Join(t.TempDir(), "out.json")
+	if err := os.WriteFile(src, []byte(`not-json`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := persistRealWorldOutputArtifact(root, realWorldEntry{ID: "bad", OutputArtifact: src}); err == nil {
+		t.Fatal("expected invalid JSON error")
 	}
 }

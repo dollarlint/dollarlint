@@ -92,7 +92,7 @@ func validationForSchemaFailure(document *Document, cfg Config, phase string, er
 	case CatalogFailureError:
 		return documentValidation{err: fmt.Errorf("%s", catalogMessage)}
 	case CatalogFailureSkip:
-		return documentValidation{skipped: true, message: fmt.Sprintf("catalog schema %s failed; skipped catalog-inferred validation", phase)}
+		return documentValidation{skipped: true, message: catalogSchemaSkippedMessage(phase)}
 	default:
 		return documentValidation{
 			warnings: []Warning{{
@@ -101,12 +101,21 @@ func validationForSchemaFailure(document *Document, cfg Config, phase string, er
 				Path:         document.RelativePath,
 				Schema:       document.Schema,
 				SchemaSource: document.SchemaSource,
-				Message:      catalogMessage + "; skipped catalog-inferred validation",
+				Message:      catalogSchemaWarningMessage(phase, document.RelativePath, document.Schema),
+				Hint:         "Technical details: " + catalogMessage,
 			}},
 			skipped: true,
-			message: fmt.Sprintf("catalog schema %s failed; skipped catalog-inferred validation", phase),
+			message: catalogSchemaSkippedMessage(phase),
 		}
 	}
+}
+
+func catalogSchemaWarningMessage(phase, path, schema string) string {
+	return fmt.Sprintf("Catalog schema could not be used for %s. The inferred schema %s failed to %s, so DollarLint skipped catalog-inferred validation for this file; this is not a finding in the file.", path, schema, phase)
+}
+
+func catalogSchemaSkippedMessage(phase string) string {
+	return fmt.Sprintf("catalog schema could not be used; skipped catalog-inferred validation after schema %s failure", phase)
 }
 
 func isCatalogSchemaSource(source string) bool {

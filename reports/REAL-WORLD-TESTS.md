@@ -2,6 +2,8 @@
 
 This report records DollarLint sweeps against real public repositories. Before starting a new sweep, check the repository tables below and avoid retesting the same projects unless the goal is an intentional before/after comparison.
 
+Structured sweep history is also stored in `reports/real-world-results.json`; prefer the repo MCP `real_world_history` tool for duplicate checks and queries.
+
 ## 2026-05-09 - Initial 10-Repo Corpus
 
 - DollarLint revision: `417cc4874097d0678a0f176a6938619de55b6c23` with active working-tree product changes during the session.
@@ -149,3 +151,66 @@ This report records DollarLint sweeps against real public repositories. Before s
 - Validation issues dropped from 32 to 26.
 - Warnings dropped from 2 to 0.
 - Validated file count rose from 894 to 898.
+
+## 2026-05-09 - Fresh 6-Repo Cross-Ecosystem Corpus
+
+- DollarLint revision: `c63b83b482d9c8ef8148c6f151742571fc20ae8f` with a clean working tree.
+- Corpus: `/tmp/dollarlint-corpus.CtwOPD`
+- Command: `XDG_CACHE_HOME=/tmp/dollarlint-cache.V2T8k4 bin/dollarlint validate /tmp/dollarlint-corpus.CtwOPD --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output /tmp/dollarlint-corpus-third.json`
+- Output artifact: `/tmp/dollarlint-corpus-third.json`
+
+### Repositories
+
+| Repo | Ecosystem | Clone URL | Repo commit | Notes |
+| --- | --- | --- | --- | --- |
+| express | JavaScript/Node | https://github.com/expressjs/express.git | `f873ac23124ffcff8c040b4bd257b32c29828d53` | All discovered configuration files validated. |
+| django | Python/JavaScript | https://github.com/django/django.git | `4d455ae2d7689ce066dfffef9fc29a6f6d3ed33e` | Private `package.json` uses uppercase `name`, which package-name schema validation rejects. |
+| terraform | Go/HCL | https://github.com/hashicorp/terraform.git | `527402d3fe2de2363c4587e7abd1a3b23669ca25` | Invalid fixture files produced expected parse failures; Changie config exposed schema drift/strictness. |
+| tokio | Rust | https://github.com/tokio-rs/tokio.git | `ee0dc9092665a1f13df573dc5e5124999d8e9035` | All discovered configuration files validated or skipped cleanly. |
+| vue-core | TypeScript/Vue | https://github.com/vuejs/core.git | `57545e958ae28ed17aa9e0ed321abcd8dc99f752` | Vercel catalog schema failed metaschema validation and was skipped with a warning. |
+| homebrew-brew | Ruby | https://github.com/Homebrew/brew.git | `e5cb8682f9beba3b712ee81d303dd496904ea848` | All discovered configuration files validated or skipped cleanly. |
+
+### Result
+
+| Metric | Count |
+| --- | ---: |
+| Discovered | 681 |
+| Validated | 139 |
+| Skipped | 540 |
+| Failed | 2 |
+| Issues | 4 |
+| Parsing issues | 2 |
+| Validation issues | 2 |
+| Schema issues | 0 |
+| Coverage issues | 0 |
+| Ignored issues | 0 |
+| Warnings | 1 |
+
+### Finding Breakdown
+
+| Repo | Total | Parsing | Validation | Schema | Notes |
+| --- | ---: | ---: | ---: | ---: | --- |
+| django | 1 | 0 | 1 | 0 | `package.json` has `"name": "Django"`; SchemaStore package schema enforces lowercase package names even for private packages. |
+| terraform | 3 | 2 | 1 | 0 | `internal/configs/testdata/invalid-files/*.tf.json` files are deliberately invalid; `.changie.yaml` lacks schema-required `headerPath` while using `versionFooterPath`. |
+| vue-core | 0 | 0 | 0 | 0 | `packages-private/sfc-playground/vercel.json` validation was skipped after the catalog Vercel schema failed metaschema validation. |
+
+### Findings
+
+- The two Terraform parsing failures are intentional invalid test fixtures: one contains native Terraform syntax in a `*.tf.json` file and the other is zero bytes.
+- Django's private `package.json` is valid JSON but violates the package-name pattern in the SchemaStore package schema because the name is uppercase.
+- Terraform's `.changie.yaml` appears to use a newer or project-specific Changie footer field shape than the fetched `https://changie.dev/schema.json` accepts.
+- SchemaStore's Vercel schema at `https://openapi.vercel.sh/vercel.json` failed draft-04 metaschema validation because `exclusiveMinimum` is numeric where draft-04 expects a boolean; DollarLint warned and skipped catalog-inferred validation instead of crashing.
+- No crashes, hangs, output-contract problems, or unexplained skipped files appeared in this sweep.
+
+### Product Decisions
+
+- Improve catalog schema failure warnings so users can tell the inferred schema failed, not their file.
+- Keep reporting intentionally invalid fixture files as parse failures; this is expected behavior for full-repository sweeps.
+- Treat the Vercel schema warning as a third-party schema compatibility signal for now, not a local suppression candidate.
+- Keep package and Changie validation findings visible; they appear to be schema/project mismatches rather than DollarLint parser bugs.
+
+### Follow-up
+
+- Implemented the warning-copy follow-up in `internal/engine/validation_compile.go`: warn-mode catalog schema failures now lead with a plain-language message that the inferred schema could not be used and this is not a finding in the file, while preserving compiler details in `warning.hint`.
+- Verified the follow-up with `go test ./internal/engine -run TestSchemaStoreMatchedSchemaFailurePolicy -count=1`, repo quick verification (`go test ./...` and `go vet ./...`), and a rerun against `/tmp/dollarlint-corpus.CtwOPD` to inspect the JSON warning shape.
+- If Vercel schema warnings recur across additional real projects, consider testing whether permissive schema compilation or a targeted upstream report would improve catalog-backed validation without hiding broken schemas.

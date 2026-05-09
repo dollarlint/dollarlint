@@ -7,8 +7,10 @@ description: Real-world validation workflow for DollarLint. Use when Codex is as
 
 ## Workflow
 
-1. Read `reports/REAL-WORLD-TESTS.md` first.
-   - Do not retest repos already listed there unless the user asks for a rerun, you need a before/after comparison, or a prior entry says the repo should be revisited.
+1. Query real-world history first.
+   - When the repo-specific MCP tools are available, start with `real_world_history` to inspect `reports/real-world-results.json` and check whether candidate repos have already been tested.
+   - Also skim `reports/REAL-WORLD-TESTS.md` for narrative context and product decisions that may not fit neatly in structured data.
+   - Do not retest repos already listed in either source unless the user asks for a rerun, you need a before/after comparison, or a prior entry says the repo should be revisited.
    - Note prior product decisions so you do not rediscover the same conclusion as if it were new.
 
 2. Record the DollarLint revision under test.
@@ -19,11 +21,13 @@ description: Real-world validation workflow for DollarLint. Use when Codex is as
 3. Choose real repositories deliberately.
    - Prefer public, well-known projects with different ecosystems and config styles.
    - Include each repo's clone URL, checked-out commit SHA, and ecosystem/language in the report.
-   - Clone into a temp directory such as `/tmp/dollarlint-corpus.<id>`, not into the repository.
+   - Prefer `real_world_prepare_corpus` to create `/tmp/dollarlint-corpus.<id>`, an isolated cache directory, an output artifact path, and a `real-world-manifest.json` file.
+   - Clone into the prepared temp directory, not into the repository. Let `real_world_prepare_corpus` perform shallow clones when useful, or use its returned clone commands.
    - Avoid repeating repos from earlier report entries unless retesting is intentional.
 
 4. Run DollarLint in a realistic but bounded mode.
    - Build the CLI from the revision under test: `go build -o bin/dollarlint ./cmd/dollarlint`.
+   - Prefer `real_world_run_corpus` for the standard real-world command and artifact capture.
    - Prefer an isolated cache for reproducibility:
 
 ```bash
@@ -47,10 +51,19 @@ XDG_CACHE_HOME="$cache" bin/dollarlint validate "$corpus" \
    - Prefer product fixes when real projects use syntax or schema patterns accepted by their own tools.
    - Prefer hints, docs, or config guidance when failures are intentional fixtures or non-document test baselines.
 
-6. Append to `reports/REAL-WORLD-TESTS.md`.
+6. Persist structured and narrative results.
+   - Prefer `real_world_record_result` to append the structured entry to `reports/real-world-results.json`; it can read summary counts from the DollarLint JSON output artifact and repositories from the prepared corpus manifest.
+   - Then append the narrative entry to `reports/REAL-WORLD-TESTS.md`.
    - Add a new dated entry; do not overwrite prior entries.
    - Include: date, DollarLint commit, working-tree note, command, output artifact path, repos tested, summary counts, findings, and product changes decided.
    - When product changes are made after the sweep, append the follow-up result and the decision that caused it.
+
+## Repo MCP Tools
+
+- `real_world_history`: query structured history and check candidate repo names or clone URLs before testing.
+- `real_world_prepare_corpus`: create temp corpus/cache/output paths, flag previously tested repos, optionally shallow-clone public repos, and write a corpus manifest.
+- `real_world_run_corpus`: build the CLI and run the standard SchemaStore-backed JSON validation command with isolated cache settings.
+- `real_world_record_result`: save the sweep to `reports/real-world-results.json` from the manifest and output artifact.
 
 ## Report Shape
 

@@ -25,7 +25,7 @@ func main() {
 	rs.mcp = server.NewMCPServer(
 		serverName,
 		"0.1.0",
-		server.WithInstructions("Repo-only maintenance tools for the dollarlint checkout. These tools run curated verification, release, example, and Azure diagnostics workflows for Codex sessions working in this repository."),
+		server.WithInstructions("Repo-only maintenance tools for the dollarlint checkout. These tools run curated verification, release, example, real-world corpus, and Azure diagnostics workflows for Codex sessions working in this repository."),
 		server.WithToolCapabilities(false),
 		server.WithInputSchemaValidation(),
 		server.WithOutputSchemaValidation(),

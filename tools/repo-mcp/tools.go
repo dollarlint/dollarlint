@@ -20,6 +20,47 @@ func (s *repoServer) addTools() {
 		"include":      arrayStringSchema("File or glob patterns to validate."),
 		"branchErrors": enumSchema([]string{"best", "all"}, "Temporarily override output.branchErrors."),
 	}), s.handleDiagnoseValidation, true)
+	s.addTool("real_world_history", "List and query structured real-world corpus history, including repositories already tested.", schemaObject(map[string]any{
+		"repo":           map[string]any{"type": "string", "description": "Single repository name or clone URL to check."},
+		"repositories":   arrayStringSchema("Repository names or clone URLs to check."),
+		"includeEntries": map[string]any{"type": "boolean", "description": "Include full structured history entries. Defaults to false."},
+	}), s.handleRealWorldHistory, true)
+	s.addToolWithHints("real_world_prepare_corpus", "Create real-world testing temp dirs, flag previously tested repositories, optionally clone repos, and write a corpus manifest.", schemaObject(map[string]any{
+		"title":                 map[string]any{"type": "string", "description": "Short sweep title used for generated paths and manifests."},
+		"repositories":          realWorldRepositoryArraySchema("Repositories planned for the corpus."),
+		"clone":                 map[string]any{"type": "boolean", "description": "When true, run shallow git clones into the prepared corpus directory. Defaults to false."},
+		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Allow intentional reruns of repositories already present in real-world history."},
+		"outputName":            map[string]any{"type": "string", "description": "Optional output JSON filename or absolute path."},
+	}), s.handleRealWorldPrepareCorpus, toolHints{ReadOnly: false, OpenWorld: true})
+	s.addToolWithHints("real_world_run_corpus", "Build the CLI if requested and run the standard schema-backed real-world corpus validation command.", schemaObject(map[string]any{
+		"corpusDir":          map[string]any{"type": "string", "description": "Prepared corpus directory to validate."},
+		"cacheDir":           map[string]any{"type": "string", "description": "Isolated XDG cache directory. Created automatically when omitted."},
+		"outputArtifact":     map[string]any{"type": "string", "description": "JSON output artifact path. Created automatically when omitted."},
+		"build":              map[string]any{"type": "boolean", "description": "Build bin/dollarlint before validating. Defaults to true."},
+		"schemaStore":        map[string]any{"type": "boolean", "description": "Enable SchemaStore catalog matching. Defaults to true."},
+		"schemaStoreFailure": enumSchema([]string{"warn", "error", "skip"}, "SchemaStore catalog failure policy. Defaults to warn."),
+		"fetchRetries":       map[string]any{"type": "integer", "description": "Remote schema fetch retries. Defaults to 1."},
+		"fetchRetryMinWait":  map[string]any{"type": "string", "description": "Minimum retry wait. Defaults to 1ms."},
+		"fetchRetryMaxWait":  map[string]any{"type": "string", "description": "Maximum retry wait. Defaults to 1ms."},
+		"extraArgs":          arrayStringSchema("Additional dollarlint validate arguments."),
+	}), s.handleRealWorldRunCorpus, toolHints{ReadOnly: false, OpenWorld: true})
+	s.addTool("real_world_record_result", "Persist a real-world sweep result to reports/real-world-results.json, reading summary counts from a DollarLint JSON artifact when provided.", schemaObject(map[string]any{
+		"id":                 map[string]any{"type": "string", "description": "Stable entry id. Defaults to a slug from date and title."},
+		"date":               map[string]any{"type": "string", "description": "Entry date in YYYY-MM-DD. Defaults to today."},
+		"title":              map[string]any{"type": "string", "description": "Short sweep title."},
+		"dollarlintRevision": map[string]any{"type": "string", "description": "DollarLint commit under test. Defaults to git rev-parse HEAD."},
+		"workingTreeNote":    map[string]any{"type": "string", "description": "Working tree note. Defaults to current git status summary."},
+		"corpus":             map[string]any{"type": "string", "description": "Corpus directory."},
+		"cacheDir":           map[string]any{"type": "string", "description": "Cache directory used by the run."},
+		"command":            map[string]any{"type": "string", "description": "Reproducible validation command."},
+		"outputArtifact":     map[string]any{"type": "string", "description": "DollarLint JSON output artifact to summarize."},
+		"manifestPath":       map[string]any{"type": "string", "description": "Prepared corpus manifest path. Defaults to <corpus>/real-world-manifest.json."},
+		"repositories":       realWorldRepositoryArraySchema("Repositories included in the sweep."),
+		"findings":           arrayStringSchema("Triaged findings."),
+		"productDecisions":   arrayStringSchema("Product decisions from the sweep."),
+		"followUp":           arrayStringSchema("Follow-up notes."),
+		"replace":            map[string]any{"type": "boolean", "description": "Replace an existing entry with the same id."},
+	}), s.handleRealWorldRecordResult, false)
 	s.addTool("azure_pruning_report", "Inspect an Azure ARM template and report detected resource refs, pruning config, branch error mode, and validation summary.", schemaObject(map[string]any{
 		"file":         map[string]any{"type": "string", "description": "ARM template path relative to the repo root."},
 		"branchErrors": enumSchema([]string{"best", "all"}, "Temporarily override output.branchErrors."),
@@ -34,15 +75,50 @@ func (s *repoServer) addTools() {
 	}), s.handlePrepareRelease, false)
 }
 
+type toolHints struct {
+	ReadOnly  bool
+	OpenWorld bool
+}
+
 func (s *repoServer) addTool(name, description string, input map[string]any, handler server.ToolHandlerFunc, readOnly bool) {
+	s.addToolWithHints(name, description, input, handler, toolHints{ReadOnly: readOnly})
+}
+
+func (s *repoServer) addToolWithHints(name, description string, input map[string]any, handler server.ToolHandlerFunc, hints toolHints) {
 	tool := mcp.NewToolWithRawSchema(name, description, mustRawJSON(input))
 	tool.RawOutputSchema = mustRawJSON(map[string]any{"type": "object", "additionalProperties": true})
 	tool.Annotations = mcp.ToolAnnotation{
 		Title:           name,
-		ReadOnlyHint:    mcp.ToBoolPtr(readOnly),
-		IdempotentHint:  mcp.ToBoolPtr(readOnly),
-		DestructiveHint: mcp.ToBoolPtr(!readOnly),
-		OpenWorldHint:   mcp.ToBoolPtr(false),
+		ReadOnlyHint:    mcp.ToBoolPtr(hints.ReadOnly),
+		IdempotentHint:  mcp.ToBoolPtr(hints.ReadOnly),
+		DestructiveHint: mcp.ToBoolPtr(!hints.ReadOnly),
+		OpenWorldHint:   mcp.ToBoolPtr(hints.OpenWorld),
 	}
 	s.mcp.AddTool(tool, handler)
+}
+
+func realWorldRepositoryArraySchema(description string) map[string]any {
+	return map[string]any{
+		"type":        "array",
+		"description": description,
+		"items": map[string]any{
+			"type":                 "object",
+			"additionalProperties": false,
+			"properties": map[string]any{
+				"name":      map[string]any{"type": "string", "description": "Short local repository name."},
+				"ecosystem": map[string]any{"type": "string", "description": "Primary ecosystem or language."},
+				"cloneURL":  map[string]any{"type": "string", "description": "Public clone URL."},
+				"commit":    map[string]any{"type": "string", "description": "Checked-out commit SHA."},
+				"notes":     map[string]any{"type": "string", "description": "Repo-specific notes."},
+				"path":      map[string]any{"type": "string", "description": "Local clone path, usually filled by prepare_corpus."},
+				"status":    map[string]any{"type": "string", "description": "Preparation status, usually filled by prepare_corpus."},
+				"error":     map[string]any{"type": "string", "description": "Preparation error, when any."},
+				"alreadyTested": map[string]any{
+					"type":        "boolean",
+					"description": "Whether history already contains this repository.",
+				},
+				"previousEntries": arrayStringSchema("Prior real-world entry ids for this repository."),
+			},
+		},
+	}
 }

@@ -302,7 +302,10 @@ func TestSchemaStoreMatchedSchemaFailurePolicy(t *testing.T) {
 	if result.Summary.Issues.Total != 0 || result.Summary.Warnings != 1 || result.Summary.Validated != 0 || result.Summary.Skipped != 1 {
 		t.Fatalf("warn catalog schema failure summary = %+v issues=%+v warnings=%+v", result.Summary, result.Issues, result.Warnings)
 	}
-	if !strings.Contains(result.Warnings[0].Message, "catalog schema compile failed") || result.Warnings[0].Kind != "schemaCatalogSchemaUnavailable" {
+	if result.Warnings[0].Kind != "schemaCatalogSchemaUnavailable" ||
+		!strings.Contains(result.Warnings[0].Message, "Catalog schema could not be used for broken.json") ||
+		!strings.Contains(result.Warnings[0].Message, "this is not a finding in the file") ||
+		!strings.Contains(result.Warnings[0].Hint, "Technical details: catalog schema compile failed") {
 		t.Fatalf("catalog schema warning = %+v", result.Warnings[0])
 	}
 

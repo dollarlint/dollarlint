@@ -163,8 +163,8 @@ winget:
       token_type: github
       pull_request:
         enabled: true
-        draft: false
-        check_boxes: true
+        draft: true
+        check_boxes: false
         base:
           owner: microsoft
           name: winget-pkgs

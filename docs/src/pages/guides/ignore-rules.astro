@@ -5,6 +5,7 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
 const ignoreRule = `[[ignore]]
 file = "fixtures/*.json"
 keyword = "required"
+schemaSource = "config-association"
 property = "legacyName"
 reason = "legacy fixture kept for compatibility"`;
 
@@ -58,6 +59,14 @@ reason = "fixture intentionally keeps the old shape"`;
           ><td><code>keyword</code></td><td
             >Either the JSON Schema keyword name, such as <code>required</code> or
             <code>type</code>, or the full keyword location.</td
+          ></tr
+        >
+        <tr
+          ><td><code>schemaSource</code></td><td
+            >The source that selected the schema, such as <code>$schema</code>,
+            <code>config-association</code>, or a catalog source like <code
+              >catalog:schemastore:mkdocs.yml</code
+            >.</td
           ></tr
         >
         <tr

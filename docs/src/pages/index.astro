@@ -146,26 +146,7 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
   <script is:inline>
     (() => {
       const hero = document.currentScript.previousElementSibling;
-      const marks = hero?.querySelectorAll("[data-hero-mark]");
-      if (!marks?.length) return;
-
-      const zones = [
-        { x: [10, 16], y: [11, 17] },
-        { x: [80, 88], y: [14, 20] },
-        { x: [50, 58], y: [74, 80] },
-        { x: [86, 94], y: [76, 84] },
-      ];
-      const rand = ([min, max]) => min + Math.random() * (max - min);
-
-      marks.forEach((mark, index) => {
-        const zone = zones[index % zones.length];
-        mark.style.setProperty("--mark-x", `${rand(zone.x).toFixed(2)}%`);
-        mark.style.setProperty("--mark-y", `${rand(zone.y).toFixed(2)}%`);
-        mark.style.setProperty(
-          "--mark-rotate",
-          `${rand([-45, 45]).toFixed(2)}deg`,
-        );
-      });
+      if (!hero) return;
 
       const installTabs = hero.querySelectorAll("[data-install-tab]");
       const installPanels = hero.querySelectorAll("[data-install-panel]");

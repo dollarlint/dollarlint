@@ -64,35 +64,67 @@ const slogans = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <script is:inline>
-      const storedTheme = localStorage.getItem("dollarlint-theme") || "system";
-      const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      const resolveTheme = (theme) =>
-        theme === "system" ? (themeQuery.matches ? "dark" : "light") : theme;
-      const applyTheme = (theme) => {
-        const resolved = resolveTheme(theme);
-        document.documentElement.dataset.themeChoice = theme;
-        document.documentElement.dataset.theme = resolved;
-        document.documentElement.style.colorScheme = resolved;
-      };
-      const sloganOptions = [
-        ["Put your money", "where your schema is"],
-        ["Time to audit", "those configs"],
-        ["Balance your", "config books"],
-        ["Make every", "schema count"],
-        ["Making cents of", "your configs"],
-        ["The buck stops", "at $schema"],
-        ["In schemas", "we trust"],
-      ];
-      window.__dollarlintSlogan =
-        sloganOptions[Math.floor(Math.random() * sloganOptions.length)];
-      applyTheme(storedTheme);
-      themeQuery.addEventListener("change", () => {
-        const currentTheme =
-          localStorage.getItem("dollarlint-theme") || "system";
-        applyTheme(currentTheme);
-      });
+      (() => {
+        const root = document.documentElement;
+        const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const getStoredTheme = () => {
+          try {
+            return localStorage.getItem("dollarlint-theme") || "system";
+          } catch {
+            return "system";
+          }
+        };
+        const resolveTheme = (theme) =>
+          theme === "system" ? (themeQuery.matches ? "dark" : "light") : theme;
+        const applyTheme = (theme) => {
+          const resolved = resolveTheme(theme);
+          root.dataset.themeChoice = theme;
+          root.dataset.theme = resolved;
+          root.style.colorScheme = resolved;
+        };
+
+        const sloganCount = 7;
+        const sloganIndex = Math.floor(Math.random() * sloganCount);
+        root.dataset.sloganIndex = String(sloganIndex);
+
+        const zones = [
+          { x: [10, 16], y: [11, 17] },
+          { x: [80, 88], y: [14, 20] },
+          { x: [50, 58], y: [74, 80] },
+          { x: [86, 94], y: [76, 84] },
+        ];
+        const rand = ([min, max]) => min + Math.random() * (max - min);
+        const runtimeStyle = document.createElement("style");
+        runtimeStyle.id = "dollarlint-runtime-style";
+        runtimeStyle.textContent = [
+          `html[data-slogan-index="${sloganIndex}"] .brand-subtitle .brand-slogan[data-slogan-option="${sloganIndex}"]{display:block}`,
+          ...zones.map(
+            (zone, index) =>
+              `.hero-mark:nth-child(${index + 1}){--mark-x:${rand(zone.x).toFixed(
+                2,
+              )}%;--mark-y:${rand(zone.y).toFixed(2)}%;--mark-rotate:${rand([
+                -45,
+                45,
+              ]).toFixed(2)}deg}`,
+          ),
+        ].join("");
+        document.head.append(runtimeStyle);
+
+        applyTheme(getStoredTheme());
+        themeQuery.addEventListener("change", () => {
+          const currentTheme = getStoredTheme();
+          if (currentTheme === "system") {
+            applyTheme(currentTheme);
+          }
+        });
+        window.__dollarlintTheme = { apply: applyTheme, get: getStoredTheme };
+      })();
       window.addEventListener("DOMContentLoaded", () => {
         const buttons = document.querySelectorAll("[data-theme-option]");
+        const storedTheme =
+          window.__dollarlintTheme?.get?.() ||
+          document.documentElement.dataset.themeChoice ||
+          "system";
         const setPressed = (theme) => {
           buttons.forEach((button) => {
             button.setAttribute(
@@ -105,8 +137,10 @@ const slogans = [
         buttons.forEach((button) => {
           button.addEventListener("click", () => {
             const theme = button.dataset.themeOption;
-            localStorage.setItem("dollarlint-theme", theme);
-            applyTheme(theme);
+            try {
+              localStorage.setItem("dollarlint-theme", theme);
+            } catch {}
+            window.__dollarlintTheme?.apply?.(theme);
             setPressed(theme);
           });
         });
@@ -233,32 +267,18 @@ const slogans = [
             <Logo class="brand-logo" />
             <span>
               <span class="brand-title">DollarLint</span>
-              <span
-                class="brand-subtitle"
-                data-slogan
-                aria-label={slogans[0].join(" ")}
-              >
-                <span data-slogan-line>{slogans[0][0]}</span>
-                <span data-slogan-line>{slogans[0][1]}</span>
+              <span class="brand-subtitle">
+                {
+                  slogans.map((slogan, index) => (
+                    <span class="brand-slogan" data-slogan-option={index}>
+                      <span>{slogan[0]}</span>
+                      <span>{slogan[1]}</span>
+                    </span>
+                  ))
+                }
               </span>
             </span>
           </a>
-          <script is:inline>
-            (() => {
-              const slogan =
-                document.currentScript.previousElementSibling?.querySelector(
-                  "[data-slogan]",
-                );
-              const lines = window.__dollarlintSlogan;
-              if (!slogan || !Array.isArray(lines)) return;
-              slogan.setAttribute("aria-label", lines.join(" "));
-              slogan
-                .querySelectorAll("[data-slogan-line]")
-                .forEach((line, index) => {
-                  line.textContent = lines[index] || "";
-                });
-            })();
-          </script>
           <div class="mobile-menu" data-mobile-menu>
             <button
               class="mobile-menu-trigger"

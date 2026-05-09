@@ -119,16 +119,16 @@ html[data-theme="dark"] {
   --inline-code-border: rgba(121, 197, 154, 0.22);
   --inline-code-fg: #d7f2ce;
   --table-head-bg: rgba(223, 189, 98, 0.12);
-  --logo-outer-fill: #6fb98e;
-  --logo-outer-highlight: #84c89d;
-  --logo-inner-fill: #cfe3c8;
-  --logo-inner-highlight: #e2efd8;
-  --logo-seal-fill: #3d7657;
-  --logo-seal-highlight: #4e8a67;
-  --logo-oval-fill: #3d7657;
-  --logo-check: var(--green-dark);
-  --logo-texture-ink: rgba(8, 20, 15, 0.36);
-  --logo-texture-paper: rgba(216, 231, 215, 0.34);
+  --logo-outer-fill: #24533f;
+  --logo-outer-highlight: #32694c;
+  --logo-inner-fill: #d6e7ce;
+  --logo-inner-highlight: #edf4df;
+  --logo-seal-fill: #78a982;
+  --logo-seal-highlight: #95be9b;
+  --logo-oval-fill: #78a982;
+  --logo-check: #0b2a1d;
+  --logo-texture-ink: rgba(8, 20, 15, 0.4);
+  --logo-texture-paper: rgba(246, 238, 209, 0.22);
   --install-bg: #211a0d;
   --install-bg-soft: #332811;
   --install-fg: #f6eed1;
@@ -368,6 +368,10 @@ pre {
   line-height: 1.35;
 }
 
+.brand-subtitle .brand-slogan {
+  display: none;
+}
+
 .brand-subtitle span {
   display: block;
   white-space: nowrap;
@@ -476,7 +480,10 @@ pre {
 }
 
 .theme-button:hover,
-.theme-button[aria-pressed="true"] {
+html[data-theme-choice="light"] .theme-button[data-theme-option="light"],
+html[data-theme-choice="dark"] .theme-button[data-theme-option="dark"],
+html[data-theme-choice="system"] .theme-button[data-theme-option="system"],
+html:not([data-theme-choice]) .theme-button[data-theme-option="system"] {
   background: var(--nav-active-bg);
   color: var(--green-dark);
 }

@@ -77,6 +77,7 @@ schema = "./schemas/settings.schema.json"`;
 const ignoreConfig = `[[ignore]]
 file = "fixtures/*.json"
 keyword = "required"
+schemaSource = "config-association"
 property = "legacyName"
 reason = "legacy fixture kept for compatibility"`;
 ---
@@ -469,9 +470,9 @@ extends = "../../.dollarlint.toml"</code></pre>
     <CodeBlock code={ignoreConfig} language="toml" />
     <p>
       Ignore rules match validation issues by file glob, JSON Schema keyword,
-      and property. All configured fields must match; omitted fields act like
-      wildcards. Ignored issues are still reported as ignored and do not make
-      the run fail.
+      schema source, and property. All configured fields must match; omitted
+      fields act like wildcards. Ignored issues are still reported as ignored
+      and do not make the run fail.
     </p>
 
     <h2>Output preferences</h2>

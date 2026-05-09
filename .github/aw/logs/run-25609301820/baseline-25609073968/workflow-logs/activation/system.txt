@@ -1,8 +1,0 @@
-2026-05-09T18:50:48.4270000Z Requested labels: ubuntu-slim
-2026-05-09T18:50:48.4270000Z Job defined at: dollarlint/dollarlint/.github/workflows/weekly-real-world-testing.lock.yml@refs/heads/main
-2026-05-09T18:50:48.4270000Z Waiting for a runner to pick up this job...
-2026-05-09T18:50:48.4290000Z Job is waiting for a hosted runner to come online.
-2026-05-09T18:50:48.4290000Z Job is about to start running on the hosted runner: GitHub Actions 1000000413
-2026-05-09T18:50:48.4260000Z Evaluating activation.if
-2026-05-09T18:50:48.4260000Z Evaluating: success()
-2026-05-09T18:50:48.4260000Z Result: true

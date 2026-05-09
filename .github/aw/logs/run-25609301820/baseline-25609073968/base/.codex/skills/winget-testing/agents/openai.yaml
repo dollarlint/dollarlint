@@ -1,4 +1,0 @@
-interface:
-  display_name: "WinGet Testing"
-  short_description: "Validate DollarLint WinGet manifests and PRs"
-  default_prompt: "Use $winget-testing to validate the DollarLint WinGet manifest, inspect Microsoft winget-pkgs PR status, and summarize any install or service-validation findings."

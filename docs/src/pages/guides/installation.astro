@@ -55,5 +55,13 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <h2>Verify the install</h2>
     <pre><code>dollarlint version
 dollarlint --help</code></pre>
+
+    <h2>Run in CI</h2>
+    <p>
+      To validate a repository in GitHub Actions, use the <a
+        href="/guides/github-action/">GitHub Action guide</a
+      >. The action installs a verified release archive and can upload SARIF
+      results to GitHub code scanning.
+    </p>
   </article>
 </DocsLayout>

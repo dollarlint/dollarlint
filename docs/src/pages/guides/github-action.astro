@@ -1,0 +1,148 @@
+---
+import CodeBlock from "../../components/CodeBlock.astro";
+import DocsLayout from "../../layouts/DocsLayout.astro";
+
+const basicWorkflow = `name: DollarLint
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  dollarlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dollarlint/dollarlint@vX.Y.Z
+        with:
+          path: .`;
+
+const sarifWorkflow = `name: DollarLint
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  dollarlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dollarlint/dollarlint@vX.Y.Z
+        with:
+          upload-sarif: true`;
+
+const argsWorkflow = `- uses: dollarlint/dollarlint@vX.Y.Z
+  with:
+    path: .
+    args: |
+      --schema-store
+      --schema-store-failure=error
+      --extend-exclude
+      generated/**`;
+---
+
+<DocsLayout title="GitHub Action" current="/guides/github-action/">
+  <article class="doc">
+    <header class="doc-header">
+      <span class="eyebrow">Guide</span>
+      <h1>GitHub Action</h1>
+      <p class="lead">
+        Run DollarLint in CI with the same validation engine you use locally,
+        pinned to a verified release archive.
+      </p>
+    </header>
+
+    <h2>Basic workflow</h2>
+    <CodeBlock code={basicWorkflow} language="yaml" />
+    <p>
+      Pin <code>dollarlint/dollarlint</code> to the release tag you want. When the
+      action ref is a full <code>vX.Y.Z</code> tag, the action downloads that matching
+      DollarLint release archive for the runner, verifies it against
+      <code>checksums.txt</code>, and runs <code>dollarlint validate</code>.
+    </p>
+
+    <h2>Upload SARIF</h2>
+    <CodeBlock code={sarifWorkflow} language="yaml" />
+    <p>
+      Set <code>upload-sarif: true</code> to force SARIF output and upload the result
+      to GitHub code scanning. The upload step runs before the action fails the job
+      for validation issues, so findings still make it to the security tab.
+    </p>
+
+    <h2>Pass validate flags</h2>
+    <CodeBlock code={argsWorkflow} language="yaml" />
+    <p>
+      Put additional <code>dollarlint validate</code> flags in <code>args</code
+      >, one argument per line. This keeps globs and schema associations intact
+      without relying on shell parsing.
+    </p>
+
+    <h2>Common inputs</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Input</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>path</code></td>
+          <td>File or directory to validate. Defaults to <code>.</code>.</td>
+        </tr>
+        <tr>
+          <td><code>working-directory</code></td>
+          <td>Directory to run DollarLint from.</td>
+        </tr>
+        <tr>
+          <td><code>config</code></td>
+          <td>Path to a specific <code>.dollarlint.toml</code> config.</td>
+        </tr>
+        <tr>
+          <td><code>version</code></td>
+          <td>
+            DollarLint version to install when the action ref is not the release
+            tag you want.
+          </td>
+        </tr>
+        <tr>
+          <td><code>upload-sarif</code></td>
+          <td>Upload SARIF results to GitHub code scanning.</td>
+        </tr>
+        <tr>
+          <td><code>fail-on-issues</code></td>
+          <td>
+            Fail the job when validation issues are found. Defaults to <code
+              >true</code
+            >.
+          </td>
+        </tr>
+        <tr>
+          <td><code>args</code></td>
+          <td>Additional validate arguments, one argument per line.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Version behavior</h2>
+    <p>
+      Release tags are the sharpest pin: <code
+        >dollarlint/dollarlint@vX.Y.Z</code
+      >
+      installs <code>vX.Y.Z</code>. If you use a branch or moving tag, set <code
+        >version</code
+      > explicitly when you need a fixed CLI version. Without either, the action installs
+      the latest published DollarLint release.
+    </p>
+  </article>
+</DocsLayout>

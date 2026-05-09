@@ -31,6 +31,60 @@ go build -o bin/dollarlint ./cmd/dollarlint
 ./bin/dollarlint validate .
 ```
 
+## GitHub Action
+
+Run DollarLint in GitHub Actions by pinning the action to the release tag you
+want:
+
+```yaml
+name: DollarLint
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  dollarlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dollarlint/dollarlint@vX.Y.Z
+        with:
+          path: .
+```
+
+The action installs the matching DollarLint release archive for the runner,
+verifies it against `checksums.txt`, and runs `dollarlint validate`.
+
+To upload SARIF results to GitHub code scanning:
+
+```yaml
+permissions:
+  contents: read
+  security-events: write
+
+steps:
+  - uses: actions/checkout@v6
+  - uses: dollarlint/dollarlint@vX.Y.Z
+    with:
+      upload-sarif: true
+```
+
+Use `args` for additional validation flags, one argument per line:
+
+```yaml
+- uses: dollarlint/dollarlint@vX.Y.Z
+  with:
+    path: .
+    args: |
+      --schema-store
+      --schema-store-failure=error
+```
+
 ## Quick start
 
 ```sh

@@ -1,0 +1,90 @@
+name: DollarLint
+description: Validate JSON-family, YAML, and TOML files with DollarLint.
+author: DollarLint
+
+branding:
+  icon: check-circle
+  color: green
+
+inputs:
+  version:
+    description: DollarLint version to install. Defaults to the pinned action ref when it is a full vX.Y.Z ref, otherwise the latest release.
+    required: false
+    default: ""
+  path:
+    description: File or directory to validate.
+    required: false
+    default: "."
+  working-directory:
+    description: Directory to run DollarLint from.
+    required: false
+    default: ""
+  config:
+    description: Path to a .dollarlint.toml config file.
+    required: false
+    default: ""
+  format:
+    description: Output format for dollarlint validate. Use text, json, or sarif.
+    required: false
+    default: "text"
+  output:
+    description: File path for DollarLint output. When upload-sarif is true, defaults to a temporary SARIF file.
+    required: false
+    default: ""
+  upload-sarif:
+    description: Upload SARIF results to GitHub code scanning. Forces format=sarif.
+    required: false
+    default: "false"
+  fail-on-issues:
+    description: Fail the job when DollarLint finds validation issues.
+    required: false
+    default: "true"
+  args:
+    description: Additional dollarlint validate arguments, one argument per line.
+    required: false
+    default: ""
+
+outputs:
+  exit-code:
+    description: Exit code returned by dollarlint validate.
+    value: ${{ steps.validate.outputs.exit_code }}
+  sarif-file:
+    description: SARIF file path uploaded to GitHub code scanning, when available.
+    value: ${{ steps.validate.outputs.sarif_file }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install DollarLint
+      id: install
+      shell: bash
+      env:
+        DOLLARLINT_VERSION: ${{ inputs.version }}
+        DOLLARLINT_ACTION_REF: ${{ github.action_ref }}
+        DOLLARLINT_REPOSITORY: dollarlint/dollarlint
+        GITHUB_TOKEN: ${{ github.token }}
+      run: '"${{ github.action_path }}/action/install.sh"'
+
+    - name: Run DollarLint
+      id: validate
+      shell: bash
+      env:
+        DOLLARLINT_PATH: ${{ inputs.path }}
+        DOLLARLINT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        DOLLARLINT_CONFIG: ${{ inputs.config }}
+        DOLLARLINT_FORMAT: ${{ inputs.format }}
+        DOLLARLINT_OUTPUT: ${{ inputs.output }}
+        DOLLARLINT_UPLOAD_SARIF: ${{ inputs.upload-sarif }}
+        DOLLARLINT_ARGS: ${{ inputs.args }}
+      run: '"${{ github.action_path }}/action/run.sh"'
+
+    - name: Upload SARIF
+      if: ${{ inputs['upload-sarif'] == 'true' && steps.validate.outputs.sarif_file != '' }}
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: ${{ steps.validate.outputs.sarif_file }}
+
+    - name: Fail on DollarLint result
+      if: ${{ steps.validate.outputs.exit_code != '0' && (steps.validate.outputs.exit_code != '1' || inputs['fail-on-issues'] == 'true') }}
+      shell: bash
+      run: exit "${{ steps.validate.outputs.exit_code }}"

@@ -14,16 +14,20 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     </header>
 
     <h2>Text</h2>
-    <pre><code>dollarlint found 8 issues in 3 files after 180ms
+    <pre><code>dollarlint found 8 issues (2 parse, 6 schema) in 3 files after 180ms
 
 invalid.json
   /      required  must have required property "enabled"
   /name  type      expected string, received number
 
+fixture.json
+  /      parse     parse fixture.json: multiple JSON values
+    hint: This file contains content after the first JSON value; use .jsonl/.ndjson for line-delimited data, or exclude generated/test fixtures.
+
 invalid.toml
   /enabled  type  expected boolean, received string
 
-Summary: 8 discovered, 7 validated, 1 skipped, 8 issues in 180ms</code></pre>
+Summary: 8 discovered, 7 validated, 1 skipped, 8 issues (2 parse, 6 schema) in 180ms</code></pre>
 
     <h2>Text with locations</h2>
     <pre><code>settings.json
@@ -45,8 +49,8 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues in 180ms</code></pre>
     <pre><code>dollarlint validate . --format json</code></pre>
     <p>
       JSON output gives you the full accounting: run root, summary counts,
-      duration, per-file results, issues, warnings, schema locations, and
-      optional source positions.
+      duration, per-file results, issues, parse hints, warnings, schema
+      locations, and optional source positions.
     </p>
 
     <h2>Branch errors</h2>

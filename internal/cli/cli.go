@@ -33,7 +33,7 @@ type validateOptions struct {
 	quiet             bool
 	locations         bool
 	includes          []string
-	extendExcludes    []string
+	excludes          []string
 	noDefaultExcludes bool
 	noGitIgnore       bool
 	forceExclude      bool
@@ -132,7 +132,7 @@ func addValidateFlags(cmd *cobra.Command, opts *validateOptions) {
 	cmd.Flags().BoolVar(&opts.quiet, "quiet", false, "Use terse text output")
 	cmd.Flags().BoolVar(&opts.locations, "locations", false, "Include line and column locations in text and JSON output")
 	cmd.Flags().StringArrayVar(&opts.includes, "include", nil, "Glob to include during discovery; repeatable")
-	cmd.Flags().StringArrayVar(&opts.extendExcludes, "extend-exclude", nil, "Additional discovery exclude glob; repeatable")
+	cmd.Flags().StringArrayVar(&opts.excludes, "exclude", nil, "Additional discovery exclude glob; repeatable")
 	cmd.Flags().BoolVar(&opts.noDefaultExcludes, "no-default-excludes", false, "Disable built-in discovery excludes for common generated and dependency directories")
 	cmd.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "Do not apply .gitignore patterns during discovery")
 	cmd.Flags().BoolVar(&opts.forceExclude, "force-exclude", false, "Apply discovery excludes even to explicitly passed files")
@@ -169,8 +169,8 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 	if len(opts.includes) > 0 {
 		cfg.Discovery.Include = opts.includes
 	}
-	if len(opts.extendExcludes) > 0 {
-		cfg.Discovery.ExtendExclude = append(cfg.Discovery.ExtendExclude, opts.extendExcludes...)
+	if len(opts.excludes) > 0 {
+		cfg.Discovery.Exclude = append(cfg.Discovery.Exclude, opts.excludes...)
 	}
 	if opts.noDefaultExcludes {
 		useDefaultExcludes := false

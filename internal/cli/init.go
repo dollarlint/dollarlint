@@ -296,7 +296,7 @@ const starterTOMLTemplate = `# dollarlint configuration
 version = 1
 
 [discovery]
-extendExclude = []
+exclude = []
 useDefaultExcludes = true
 respectGitIgnore = true
 forceExclude = false

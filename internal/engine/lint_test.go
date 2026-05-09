@@ -44,7 +44,7 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	if result.Summary.Discovered != 5 || result.Summary.Validated != 4 || result.Summary.Skipped != 1 {
 		t.Fatalf("summary counts = %+v", result.Summary)
 	}
-	if result.Summary.Ignored != 1 || result.Summary.Issues != 3 || !result.HasIssues() {
+	if result.Summary.Ignored != 1 || result.Summary.Issues != 3 || result.Summary.IssueCounts.Schema != 3 || result.Summary.IssueCounts.Parse != 0 || !result.HasIssues() {
 		t.Fatalf("issue counts = %+v issues=%+v", result.Summary, result.Issues)
 	}
 	if result.Summary.Duration.Duration <= 0 || result.Summary.DurationNanos <= 0 {
@@ -65,7 +65,7 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 		t.Fatalf("missing expected issues: %+v", result.Issues)
 	}
 	text := FormatText(result, OutputConfig{ShowSkipped: true})
-	if !strings.Contains(text, "dollarlint found 3 issues in 2 files") || !strings.Contains(text, "skipped: skip.yaml") {
+	if !strings.Contains(text, "dollarlint found 3 schema issues in 2 files") || !strings.Contains(text, "skipped: skip.yaml") {
 		t.Fatalf("text output = %s", text)
 	}
 	data, err := FormatJSON(result)

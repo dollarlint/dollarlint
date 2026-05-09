@@ -137,7 +137,7 @@ directory:
 
 - `extends`
 - `discovery.include`
-- `discovery.extendExclude`
+- `discovery.exclude`
 - `schemas.associations[].file`
 - relative `schemas.associations[].schema` values
 - local `schemas.catalogs.sources[].path`
@@ -192,7 +192,7 @@ Suggested merge behavior:
 - Scalars replace parent values when the child sets them.
 - Nested objects merge field by field.
 - `discovery.include` replaces the parent include list.
-- `discovery.extendExclude` appends parent entries first, then child entries.
+- `discovery.exclude` appends parent entries first, then child entries.
 - `schemas.associations` appends parent entries first, then child entries, but
   matching should prefer later entries so child associations can override
   parent associations.
@@ -217,7 +217,7 @@ CLI flags should be a final overlay across the entire invocation.
 Examples:
 
 - `--include` replaces discovery includes for all effective configs.
-- `--extend-exclude` appends to all effective configs.
+- `--exclude` appends to all effective configs.
 - `--schema glob=uri` appends a global association to all effective configs.
 - `--schema-store`, `--schema-store-url`, and `--schema-store-failure` apply to
   all effective configs.

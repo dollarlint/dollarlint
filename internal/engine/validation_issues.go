@@ -1,9 +1,11 @@
 package engine
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"math/big"
+	"os"
 	"path"
 	"strings"
 
@@ -324,12 +326,14 @@ func ratString(value *big.Rat) string {
 }
 
 func issueForError(file DiscoveredFile, schema, keyword string, err error) Issue {
+	message := err.Error()
 	return Issue{
 		File:         file.Path,
 		RelativePath: file.RelativePath,
 		Schema:       schema,
 		Keyword:      keyword,
-		Message:      err.Error(),
+		Message:      message,
+		Hint:         hintForIssue(file, keyword, message),
 	}
 }
 
@@ -355,9 +359,67 @@ func issuesForDocumentParseErrors(document *Document) []Issue {
 			Line:         parseErr.Line,
 			Column:       parseErr.Column,
 			Message:      parseErr.Message,
+			Hint: hintForIssue(DiscoveredFile{
+				Path:         document.Path,
+				RelativePath: document.RelativePath,
+			}, issueKeywordParse, parseErr.Message),
 		})
 	}
 	return issues
+}
+
+func hintForIssue(file DiscoveredFile, keyword, message string) string {
+	if keyword != issueKeywordParse {
+		return ""
+	}
+	lower := strings.ToLower(message)
+	ext := strings.ToLower(path.Ext(file.RelativePath))
+	if ext == "" {
+		ext = strings.ToLower(path.Ext(file.Path))
+	}
+	if strings.HasSuffix(strings.ToLower(file.RelativePath), ".baseline.jsonc") ||
+		strings.Contains(strings.ToLower(file.RelativePath), "/tests/baselines/") {
+		return "This looks like a test baseline artifact rather than a standalone JSON document; exclude generated or baseline fixtures."
+	}
+	if strings.Contains(lower, "multiple json values") ||
+		strings.Contains(lower, "after top-level value") {
+		return "This file contains content after the first JSON value; use .jsonl/.ndjson for line-delimited data, or exclude generated/test fixtures."
+	}
+	if strings.Contains(lower, "unexpected eof") || lower == "eof" || strings.HasSuffix(lower, ": eof") {
+		if fileIsEmpty(file.Path) {
+			return "Empty JSON files are not valid documents; add a value such as {} or exclude placeholder fixtures."
+		}
+		return "The document ends before a complete value is parsed; check for an unfinished object, array, string, or comment."
+	}
+	if (ext == ".yaml" || ext == ".yml") && fileContainsToken(file.Path, "<%") {
+		return "This YAML file appears to contain template tags; exclude it or validate the rendered YAML instead."
+	}
+	if (ext == ".yaml" || ext == ".yml") && strings.Contains(lower, "mapping key") && strings.Contains(lower, "already defined") {
+		return "This YAML parser rejects duplicate mapping keys; exclude deliberately invalid fixtures or remove the duplicate key."
+	}
+	if ext == ".json" && (strings.Contains(lower, "invalid literal") || strings.Contains(lower, "looking for beginning of value")) {
+		return "This file is not valid JSON/JSONC despite its .json extension; rename it, exclude it, or use .jsonl/.ndjson for record streams."
+	}
+	if ext == ".toml" {
+		return "This TOML file is syntactically invalid; exclude it if it is an intentionally broken test fixture."
+	}
+	return ""
+}
+
+func fileIsEmpty(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir() && info.Size() == 0
+}
+
+func fileContainsToken(path, token string) bool {
+	file, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer file.Close()
+	buffer := make([]byte, 8192)
+	n, _ := file.Read(buffer)
+	return bytes.Contains(buffer[:n], []byte(token))
 }
 
 func addWarning(result *Result, warning Warning) {
@@ -372,4 +434,9 @@ func addIssue(result *Result, issue Issue) {
 		return
 	}
 	result.Summary.Issues++
+	if issue.Keyword == issueKeywordParse {
+		result.Summary.IssueCounts.Parse++
+	} else {
+		result.Summary.IssueCounts.Schema++
+	}
 }

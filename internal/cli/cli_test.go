@@ -193,7 +193,7 @@ func TestExecuteDiscoveryFlags(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "node_modules", "bad.json"), `{"$schema":"../schema.json"}`)
 	writeFile(t, filepath.Join(dir, "target.json"), `{"$schema":"./schema.json","ok":true}`)
 	var stdout, stderr bytes.Buffer
-	if code := Execute([]string{"validate", dir, "--format", "json", "--extend-exclude", "generated/**"}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"validate", dir, "--format", "json", "--exclude", "generated/**"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("default discovery exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), `"issues": 0`) {
@@ -201,7 +201,7 @@ func TestExecuteDiscoveryFlags(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{"validate", dir, "--format", "json", "--no-gitignore", "--extend-exclude", "generated/**"}, &stdout, &stderr); code != 1 {
+	if code := Execute([]string{"validate", dir, "--format", "json", "--no-gitignore", "--exclude", "generated/**"}, &stdout, &stderr); code != 1 {
 		t.Fatalf("no-gitignore exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), `"issues": 1`) {
@@ -209,7 +209,7 @@ func TestExecuteDiscoveryFlags(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{"validate", dir, "--format", "json", "--no-default-excludes", "--extend-exclude", "generated/**"}, &stdout, &stderr); code != 1 {
+	if code := Execute([]string{"validate", dir, "--format", "json", "--no-default-excludes", "--exclude", "generated/**"}, &stdout, &stderr); code != 1 {
 		t.Fatalf("no-default-excludes exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), `"issues": 1`) {
@@ -218,12 +218,12 @@ func TestExecuteDiscoveryFlags(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "target.json"), `{"$schema":"./schema.json"}`)
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{"validate", filepath.Join(dir, "target.json"), "--format", "json", "--extend-exclude", "target.json"}, &stdout, &stderr); code != 1 {
+	if code := Execute([]string{"validate", filepath.Join(dir, "target.json"), "--format", "json", "--exclude", "target.json"}, &stdout, &stderr); code != 1 {
 		t.Fatalf("explicit file exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{"validate", filepath.Join(dir, "target.json"), "--format", "json", "--extend-exclude", "target.json", "--force-exclude"}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"validate", filepath.Join(dir, "target.json"), "--format", "json", "--exclude", "target.json", "--force-exclude"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("force-exclude exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), `"discovered": 0`) {

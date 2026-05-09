@@ -105,11 +105,18 @@ func TestParseDocumentJSONParsingModes(t *testing.T) {
 	}
 	ordinary := filepath.Join(dir, "settings.json")
 	writeFile(t, ordinary, `{
-  // Ordinary .json stays strict in auto mode.
-  "$schema": "./settings.schema.json"
+  // Ordinary .json falls back to JSONC in auto mode.
+  "$schema": "./settings.schema.json",
 }`)
-	if _, err := ParseDocument(DiscoveredFile{Path: ordinary, RelativePath: "settings.json"}); err == nil {
-		t.Fatalf("expected auto mode to keep ordinary .json strict")
+	doc, err = ParseDocument(DiscoveredFile{Path: ordinary, RelativePath: "settings.json"})
+	if err != nil {
+		t.Fatalf("ParseDocument auto ordinary jsonc: %v", err)
+	}
+	if doc.Format != DocumentFormatJSONC || doc.Schema != "./settings.schema.json" {
+		t.Fatalf("auto ordinary jsonc doc = %+v", doc)
+	}
+	if _, err := parseDocument(DiscoveredFile{Path: ordinary, RelativePath: "settings.json"}, strict, false); err == nil {
+		t.Fatalf("expected strict mode to reject commented ordinary .json")
 	}
 	jsonc := DefaultConfig().Parsing
 	jsonc.JSON.Mode = JSONParsingJSONC

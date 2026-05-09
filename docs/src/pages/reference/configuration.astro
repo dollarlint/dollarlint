@@ -6,7 +6,7 @@ const starterConfig = `# dollarlint configuration
 version = 1
 
 [discovery]
-extendExclude = []
+exclude = []
 useDefaultExcludes = true
 respectGitIgnore = true
 forceExclude = false
@@ -108,12 +108,12 @@ reason = "legacy fixture kept for compatibility"`;
       replace that default set with custom discovery globs.
     </p>
     <p>
-      Discovery, exclude, association, and ignore-file globs are matched against
-      slash-separated paths relative to the validation root. A glob without a
-      slash matches basenames at any depth, so <code>*.json</code> matches both <code
-        >package.json</code
-      > and <code>config/settings.json</code>. Use slashes when you want to
-      match a particular relative path shape.
+      Discovery, exclude, association, and ignore-file globs in config are
+      matched against slash-separated paths relative to the config file's
+      directory. CLI globs are relative to the validation root. A glob without a
+      slash matches basenames at any depth, so <code>*.json</code> matches both
+      <code>package.json</code> and <code>config/settings.json</code>. Use slashes
+      when you want to match a particular relative path shape.
     </p>
     <table>
       <thead>
@@ -125,12 +125,13 @@ reason = "legacy fixture kept for compatibility"`;
       <tbody>
         <tr
           ><td><code>include</code></td><td
-            >Optional replacement discovery globs to consider. Repeatable CLI
-            includes replace config includes for that run.</td
+            >Optional replacement discovery globs to consider. Leave unset for
+            built-in defaults; set to an empty list only to discover no files.
+            Repeatable CLI includes replace config includes for that run.</td
           ></tr
         >
         <tr
-          ><td><code>extendExclude</code></td><td
+          ><td><code>exclude</code></td><td
             >Additional discovery globs to ignore, on top of the built-in
             default excludes.</td
           ></tr
@@ -163,21 +164,20 @@ reason = "legacy fixture kept for compatibility"`;
     <p>
       Default excludes are intentionally not written out by <code
         >dollarlint init</code
-      >. Keep project-specific ignores in <code>extendExclude</code>.
+      >. Keep project-specific ignores in <code>exclude</code>.
+    </p>
+    <p>
+      Relative schema paths in associations and local catalog source paths are
+      resolved from the directory containing <code>.dollarlint.toml</code>.
     </p>
 
     <h2>Parsing</h2>
     <p>
-      JSON parsing defaults to <code>auto</code>: ordinary <code>.json</code>
-      files stay strict, while known JSONC-by-convention files such as <code
-        >tsconfig*.json</code
-      >, <code>jsconfig*.json</code>, <code>deno.json</code>, <code
-        >devcontainer.json</code
-      >, <code>.devcontainer/devcontainer.json</code>, and common <code
-        >.vscode</code
-      > JSON files allow comments and trailing commas. Files ending in <code
-        >.jsonc</code
-      > always use JSONC parsing.
+      JSON parsing defaults to <code>auto</code>: <code>.json</code> files are
+      parsed as strict JSON first, then retried as JSONC when strict parsing
+      fails, so comments and trailing commas work in projects whose existing
+      tools accept them. Files ending in <code>.jsonc</code> always use JSONC
+      parsing.
     </p>
     <table>
       <thead>

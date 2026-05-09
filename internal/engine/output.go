@@ -30,9 +30,8 @@ func FormatText(result Result, output OutputConfig) string {
 	}
 	var builder strings.Builder
 	if result.HasIssues() {
-		headline := fmt.Sprintf("dollarlint found %d issue%s in %d file%s after %s",
-			result.Summary.Issues,
-			plural(result.Summary.Issues),
+		headline := fmt.Sprintf("dollarlint found %s in %d file%s after %s",
+			issueCountLabel(result),
 			filesWithIssues(result),
 			plural(filesWithIssues(result)),
 			formatElapsed(result.Summary.Duration.Duration),
@@ -116,6 +115,9 @@ func writeIssueRow(builder *strings.Builder, issue Issue, output OutputConfig, w
 	if output.Verbose {
 		writeVerboseIssueDetails(builder, issue)
 	}
+	if issue.Hint != "" {
+		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("hint:"), issue.Hint)
+	}
 }
 
 func writeVerboseIssueDetails(builder *strings.Builder, issue Issue) {
@@ -159,12 +161,11 @@ func writeWarnings(builder *strings.Builder, result Result) {
 }
 
 func writeSummary(builder *strings.Builder, result Result) {
-	summary := fmt.Sprintf("Summary: %d discovered, %d validated, %d skipped, %d issue%s",
+	summary := fmt.Sprintf("Summary: %d discovered, %d validated, %d skipped, %s",
 		result.Summary.Discovered,
 		result.Summary.Validated,
 		result.Summary.Skipped,
-		result.Summary.Issues,
-		plural(result.Summary.Issues),
+		issueCountLabel(result),
 	)
 	if result.Summary.Ignored > 0 {
 		summary += fmt.Sprintf(", %d ignored", result.Summary.Ignored)
@@ -246,6 +247,50 @@ func filesWithIssues(result Result) int {
 		}
 	}
 	return len(seen)
+}
+
+type issueCounts struct {
+	Total  int
+	Parse  int
+	Schema int
+}
+
+func countIssues(result Result) issueCounts {
+	counts := issueCounts{}
+	for _, issue := range result.Issues {
+		if issue.Ignored {
+			continue
+		}
+		counts.Total++
+		if issue.Keyword == issueKeywordParse {
+			counts.Parse++
+		} else {
+			counts.Schema++
+		}
+	}
+	if counts.Total == 0 && result.Summary.Issues > 0 {
+		counts.Total = result.Summary.Issues
+		counts.Parse = result.Summary.IssueCounts.Parse
+		counts.Schema = result.Summary.IssueCounts.Schema
+	}
+	return counts
+}
+
+func issueCountLabel(result Result) string {
+	counts := countIssues(result)
+	if counts.Total == 0 {
+		if result.Summary.Issues > 0 {
+			return fmt.Sprintf("%d issue%s", result.Summary.Issues, plural(result.Summary.Issues))
+		}
+		return "0 issues"
+	}
+	if counts.Parse == 0 {
+		return fmt.Sprintf("%d schema issue%s", counts.Schema, plural(counts.Schema))
+	}
+	if counts.Schema == 0 {
+		return fmt.Sprintf("%d parse issue%s", counts.Parse, plural(counts.Parse))
+	}
+	return fmt.Sprintf("%d issues (%d parse, %d schema)", counts.Total, counts.Parse, counts.Schema)
 }
 
 func plural(count int) string {

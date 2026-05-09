@@ -84,11 +84,22 @@ func TestLoadConfigDefaultsAndTOML(t *testing.T) {
 		t.Fatalf("no-dot toml config should be ignored: path=%q cfg=%+v", path, cfg)
 	}
 	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), `
+[discovery]
+include = []
+`)
+	cfg, path, err = LoadConfig(dir, "")
+	if err != nil {
+		t.Fatalf("LoadConfig empty include: %v", err)
+	}
+	if path == "" || cfg.Discovery.Include == nil || len(cfg.Discovery.Include) != 0 {
+		t.Fatalf("explicit empty include should not get defaults: path=%q cfg=%+v", path, cfg)
+	}
+	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), `
 version = 1
 
 [discovery]
 include = ["*.json"]
-extendExclude = ["generated/**"]
+exclude = ["generated/**"]
 useDefaultExcludes = false
 respectGitIgnore = false
 forceExclude = true
@@ -164,7 +175,7 @@ keyword = "type"
 	if !cfg.Schemas.RequireCoverage {
 		t.Fatalf("schema coverage requirement not decoded: %+v", cfg.Schemas)
 	}
-	if !cfg.Schemas.Catalogs.Enabled || cfg.Schemas.Catalogs.Failure != "skip" || len(cfg.Schemas.Catalogs.Sources) != 1 || cfg.Schemas.Catalogs.Sources[0].Path != "./catalog.json" {
+	if !cfg.Schemas.Catalogs.Enabled || cfg.Schemas.Catalogs.Failure != "skip" || len(cfg.Schemas.Catalogs.Sources) != 1 || cfg.Schemas.Catalogs.Sources[0].Path != filepath.Join(dir, "catalog.json") {
 		t.Fatalf("catalogs not decoded: %+v", cfg.Schemas.Catalogs)
 	}
 	if fetchRetries(cfg.Schemas.Fetch) != 4 || cfg.Schemas.Fetch.RetryMinWait.Duration != 100*time.Millisecond || cfg.Schemas.Fetch.RetryMaxWait.Duration != time.Second {
@@ -179,7 +190,7 @@ keyword = "type"
 	if !cfg.Output.ShowSkipped || !cfg.Output.Locations || cfg.Output.BranchErrors != BranchErrorsAll {
 		t.Fatalf("output preferences not decoded: %+v", cfg.Output)
 	}
-	if len(cfg.Discovery.Include) != 1 || cfg.Discovery.Include[0] != "*.json" || len(cfg.Discovery.ExtendExclude) != 1 || cfg.Discovery.ExtendExclude[0] != "generated/**" {
+	if len(cfg.Discovery.Include) != 1 || cfg.Discovery.Include[0] != "*.json" || len(cfg.Discovery.Exclude) != 1 || cfg.Discovery.Exclude[0] != "generated/**" {
 		t.Fatalf("discovery config not decoded: %+v", cfg.Discovery)
 	}
 	if discoveryUseDefaultExcludes(cfg.Discovery) || discoveryRespectGitIgnore(cfg.Discovery) || !cfg.Discovery.ForceExclude || !cfg.Discovery.FollowSymlinks {
@@ -206,6 +217,12 @@ schema = "./schema.json"
 	}
 	if path != customPath || cfg.Schemas.MaxDepth != 4 || len(cfg.Schemas.Associations) != 1 {
 		t.Fatalf("toml cfg = %s %+v", path, cfg)
+	}
+	if cfg.Schemas.Associations[0].File != "nested/**/*.toml" {
+		t.Fatalf("config-relative association file = %+v", cfg.Schemas.Associations[0])
+	}
+	if !strings.HasPrefix(cfg.Schemas.Associations[0].Schema, "file://") || !strings.HasSuffix(cfg.Schemas.Associations[0].Schema, "/nested/schema.json") {
+		t.Fatalf("config-relative association schema = %+v", cfg.Schemas.Associations[0])
 	}
 	if cfg.Schemas.Catalogs.Sources[0].URL != defaultSchemaStoreCatalogURL {
 		t.Fatalf("catalog default URL = %q", cfg.Schemas.Catalogs.Sources[0].URL)

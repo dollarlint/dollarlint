@@ -9,13 +9,13 @@ import (
 func TestFormatTextGroupedDefault(t *testing.T) {
 	result := textFixtureResult()
 	text := FormatText(result, OutputConfig{})
-	assertContains(t, text, "dollarlint found 5 issues in 2 files after 123ms")
+	assertContains(t, text, "dollarlint found 5 schema issues in 2 files after 123ms")
 	assertContains(t, text, "\na.json\n")
 	assertContains(t, text, "/name     type")
 	assertContains(t, text, "/count    minimum")
 	assertContains(t, text, "\nb.toml\n")
 	assertContains(t, text, "/enabled  type")
-	assertContains(t, text, "Summary: 4 discovered, 3 validated, 1 skipped, 5 issues in 123ms")
+	assertContains(t, text, "Summary: 4 discovered, 3 validated, 1 skipped, 5 schema issues in 123ms")
 	if strings.Contains(text, "schema:") {
 		t.Fatalf("default output should not include verbose schema details:\n%s", text)
 	}
@@ -38,7 +38,7 @@ func TestFormatTextLocationsVerboseSkippedAndQuiet(t *testing.T) {
 	assertContains(t, locationOnly, "2:7       type")
 	assertContains(t, locationOnly, "expected string, received number  /name")
 	quiet := FormatText(result, OutputConfig{Quiet: true})
-	assertContains(t, quiet, "dollarlint found 5 issues in 2 files after 123ms")
+	assertContains(t, quiet, "dollarlint found 5 schema issues in 2 files after 123ms")
 	assertContains(t, quiet, "1 warning")
 	if strings.Contains(quiet, "Summary:") {
 		t.Fatalf("quiet output should omit summary:\n%s", quiet)
@@ -52,6 +52,30 @@ func TestFormatTextLocationsVerboseSkippedAndQuiet(t *testing.T) {
 	passed = FormatText(Result{Summary: Summary{Warnings: 1, Duration: NewDuration(123 * time.Millisecond)}, Warnings: []Warning{{Kind: "x", Message: "careful"}}}, OutputConfig{})
 	assertContains(t, passed, "dollarlint passed with 1 warning in 123ms")
 	assertContains(t, passed, "careful")
+}
+
+func TestFormatTextIssueBreakdownAndHints(t *testing.T) {
+	result := Result{
+		Summary: Summary{Issues: 2, Duration: NewDuration(123 * time.Millisecond), DurationNanos: int64(123 * time.Millisecond)},
+		Issues: []Issue{
+			{
+				RelativePath: "data.json",
+				Keyword:      issueKeywordParse,
+				Message:      "parse data.json: multiple JSON values",
+				Hint:         "Use .jsonl for line-delimited data.",
+			},
+			{
+				RelativePath:     "config.json",
+				Keyword:          "type",
+				InstanceLocation: "/name",
+				Message:          "expected string, received number",
+			},
+		},
+	}
+	text := FormatText(result, OutputConfig{})
+	assertContains(t, text, "dollarlint found 2 issues (1 parse, 1 schema) in 2 files after 123ms")
+	assertContains(t, text, "hint: Use .jsonl for line-delimited data.")
+	assertContains(t, text, "Summary: 0 discovered, 0 validated, 0 skipped, 2 issues (1 parse, 1 schema) in 123ms")
 }
 
 func TestTextHelpers(t *testing.T) {

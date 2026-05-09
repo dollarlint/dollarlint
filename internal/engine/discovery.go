@@ -127,7 +127,7 @@ func newDiscoveryExcluder(root string, rootIsDir bool, cfg DiscoveryConfig) (dis
 	if discoveryUseDefaultExcludes(cfg) {
 		excluder.patterns = append(excluder.patterns, defaultDiscoveryExcludes...)
 	}
-	excluder.patterns = append(excluder.patterns, cfg.ExtendExclude...)
+	excluder.patterns = append(excluder.patterns, cfg.Exclude...)
 	if discoveryRespectGitIgnore(cfg) && rootIsDir {
 		rules, err := loadGitIgnoreRules(root)
 		if err != nil {
@@ -140,7 +140,7 @@ func newDiscoveryExcluder(root string, rootIsDir bool, cfg DiscoveryConfig) (dis
 
 func normalizedDiscoveryConfig(cfg DiscoveryConfig) DiscoveryConfig {
 	defaults := DefaultConfig().Discovery
-	if len(cfg.Include) == 0 {
+	if cfg.Include == nil {
 		cfg.Include = defaults.Include
 	}
 	if cfg.UseDefaultExcludes == nil {

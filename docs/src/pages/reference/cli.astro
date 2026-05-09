@@ -138,15 +138,16 @@ const mcpConfig = `{
         <tr
           ><td><code>--include</code></td><td
             >Set discovery include globs. Repeatable; when provided, replaces
-            config includes for this run. A glob without a slash can match a
-            basename at any depth.</td
+            config includes for this run. CLI include globs are relative to the
+            validation root. A glob without a slash can match a basename at any
+            depth.</td
           ></tr
         >
         <tr
-          ><td><code>--extend-exclude</code></td><td
+          ><td><code>--exclude</code></td><td
             >Add a discovery exclude glob on top of config and built-in default
-            excludes. Repeatable. A glob without a slash can match a basename at
-            any depth.</td
+            excludes. Repeatable and relative to the validation root. A glob
+            without a slash can match a basename at any depth.</td
           ></tr
         >
         <tr

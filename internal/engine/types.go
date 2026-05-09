@@ -41,7 +41,7 @@ type Config struct {
 
 type DiscoveryConfig struct {
 	Include            []string `json:"include,omitempty" yaml:"include,omitempty" toml:"include,omitempty"`
-	ExtendExclude      []string `json:"extendExclude,omitempty" yaml:"extendExclude,omitempty" toml:"extendExclude,omitempty"`
+	Exclude            []string `json:"exclude,omitempty" yaml:"exclude,omitempty" toml:"exclude,omitempty"`
 	UseDefaultExcludes *bool    `json:"useDefaultExcludes,omitempty" yaml:"useDefaultExcludes,omitempty" toml:"useDefaultExcludes,omitempty"`
 	RespectGitIgnore   *bool    `json:"respectGitIgnore,omitempty" yaml:"respectGitIgnore,omitempty" toml:"respectGitIgnore,omitempty"`
 	ForceExclude       bool     `json:"forceExclude,omitempty" yaml:"forceExclude,omitempty" toml:"forceExclude,omitempty"`
@@ -141,15 +141,21 @@ type Result struct {
 }
 
 type Summary struct {
-	Discovered    int      `json:"discovered"`
-	Validated     int      `json:"validated"`
-	Skipped       int      `json:"skipped"`
-	Failed        int      `json:"failed"`
-	Issues        int      `json:"issues"`
-	Ignored       int      `json:"ignored"`
-	Warnings      int      `json:"warnings"`
-	Duration      Duration `json:"duration,omitempty"`
-	DurationNanos int64    `json:"durationNanos,omitempty"`
+	Discovered    int         `json:"discovered"`
+	Validated     int         `json:"validated"`
+	Skipped       int         `json:"skipped"`
+	Failed        int         `json:"failed"`
+	Issues        int         `json:"issues"`
+	IssueCounts   IssueCounts `json:"issueCounts"`
+	Ignored       int         `json:"ignored"`
+	Warnings      int         `json:"warnings"`
+	Duration      Duration    `json:"duration,omitempty"`
+	DurationNanos int64       `json:"durationNanos,omitempty"`
+}
+
+type IssueCounts struct {
+	Parse  int `json:"parse"`
+	Schema int `json:"schema"`
 }
 
 type FileResult struct {
@@ -175,6 +181,7 @@ type Issue struct {
 	Line             int    `json:"line,omitempty"`
 	Column           int    `json:"column,omitempty"`
 	Message          string `json:"message"`
+	Hint             string `json:"hint,omitempty"`
 	Ignored          bool   `json:"ignored,omitempty"`
 	IgnoreReason     string `json:"ignoreReason,omitempty"`
 }

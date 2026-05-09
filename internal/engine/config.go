@@ -3,9 +3,11 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/pelletier/go-toml/v2"
@@ -77,7 +79,7 @@ func (c *Config) ApplyDefaults() {
 	if c.Version == 0 {
 		c.Version = defaults.Version
 	}
-	if len(c.Discovery.Include) == 0 {
+	if c.Discovery.Include == nil {
 		c.Discovery.Include = append([]string(nil), defaults.Discovery.Include...)
 	}
 	if c.Discovery.UseDefaultExcludes == nil {
@@ -145,7 +147,8 @@ func defaultSchemaStoreCatalogSource() CatalogSource {
 
 func LoadConfig(root, explicitPath string) (Config, string, error) {
 	cfg := DefaultConfig()
-	path, err := resolveConfigPath(root, explicitPath)
+	searchRoot := configSearchRoot(root)
+	path, err := resolveConfigPath(searchRoot, explicitPath)
 	if err != nil {
 		return cfg, "", err
 	}
@@ -160,6 +163,7 @@ func LoadConfig(root, explicitPath string) (Config, string, error) {
 	if err := decodeConfig(path, data, &loaded); err != nil {
 		return cfg, "", err
 	}
+	normalizeConfigAuthoredPaths(&loaded, searchRoot, path)
 	if err := validateConfigValues(loaded); err != nil {
 		return cfg, "", err
 	}
@@ -256,6 +260,93 @@ func decodeConfig(path string, data []byte, out *Config) error {
 
 func isConfigFileName(path string) bool {
 	return filepath.Base(path) == ".dollarlint.toml"
+}
+
+func normalizeConfigAuthoredPaths(cfg *Config, root, configPath string) {
+	if cfg == nil || configPath == "" {
+		return
+	}
+	configDir := filepath.Dir(configPath)
+	if cfg.Discovery.Include != nil {
+		cfg.Discovery.Include = configRelativeGlobs(root, configDir, cfg.Discovery.Include)
+	}
+	cfg.Discovery.Exclude = configRelativeGlobs(root, configDir, cfg.Discovery.Exclude)
+	for i := range cfg.Schemas.Associations {
+		cfg.Schemas.Associations[i].File = configRelativeGlob(root, configDir, cfg.Schemas.Associations[i].File)
+		cfg.Schemas.Associations[i].Schema = configRelativeSchemaURI(configDir, cfg.Schemas.Associations[i].Schema)
+	}
+	for i := range cfg.Schemas.Catalogs.Sources {
+		cfg.Schemas.Catalogs.Sources[i].Path = configRelativeLocalPath(configDir, cfg.Schemas.Catalogs.Sources[i].Path)
+	}
+	for i := range cfg.Ignore {
+		cfg.Ignore[i].File = configRelativeGlob(root, configDir, cfg.Ignore[i].File)
+	}
+}
+
+func configRelativeGlobs(root, configDir string, patterns []string) []string {
+	if len(patterns) == 0 {
+		return patterns
+	}
+	out := make([]string, len(patterns))
+	for i, pattern := range patterns {
+		out[i] = configRelativeGlob(root, configDir, pattern)
+	}
+	return out
+}
+
+func configRelativeGlob(root, configDir, pattern string) string {
+	pattern = cleanGlob(pattern)
+	if pattern == "" || filepath.IsAbs(pattern) {
+		return pattern
+	}
+	rootAbs, err := filepath.Abs(root)
+	if err != nil {
+		return pattern
+	}
+	configAbs, err := filepath.Abs(configDir)
+	if err != nil {
+		return pattern
+	}
+	rel, err := filepath.Rel(rootAbs, configAbs)
+	if err != nil {
+		return pattern
+	}
+	rel = cleanGlob(rel)
+	if rel == "" {
+		return pattern
+	}
+	if strings.HasPrefix(rel, "../") || rel == ".." {
+		return pattern
+	}
+	if strings.Contains(pattern, "/") {
+		return cleanGlob(rel + "/" + pattern)
+	}
+	return cleanGlob(rel + "/**/" + pattern)
+}
+
+func configRelativeSchemaURI(configDir, raw string) string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return raw
+	}
+	parsed, err := url.Parse(raw)
+	if err != nil || parsed.IsAbs() || parsed.Path == "" || filepath.IsAbs(parsed.Path) {
+		return raw
+	}
+	base, _ := fileURL(configDir + string(filepath.Separator))
+	return base.ResolveReference(parsed).String()
+}
+
+func configRelativeLocalPath(configDir, raw string) string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" || filepath.IsAbs(raw) || isRemoteURI(raw) {
+		return raw
+	}
+	parsed, err := url.Parse(raw)
+	if err == nil && parsed.IsAbs() {
+		return raw
+	}
+	return filepath.Clean(filepath.Join(configDir, raw))
 }
 
 func remoteFetchEnabled(cfg SchemaConfig) bool {

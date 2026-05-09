@@ -46,7 +46,7 @@
         "include": {
           "$ref": "#/$defs/stringList"
         },
-        "extendExclude": {
+        "exclude": {
           "$ref": "#/$defs/stringList"
         },
         "useDefaultExcludes": {

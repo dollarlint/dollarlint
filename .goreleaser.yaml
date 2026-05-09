@@ -94,7 +94,7 @@ npms:
       - dollarlint
     name: dollarlint
     description: Validate JSON-family, YAML, and TOML files against their declared JSON Schemas.
-    homepage: https://github.com/dollarlint/dollarlint
+    homepage: https://dollarlint.dev
     keywords:
       - cli
       - json-schema

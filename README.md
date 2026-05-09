@@ -151,7 +151,7 @@ Example:
 version = 1
 
 [discovery]
-extendExclude = ["generated/**"]
+exclude = ["generated/**"]
 useDefaultExcludes = true
 respectGitIgnore = true
 forceExclude = false
@@ -219,15 +219,18 @@ Output format and artifact location are run-time options, not persistent config.
 If `discovery.include` is unset, DollarLint discovers JSON, JSONC, JSON5, JSON Lines (`.jsonl` and `.ndjson`), YAML, YML, and TOML files at any depth.
 
 - Set `discovery.include` only when you want to replace the default file set.
+- Set `discovery.include = []` only when you intentionally want to discover no files from config.
 - A glob without a slash matches basenames at any depth (`*.json` matches `package.json` and `config/settings.json`).
 - `useDefaultExcludes = true` skips common dependency, generated, cache, build, temp, and VCS directories (`node_modules`, `vendor`, `dist`, `build`, `.build`, `DerivedData`, `SourcePackages/checkouts`, `.git`, `.venv`, `.cache`).
-- `discovery.extendExclude` adds project-specific excludes on top of defaults.
+- `discovery.exclude` adds project-specific excludes on top of defaults.
 - `respectGitIgnore = true` applies `.gitignore` patterns during directory discovery, including nested `.gitignore` files as the walk descends.
 - `forceExclude = true` also applies excludes to explicitly passed files.
 
+Config-authored discovery, association, and ignore globs are relative to the directory containing `.dollarlint.toml`. CLI globs such as `--include`, `--exclude`, and `--schema` are relative to the validation root. Relative schema and local catalog paths in config are also resolved from the config file's directory.
+
 ### JSON parsing
 
-`parsing.json.mode = "auto"` is the default. Ordinary `.json` files are parsed as strict JSON, while known JSONC-by-convention files such as `tsconfig*.json`, `jsconfig*.json`, `.vscode/settings.json`, and `devcontainer.json` allow comments and trailing commas.
+`parsing.json.mode = "auto"` is the default. `.json` files are parsed as strict JSON first, then retried as JSONC when strict parsing fails, so comments and trailing commas work in projects whose existing tools accept them.
 
 - Use `"strict"` to parse every `.json` file as standard JSON.
 - Use `"jsonc"` to allow JSONC syntax in every `.json` file.

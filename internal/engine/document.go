@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"unicode"
@@ -25,6 +24,8 @@ const (
 	DocumentFormatJSONLines = "jsonl"
 	DocumentFormatYAML      = "yaml"
 	DocumentFormatTOML      = "toml"
+
+	documentFormatJSONAuto = "json-auto"
 )
 
 type Document struct {
@@ -90,15 +91,15 @@ func parseDocument(file DiscoveredFile, cfg ParsingConfig, sourceLocations bool)
 	if err != nil {
 		return nil, err
 	}
-	data, lineDocuments, parseErrors, err := parseDocumentData(raw, format)
+	effectiveFormat, data, lineDocuments, parseErrors, err := parseDocumentData(raw, format)
 	if err != nil {
 		return nil, fmt.Errorf("parse %s: %w", file.Path, err)
 	}
-	schema, source := extractSchema(raw, data, format)
+	schema, source := extractSchema(raw, data, effectiveFormat)
 	document := &Document{
 		Path:          file.Path,
 		RelativePath:  file.RelativePath,
-		Format:        format,
+		Format:        effectiveFormat,
 		Data:          data,
 		Schema:        schema,
 		SchemaSource:  source,
@@ -165,59 +166,33 @@ func jsonFormatForPath(file DiscoveredFile, cfg ParsingConfig) (string, error) {
 	case JSONParsingJSONC:
 		return DocumentFormatJSONC, nil
 	case JSONParsingAuto:
-		rel := file.RelativePath
-		if rel == "" {
-			rel = file.Path
-		}
-		if isConventionalJSONCPath(rel) {
-			return DocumentFormatJSONC, nil
-		}
+		return documentFormatJSONAuto, nil
 	}
 	return DocumentFormatJSON, nil
 }
 
-func isConventionalJSONCPath(raw string) bool {
-	rel := strings.ToLower(cleanGlob(raw))
-	base := path.Base(rel)
-	if isTSOrJSConfigJSON(base) {
-		return true
-	}
-	switch base {
-	case "deno.json", "devcontainer.json":
-		return true
-	}
-	parts := strings.Split(rel, "/")
-	for i := 0; i < len(parts)-1; i++ {
-		next := parts[i+1]
-		switch parts[i] {
-		case ".vscode":
-			switch next {
-			case "settings.json", "tasks.json", "launch.json", "extensions.json":
-				return true
-			}
-		case ".devcontainer":
-			if next == "devcontainer.json" {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func isTSOrJSConfigJSON(base string) bool {
-	if base == "tsconfig.json" || base == "jsconfig.json" {
-		return true
-	}
-	return (strings.HasPrefix(base, "tsconfig.") || strings.HasPrefix(base, "jsconfig.")) &&
-		strings.HasSuffix(base, ".json")
-}
-
-func parseDocumentData(raw []byte, format string) (any, []LineDocument, []DocumentParseError, error) {
+func parseDocumentData(raw []byte, format string) (string, any, []LineDocument, []DocumentParseError, error) {
 	if format == DocumentFormatJSONLines {
-		return decodeJSONLines(raw)
+		data, lineDocuments, parseErrors, err := decodeJSONLines(raw)
+		return format, data, lineDocuments, parseErrors, err
+	}
+	if format == documentFormatJSONAuto {
+		data, err := decodeDocument(raw, DocumentFormatJSON)
+		if err == nil {
+			return DocumentFormatJSON, data, nil, nil, nil
+		}
+		jsonErr := err
+		data, err = decodeDocument(raw, DocumentFormatJSONC)
+		if err == nil {
+			return DocumentFormatJSONC, data, nil, nil, nil
+		}
+		if strings.Contains(jsonErr.Error(), "multiple JSON values") {
+			return DocumentFormatJSON, nil, nil, nil, jsonErr
+		}
+		return DocumentFormatJSONC, nil, nil, nil, err
 	}
 	data, err := decodeDocument(raw, format)
-	return data, nil, nil, err
+	return format, data, nil, nil, err
 }
 
 func decodeDocument(raw []byte, format string) (any, error) {

@@ -73,9 +73,10 @@ schema = "./schemas/event.schema.json"`;
     </p>
     <CodeBlock code={association} language="toml" />
     <p>
-      Association globs are matched against each discovered file's path relative
-      to the validation root. Like discovery globs, a pattern without a slash
-      can match a basename at any depth.
+      Association globs in config are matched relative to the config file's
+      directory. Like discovery globs, a pattern without a slash can match a
+      basename at any depth. Relative schema paths are resolved from the same
+      config directory.
     </p>
 
     <div class="note">

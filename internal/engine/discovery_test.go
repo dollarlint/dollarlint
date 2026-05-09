@@ -21,7 +21,7 @@ func TestDiscoverFilesSkipsNonSourceAndMatchesGlobs(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "dist", "d.toml"), `name = "ok"`)
 	writeFile(t, filepath.Join(dir, "generated", "e.json"), `{}`)
 	cfg := DefaultConfig().Discovery
-	cfg.ExtendExclude = []string{"generated/**"}
+	cfg.Exclude = []string{"generated/**"}
 	files, err := DiscoverFiles(dir, cfg)
 	if err != nil {
 		t.Fatalf("DiscoverFiles: %v", err)
@@ -37,7 +37,7 @@ func TestDiscoverFilesSkipsNonSourceAndMatchesGlobs(t *testing.T) {
 	}
 	disabled := false
 	cfg.UseDefaultExcludes = &disabled
-	cfg.ExtendExclude = nil
+	cfg.Exclude = nil
 	files, err = DiscoverFiles(dir, cfg)
 	if err != nil {
 		t.Fatalf("DiscoverFiles without default excludes: %v", err)
@@ -116,7 +116,7 @@ func TestDiscoverSingleFileAndSymlink(t *testing.T) {
 		t.Fatalf("expected excluded single file, got %+v", files)
 	}
 	cfg = DefaultConfig().Discovery
-	cfg.ExtendExclude = []string{"target.json"}
+	cfg.Exclude = []string{"target.json"}
 	files, err = DiscoverFiles(target, cfg)
 	if err != nil {
 		t.Fatalf("DiscoverFiles single force false: %v", err)
@@ -215,6 +215,10 @@ func TestDiscoverAndGlobErrors(t *testing.T) {
 	cfg := normalizedDiscoveryConfig(DiscoveryConfig{})
 	if len(cfg.Include) == 0 || !discoveryUseDefaultExcludes(cfg) || !discoveryRespectGitIgnore(cfg) {
 		t.Fatalf("normalized discovery config = %+v", cfg)
+	}
+	cfg = normalizedDiscoveryConfig(DiscoveryConfig{Include: []string{}})
+	if cfg.Include == nil || len(cfg.Include) != 0 {
+		t.Fatalf("explicit empty include should not get defaults: %+v", cfg)
 	}
 	if rule, ok := parseGitIgnoreRule("", "# comment"); ok || rule.Pattern != "" {
 		t.Fatalf("comment rule parsed: %+v", rule)

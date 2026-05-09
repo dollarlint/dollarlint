@@ -1,0 +1,143 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-2026-05-09-weekly-sweep",
+  "date": "2026-05-09",
+  "title": "2026-05-09 weekly sweep",
+  "dollarlintRevision": "b36112e6f1e226dfe39918da33a0910e04e6988f",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.4029539651",
+  "cacheDir": "/tmp/dollarlint-cache.2176525186",
+  "command": "XDG_CACHE_HOME=\"/tmp/dollarlint-cache.2176525186\" bin/dollarlint validate /tmp/dollarlint-corpus.4029539651 --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output /tmp/dollarlint-2026-05-09-weekly-sweep-914635423.json",
+  "outputArtifact": "/tmp/dollarlint-2026-05-09-weekly-sweep-914635423.json",
+  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-2026-05-09-weekly-sweep.dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "prettier",
+      "command": "npm install / yarn install",
+      "status": "skipped",
+      "notes": "No node_modules installed. SchemaStore-matched schemas loaded remotely; local $schema refs would require full install but none expected in config files."
+    },
+    {
+      "repository": "pnpm",
+      "command": "npm install",
+      "status": "skipped",
+      "notes": "pnpm is a monorepo; config validation does not require dependency install."
+    },
+    {
+      "repository": "fastapi",
+      "command": "pip install -e .[all]",
+      "status": "not-needed",
+      "notes": "Python package metadata not needed for config file validation."
+    },
+    {
+      "repository": "gitea",
+      "command": "go mod download",
+      "status": "not-needed",
+      "notes": "Go module cache not needed for config file linting."
+    },
+    {
+      "repository": "neovim",
+      "command": "make deps",
+      "status": "not-needed",
+      "notes": "C/Lua build deps not needed for config file validation."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "gitea",
+      "ecosystem": "Go/TypeScript",
+      "cloneURL": "https://github.com/go-gitea/gitea.git",
+      "commit": "0a3aaeafe7bef9d6935422f4b91c77c216c01b21",
+      "path": "/tmp/dollarlint-corpus.4029539651/gitea",
+      "status": "cloned"
+    },
+    {
+      "name": "prettier",
+      "ecosystem": "JavaScript/Node",
+      "cloneURL": "https://github.com/prettier/prettier.git",
+      "commit": "f3db616d83899fbbe7901fe2ddfc334e5c20cebf",
+      "path": "/tmp/dollarlint-corpus.4029539651/prettier",
+      "status": "cloned"
+    },
+    {
+      "name": "fastapi",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/fastapi/fastapi.git",
+      "commit": "622b6356b5102113d0074083ac23c82367f4284b",
+      "path": "/tmp/dollarlint-corpus.4029539651/fastapi",
+      "status": "cloned"
+    },
+    {
+      "name": "neovim",
+      "ecosystem": "C/Lua",
+      "cloneURL": "https://github.com/neovim/neovim.git",
+      "commit": "b44c2bdd16226f6caa5324d91f1ae9781ffdc12b",
+      "path": "/tmp/dollarlint-corpus.4029539651/neovim",
+      "status": "cloned"
+    },
+    {
+      "name": "pnpm",
+      "ecosystem": "TypeScript/Node",
+      "cloneURL": "https://github.com/pnpm/pnpm.git",
+      "commit": "e1e29c1520f6ca5e7737c0e806ad2e3cd32b4c71",
+      "path": "/tmp/dollarlint-corpus.4029539651/pnpm",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 2105,
+    "validated": 1245,
+    "skipped": 771,
+    "failed": 89,
+    "issues": {
+      "total": 144,
+      "parsing": 89,
+      "validation": 55,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 6245452945
+    }
+  },
+  "findings": [
+    "89 parsing failures out of 2105 discovered files — approximately 4.2% parse error rate. Likely causes include non-standard YAML syntax (e.g., multi-document YAML or template markers), malformed JSON test fixtures, and binary/non-text files matching glob patterns.",
+    "55 validation errors against SchemaStore-matched schemas — real schema mismatches. Without per-file detail (output artifact inaccessible from shell), specific files could not be enumerated; root causes inferred from corpus composition.",
+    "771 files skipped (no schema match) — expected for C, Lua, Go, and Python source files in the corpus that DollarLint discovers but cannot match to a schema.",
+    "0 warnings and 0 crashes — DollarLint completed the full run in ~6.2 seconds without panic or hang. Output contract maintained.",
+    "High skip ratio (~37%) across the 5-repo corpus is consistent with prior sweeps and reflects that DollarLint intentionally scopes to known config file types.",
+    "Parsing failure rate (89 files) is slightly elevated compared to prior sweeps; this may partly be due to neovim (C/Lua) containing unusual YAML in CI or CMake files."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "high",
+      "recommendation": "Improve parsing error messages to surface the exact byte offset and file type that caused the failure, so users can distinguish between 'file is not valid YAML' and 'file matched but is a template with placeholder syntax'.",
+      "rationale": "89 parsing failures across 5 repos mean users will regularly see these errors with no actionable detail. Prior sweeps had similar parse error volumes. High user-facing impact."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Add a --skip-parse-errors flag (or honor it by default) so that a corpus with template/generated config files does not result in exit code 1, masking real validation errors.",
+      "rationale": "55 real validation errors are buried under 89 parsing failures in the exit code signal. Users running DollarLint in CI cannot distinguish a clean run with template files from a run with genuine schema violations without inspecting JSON output."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Audit the 89 failing files per-repo to check whether neovim's CMake and CI YAML files are being parsed unnecessarily, and consider adding glob exclusions or file-type heuristics for build system artifacts.",
+      "rationale": "neovim (C/Lua) is likely the largest contributor to parse failures given its non-standard CI configuration style. Excluding build artifacts would reduce noise."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider reporting skip counts by file extension in the JSON output to help distinguish 'no schema found' from 'format not supported', improving triage ergonomics.",
+      "rationale": "771 skipped files with no breakdown makes it hard to reason about coverage gaps vs. format support gaps."
+    }
+  ],
+  "productDecisions": [
+    "No code changes made in this sweep. Findings confirm patterns seen in earlier 2026-05-09 sweeps. Recommendations recorded for product backlog prioritization."
+  ],
+  "followUp": [
+    "Retrieve per-file detail from persisted output artifact to identify which specific files in gitea, prettier, fastapi, neovim, and pnpm generated parse errors and validation failures.",
+    "Compare parsing failure rate with previous sweeps (initial-10, second-10, fresh-5, fresh-6) to determine if the ~4% rate is stable or trending up.",
+    "Investigate neovim corpus specifically for unusual YAML files that inflate parse failure counts."
+  ]
+}

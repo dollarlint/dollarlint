@@ -36,6 +36,13 @@
       "title": "Copilot MCP end-to-end 3-repo sweep",
       "path": "reports/real-world-results/2026-05-09-copilot-mcp-end-to-end-3-repo-sweep.json",
       "repoCount": 3
+    },
+    {
+      "id": "2026-05-09-2026-05-09-weekly-sweep",
+      "date": "2026-05-09",
+      "title": "2026-05-09 weekly sweep",
+      "path": "reports/real-world-results/2026-05-09-2026-05-09-weekly-sweep.json",
+      "repoCount": 5
     }
   ]
 }

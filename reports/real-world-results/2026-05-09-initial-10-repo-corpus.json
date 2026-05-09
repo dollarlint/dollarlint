@@ -1,0 +1,112 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-initial-10-repo-corpus",
+  "date": "2026-05-09",
+  "title": "Initial 10-Repo Corpus",
+  "dollarlintRevision": "417cc4874097d0678a0f176a6938619de55b6c23",
+  "workingTreeNote": "active working-tree product changes during the session",
+  "corpus": "/private/tmp/dollarlint-corpus.SBjYew",
+  "command": "bin/dollarlint validate /private/tmp/dollarlint-corpus.SBjYew --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output /private/tmp/dollarlint-corpus-auto.json",
+  "outputArtifact": "/private/tmp/dollarlint-corpus-auto.json",
+  "repositories": [
+    {
+      "name": "cargo",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/rust-lang/cargo.git",
+      "commit": "a343accce852",
+      "notes": "Rustfix JSON fixtures and Cargo.toml test fixtures produced expected failures."
+    },
+    {
+      "name": "efcore",
+      "ecosystem": "C#/.NET",
+      "cloneURL": "https://github.com/dotnet/efcore.git",
+      "commit": "a267c3e860df",
+      "notes": "Devcontainer schema exposed unsupported vscode refs; Azure pipeline validation had likely schema/version mismatch."
+    },
+    {
+      "name": "fmt",
+      "ecosystem": "C++",
+      "cloneURL": "https://github.com/fmtlib/fmt.git",
+      "commit": "9cb8c0f92b4c",
+      "notes": "No notable final findings."
+    },
+    {
+      "name": "laravel-framework",
+      "ecosystem": "PHP",
+      "cloneURL": "https://github.com/laravel/framework.git",
+      "commit": "295448c0076a",
+      "notes": "No notable final findings."
+    },
+    {
+      "name": "maven",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/apache/maven.git",
+      "commit": "9cedc78f3491",
+      "notes": "No notable final findings."
+    },
+    {
+      "name": "prometheus",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/prometheus/prometheus.git",
+      "commit": "ecab2f45a8b7",
+      "notes": "Invalid YAML/JSON testdata and one ESLint validation issue."
+    },
+    {
+      "name": "rails",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/rails/rails.git",
+      "commit": "7aeda6a9c478",
+      "notes": "Test fixtures accounted for most parse findings; devcontainer schema exposed unsupported vscode refs."
+    },
+    {
+      "name": "requests",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/psf/requests.git",
+      "commit": "eb173bc819c7",
+      "notes": "GitHub workflow SchemaStore validation reported matrix-related issues."
+    },
+    {
+      "name": "typescript",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/microsoft/TypeScript.git",
+      "commit": "f350b5233149",
+      "notes": "Large number of JSON baseline/test artifacts with multiple JSON values."
+    },
+    {
+      "name": "zig",
+      "ecosystem": "Zig",
+      "cloneURL": "https://github.com/ziglang/zig.git",
+      "commit": "738d2be9d6b6",
+      "notes": "Forgejo issue template files matched GitHub issue-form schema too eagerly."
+    }
+  ],
+  "result": {
+    "discovered": 4055,
+    "validated": 1073,
+    "skipped": 2269,
+    "failed": 713,
+    "issues": {
+      "total": 735,
+      "parsing": 713,
+      "validation": 22,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 4
+  },
+  "findings": [
+    "Most parse failures were real from DollarLint's perspective but not product bugs: intentionally invalid fixtures, recorded compiler output, JSON streams, placeholder responses, and test baselines that are not standalone JSON documents.",
+    "Strict .json parsing was too rigid for the ecosystem expectation that many tools accept comments and trailing commas.",
+    "JSON output needed a cleaner pre-v1 contract so scripts can distinguish parsing, validation, schema, ignored, and warning outcomes without inference.",
+    "SchemaStore matching was too eager for generic basenames and some cross-platform conventions.",
+    "Devcontainer schemas reference vscode: URIs, which caused catalog schema warnings and skipped validation."
+  ],
+  "productDecisions": [
+    "Default .json parsing should be lenient-by-default through parsing.json.mode = auto: strict JSON first, JSONC fallback for comments/trailing commas.",
+    "Add parse hints for common real-world failure modes such as multiple JSON values, invalid test fixtures, duplicate YAML keys, templated YAML, and empty/placeholder files.",
+    "Break and clean up JSON output before v1: formatVersion, relative path, root-relative local schema paths, issues and ignoredIssues, per-issue category, structured warnings, always-present arrays, and numeric summary.durationNanos.",
+    "Add [schemas.catalogs] match = auto so the default catalog behavior can avoid low-confidence matches while still offering exhaustive matching when requested.",
+    "Treat unsupported external editor schema references like vscode: as a product compatibility issue rather than a user-facing warning."
+  ]
+}

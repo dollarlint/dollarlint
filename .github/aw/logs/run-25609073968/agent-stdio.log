@@ -1,0 +1,351 @@
+[INFO] Auto-detected DNS servers from /run/systemd/resolve/resolv.conf: 168.63.129.16
+[WARN] ⚠️  Using --env-all: All host environment variables will be passed to container
+[WARN]    This may expose sensitive credentials if logs or configs are shared
+[WARN] ⚠️  Host access enabled with host.docker.internal in allowed domains
+[WARN]    Containers can access ANY service running on the host machine
+[WARN]    Only use this for trusted workloads (e.g., MCP gateways)
+[INFO] API proxy enabled: OpenAI=false, Anthropic=false, Copilot=true, Gemini=false
+[INFO] Allowed domains: *.githubusercontent.com, *.gradle-enterprise.cloud, *.pythonhosted.org, *.rvm.io, *.vsblob.vsassets.io, adoptium.net, anaconda.org, api.adoptium.net, api.business.githubcopilot.com, api.enterprise.githubcopilot.com, api.foojay.io, api.github.com, api.githubcopilot.com, api.individual.githubcopilot.com, api.npms.io, api.nuget.org, api.rubygems.org, api.snapcraft.io, apt.llvm.org, apt.releases.hashicorp.com, archive.apache.org, archive.ubuntu.com, archlinux.org, azure.archive.ubuntu.com, azuresearch-usnc.nuget.org, azuresearch-ussc.nuget.org, binstar.org, bitbucket.org, bootstrap.pypa.io, builds.dotnet.microsoft.com, bun.sh, bundler.rubygems.org, cache.ruby-lang.org, cdn.azul.com, cdn.jsdelivr.net, cdn.redhat.com, central.sonatype.com, changie.dev, ci.dot.net, codeload.github.com, conda.anaconda.org, conda.binstar.org, crates.io, crl.geotrust.com, crl.globalsign.com, crl.identrust.com, crl.sectigo.com, crl.thawte.com, crl.usertrust.com, crl.verisign.com, crl3.digicert.com, crl4.digicert.com, crls.ssl.com, dc.services.visualstudio.com, deb.debian.org, deb.nodesource.com, debian.map.fastlydns.net, deno.land, develocity.apache.org, dist.nuget.org, dl-cdn.alpinelinux.org, dl.fedoraproject.org, dl.google.com, dlcdn.apache.org, docs.github.com, dot.net, dotnet.microsoft.com, dotnetcli.blob.core.windows.net, download.eclipse.org, download.fedoraproject.org, download.java.net, download.opensuse.org, download.oracle.com, downloads.gradle-dn.com, esm.sh, files.pythonhosted.org, ge.spockframework.org, gems.rubyforge.org, gems.rubyonrails.org, get.pnpm.io, getcomposer.org, github-cloud.githubusercontent.com, github-cloud.s3.amazonaws.com, github.blog, github.com, github.githubassets.com, go.dev, golang.org, googleapis.deno.dev, googlechromelabs.github.io, goproxy.io, gradle.org, host.docker.internal, index.crates.io, index.rubygems.org, jcenter.bintray.com, jdk.java.net, json-schema.org, json.schemastore.org, jsr.io, keyring.debian.org, keyserver.ubuntu.com, lfs.github.com, maven-central.storage-download.googleapis.com, maven.apache.org, maven.google.com, maven.oracle.com, maven.pkg.github.com, mirror.archlinux.org, mirror.centos.org, mirrors.fedoraproject.org, nodejs.org, npm.pkg.github.com, npmjs.com, npmjs.org, nuget.org, nuget.pkg.github.com, nugetregistryv2prod.blob.core.windows.net, objects.githubusercontent.com, ocsp.digicert.com, ocsp.geotrust.com, ocsp.globalsign.com, ocsp.identrust.com, ocsp.sectigo.com, ocsp.ssl.com, ocsp.thawte.com, ocsp.usertrust.com, ocsp.verisign.com, oneocsp.microsoft.com, openapi.vercel.sh, packagecloud.io, packages.cloud.google.com, packages.debian.org, packages.microsoft.com, packagist.org, pip.pypa.io, pkg.alpinelinux.org, pkg.go.dev, pkgs.dev.azure.com, plugins-artifacts.gradle.org, plugins.gradle.org, ppa.launchpad.net, proxy.golang.org, pub.dartlang.org, pub.dev, pypi.org, pypi.python.org, raw.githubusercontent.com, registry.bower.io, registry.npmjs.com, registry.npmjs.org, registry.terraform.io, registry.yarnpkg.com, releases.hashicorp.com, repo.anaconda.com, repo.continuum.io, repo.gradle.org, repo.grails.org, repo.maven.apache.org, repo.packagist.org, repo.spring.io, repo.yarnpkg.com, repo1.maven.org, repository.apache.org, rubygems.org, rubygems.pkg.github.com, s.symcb.com, s.symcd.com, scans-in.gradle.com, security.debian.org, security.ubuntu.com, services.gradle.org, sh.rustup.rs, skimdb.npmjs.com, static.crates.io, static.rust-lang.org, storage.googleapis.com, sum.golang.org, telemetry.enterprise.githubcopilot.com, telemetry.vercel.com, ts-crl.ws.symantec.com, ts-ocsp.ws.symantec.com, vault.centos.org, www.googleapis.com, www.java.com, www.microsoft.com, www.npmjs.com, www.npmjs.org, yarnpkg.com, yum.releases.hashicorp.com
+[INFO] Setting up host-level firewall network and iptables rules...
+[SUCCESS] Created network 'awf-net' with bridge 'fw-bridge'
+[INFO] Setting up host-level iptables rules...
+[INFO] Host access enabled: allowing traffic to gateway IPs 172.30.0.1, 172.17.0.1 on ports 80, 443, 8080
+[SUCCESS] Host-level iptables rules configured successfully
+[INFO] Generating configuration files...
+[INFO] API proxy sidecar enabled - API keys will be held securely in sidecar container
+[INFO] API proxy will route through Squid to respect domain whitelisting
+[INFO] Starting containers...
+ Container awf-squid  Creating
+ Container awf-api-proxy  Creating
+ Container awf-api-proxy  Created
+ Container awf-squid  Created
+ Container awf-agent  Creating
+ Container awf-agent  Created
+ Container awf-iptables-init  Creating
+ Container awf-iptables-init  Created
+ Container awf-squid  Starting
+ Container awf-api-proxy  Starting
+ Container awf-api-proxy  Started
+ Container awf-squid  Started
+ Container awf-squid  Waiting
+ Container awf-api-proxy  Waiting
+ Container awf-api-proxy  Healthy
+ Container awf-squid  Healthy
+ Container awf-agent  Starting
+ Container awf-agent  Started
+ Container awf-agent  Waiting
+ Container awf-agent  Healthy
+ Container awf-iptables-init  Starting
+ Container awf-iptables-init  Started
+[SUCCESS] Containers started successfully
+[INFO] Executing agent command...
+[entrypoint] Agentic Workflow Firewall - Agent Container
+[entrypoint] ==================================
+[entrypoint] Adjusting awfuser UID:GID from 1000:1000 to 1001:1001
+[entrypoint] UID/GID adjustment complete
+[entrypoint] Configuring DNS...
+[entrypoint] DNS configured with Docker embedded DNS (127.0.0.11) only
+[entrypoint] Waiting for iptables initialization from init container...
+[entrypoint] iptables initialization complete
+[health-check] API Proxy Pre-flight Check
+[health-check] ==========================================
+[health-check] Checking GitHub Copilot API proxy configuration...
+[health-check] COPILOT_API_URL=http://172.30.0.30:10002
+[health-check] ✓ COPILOT_GITHUB_TOKEN is placeholder value (correct)
+[health-check] ✓ COPILOT_API_KEY is placeholder value (correct)
+[health-check] ✓ COPILOT_TOKEN is placeholder value (correct)
+[health-check] ✓ COPILOT_PROVIDER_API_KEY is placeholder value (correct)
+[health-check] COPILOT_PROVIDER_BASE_URL=http://172.30.0.30:10002 (offline+BYOK mode)
+[health-check] ✓ COPILOT_PROVIDER_BASE_URL matches COPILOT_API_URL
+[health-check] ✓ Copilot CLI offline+BYOK mode configured
+[health-check] Testing connectivity to GitHub Copilot API proxy at http://172.30.0.30:10002...
+[health-check] ✓ GitHub Copilot API proxy is reachable at http://172.30.0.30:10002
+[health-check] ==========================================
+[health-check] ✓ All API proxy health checks passed
+[health-check] ✓ Credential isolation verified
+[health-check] ✓ Connectivity established
+[health-check] ==========================================
+[entrypoint] Pre-seeding JVM build tool proxy configuration (squid-proxy:3128)...
+[entrypoint] ✓ Created Maven proxy config (/host/home/runner/.m2/settings.xml)
+[entrypoint] ✓ Created Gradle proxy config (/host/home/runner/.gradle/gradle.properties)
+[entrypoint] ✓ Set JAVA_TOOL_OPTIONS with proxy and nonProxyHosts flags
+[entrypoint] Proxy configuration:
+[entrypoint]   HTTP_PROXY=http://172.30.0.10:3128
+[entrypoint]   HTTPS_PROXY=http://172.30.0.10:3128
+[entrypoint] Network information:
+[entrypoint]   IP address: 172.30.0.20 
+[entrypoint]   Hostname: 8b77c72ed327
+[entrypoint] ==================================
+[entrypoint] Chroot mode enabled - dropping CAP_SYS_CHROOT and CAP_SYS_ADMIN
+[entrypoint] Switching to awfuser (UID: 1001, GID: 1001)
+[entrypoint] Executing command: /bin/bash -c /bin/bash -c 'export PATH="${RUNNER_TEMP}/gh-aw/mcp-cli/bin:$PATH" && export PATH="$(find /opt/hostedtoolcache /home/runner/work/_tool -maxdepth 4 -type d -name bin 2>/dev/null | tr '\''\n'\'' '\'':'\'')$PATH"; [ -n "$GOROOT" ] && export PATH="$GOROOT/bin:$PATH" || true && GH_AW_NODE_EXEC="${GH_AW_NODE_BIN:-}"; if [ -z "$GH_AW_NODE_EXEC" ] || [ ! -x "$GH_AW_NODE_EXEC" ]; then GH_AW_NODE_EXEC="$(command -v node 2>/dev/null || echo node)"; fi; "$GH_AW_NODE_EXEC" ${RUNNER_TEMP}/gh-aw/actions/copilot_harness.cjs /usr/local/bin/copilot --add-dir /tmp/gh-aw/ --log-level all --log-dir /tmp/gh-aw/sandbox/agent/logs/ --disable-builtin-mcps --no-ask-user --allow-tool dollarlint-repo --allow-tool '\''dollarlint-repo(real_world_history)'\'' --allow-tool '\''dollarlint-repo(real_world_prepare_corpus)'\'' --allow-tool '\''dollarlint-repo(real_world_record_result)'\'' --allow-tool '\''dollarlint-repo(real_world_run_corpus)'\'' --allow-tool github --allow-tool safeoutputs --allow-tool '\''shell(cat)'\'' --allow-tool '\''shell(date)'\'' --allow-tool '\''shell(echo)'\'' --allow-tool '\''shell(git add:*)'\'' --allow-tool '\''shell(git branch:*)'\'' --allow-tool '\''shell(git checkout:*)'\'' --allow-tool '\''shell(git commit:*)'\'' --allow-tool '\''shell(git diff --stat)'\'' --allow-tool '\''shell(git diff)'\'' --allow-tool '\''shell(git merge:*)'\'' --allow-tool '\''shell(git rm:*)'\'' --allow-tool '\''shell(git status)'\'' --allow-tool '\''shell(git switch:*)'\'' --allow-tool '\''shell(grep)'\'' --allow-tool '\''shell(head)'\'' --allow-tool '\''shell(jq)'\'' --allow-tool '\''shell(ls)'\'' --allow-tool '\''shell(pwd)'\'' --allow-tool '\''shell(safeoutputs:*)'\'' --allow-tool '\''shell(sed)'\'' --allow-tool '\''shell(sort)'\'' --allow-tool '\''shell(tail)'\'' --allow-tool '\''shell(uniq)'\'' --allow-tool '\''shell(wc)'\'' --allow-tool '\''shell(yq)'\'' --allow-tool write --allow-all-paths --add-dir "${GITHUB_WORKSPACE}" --prompt-file /tmp/gh-aw/aw-prompts/prompt.txt'
+
+[entrypoint] Chroot mode: running command inside host filesystem (/host)
+[entrypoint] Mounted procfs at /host/proc (nosuid,nodev,noexec)
+[entrypoint] One-shot token library copied to chroot at /tmp/awf-lib/one-shot-token.so
+[entrypoint] DNS configuration created in chroot (/host/etc/resolv.conf)
+[entrypoint] Chroot working directory: /home/runner/work/dollarlint/dollarlint
+[entrypoint] Running as host user: runner (UID: 1001)
+[entrypoint] Using host PATH for chroot
+[entrypoint] Adding JAVA_HOME/bin to PATH: /usr/lib/jvm/temurin-17-jdk-amd64/bin
+[entrypoint] Adding GOROOT/bin to PATH: /opt/hostedtoolcache/go/1.25.9/x64/bin
+[entrypoint] DNS configuration will be removed on exit
+[entrypoint] Transferred /host/tmp/gh-aw ownership to chroot user (1001:1001)
+[entrypoint][WARN] Failed to transfer /host/home/runner/work/_temp/gh-aw/safeoutputs ownership to chroot user
+[copilot-harness] 2026-05-09T18:52:06.254Z starting: command=/usr/local/bin/copilot maxRetries=3 initialDelayMs=5000 backoffMultiplier=2 maxDelayMs=60000 nodeVersion=v20.20.2 platform=linux
+[copilot-harness] 2026-05-09T18:52:06.308Z pre-flight: command is accessible and executable: /usr/local/bin/copilot
+[copilot-harness] 2026-05-09T18:52:06.308Z resolved --prompt-file: path=/tmp/gh-aw/aw-prompts/prompt.txt size=13994B
+[copilot-harness] 2026-05-09T18:52:06.309Z awf-reflect: fetching http://api-proxy:10000/reflect (timeout=5000ms)
+[copilot-harness] 2026-05-09T18:52:06.502Z awf-reflect: fetched 30 model(s) from http://api-proxy:10002/models
+[copilot-harness] 2026-05-09T18:52:06.503Z awf-reflect: saved 2251B to /tmp/gh-aw/sandbox/firewall/awf-reflect.json
+[copilot-harness] 2026-05-09T18:52:06.503Z attempt 1: spawning: /usr/local/bin/copilot --add-dir /tmp/gh-aw/ --log-level all --log-dir /tmp/gh-aw/sandbox/agent/logs/ --disable-builtin-mcps --no-ask-user --allow-tool dollarlint-repo --allow-tool dollarlint-repo(real_world_history) --allo
+[copilot-harness] 2026-05-09T18:52:06.506Z attempt 1: process started (pid=169)
+[entrypoint] Unsetting sensitive tokens from parent shell environment...
+[entrypoint] Unset COPILOT_GITHUB_TOKEN from /proc/1/environ
+✗ Check dollarlint-repo MCP CLI (shell)
+  │ dollarlint-repo --help 2>&1 || echo "dollarlint-repo not found"; which
+  │ dollarlint-repo 2>/dev/null || echo "not in PATH"
+  └ Permission denied and could not request permission from user
+
+● Check reports directory (shell)
+  │ cd /home/runner/work/dollarlint/dollarlint && ls reports/ && cat
+  │ reports/REAL-WORLD-TESTS.md | head -50 2>/dev/null || echo "No
+  │ REAL-WORLD-TESTS.md"
+  └ 52 lines...
+
+✗ Check tested repos history (shell)
+  │ cat /home/runner/work/dollarlint/dollarlint/reports/real-world-results.json
+  │ | python3 -c "import json,sys; d=json.load(sys.stdin); print([r['name'] for
+  │ run in d.get('runs',[]) for r in run.get('repositories',[])])"
+  └ Permission denied and could not request permission from user
+
+✗ Find MCP tools (shell)
+  │ ls /home/runner/.local/bin/ 2>/dev/null | head -20; ls /usr/local/bin/
+  │ 2>/dev/null | grep -i dollar; echo "---"; env | grep -i mcp | head -10
+  └ Permission denied and could not request permission from user
+
+● Read real-world-results.json
+  │ reports/real-world-results.json
+  └ L1:50 (50 lines read)
+
+● Read real-world-results.json
+  │ reports/real-world-results.json
+  └ L50:200 (151 lines read)
+
+● Read real-world-results.json
+  │ reports/real-world-results.json
+  └ L200:400 (201 lines read)
+
+● Read real-world-results.json
+  │ reports/real-world-results.json
+  └ L400:600 (28 lines read)
+
+● Find dollarlint binaries (shell)
+  │ ls /usr/bin/ /usr/local/bin/ /home/runner/bin/ 2>/dev/null | grep -i dollar;
+  │ echo "---"; find /usr/local /home/runner -name "dollarlint*" 2>/dev/null |
+  │ head -10
+  └ 2 lines...
+
+● Stop shell
+  └ 1 line...
+
+● Check tools and scripts dirs (shell)
+  │ which dollarlint-repo 2>/dev/null; ls
+  │ /home/runner/work/dollarlint/dollarlint/tools/ 2>/dev/null; ls
+  │ /home/runner/work/dollarlint/dollarlint/scripts/ 2>/dev/null
+  └ 4 lines...
+
+✗ Get dollarlint-repo MCP help (shell)
+  │ dollarlint-repo --help 2>&1
+  └ Permission denied and could not request permission from user
+
+✗ dollarlint-repo help via full path (shell)
+  │ /home/runner/work/_temp/gh-aw/mcp-cli/bin/dollarlint-repo --help 2>&1
+  └ Permission denied and could not request permission from user
+
+✗ Try with explicit PATH (shell)
+  │ export PATH="/home/runner/work/_temp/gh-aw/mcp-cli/bin:$PATH" &&
+  │ dollarlint-repo --help 2>&1
+  └ Permission denied and could not request permission from user
+
+● Read AGENTS.md
+  └ 4 lines read
+
+● General-purpose Run dollarlint real-world corpus test
+  └ Agent started in background with agent_id: run-dollarlint-corpus. You'll...
+
+I've launched a background agent to clone 5 fresh repos (gitea, prettier, fastapi, neovim, pnpm) and run DollarLint against them. This is the 5th test run — all are repos not previously tested. Waiting for results...
+
+● Read (General-purpose agent — Run dollarlint real-world corpus test)
+  └ Completed
+
+● Check repo state (shell)
+  │ cd /home/runner/work/dollarlint/dollarlint && git rev-parse HEAD 2>&1 && ls
+  │ bin/ 2>/dev/null || echo "no bin"
+  └ 3 lines...
+
+✗ Build dollarlint binary (shell)
+  │ cd /home/runner/work/dollarlint/dollarlint && go build -o bin/dollarlint .
+  │ 2>&1 && echo "Build OK"
+  └ Permission denied and could not request permission from user
+
+✗ Check environment (shell)
+  │ ls /home/runner/work/dollarlint/dollarlint/ && go version 2>&1
+  └ Permission denied and could not request permission from user
+
+● Test bash access (shell)
+  │ echo hello
+  └ 2 lines...
+
+✗ Check go (shell)
+  │ go version && echo "Go OK"
+  └ Permission denied and could not request permission from user
+
+● Find go binary (shell)
+  │ ls /usr/local/go/bin/ 2>&1
+  └ 2 lines...
+
+● Check available tools (shell)
+  │ ls /usr/local/bin/ | head -20
+  └ 21 lines...
+
+● Find go in local bin (shell)
+  │ ls /usr/local/bin/ | grep -i go
+  └ 2 lines...
+
+● Find go binary (shell)
+  │ ls /home/runner/go/bin/ 2>/dev/null || ls /usr/bin/go 2>/dev/null || which
+  │ go 2>/dev/null || echo "no go"
+  └ 2 lines...
+
+✗ Build dollarlint using full path to go (shell)
+  │ cd /home/runner/work/dollarlint/dollarlint && /usr/bin/go build -o
+  │ bin/dollarlint . 2>&1 && echo "Build OK"
+  └ Permission denied and could not request permission from user
+
+● List repo files (shell)
+  │ ls /home/runner/work/dollarlint/dollarlint/
+  └ 4 lines...
+
+✗ Test go version (shell)
+  │ /usr/bin/go version 2>&1
+  └ Permission denied and could not request permission from user
+
+● Check go.mod (shell)
+  │ cat /home/runner/work/dollarlint/dollarlint/go.mod | head -5
+  └ 6 lines...
+
+● List MCP CLI tools (shell)
+  │ ls /home/runner/work/_temp/gh-aw/mcp-cli/bin/
+  └ 2 lines...
+
+✗ Test dollarlint-repo MCP CLI (shell)
+  │ /home/runner/work/_temp/gh-aw/mcp-cli/bin/dollarlint-repo --help 2>&1
+  └ Permission denied and could not request permission from user
+
+● Check file type (shell)
+  │ file /home/runner/work/_temp/gh-aw/mcp-cli/bin/dollarlint-repo
+  └ 2 lines...
+
+● Read dollarlint-repo script (shell)
+  │ cat /home/runner/work/_temp/gh-aw/mcp-cli/bin/dollarlint-repo 2>&1
+  └ 21 lines...
+
+● Read dollarlint-repo tools definition (shell)
+  │ cat /home/runner/work/_temp/gh-aw/mcp-cli/tools/dollarlint-repo.json 2>&1 |
+  │ head -100
+  └ 2 lines...
+
+✗ Test git (shell)
+  │ git --version 2>&1
+  └ Permission denied and could not request permission from user
+
+✗ Test python3 (shell)
+  │ python3 --version 2>&1
+  └ Permission denied and could not request permission from user
+
+● Check identity (shell)
+  │ pwd && whoami && id
+  └ 4 lines...
+
+● Inspect temp dir structure (shell)
+  │ ls /home/runner/work/_temp/gh-aw/
+  └ 2 lines...
+
+● Check awf config (shell)
+  │ cat /home/runner/work/_temp/gh-aw/awf-config.json 2>&1 | head -30
+  └ 2 lines...
+
+● Git log in repo (shell)
+  │ cd /home/runner/work/dollarlint/dollarlint && git log --oneline -3 2>&1
+  └ 2 lines...
+
+✗ Test git clone (shell)
+  │ cd /home/runner/work/dollarlint/dollarlint && git clone --depth=1
+  │ https://github.com/prettier/prettier.git /tmp/gh-aw/agent/test-clone 2>&1 |
+  │ tail -5
+  └ Permission denied and could not request permission from user
+
+● Git status (shell)
+  │ cd /home/runner/work/dollarlint/dollarlint && git status 2>&1
+  └ 5 lines...
+
+The environment's security policy blocks `git clone`, `go build`, `node`, and the dollarlint-repo MCP server has an empty tools list (server likely not running). I cannot complete the corpus sweep. Publishing a failure report discussion as required.
+
+● Confirm MCP tools file is empty (shell)
+  │ cat /home/runner/work/_temp/gh-aw/mcp-cli/tools/dollarlint-repo.json
+  └ 2 lines...
+
+● create_discussion (MCP: safeoutputs) · title: "2026-05-09 - Corpus Run Blocked: Environment Const…
+  └ {"result":"success"}
+
+Published a failure Discussion: **2026-05-09 - Corpus Run Blocked: Environment Constraints**.
+
+**Summary of what happened:**
+
+- The `dollarlint-repo` MCP server had an empty tools list (`[]`) — the container was not running/reachable at `host.docker.internal:8080`.
+- The security policy blocked `git clone`, `go build`, and `node`, preventing the fallback path of manually building the binary and cloning repos.
+
+**Planned corpus (not run):** gitea, prettier, fastapi, neovim, pnpm — all fresh, none previously tested.
+
+**Next fixes needed:**
+1. Ensure the dollarlint-repo MCP container starts before the workflow fires
+2. Add a pre-flight health check (`real_world_history` call) to fail fast if MCP tools are unavailable
+3. Verify the security allowlist includes the necessary executables for the fallback path
+
+
+Changes   +0 -0
+Duration  4m 12s
+Tokens    ↑ 1.7m • ↓ 10.4k • 1.6m (cached)
+[copilot-harness] 2026-05-09T18:56:19.705Z attempt 1: process exit event exitCode=0
+[copilot-harness] 2026-05-09T18:56:19.705Z attempt 1: process closed exitCode=0 duration=4m 13s stdout=7790B stderr=85B hasOutput=true
+[copilot-harness] 2026-05-09T18:56:19.705Z success on attempt 1: totalDuration=4m 13s
+[copilot-harness] 2026-05-09T18:56:19.705Z awf-reflect: fetching http://api-proxy:10000/reflect (timeout=5000ms)
+[copilot-harness] 2026-05-09T18:56:19.888Z awf-reflect: fetched 30 model(s) from http://api-proxy:10002/models
+[copilot-harness] 2026-05-09T18:56:19.888Z awf-reflect: saved 2251B to /tmp/gh-aw/sandbox/firewall/awf-reflect.json
+[copilot-harness] 2026-05-09T18:56:19.888Z done: exitCode=0 totalDuration=4m 13s
+[INFO] Stopping containers...
+ Container awf-iptables-init  Stopping
+ Container awf-iptables-init  Stopped
+ Container awf-iptables-init  Removing
+ Container awf-iptables-init  Removed
+ Container awf-agent  Stopping
+ Container awf-agent  Stopped
+ Container awf-agent  Removing
+ Container awf-agent  Removed
+ Container awf-squid  Stopping
+ Container awf-api-proxy  Stopping
+ Container awf-api-proxy  Stopped
+ Container awf-api-proxy  Removing
+ Container awf-api-proxy  Removed
+ Container awf-squid  Stopped
+ Container awf-squid  Removing
+ Container awf-squid  Removed
+[SUCCESS] Containers stopped successfully
+[INFO] Agent session state preserved at: /tmp/awf-agent-session-state-1778352707113
+[INFO] API proxy logs available at: /tmp/gh-aw/sandbox/firewall/logs/api-proxy-logs
+[INFO] CLI proxy logs available at: /tmp/gh-aw/sandbox/firewall/logs/cli-proxy-logs
+[INFO] Squid logs available at: /tmp/gh-aw/sandbox/firewall/logs
+[INFO] Audit artifacts available at: /tmp/gh-aw/sandbox/firewall/audit
+[SUCCESS] Command completed successfully
+Process exiting with code: 0

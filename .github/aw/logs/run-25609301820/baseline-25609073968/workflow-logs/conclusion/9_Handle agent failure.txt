@@ -1,0 +1,154 @@
+﻿2026-05-09T18:57:46.7250868Z ##[group]Run actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+2026-05-09T18:57:46.7251633Z with:
+2026-05-09T18:57:46.7252235Z   github-token: ***
+2026-05-09T18:57:46.7253861Z   script: const { setupGlobals } = require('/home/runner/work/_temp/gh-aw/actions/setup_globals.cjs');
+setupGlobals(core, github, context, exec, io, getOctokit);
+const { main } = require('/home/runner/work/_temp/gh-aw/actions/handle_agent_failure.cjs');
+await main();
+
+2026-05-09T18:57:46.7255637Z   debug: false
+2026-05-09T18:57:46.7256039Z   user-agent: actions/github-script
+2026-05-09T18:57:46.7256526Z   result-encoding: json
+2026-05-09T18:57:46.7256931Z   retries: 0
+2026-05-09T18:57:46.7257344Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-05-09T18:57:46.7258242Z env:
+2026-05-09T18:57:46.7258594Z   CANDIDATE_REPOS: 
+2026-05-09T18:57:46.7258970Z   MAX_REPOS: 5
+2026-05-09T18:57:46.7270058Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T18:57:46.7285698Z   GITHUB_AW_OTEL_TRACE_ID: 9be79f811a481947cc30da41afffae00
+2026-05-09T18:57:46.7286413Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: 5aa609ba408b363d
+2026-05-09T18:57:46.7286996Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353064989
+2026-05-09T18:57:46.7287780Z   GH_AW_AGENT_OUTPUT: /tmp/gh-aw/agent_output.json
+2026-05-09T18:57:46.7288626Z   GH_AW_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T18:57:46.7289382Z   GH_AW_RUN_URL: https://github.com/dollarlint/dollarlint/actions/runs/25609073968
+2026-05-09T18:57:46.7290104Z   GH_AW_AGENT_CONCLUSION: success
+2026-05-09T18:57:46.7290607Z   GH_AW_WORKFLOW_ID: weekly-real-world-testing
+2026-05-09T18:57:46.7291188Z   GH_AW_ACTION_FAILURE_ISSUE_EXPIRES_HOURS: 168
+2026-05-09T18:57:46.7291723Z   GH_AW_ENGINE_ID: copilot
+2026-05-09T18:57:46.7292171Z   GH_AW_SECRET_VERIFICATION_RESULT: success
+2026-05-09T18:57:46.7292725Z   GH_AW_CHECKOUT_PR_SUCCESS: true
+2026-05-09T18:57:46.7293377Z   GH_AW_INFERENCE_ACCESS_ERROR: false
+2026-05-09T18:57:46.7293863Z   GH_AW_MCP_POLICY_ERROR: false
+2026-05-09T18:57:46.7294328Z   GH_AW_AGENTIC_ENGINE_TIMEOUT: false
+2026-05-09T18:57:46.7295141Z   GH_AW_MODEL_NOT_SUPPORTED_ERROR: false
+2026-05-09T18:57:46.7296359Z   GH_AW_ENGINE_API_HOSTS: api.enterprise.githubcopilot.com,api.githubcopilot.com,api.business.githubcopilot.com,api.individual.githubcopilot.com
+2026-05-09T18:57:46.7297771Z   GH_AW_CREATE_DISCUSSION_ERRORS: 
+2026-05-09T18:57:46.7298292Z   GH_AW_CREATE_DISCUSSION_ERROR_COUNT: 0
+2026-05-09T18:57:46.7298808Z   GH_AW_CODE_PUSH_FAILURE_ERRORS: 
+2026-05-09T18:57:46.7299285Z   GH_AW_CODE_PUSH_FAILURE_COUNT: 0
+2026-05-09T18:57:46.7299756Z   GH_AW_LOCKDOWN_CHECK_FAILED: false
+2026-05-09T18:57:46.7300243Z   GH_AW_STALE_LOCK_FILE_FAILED: false
+2026-05-09T18:57:46.7300726Z   GH_AW_GROUP_REPORTS: false
+2026-05-09T18:57:46.7301174Z   GH_AW_FAILURE_REPORT_AS_ISSUE: true
+2026-05-09T18:57:46.7301690Z   GH_AW_MISSING_TOOL_REPORT_AS_FAILURE: true
+2026-05-09T18:57:46.7302247Z   GH_AW_MISSING_DATA_REPORT_AS_FAILURE: true
+2026-05-09T18:57:46.7302853Z   GH_AW_TIMEOUT_MINUTES: 90
+2026-05-09T18:57:46.7325626Z ##[endgroup]
+2026-05-09T18:57:46.8708986Z Agent conclusion: success
+2026-05-09T18:57:46.8714160Z Workflow name: Weekly Real-World Testing
+2026-05-09T18:57:46.8717056Z Workflow ID: weekly-real-world-testing
+2026-05-09T18:57:46.8720185Z Secret verification result: success
+2026-05-09T18:57:46.8722919Z Assignment error count: 0
+2026-05-09T18:57:46.8725526Z Assign copilot failure count: 0
+2026-05-09T18:57:46.8728466Z Create discussion error count: 0
+2026-05-09T18:57:46.8731043Z Code push failure count: 0
+2026-05-09T18:57:46.8734144Z Checkout PR success: true
+2026-05-09T18:57:46.8739548Z Inference access error: false
+2026-05-09T18:57:46.8742601Z MCP policy error: false
+2026-05-09T18:57:46.8745347Z Agentic engine timeout: false
+2026-05-09T18:57:46.8748616Z Model not supported error: false
+2026-05-09T18:57:46.8752121Z Push repo-memory result: 
+2026-05-09T18:57:46.8755109Z App token minting failed (safe_outputs/conclusion/activation): false/false/false
+2026-05-09T18:57:46.8756849Z Lockdown check failed: false
+2026-05-09T18:57:46.8758475Z Stale lock file check failed: false
+2026-05-09T18:57:46.8759806Z Cache memory enabled: false
+2026-05-09T18:57:46.8760995Z Missing tool report-as-failure: true
+2026-05-09T18:57:46.8762202Z Missing data report-as-failure: true
+2026-05-09T18:57:46.8767361Z Agent output content length: 2747
+2026-05-09T18:57:46.8770343Z Agent emitted 1 missing_tool message(s) - activating failure handling
+2026-05-09T18:57:46.8978671Z Searching for pull request from branch: main
+2026-05-09T18:57:47.3451218Z No pull request found for branch: main
+2026-05-09T18:57:47.3452018Z Parent issue creation is disabled (group-reports: false)
+2026-05-09T18:57:47.3556465Z Checking for existing issue with title: "[aw] Weekly Real-World Testing failed"
+2026-05-09T18:57:47.7099828Z Found existing issue #11: https://github.com/dollarlint/dollarlint/issues/11
+2026-05-09T18:57:47.7107015Z Found 1 missing_tool message(s)
+2026-05-09T18:57:48.1770349Z ✓ Added comment to existing issue #11

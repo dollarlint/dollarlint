@@ -1,0 +1,132 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-second-10-repo-corpus-and-priority-fixes",
+  "date": "2026-05-09",
+  "title": "Second 10-Repo Corpus And Priority Fixes",
+  "dollarlintRevision": "417cc4874097d0678a0f176a6938619de55b6c23",
+  "workingTreeNote": "active working-tree product changes during the session",
+  "corpus": "/private/tmp/dollarlint-corpus2.oDzlq4",
+  "command": "bin/dollarlint validate /private/tmp/dollarlint-corpus2.oDzlq4 --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output /private/tmp/dollarlint-corpus2-priority.json",
+  "outputArtifact": "/private/tmp/dollarlint-corpus2-priority.json",
+  "repositories": [
+    {
+      "name": "avalonia",
+      "ecosystem": "C#/.NET",
+      "cloneURL": "https://github.com/AvaloniaUI/Avalonia.git",
+      "commit": "dcb607179b70",
+      "notes": "Exposed UTF-8 BOM files and Azure Pipelines schema strictness."
+    },
+    {
+      "name": "cargo",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/rust-lang/cargo.git",
+      "commit": "a343accce852",
+      "notes": "Same Rustfix/Cargo fixture patterns as initial corpus."
+    },
+    {
+      "name": "flask",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/pallets/flask.git",
+      "commit": "7374c85ddefc",
+      "notes": "No notable final findings."
+    },
+    {
+      "name": "flutter-samples",
+      "ecosystem": "Dart/Flutter/Angular",
+      "cloneURL": "https://github.com/flutter/samples.git",
+      "commit": "56bf76f2f091",
+      "notes": "Exposed bogus *.app.json SchemaStore match for tsconfig.app.json; Angular schema pointed into missing node_modules."
+    },
+    {
+      "name": "julia",
+      "ecosystem": "Julia",
+      "cloneURL": "https://github.com/JuliaLang/julia.git",
+      "commit": "2569364ac493",
+      "notes": "No notable final findings."
+    },
+    {
+      "name": "laravel-framework",
+      "ecosystem": "PHP",
+      "cloneURL": "https://github.com/laravel/framework.git",
+      "commit": "295448c0076a",
+      "notes": "No notable final findings."
+    },
+    {
+      "name": "phoenix",
+      "ecosystem": "Elixir",
+      "cloneURL": "https://github.com/phoenixframework/phoenix.git",
+      "commit": "e50429581546",
+      "notes": "No notable final findings."
+    },
+    {
+      "name": "prometheus",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/prometheus/prometheus.git",
+      "commit": "ecab2f45a8b7",
+      "notes": "Same invalid testdata pattern as initial corpus."
+    },
+    {
+      "name": "svelte",
+      "ecosystem": "TypeScript/Svelte",
+      "cloneURL": "https://github.com/sveltejs/svelte.git",
+      "commit": "af5b9724ab31",
+      "notes": "No notable final findings."
+    },
+    {
+      "name": "zig",
+      "ecosystem": "Zig",
+      "cloneURL": "https://github.com/ziglang/zig.git",
+      "commit": "738d2be9d6b6",
+      "notes": "Same Forgejo issue-template SchemaStore mismatch pattern."
+    }
+  ],
+  "result": {
+    "discovered": 2079,
+    "validated": 898,
+    "skipped": 1163,
+    "failed": 18,
+    "issues": {
+      "total": 45,
+      "parsing": 18,
+      "validation": 26,
+      "schema": 1,
+      "coverage": 0
+    },
+    "warnings": 0
+  },
+  "beforeResult": {
+    "discovered": 2079,
+    "validated": 894,
+    "skipped": 1164,
+    "failed": 21,
+    "issues": {
+      "total": 54,
+      "parsing": 21,
+      "validation": 32,
+      "schema": 1,
+      "coverage": 0
+    },
+    "warnings": 2
+  },
+  "findings": [
+    "Avalonia had UTF-8 BOM-prefixed configuration files; those should parse normally.",
+    "SchemaStore's *.app.json match incorrectly captured Flutter's tsconfig.app.json before the more appropriate TypeScript schema.",
+    "Devcontainer vscode: references produced catalog schema warnings.",
+    "Stale persistent cache entries for reused localhost test-server URLs made plain go test ./... unreliable during local development.",
+    "Remaining parse findings still look real or fixture-oriented: JSON streams/multiple JSON values, deliberately invalid TOML/YAML fixtures, and placeholder files with non-JSON contents."
+  ],
+  "productDecisions": [
+    "Strip UTF-8 BOMs before parsing documents, decoding schemas, and attaching source maps.",
+    "In match = auto, skip basename-only leading wildcard SchemaStore globs such as *.app.json; preserve them under match = all.",
+    "Treat vscode: schema references as permissive empty schemas so catalog-backed validation can continue without warnings.",
+    "Do not persist remote schema cache entries for loopback/local hosts; in-memory per-run caching is enough for local schema servers and avoids stale test pollution."
+  ],
+  "followUp": [
+    "Final corpus result improved from 54 to 45 issues.",
+    "Parsing issues dropped from 21 to 18.",
+    "Validation issues dropped from 32 to 26.",
+    "Warnings dropped from 2 to 0.",
+    "Validated file count rose from 894 to 898."
+  ]
+}

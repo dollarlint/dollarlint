@@ -1,0 +1,116 @@
+﻿2026-05-09T18:50:59.9763332Z ##[group]Run actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+2026-05-09T18:50:59.9764198Z with:
+2026-05-09T18:50:59.9765803Z   script: const { setupGlobals } = require('/home/runner/work/_temp/gh-aw/actions/setup_globals.cjs');
+setupGlobals(core, github, context, exec, io, getOctokit);
+const { main } = require('/home/runner/work/_temp/gh-aw/actions/check_workflow_timestamp_api.cjs');
+await main();
+
+2026-05-09T18:50:59.9767801Z   github-token: ***
+2026-05-09T18:50:59.9768187Z   debug: false
+2026-05-09T18:50:59.9768570Z   user-agent: actions/github-script
+2026-05-09T18:50:59.9769029Z   result-encoding: json
+2026-05-09T18:50:59.9769414Z   retries: 0
+2026-05-09T18:50:59.9769805Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-05-09T18:50:59.9770634Z env:
+2026-05-09T18:50:59.9770970Z   CANDIDATE_REPOS: 
+2026-05-09T18:50:59.9771339Z   MAX_REPOS: 5
+2026-05-09T18:50:59.9782029Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T18:50:59.9792390Z   GITHUB_AW_OTEL_TRACE_ID: 9be79f811a481947cc30da41afffae00
+2026-05-09T18:50:59.9793015Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: e809c7dc79d314d4
+2026-05-09T18:50:59.9793554Z   GITHUB_AW_OTEL_JOB_START_MS: 1778352657602
+2026-05-09T18:50:59.9794127Z   GH_AW_WORKFLOW_FILE: weekly-real-world-testing.lock.yml
+2026-05-09T18:50:59.9795145Z   GH_AW_CONTEXT_WORKFLOW_REF: dollarlint/dollarlint/.github/workflows/weekly-real-world-testing.lock.yml@refs/heads/main
+2026-05-09T18:50:59.9796062Z ##[endgroup]
+2026-05-09T18:51:00.1674368Z Checking for stale lock file using frontmatter hash:
+2026-05-09T18:51:00.1680303Z   Source: .github/workflows/weekly-real-world-testing.md
+2026-05-09T18:51:00.1683448Z   Lock file: .github/workflows/weekly-real-world-testing.lock.yml
+2026-05-09T18:51:00.1687513Z Env workflow ref already identifies this workflow, skipping referenced_workflows API lookup
+2026-05-09T18:51:00.1692123Z GITHUB_WORKFLOW_REF: dollarlint/dollarlint/.github/workflows/weekly-real-world-testing.lock.yml@refs/heads/main
+2026-05-09T18:51:00.1696119Z GH_AW_CONTEXT_WORKFLOW_REF: dollarlint/dollarlint/.github/workflows/weekly-real-world-testing.lock.yml@refs/heads/main (available as env fallback)
+2026-05-09T18:51:00.1699805Z GITHUB_REPOSITORY: dollarlint/dollarlint
+2026-05-09T18:51:00.1703018Z Resolved source repo: dollarlint/dollarlint @ refs/heads/main
+2026-05-09T18:51:00.1705965Z Same-repo invocation: checking out dollarlint/dollarlint @ refs/heads/main
+2026-05-09T18:51:00.9145792Z Frontmatter hash comparison:
+2026-05-09T18:51:00.9163881Z   Lock file hash:    4ab1bdb5c934fe92af1f80041420c363639a9113a584d30a197a5b5d917fd78b
+2026-05-09T18:51:00.9215013Z   Recomputed hash:   4ab1bdb5c934fe92af1f80041420c363639a9113a584d30a197a5b5d917fd78b
+2026-05-09T18:51:00.9218571Z   Status: ✅ Hashes match
+2026-05-09T18:51:00.9219128Z ✅ Lock file is up to date (hashes match)

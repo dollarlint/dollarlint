@@ -1,0 +1,265 @@
+﻿2026-05-09T19:10:36.6026129Z ##[group]Run set -o pipefail
+2026-05-09T19:10:36.6026487Z [36;1mset -o pipefail[0m
+2026-05-09T19:10:36.6026766Z [36;1mtouch /tmp/gh-aw/agent-step-summary.md[0m
+2026-05-09T19:10:36.6027128Z [36;1mGH_AW_NODE_BIN=$(command -v node 2>/dev/null || true)[0m
+2026-05-09T19:10:36.6027457Z [36;1mexport GH_AW_NODE_BIN[0m
+2026-05-09T19:10:36.6027781Z [36;1m(umask 177 && touch /tmp/gh-aw/threat-detection/detection.log)[0m
+2026-05-09T19:10:36.6031035Z [36;1mprintf '%s\n' '{"$schema":"https://github.com/github/gh-aw-firewall/releases/download/v0.25.40/awf-config.schema.json","network":{"allowDomains":["api.business.githubcopilot.com","api.enterprise.githubcopilot.com","api.github.com","api.githubcopilot.com","api.individual.githubcopilot.com","github.com","host.docker.internal","telemetry.enterprise.githubcopilot.com"]},"apiProxy":{"enabled":true},"container":{"imageTag":"0.25.40,squid=sha256:b084f4a2c771f584ee68084ced52fa6b3245197a1889645d817462d307d3ac51,agent=sha256:14ff567e8d9d4c2fbc5e55c973488381c71d7e0fdbe72d30ee7b8a738fd86504,api-proxy=sha256:2883ca3e5ae9f330cafdd9345bfd4ae17fc8da36c96d4c9a1f76e922b4c45280,cli-proxy=sha256:3e7152911d4b4b7b97beef9d3d7d924ff7902227e86001ef3838fb728d5d514c"}}' > "${RUNNER_TEMP}/gh-aw/awf-config.json" && cp "${RUNNER_TEMP}/gh-aw/awf-config.json" /tmp/gh-aw/awf-config.json[0m
+2026-05-09T19:10:36.6034385Z [36;1m# shellcheck disable=SC1003[0m
+2026-05-09T19:10:36.6036325Z [36;1msudo -E awf --config "${RUNNER_TEMP}/gh-aw/awf-config.json" --container-workdir "${GITHUB_WORKSPACE}" --mount "${RUNNER_TEMP}/gh-aw:${RUNNER_TEMP}/gh-aw:ro" --mount "${RUNNER_TEMP}/gh-aw:/host${RUNNER_TEMP}/gh-aw:ro" --env-all --exclude-env COPILOT_GITHUB_TOKEN --log-level info --proxy-logs-dir /tmp/gh-aw/sandbox/firewall/logs --audit-dir /tmp/gh-aw/sandbox/firewall/audit --enable-host-access --allow-host-ports 80,443,8080 --skip-pull \[0m
+2026-05-09T19:10:36.6040199Z [36;1m  -- /bin/bash -c 'export PATH="$(find /opt/hostedtoolcache /home/runner/work/_tool -maxdepth 4 -type d -name bin 2>/dev/null | tr '\''\n'\'' '\'':'\'')$PATH"; [ -n "$GOROOT" ] && export PATH="$GOROOT/bin:$PATH" || true && GH_AW_NODE_EXEC="${GH_AW_NODE_BIN:-}"; if [ -z "$GH_AW_NODE_EXEC" ] || [ ! -x "$GH_AW_NODE_EXEC" ]; then GH_AW_NODE_EXEC="$(command -v node 2>/dev/null || echo node)"; fi; "$GH_AW_NODE_EXEC" ${RUNNER_TEMP}/gh-aw/actions/copilot_harness.cjs /usr/local/bin/copilot --add-dir /tmp/gh-aw/ --log-level all --log-dir /tmp/gh-aw/sandbox/agent/logs/ --disable-builtin-mcps --no-ask-user --allow-all-tools --add-dir "${GITHUB_WORKSPACE}" --prompt-file /tmp/gh-aw/aw-prompts/prompt.txt' 2>&1 | tee -a /tmp/gh-aw/threat-detection/detection.log[0m
+2026-05-09T19:10:36.6063386Z shell: /usr/bin/bash -e {0}
+2026-05-09T19:10:36.6063618Z env:
+2026-05-09T19:10:36.6063802Z   CANDIDATE_REPOS: 
+2026-05-09T19:10:36.6064007Z   MAX_REPOS: 5
+2026-05-09T19:10:36.6070380Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T19:10:36.6077407Z   GITHUB_AW_OTEL_TRACE_ID: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:10:36.6077759Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: 9fbee84f2fc181bd
+2026-05-09T19:10:36.6078057Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353820692
+2026-05-09T19:10:36.6078356Z   GH_AW_PROMPT: /tmp/gh-aw/aw-prompts/prompt.txt
+2026-05-09T19:10:36.6078640Z   COPILOT_AGENT_RUNNER_TYPE: STANDALONE
+2026-05-09T19:10:36.6078949Z   COPILOT_API_KEY: dummy-byok-key-for-offline-mode
+2026-05-09T19:10:36.6079920Z   COPILOT_GITHUB_TOKEN: ***
+2026-05-09T19:10:36.6080169Z   COPILOT_MODEL: claude-sonnet-4.6
+2026-05-09T19:10:36.6080413Z   GH_AW_PHASE: detection
+2026-05-09T19:10:36.6080616Z   GH_AW_VERSION: v0.71.5
+2026-05-09T19:10:36.6080855Z   GITHUB_API_URL: https://api.github.com
+2026-05-09T19:10:36.6081134Z   GITHUB_AW: true
+2026-05-09T19:10:36.6081364Z   GITHUB_COPILOT_INTEGRATION_ID: agentic-workflows
+2026-05-09T19:10:36.6081641Z   GITHUB_HEAD_REF: 
+2026-05-09T19:10:36.6081829Z   GITHUB_REF_NAME: main
+2026-05-09T19:10:36.6082057Z   GITHUB_SERVER_URL: https://github.com
+2026-05-09T19:10:36.6082363Z   GITHUB_STEP_SUMMARY: /tmp/gh-aw/agent-step-summary.md
+2026-05-09T19:10:36.6082724Z   GITHUB_WORKSPACE: /home/runner/work/dollarlint/dollarlint
+2026-05-09T19:10:36.6083117Z   GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+2026-05-09T19:10:36.6083460Z   GIT_AUTHOR_NAME: github-actions[bot]
+2026-05-09T19:10:36.6083800Z   GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+2026-05-09T19:10:36.6084152Z   GIT_COMMITTER_NAME: github-actions[bot]
+2026-05-09T19:10:36.6084406Z   XDG_CONFIG_HOME: /home/runner
+2026-05-09T19:10:36.6084628Z ##[endgroup]
+2026-05-09T19:10:36.7635860Z [INFO] Auto-detected DNS servers from /run/systemd/resolve/resolv.conf: 168.63.129.16
+2026-05-09T19:10:36.7643080Z [WARN] ⚠️  Using --env-all: All host environment variables will be passed to container
+2026-05-09T19:10:36.7643918Z [WARN]    This may expose sensitive credentials if logs or configs are shared
+2026-05-09T19:10:36.7645303Z [WARN] ⚠️  Host access enabled with host.docker.internal in allowed domains
+2026-05-09T19:10:36.7646388Z [WARN]    Containers can access ANY service running on the host machine
+2026-05-09T19:10:36.7647318Z [WARN]    Only use this for trusted workloads (e.g., MCP gateways)
+2026-05-09T19:10:36.7648028Z [INFO] API proxy enabled: OpenAI=false, Anthropic=false, Copilot=true, Gemini=false
+2026-05-09T19:10:36.7655870Z [INFO] Allowed domains: api.business.githubcopilot.com, api.enterprise.githubcopilot.com, api.github.com, api.githubcopilot.com, api.individual.githubcopilot.com, github.com, host.docker.internal, telemetry.enterprise.githubcopilot.com
+2026-05-09T19:10:36.7658172Z [INFO] Setting up host-level firewall network and iptables rules...
+2026-05-09T19:10:36.8460656Z [SUCCESS] Created network 'awf-net' with bridge 'fw-bridge'
+2026-05-09T19:10:36.8465802Z [INFO] Setting up host-level iptables rules...
+2026-05-09T19:10:36.9292697Z [INFO] Host access enabled: allowing traffic to gateway IPs 172.30.0.1, 172.17.0.1 on ports 80, 443, 8080
+2026-05-09T19:10:36.9726981Z [SUCCESS] Host-level iptables rules configured successfully
+2026-05-09T19:10:36.9792347Z [INFO] Generating configuration files...
+2026-05-09T19:10:37.1296704Z [INFO] API proxy sidecar enabled - API keys will be held securely in sidecar container
+2026-05-09T19:10:37.1297428Z [INFO] API proxy will route through Squid to respect domain whitelisting
+2026-05-09T19:10:37.1413300Z [INFO] Starting containers...
+2026-05-09T19:10:37.3499823Z  Container awf-squid  Creating
+2026-05-09T19:10:37.3504274Z  Container awf-api-proxy  Creating
+2026-05-09T19:10:37.5824138Z  Container awf-api-proxy  Created
+2026-05-09T19:10:37.5824676Z  Container awf-squid  Created
+2026-05-09T19:10:37.5825452Z  Container awf-agent  Creating
+2026-05-09T19:10:37.5970830Z  Container awf-agent  Created
+2026-05-09T19:10:37.5971444Z  Container awf-iptables-init  Creating
+2026-05-09T19:10:37.6077241Z  Container awf-iptables-init  Created
+2026-05-09T19:10:37.6105281Z  Container awf-squid  Starting
+2026-05-09T19:10:37.6106063Z  Container awf-api-proxy  Starting
+2026-05-09T19:10:37.7927053Z  Container awf-api-proxy  Started
+2026-05-09T19:10:37.8057814Z  Container awf-squid  Started
+2026-05-09T19:10:37.8058691Z  Container awf-squid  Waiting
+2026-05-09T19:10:37.8086272Z  Container awf-api-proxy  Waiting
+2026-05-09T19:10:43.3058446Z  Container awf-api-proxy  Healthy
+2026-05-09T19:10:43.3059175Z  Container awf-squid  Healthy
+2026-05-09T19:10:43.3059727Z  Container awf-agent  Starting
+2026-05-09T19:10:43.4514566Z  Container awf-agent  Started
+2026-05-09T19:10:43.4515312Z  Container awf-agent  Waiting
+2026-05-09T19:10:48.9529378Z  Container awf-agent  Healthy
+2026-05-09T19:10:48.9536952Z  Container awf-iptables-init  Starting
+2026-05-09T19:10:49.0317051Z  Container awf-iptables-init  Started
+2026-05-09T19:10:49.0368562Z [SUCCESS] Containers started successfully
+2026-05-09T19:10:49.0373552Z [INFO] Executing agent command...
+2026-05-09T19:10:49.0673400Z [entrypoint] Agentic Workflow Firewall - Agent Container
+2026-05-09T19:10:49.0674314Z [entrypoint] ==================================
+2026-05-09T19:10:49.0675056Z [entrypoint] Adjusting awfuser UID:GID from 1000:1000 to 1001:1001
+2026-05-09T19:10:49.0676461Z [entrypoint] UID/GID adjustment complete
+2026-05-09T19:10:49.0677151Z [entrypoint] Configuring DNS...
+2026-05-09T19:10:49.0678062Z [entrypoint] DNS configured with Docker embedded DNS (127.0.0.11) only
+2026-05-09T19:10:49.0679215Z [entrypoint] Waiting for iptables initialization from init container...
+2026-05-09T19:10:49.2722541Z [entrypoint] iptables initialization complete
+2026-05-09T19:10:49.2741177Z [health-check] API Proxy Pre-flight Check
+2026-05-09T19:10:49.2742333Z [health-check] ==========================================
+2026-05-09T19:10:49.2745769Z [health-check] Checking GitHub Copilot API proxy configuration...
+2026-05-09T19:10:49.2748698Z [health-check] COPILOT_API_URL=http://172.30.0.30:10002
+2026-05-09T19:10:49.2752775Z [health-check] ✓ COPILOT_GITHUB_TOKEN is placeholder value (correct)
+2026-05-09T19:10:49.2753633Z [health-check] ✓ COPILOT_API_KEY is placeholder value (correct)
+2026-05-09T19:10:49.2754426Z [health-check] ✓ COPILOT_TOKEN is placeholder value (correct)
+2026-05-09T19:10:49.2755295Z [health-check] ✓ COPILOT_PROVIDER_API_KEY is placeholder value (correct)
+2026-05-09T19:10:49.2756639Z [health-check] COPILOT_PROVIDER_BASE_URL=http://172.30.0.30:10002 (offline+BYOK mode)
+2026-05-09T19:10:49.2758011Z [health-check] ✓ COPILOT_PROVIDER_BASE_URL matches COPILOT_API_URL
+2026-05-09T19:10:49.2759154Z [health-check] ✓ Copilot CLI offline+BYOK mode configured
+2026-05-09T19:10:49.2760409Z [health-check] Testing connectivity to GitHub Copilot API proxy at http://172.30.0.30:10002...
+2026-05-09T19:10:49.2885488Z [health-check] ✓ GitHub Copilot API proxy is reachable at http://172.30.0.30:10002
+2026-05-09T19:10:49.2887554Z [health-check] ==========================================
+2026-05-09T19:10:49.2888455Z [health-check] ✓ All API proxy health checks passed
+2026-05-09T19:10:49.2889640Z [health-check] ✓ Credential isolation verified
+2026-05-09T19:10:49.2890390Z [health-check] ✓ Connectivity established
+2026-05-09T19:10:49.2891155Z [health-check] ==========================================
+2026-05-09T19:10:49.2896252Z [entrypoint] Pre-seeding JVM build tool proxy configuration (squid-proxy:3128)...
+2026-05-09T19:10:49.2935280Z [entrypoint] ✓ Created Maven proxy config (/host/home/runner/.m2/settings.xml)
+2026-05-09T19:10:49.2973032Z [entrypoint] ✓ Created Gradle proxy config (/host/home/runner/.gradle/gradle.properties)
+2026-05-09T19:10:49.2995019Z [entrypoint] ✓ Set JAVA_TOOL_OPTIONS with proxy and nonProxyHosts flags
+2026-05-09T19:10:49.2995656Z [entrypoint] Proxy configuration:
+2026-05-09T19:10:49.2996537Z [entrypoint]   HTTP_PROXY=http://172.30.0.10:3128
+2026-05-09T19:10:49.2996972Z [entrypoint]   HTTPS_PROXY=http://172.30.0.10:3128
+2026-05-09T19:10:49.2997343Z [entrypoint] Network information:
+2026-05-09T19:10:49.3007970Z [entrypoint]   IP address: 172.30.0.20 
+2026-05-09T19:10:49.3017128Z [entrypoint]   Hostname: e34d8d4ccc2c
+2026-05-09T19:10:49.3082632Z [entrypoint] ==================================
+2026-05-09T19:10:49.3083700Z [entrypoint] Chroot mode enabled - dropping CAP_SYS_CHROOT and CAP_SYS_ADMIN
+2026-05-09T19:10:49.3116475Z [entrypoint] Switching to awfuser (UID: 1001, GID: 1001)
+2026-05-09T19:10:49.3120068Z [entrypoint] Executing command: /bin/bash -c /bin/bash -c 'export PATH="$(find /opt/hostedtoolcache /home/runner/work/_tool -maxdepth 4 -type d -name bin 2>/dev/null | tr '\''\n'\'' '\'':'\'')$PATH"; [ -n "$GOROOT" ] && export PATH="$GOROOT/bin:$PATH" || true && GH_AW_NODE_EXEC="${GH_AW_NODE_BIN:-}"; if [ -z "$GH_AW_NODE_EXEC" ] || [ ! -x "$GH_AW_NODE_EXEC" ]; then GH_AW_NODE_EXEC="$(command -v node 2>/dev/null || echo node)"; fi; "$GH_AW_NODE_EXEC" ${RUNNER_TEMP}/gh-aw/actions/copilot_harness.cjs /usr/local/bin/copilot --add-dir /tmp/gh-aw/ --log-level all --log-dir /tmp/gh-aw/sandbox/agent/logs/ --disable-builtin-mcps --no-ask-user --allow-all-tools --add-dir "${GITHUB_WORKSPACE}" --prompt-file /tmp/gh-aw/aw-prompts/prompt.txt'
+2026-05-09T19:10:49.3122672Z 
+2026-05-09T19:10:49.3125240Z [entrypoint] Chroot mode: running command inside host filesystem (/host)
+2026-05-09T19:10:49.3158259Z [entrypoint] Mounted procfs at /host/proc (nosuid,nodev,noexec)
+2026-05-09T19:10:49.3213251Z [entrypoint] One-shot token library copied to chroot at /tmp/awf-lib/one-shot-token.so
+2026-05-09T19:10:49.3251123Z [entrypoint] DNS configuration created in chroot (/host/etc/resolv.conf)
+2026-05-09T19:10:49.3289681Z [entrypoint] Chroot working directory: /home/runner/work/dollarlint/dollarlint
+2026-05-09T19:10:49.3316997Z [entrypoint] Running as host user: runner (UID: 1001)
+2026-05-09T19:10:49.3317407Z [entrypoint] Using host PATH for chroot
+2026-05-09T19:10:49.3331248Z [entrypoint] Adding JAVA_HOME/bin to PATH: /usr/lib/jvm/temurin-17-jdk-amd64/bin
+2026-05-09T19:10:49.3359880Z [entrypoint] DNS configuration will be removed on exit
+2026-05-09T19:10:49.3375310Z [entrypoint] Transferred /host/tmp/gh-aw ownership to chroot user (1001:1001)
+2026-05-09T19:10:49.5917132Z [copilot-harness] 2026-05-09T19:10:49.547Z starting: command=/usr/local/bin/copilot maxRetries=3 initialDelayMs=5000 backoffMultiplier=2 maxDelayMs=60000 nodeVersion=v24.14.1 platform=linux
+2026-05-09T19:10:49.5936320Z [copilot-harness] 2026-05-09T19:10:49.593Z pre-flight: command is accessible and executable: /usr/local/bin/copilot
+2026-05-09T19:10:49.5937731Z [copilot-harness] 2026-05-09T19:10:49.593Z resolved --prompt-file: path=/tmp/gh-aw/aw-prompts/prompt.txt size=5681B
+2026-05-09T19:10:49.5940496Z [copilot-harness] 2026-05-09T19:10:49.593Z awf-reflect: fetching http://api-proxy:10000/reflect (timeout=5000ms)
+2026-05-09T19:10:49.9929509Z [copilot-harness] 2026-05-09T19:10:49.992Z awf-reflect: fetched 30 model(s) from http://api-proxy:10002/models
+2026-05-09T19:10:49.9933276Z [copilot-harness] 2026-05-09T19:10:49.992Z awf-reflect: saved 1354B to /tmp/gh-aw/sandbox/firewall/awf-reflect.json
+2026-05-09T19:10:49.9938268Z [copilot-harness] 2026-05-09T19:10:49.993Z attempt 1: spawning: /usr/local/bin/copilot --add-dir /tmp/gh-aw/ --log-level all --log-dir /tmp/gh-aw/sandbox/agent/logs/ --disable-builtin-mcps --no-ask-user --allow-all-tools --add-dir /home/runner/work/dollarlint/dollarlint -p <redacted>
+2026-05-09T19:10:49.9970832Z [copilot-harness] 2026-05-09T19:10:49.996Z attempt 1: process started (pid=167)
+2026-05-09T19:10:50.3548355Z [entrypoint] Unsetting sensitive tokens from parent shell environment...
+2026-05-09T19:10:50.3549121Z [entrypoint] Unset COPILOT_GITHUB_TOKEN from /proc/1/environ
+2026-05-09T19:10:56.8029829Z ● Read agent output and prompt files (shell)
+2026-05-09T19:10:56.8032127Z   │ cat /tmp/gh-aw/threat-detection/agent_output.json && echo "---" && cat
+2026-05-09T19:10:56.8033946Z   │ /tmp/gh-aw/threat-detection/aw-prompts/prompt.txt
+2026-05-09T19:10:56.8034900Z   └ 225 lines...
+2026-05-09T19:10:56.8035247Z 
+2026-05-09T19:11:00.5263644Z No threats detected. The agent output reflects a legitimate incomplete workflow run due to infrastructure blockers (MCP server unavailable, restricted bash policy). No suspicious web calls, secret leakage, encoded payloads, or prompt injection attempts were found.
+2026-05-09T19:11:00.5265976Z 
+2026-05-09T19:11:00.6064712Z THREAT_DETECTION_RESULT:{"prompt_injection":false,"secret_leak":false,"malicious_patch":false,"reasons":[]}
+2026-05-09T19:11:00.6065808Z 
+2026-05-09T19:11:00.6572378Z 
+2026-05-09T19:11:00.6573298Z Changes   +0 -0
+2026-05-09T19:11:00.6573808Z Duration  9s
+2026-05-09T19:11:00.6575089Z Tokens    ↑ 36.4k • ↓ 271 • 22.1k (cached)
+2026-05-09T19:11:00.7218405Z [copilot-harness] 2026-05-09T19:11:00.721Z attempt 1: process exit event exitCode=0
+2026-05-09T19:11:00.7220234Z [copilot-harness] 2026-05-09T19:11:00.721Z attempt 1: process closed exitCode=0 duration=10s stdout=575B stderr=81B hasOutput=true
+2026-05-09T19:11:00.7221722Z [copilot-harness] 2026-05-09T19:11:00.721Z success on attempt 1: totalDuration=10s
+2026-05-09T19:11:00.7222917Z [copilot-harness] 2026-05-09T19:11:00.721Z awf-reflect: fetching http://api-proxy:10000/reflect (timeout=5000ms)
+2026-05-09T19:11:01.0688100Z [copilot-harness] 2026-05-09T19:11:01.068Z awf-reflect: fetched 30 model(s) from http://api-proxy:10002/models
+2026-05-09T19:11:01.0690506Z [copilot-harness] 2026-05-09T19:11:01.068Z awf-reflect: saved 1354B to /tmp/gh-aw/sandbox/firewall/awf-reflect.json
+2026-05-09T19:11:01.0693172Z [copilot-harness] 2026-05-09T19:11:01.068Z done: exitCode=0 totalDuration=11s
+2026-05-09T19:11:01.3410451Z [INFO] Stopping containers...
+2026-05-09T19:11:01.4245323Z  Container awf-iptables-init  Stopping
+2026-05-09T19:11:01.4248221Z  Container awf-iptables-init  Stopped
+2026-05-09T19:11:01.4248733Z  Container awf-iptables-init  Removing
+2026-05-09T19:11:01.4284963Z  Container awf-iptables-init  Removed
+2026-05-09T19:11:01.4285537Z  Container awf-agent  Stopping
+2026-05-09T19:11:01.4288362Z  Container awf-agent  Stopped
+2026-05-09T19:11:01.4289195Z  Container awf-agent  Removing
+2026-05-09T19:11:01.4360683Z  Container awf-agent  Removed
+2026-05-09T19:11:01.4361314Z  Container awf-api-proxy  Stopping
+2026-05-09T19:11:01.4361830Z  Container awf-squid  Stopping
+2026-05-09T19:11:01.5100229Z  Container awf-api-proxy  Stopped
+2026-05-09T19:11:01.5101225Z  Container awf-api-proxy  Removing
+2026-05-09T19:11:01.5158675Z  Container awf-api-proxy  Removed
+2026-05-09T19:11:02.5391740Z  Container awf-squid  Stopped
+2026-05-09T19:11:02.5393128Z  Container awf-squid  Removing
+2026-05-09T19:11:02.5446549Z  Container awf-squid  Removed
+2026-05-09T19:11:02.5486457Z [SUCCESS] Containers stopped successfully
+2026-05-09T19:11:02.5939692Z [INFO] Agent session state preserved at: /tmp/awf-agent-session-state-1778353836756
+2026-05-09T19:11:02.5962648Z [INFO] API proxy logs available at: /tmp/gh-aw/sandbox/firewall/logs/api-proxy-logs
+2026-05-09T19:11:02.5984389Z [INFO] CLI proxy logs available at: /tmp/gh-aw/sandbox/firewall/logs/cli-proxy-logs
+2026-05-09T19:11:02.6006540Z [INFO] Squid logs available at: /tmp/gh-aw/sandbox/firewall/logs
+2026-05-09T19:11:02.6027805Z [INFO] Audit artifacts available at: /tmp/gh-aw/sandbox/firewall/audit
+2026-05-09T19:11:02.6048821Z [SUCCESS] Command completed successfully
+2026-05-09T19:11:02.6049445Z Process exiting with code: 0

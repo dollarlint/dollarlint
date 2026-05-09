@@ -1,0 +1,89 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-fresh-6-repo-cross-ecosystem-corpus",
+  "date": "2026-05-09",
+  "title": "Fresh 6-Repo Cross-Ecosystem Corpus",
+  "dollarlintRevision": "c63b83b482d9c8ef8148c6f151742571fc20ae8f",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.CtwOPD",
+  "cacheDir": "/tmp/dollarlint-cache.V2T8k4",
+  "command": "XDG_CACHE_HOME=/tmp/dollarlint-cache.V2T8k4 bin/dollarlint validate /tmp/dollarlint-corpus.CtwOPD --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output /tmp/dollarlint-corpus-third.json",
+  "outputArtifact": "/tmp/dollarlint-corpus-third.json",
+  "repositories": [
+    {
+      "name": "express",
+      "ecosystem": "JavaScript/Node",
+      "cloneURL": "https://github.com/expressjs/express.git",
+      "commit": "f873ac23124ffcff8c040b4bd257b32c29828d53",
+      "notes": "All discovered configuration files validated."
+    },
+    {
+      "name": "django",
+      "ecosystem": "Python/JavaScript",
+      "cloneURL": "https://github.com/django/django.git",
+      "commit": "4d455ae2d7689ce066dfffef9fc29a6f6d3ed33e",
+      "notes": "Private package.json uses uppercase name, which package-name schema validation rejects."
+    },
+    {
+      "name": "terraform",
+      "ecosystem": "Go/HCL",
+      "cloneURL": "https://github.com/hashicorp/terraform.git",
+      "commit": "527402d3fe2de2363c4587e7abd1a3b23669ca25",
+      "notes": "Invalid fixture files produced expected parse failures; Changie config exposed schema drift/strictness."
+    },
+    {
+      "name": "tokio",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/tokio-rs/tokio.git",
+      "commit": "ee0dc9092665a1f13df573dc5e5124999d8e9035",
+      "notes": "All discovered configuration files validated or skipped cleanly."
+    },
+    {
+      "name": "vue-core",
+      "ecosystem": "TypeScript/Vue",
+      "cloneURL": "https://github.com/vuejs/core.git",
+      "commit": "57545e958ae28ed17aa9e0ed321abcd8dc99f752",
+      "notes": "Vercel catalog schema failed metaschema validation and was skipped with a warning."
+    },
+    {
+      "name": "homebrew-brew",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/Homebrew/brew.git",
+      "commit": "e5cb8682f9beba3b712ee81d303dd496904ea848",
+      "notes": "All discovered configuration files validated or skipped cleanly."
+    }
+  ],
+  "result": {
+    "discovered": 681,
+    "validated": 139,
+    "skipped": 540,
+    "failed": 2,
+    "issues": {
+      "total": 4,
+      "parsing": 2,
+      "validation": 2,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 1
+  },
+  "findings": [
+    "The two Terraform parsing failures are intentional invalid test fixtures: one contains native Terraform syntax in a *.tf.json file and the other is zero bytes.",
+    "Django's private package.json is valid JSON but violates the package-name pattern in the SchemaStore package schema because the name is uppercase.",
+    "Terraform's .changie.yaml appears to use a newer or project-specific Changie footer field shape than the fetched https://changie.dev/schema.json accepts.",
+    "SchemaStore's Vercel schema at https://openapi.vercel.sh/vercel.json failed draft-04 metaschema validation because exclusiveMinimum is numeric where draft-04 expects a boolean; DollarLint warned and skipped catalog-inferred validation instead of crashing.",
+    "No crashes, hangs, output-contract problems, or unexplained skipped files appeared in this sweep."
+  ],
+  "productDecisions": [
+    "Improve catalog schema failure warnings so users can tell the inferred schema failed, not their file.",
+    "Keep reporting intentionally invalid fixture files as parse failures; this is expected behavior for full-repository sweeps.",
+    "Treat the Vercel schema warning as a third-party schema compatibility signal for now, not a local suppression candidate.",
+    "Keep package and Changie validation findings visible; they appear to be schema/project mismatches rather than DollarLint parser bugs."
+  ],
+  "followUp": [
+    "Implemented the warning-copy follow-up in internal/engine/validation_compile.go: warn-mode catalog schema failures now lead with a plain-language message that the inferred schema could not be used and this is not a finding in the file, while preserving compiler details in warning.hint.",
+    "Verified the follow-up with go test ./internal/engine -run TestSchemaStoreMatchedSchemaFailurePolicy -count=1, repo quick verification (go test ./... and go vet ./...), and a rerun against /tmp/dollarlint-corpus.CtwOPD to inspect the JSON warning shape.",
+    "If Vercel schema warnings recur across additional real projects, consider testing whether permissive schema compilation or a targeted upstream report would improve catalog-backed validation without hiding broken schemas."
+  ]
+}

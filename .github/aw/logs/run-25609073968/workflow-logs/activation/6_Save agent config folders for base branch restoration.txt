@@ -1,0 +1,106 @@
+﻿2026-05-09T18:50:59.9354399Z ##[group]Run bash "${RUNNER_TEMP}/gh-aw/actions/save_base_github_folders.sh"
+2026-05-09T18:50:59.9355894Z [36;1mbash "${RUNNER_TEMP}/gh-aw/actions/save_base_github_folders.sh"[0m
+2026-05-09T18:50:59.9380497Z shell: /usr/bin/bash -e {0}
+2026-05-09T18:50:59.9382723Z env:
+2026-05-09T18:50:59.9383095Z   CANDIDATE_REPOS: 
+2026-05-09T18:50:59.9383468Z   MAX_REPOS: 5
+2026-05-09T18:50:59.9403701Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T18:50:59.9446649Z   GITHUB_AW_OTEL_TRACE_ID: 9be79f811a481947cc30da41afffae00
+2026-05-09T18:50:59.9448864Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: e809c7dc79d314d4
+2026-05-09T18:50:59.9451379Z   GITHUB_AW_OTEL_JOB_START_MS: 1778352657602
+2026-05-09T18:50:59.9452103Z   GH_AW_AGENT_FOLDERS: .agents .claude .codex .crush .gemini .github .opencode .pi
+2026-05-09T18:50:59.9453337Z   GH_AW_AGENT_FILES: .crush.json AGENTS.md CLAUDE.md GEMINI.md PI.md opencode.jsonc
+2026-05-09T18:50:59.9454048Z ##[endgroup]
+2026-05-09T18:50:59.9512181Z .agents not found in workspace, skipping
+2026-05-09T18:50:59.9515250Z .claude not found in workspace, skipping
+2026-05-09T18:50:59.9547639Z Saved .codex to /tmp/gh-aw/base/.codex
+2026-05-09T18:50:59.9548402Z .crush not found in workspace, skipping
+2026-05-09T18:50:59.9549081Z .gemini not found in workspace, skipping
+2026-05-09T18:50:59.9583461Z Saved .github to /tmp/gh-aw/base/.github
+2026-05-09T18:50:59.9584251Z .opencode not found in workspace, skipping
+2026-05-09T18:50:59.9584881Z .pi not found in workspace, skipping
+2026-05-09T18:50:59.9585519Z .crush.json not found in workspace, skipping
+2026-05-09T18:50:59.9608464Z Saved AGENTS.md to /tmp/gh-aw/base/AGENTS.md
+2026-05-09T18:50:59.9610666Z CLAUDE.md not found in workspace, skipping
+2026-05-09T18:50:59.9611352Z GEMINI.md not found in workspace, skipping
+2026-05-09T18:50:59.9655781Z PI.md not found in workspace, skipping
+2026-05-09T18:50:59.9656603Z opencode.jsonc not found in workspace, skipping

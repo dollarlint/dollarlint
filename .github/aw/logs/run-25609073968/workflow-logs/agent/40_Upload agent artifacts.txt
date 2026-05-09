@@ -1,0 +1,135 @@
+﻿2026-05-09T18:56:24.1453070Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-05-09T18:56:24.1454061Z with:
+2026-05-09T18:56:24.1454367Z   name: agent
+2026-05-09T18:56:24.1457390Z   path: /tmp/gh-aw/aw-prompts/prompt.txt
+/tmp/gh-aw/sandbox/agent/logs/
+/tmp/gh-aw/redacted-urls.log
+/tmp/gh-aw/mcp-logs/
+/tmp/gh-aw/agent_usage.json
+/tmp/gh-aw/agent-stdio.log
+/tmp/gh-aw/pre-agent-audit.txt
+/tmp/gh-aw/agent/
+/tmp/gh-aw/github_rate_limits.jsonl
+/tmp/gh-aw/safeoutputs.jsonl
+/tmp/gh-aw/agent_output.json
+/tmp/gh-aw/aw-*.patch
+/tmp/gh-aw/aw-*.bundle
+/tmp/gh-aw/awf-config.json
+/tmp/gh-aw/sandbox/firewall/logs/
+/tmp/gh-aw/sandbox/firewall/audit/
+/tmp/gh-aw/sandbox/firewall/awf-reflect.json
+
+2026-05-09T18:56:24.1461409Z   if-no-files-found: ignore
+2026-05-09T18:56:24.1461823Z   compression-level: 6
+2026-05-09T18:56:24.1462181Z   overwrite: false
+2026-05-09T18:56:24.1462525Z   include-hidden-files: false
+2026-05-09T18:56:24.1462911Z   archive: true
+2026-05-09T18:56:24.1463211Z env:
+2026-05-09T18:56:24.1463484Z   CANDIDATE_REPOS: 
+2026-05-09T18:56:24.1464028Z   MAX_REPOS: 5
+2026-05-09T18:56:24.1464342Z   DEFAULT_BRANCH: main
+2026-05-09T18:56:24.1464713Z   GH_AW_ASSETS_ALLOWED_EXTS: 
+2026-05-09T18:56:24.1465105Z   GH_AW_ASSETS_BRANCH: 
+2026-05-09T18:56:24.1465467Z   GH_AW_ASSETS_MAX_SIZE_KB: 0
+2026-05-09T18:56:24.1465937Z   GH_AW_MCP_LOG_DIR: /tmp/gh-aw/mcp-logs/safeoutputs
+2026-05-09T18:56:24.1466530Z   GH_AW_WORKFLOW_ID_SANITIZED: weeklyrealworldtesting
+2026-05-09T18:56:24.1477712Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T18:56:24.1489274Z   GITHUB_AW_OTEL_TRACE_ID: 9be79f811a481947cc30da41afffae00
+2026-05-09T18:56:24.1489989Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: 5146b91f02588dc1
+2026-05-09T18:56:24.1490526Z   GITHUB_AW_OTEL_JOB_START_MS: 1778352673706
+2026-05-09T18:56:24.1490989Z   GOTOOLCHAIN: local
+2026-05-09T18:56:24.1491397Z   GOROOT: /opt/hostedtoolcache/go/1.25.9/x64
+2026-05-09T18:56:24.1492269Z   GH_AW_AGENT_OUTPUT: /tmp/gh-aw/agent_output.json
+2026-05-09T18:56:24.1492798Z   GH_AW_EFFECTIVE_TOKENS: 1875356
+2026-05-09T18:56:24.1493215Z ##[endgroup]
+2026-05-09T18:56:24.3013421Z With the provided path, there will be 29 files uploaded
+2026-05-09T18:56:24.3018546Z Artifact name is valid!
+2026-05-09T18:56:24.3019182Z Root directory input is valid!
+2026-05-09T18:56:24.4522835Z Uploading artifact: agent.zip
+2026-05-09T18:56:24.4560616Z Beginning upload of artifact content to blob storage
+2026-05-09T18:56:24.7130724Z Uploaded bytes 166454
+2026-05-09T18:56:24.7458527Z Finished uploading artifact content to blob storage!
+2026-05-09T18:56:24.7460060Z SHA256 digest of uploaded artifact is 080c29b4c09d1a60bbcdcf2bb504067ed476c2e6f75d9e7f2255e0ccc7808a5c
+2026-05-09T18:56:24.7461507Z Finalizing artifact upload
+2026-05-09T18:56:24.9122364Z Artifact agent successfully finalized. Artifact ID 6897898575
+2026-05-09T18:56:24.9123595Z Artifact agent has been successfully uploaded! Final size is 166454 bytes. Artifact ID is 6897898575
+2026-05-09T18:56:24.9127724Z Artifact download URL: https://github.com/dollarlint/dollarlint/actions/runs/25609073968/artifacts/6897898575

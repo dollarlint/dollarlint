@@ -1,0 +1,108 @@
+﻿2026-05-09T18:57:46.0669117Z ##[group]Run actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+2026-05-09T18:57:46.0669946Z with:
+2026-05-09T18:57:46.0671019Z   github-token: ***
+2026-05-09T18:57:46.0673066Z   script: const { setupGlobals } = require('/home/runner/work/_temp/gh-aw/actions/setup_globals.cjs');
+setupGlobals(core, github, context, exec, io, getOctokit);
+const { main } = require('/home/runner/work/_temp/gh-aw/actions/handle_noop_message.cjs');
+await main();
+
+2026-05-09T18:57:46.0675616Z   debug: false
+2026-05-09T18:57:46.0676380Z   user-agent: actions/github-script
+2026-05-09T18:57:46.0677226Z   result-encoding: json
+2026-05-09T18:57:46.0677883Z   retries: 0
+2026-05-09T18:57:46.0678316Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-05-09T18:57:46.0678876Z env:
+2026-05-09T18:57:46.0679242Z   CANDIDATE_REPOS: 
+2026-05-09T18:57:46.0679717Z   MAX_REPOS: 5
+2026-05-09T18:57:46.0692775Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T18:57:46.0739501Z   GITHUB_AW_OTEL_TRACE_ID: 9be79f811a481947cc30da41afffae00
+2026-05-09T18:57:46.0740185Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: 5aa609ba408b363d
+2026-05-09T18:57:46.0740777Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353064989
+2026-05-09T18:57:46.0741342Z   GH_AW_AGENT_OUTPUT: /tmp/gh-aw/agent_output.json
+2026-05-09T18:57:46.0741884Z   GH_AW_NOOP_MAX: 1
+2026-05-09T18:57:46.0742325Z   GH_AW_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T18:57:46.0743070Z   GH_AW_RUN_URL: https://github.com/dollarlint/dollarlint/actions/runs/25609073968
+2026-05-09T18:57:46.0743799Z   GH_AW_AGENT_CONCLUSION: success
+2026-05-09T18:57:46.0744283Z   GH_AW_NOOP_REPORT_AS_ISSUE: true
+2026-05-09T18:57:46.0744747Z ##[endgroup]
+2026-05-09T18:57:46.2088161Z Agent output content length: 2747
+2026-05-09T18:57:46.2093953Z No noop items found in agent output

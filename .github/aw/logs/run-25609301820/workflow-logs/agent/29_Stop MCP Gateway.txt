@@ -1,0 +1,106 @@
+﻿2026-05-09T19:10:05.8565713Z ##[group]Run bash "${RUNNER_TEMP}/gh-aw/actions/stop_mcp_gateway.sh" "$GATEWAY_PID"
+2026-05-09T19:10:05.8566267Z [36;1mbash "${RUNNER_TEMP}/gh-aw/actions/stop_mcp_gateway.sh" "$GATEWAY_PID"[0m
+2026-05-09T19:10:05.8585519Z shell: /usr/bin/bash -e {0}
+2026-05-09T19:10:05.8585754Z env:
+2026-05-09T19:10:05.8585929Z   CANDIDATE_REPOS: 
+2026-05-09T19:10:05.8586118Z   MAX_REPOS: 5
+2026-05-09T19:10:05.8586299Z   DEFAULT_BRANCH: main
+2026-05-09T19:10:05.8586508Z   GH_AW_ASSETS_ALLOWED_EXTS: 
+2026-05-09T19:10:05.8586733Z   GH_AW_ASSETS_BRANCH: 
+2026-05-09T19:10:05.8586935Z   GH_AW_ASSETS_MAX_SIZE_KB: 0
+2026-05-09T19:10:05.8587212Z   GH_AW_MCP_LOG_DIR: /tmp/gh-aw/mcp-logs/safeoutputs
+2026-05-09T19:10:05.8587553Z   GH_AW_WORKFLOW_ID_SANITIZED: weeklyrealworldtesting
+2026-05-09T19:10:05.8593815Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T19:10:05.8600193Z   GITHUB_AW_OTEL_TRACE_ID: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:10:05.8600538Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: dc173ed08ab73d05
+2026-05-09T19:10:05.8600834Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353336808
+2026-05-09T19:10:05.8601093Z   GOTOOLCHAIN: local
+2026-05-09T19:10:05.8601319Z   GOROOT: /opt/hostedtoolcache/go/1.26.3/x64
+2026-05-09T19:10:05.8601580Z   MCP_GATEWAY_PORT: 8080
+2026-05-09T19:10:05.8602011Z   MCP_GATEWAY_API_KEY: ***
+2026-05-09T19:10:05.8602236Z   GATEWAY_PID: 4092
+2026-05-09T19:10:05.8602426Z ##[endgroup]
+2026-05-09T19:10:05.8653849Z Stopping MCP gateway (PID: 4092)...
+2026-05-09T19:10:05.8755193Z Attempting graceful shutdown via /close endpoint...
+2026-05-09T19:10:05.8972129Z Gateway accepted close request
+2026-05-09T19:10:05.8973376Z Response: {"message":"Gateway shutdown initiated","serversTerminated":3,"status":"closed"}
+2026-05-09T19:10:06.9260733Z Gateway stopped gracefully via /close endpoint

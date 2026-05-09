@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -86,21 +87,66 @@ func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
 			Corpus:             "/tmp/corpus",
 			Command:            "bin/dollarlint validate /tmp/corpus",
 			OutputArtifact:     "/tmp/out.json",
+			DependencyPrep: []realWorldDependencyPrep{{
+				Repository: "example",
+				Command:    "npm ci --ignore-scripts",
+				Status:     "skipped",
+				Notes:      "No lockfile present.",
+			}},
 			Repositories: []realWorldRepository{{
 				Name:     "example",
 				CloneURL: "https://github.com/example/example.git",
+			}},
+			ProductRecommendations: []realWorldProductRecommendation{{
+				Strength:       "low",
+				Recommendation: "Keep observing this fixture class.",
+				Rationale:      "The sweep produced a low-volume signal.",
 			}},
 		}},
 	}
 	if err := saveRealWorldHistory(root, history); err != nil {
 		t.Fatal(err)
 	}
+	indexData, err := os.ReadFile(filepath.Join(root, realWorldResultsRelPath))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var index realWorldHistoryIndex
+	if err := json.Unmarshal(indexData, &index); err != nil {
+		t.Fatal(err)
+	}
+	if index.Schema != realWorldResultsSchema || index.SchemaVersion != realWorldHistorySchemaVersion || len(index.Entries) != 1 {
+		t.Fatalf("index = %+v", index)
+	}
+	if index.Entries[0].Path == "" || filepath.Dir(index.Entries[0].Path) != realWorldResultsDirRelPath {
+		t.Fatalf("index entry = %+v", index.Entries[0])
+	}
+	entryData, err := os.ReadFile(filepath.Join(root, index.Entries[0].Path))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var entryFile realWorldEntryFile
+	if err := json.Unmarshal(entryData, &entryFile); err != nil {
+		t.Fatal(err)
+	}
+	if entryFile.Schema != realWorldEntrySchema || entryFile.SchemaVersion != realWorldHistorySchemaVersion || entryFile.ID != "sample" {
+		t.Fatalf("entry file = %+v", entryFile)
+	}
+	if len(entryFile.DependencyPrep) != 1 || entryFile.DependencyPrep[0].Status != "skipped" {
+		t.Fatalf("dependency prep = %+v", entryFile.DependencyPrep)
+	}
+	if len(entryFile.ProductRecommendations) != 1 || entryFile.ProductRecommendations[0].Strength != "low" {
+		t.Fatalf("product recommendations = %+v", entryFile.ProductRecommendations)
+	}
 	loaded, err := loadRealWorldHistory(root)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if loaded.Schema != realWorldResultsSchema || loaded.SchemaVersion != 1 {
+	if loaded.Schema != realWorldResultsSchema || loaded.SchemaVersion != realWorldHistorySchemaVersion {
 		t.Fatalf("loaded history = %+v", loaded)
+	}
+	if len(loaded.Entries) != 1 || loaded.Entries[0].Repositories[0].Name != "example" {
+		t.Fatalf("loaded entries = %+v", loaded.Entries)
 	}
 }
 

@@ -1,0 +1,22 @@
+﻿2026-05-09T19:02:01.4336992Z ##[group]Run github/gh-aw-actions/setup@v0.71.5
+2026-05-09T19:02:01.4338031Z with:
+2026-05-09T19:02:01.4338515Z   destination: /home/runner/work/_temp/gh-aw/actions
+2026-05-09T19:02:01.4339112Z   job-name: activation
+2026-05-09T19:02:01.4339559Z   safe-output-artifact-client: false
+2026-05-09T19:02:01.4340247Z env:
+2026-05-09T19:02:01.4340615Z   CANDIDATE_REPOS: 
+2026-05-09T19:02:01.4340998Z   MAX_REPOS: 5
+2026-05-09T19:02:01.4341502Z   GH_AW_SETUP_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T19:02:01.4343396Z   GH_AW_CURRENT_WORKFLOW_REF: dollarlint/dollarlint/.github/workflows/weekly-real-world-testing.lock.yml@refs/heads/main
+2026-05-09T19:02:01.4344414Z   GH_AW_INFO_VERSION: 1.0.40
+2026-05-09T19:02:01.4344865Z ##[endgroup]
+2026-05-09T19:02:02.5366258Z Successfully copied 363 files to /home/runner/work/_temp/gh-aw/actions
+2026-05-09T19:02:02.6648640Z Successfully copied 25 mcp-scripts files to /home/runner/work/_temp/gh-aw/mcp-scripts
+2026-05-09T19:02:02.7213522Z Successfully copied 62 safe-outputs files to /home/runner/work/_temp/gh-aw/safeoutputs
+2026-05-09T19:02:02.7390690Z [otlp] INPUT_TRACE_ID not set, a new trace ID will be generated
+2026-05-09T19:02:02.7397259Z [otlp] GH_AW_OTLP_ENDPOINTS not set, skipping setup span
+2026-05-09T19:02:02.7427824Z [otlp] resolved trace-id=2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:02:02.7432469Z [otlp] trace-id=2b44c10eb466e49ac4f139a9c5909344 written to GITHUB_OUTPUT
+2026-05-09T19:02:02.7436825Z [otlp] GITHUB_AW_OTEL_TRACE_ID written to GITHUB_ENV
+2026-05-09T19:02:02.7440846Z [otlp] GITHUB_AW_OTEL_PARENT_SPAN_ID written to GITHUB_ENV
+2026-05-09T19:02:02.7444910Z [otlp] GITHUB_AW_OTEL_JOB_START_MS written to GITHUB_ENV

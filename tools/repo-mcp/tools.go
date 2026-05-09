@@ -44,22 +44,24 @@ func (s *repoServer) addTools() {
 		"fetchRetryMaxWait":  map[string]any{"type": "string", "description": "Maximum retry wait. Defaults to 1ms."},
 		"extraArgs":          arrayStringSchema("Additional dollarlint validate arguments."),
 	}), s.handleRealWorldRunCorpus, toolHints{ReadOnly: false, OpenWorld: true})
-	s.addTool("real_world_record_result", "Persist a real-world sweep result to reports/real-world-results.json, reading summary counts from a DollarLint JSON artifact when provided.", schemaObject(map[string]any{
-		"id":                 map[string]any{"type": "string", "description": "Stable entry id. Defaults to a slug from date and title."},
-		"date":               map[string]any{"type": "string", "description": "Entry date in YYYY-MM-DD. Defaults to today."},
-		"title":              map[string]any{"type": "string", "description": "Short sweep title."},
-		"dollarlintRevision": map[string]any{"type": "string", "description": "DollarLint commit under test. Defaults to git rev-parse HEAD."},
-		"workingTreeNote":    map[string]any{"type": "string", "description": "Working tree note. Defaults to current git status summary."},
-		"corpus":             map[string]any{"type": "string", "description": "Corpus directory."},
-		"cacheDir":           map[string]any{"type": "string", "description": "Cache directory used by the run."},
-		"command":            map[string]any{"type": "string", "description": "Reproducible validation command."},
-		"outputArtifact":     map[string]any{"type": "string", "description": "DollarLint JSON output artifact to summarize."},
-		"manifestPath":       map[string]any{"type": "string", "description": "Prepared corpus manifest path. Defaults to <corpus>/real-world-manifest.json."},
-		"repositories":       realWorldRepositoryArraySchema("Repositories included in the sweep."),
-		"findings":           arrayStringSchema("Triaged findings."),
-		"productDecisions":   arrayStringSchema("Product decisions from the sweep."),
-		"followUp":           arrayStringSchema("Follow-up notes."),
-		"replace":            map[string]any{"type": "boolean", "description": "Replace an existing entry with the same id."},
+	s.addTool("real_world_record_result", "Persist a real-world sweep result to split reports/real-world-results storage, reading summary counts from a DollarLint JSON artifact when provided.", schemaObject(map[string]any{
+		"id":                     map[string]any{"type": "string", "description": "Stable entry id. Defaults to a slug from date and title."},
+		"date":                   map[string]any{"type": "string", "description": "Entry date in YYYY-MM-DD. Defaults to today."},
+		"title":                  map[string]any{"type": "string", "description": "Short sweep title."},
+		"dollarlintRevision":     map[string]any{"type": "string", "description": "DollarLint commit under test. Defaults to git rev-parse HEAD."},
+		"workingTreeNote":        map[string]any{"type": "string", "description": "Working tree note. Defaults to current git status summary."},
+		"corpus":                 map[string]any{"type": "string", "description": "Corpus directory."},
+		"cacheDir":               map[string]any{"type": "string", "description": "Cache directory used by the run."},
+		"command":                map[string]any{"type": "string", "description": "Reproducible validation command."},
+		"outputArtifact":         map[string]any{"type": "string", "description": "DollarLint JSON output artifact to summarize."},
+		"manifestPath":           map[string]any{"type": "string", "description": "Prepared corpus manifest path. Defaults to <corpus>/real-world-manifest.json."},
+		"repositories":           realWorldRepositoryArraySchema("Repositories included in the sweep."),
+		"dependencyPrep":         realWorldDependencyPrepArraySchema("Dependency preparation commands, skips, failures, and their validation impact."),
+		"findings":               arrayStringSchema("Triaged findings."),
+		"productRecommendations": realWorldProductRecommendationArraySchema("Product recommendations from the sweep, with strength and rationale."),
+		"productDecisions":       arrayStringSchema("Product changes or decisions made after the sweep."),
+		"followUp":               arrayStringSchema("Follow-up notes."),
+		"replace":                map[string]any{"type": "boolean", "description": "Replace an existing entry with the same id."},
 	}), s.handleRealWorldRecordResult, false)
 	s.addTool("azure_pruning_report", "Inspect an Azure ARM template and report detected resource refs, pruning config, branch error mode, and validation summary.", schemaObject(map[string]any{
 		"file":         map[string]any{"type": "string", "description": "ARM template path relative to the repo root."},
@@ -118,6 +120,42 @@ func realWorldRepositoryArraySchema(description string) map[string]any {
 					"description": "Whether history already contains this repository.",
 				},
 				"previousEntries": arrayStringSchema("Prior real-world entry ids for this repository."),
+			},
+		},
+	}
+}
+
+func realWorldDependencyPrepArraySchema(description string) map[string]any {
+	return map[string]any{
+		"type":        "array",
+		"description": description,
+		"items": map[string]any{
+			"type":                 "object",
+			"additionalProperties": false,
+			"properties": map[string]any{
+				"repository": map[string]any{"type": "string", "description": "Repository name this prep entry applies to, when scoped to one repo."},
+				"command":    map[string]any{"type": "string", "description": "Dependency-prep command that was run or intentionally skipped."},
+				"status":     map[string]any{"type": "string", "description": "Outcome such as run, skipped, failed, timed-out, narrowed, or not-needed."},
+				"notes":      map[string]any{"type": "string", "description": "Reason, result, and expected validation impact."},
+				"error":      map[string]any{"type": "string", "description": "Failure or timeout detail, when any."},
+				"output":     map[string]any{"type": "string", "description": "Relevant trimmed command output, when useful."},
+			},
+		},
+	}
+}
+
+func realWorldProductRecommendationArraySchema(description string) map[string]any {
+	return map[string]any{
+		"type":        "array",
+		"description": description,
+		"items": map[string]any{
+			"type":                 "object",
+			"additionalProperties": false,
+			"required":             []string{"strength", "recommendation", "rationale"},
+			"properties": map[string]any{
+				"strength":       enumSchema([]string{"high", "med", "low"}, "Recommendation strength based on frequency, severity, reproducibility, and user impact."),
+				"recommendation": map[string]any{"type": "string", "description": "Recommended product action."},
+				"rationale":      map[string]any{"type": "string", "description": "Why this recommendation follows from the sweep."},
 			},
 		},
 	}

@@ -1,0 +1,886 @@
+﻿2026-05-09T19:11:11.1898762Z Current runner version: '2.334.0'
+2026-05-09T19:11:11.1922715Z ##[group]Runner Image Provisioner
+2026-05-09T19:11:11.1923545Z Hosted Compute Agent
+2026-05-09T19:11:11.1924065Z Version: 20260415.520
+2026-05-09T19:11:11.1925062Z Commit: af089020f5f67b61ccc91db6c07980876c02bf7b
+2026-05-09T19:11:11.1925807Z Build Date: 2026-04-15T18:07:08Z
+2026-05-09T19:11:11.1926440Z Worker ID: {2ebd3d06-b094-4c56-8e47-86e97218e71e}
+2026-05-09T19:11:11.1927077Z Azure Region: northcentralus
+2026-05-09T19:11:11.1927653Z ##[endgroup]
+2026-05-09T19:11:11.1929017Z ##[group]VM Image
+2026-05-09T19:11:11.1929589Z - OS: Linux (x64)
+2026-05-09T19:11:11.1930104Z - Source: Docker
+2026-05-09T19:11:11.1930601Z - Name: ubuntu:24.04
+2026-05-09T19:11:11.1931071Z - Version: 20260504.56.2
+2026-05-09T19:11:11.1931605Z ##[endgroup]
+2026-05-09T19:11:11.1932863Z ##[group]GITHUB_TOKEN Permissions
+2026-05-09T19:11:11.1935000Z Contents: write
+2026-05-09T19:11:11.1935680Z Discussions: write
+2026-05-09T19:11:11.1936361Z Issues: write
+2026-05-09T19:11:11.1936971Z Metadata: read
+2026-05-09T19:11:11.1937488Z PullRequests: write
+2026-05-09T19:11:11.1937960Z ##[endgroup]
+2026-05-09T19:11:11.1940235Z Secret source: Actions
+2026-05-09T19:11:11.1940897Z Prepare workflow directory
+2026-05-09T19:11:11.2554403Z Prepare all required actions
+2026-05-09T19:11:11.2592601Z Getting action download info
+2026-05-09T19:11:11.8077680Z Download action repository 'github/gh-aw-actions@v0.71.5' (SHA:b8068426813005612b960b5ab0b8bd2c27142323)
+2026-05-09T19:11:12.4500233Z Download action repository 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c' (SHA:3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c)
+2026-05-09T19:11:12.7970979Z Download action repository 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd' (SHA:de0fac2e4500dabe0009e67214ff5f5447ce83dd)
+2026-05-09T19:11:12.8606937Z Download action repository 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3' (SHA:3a2844b7e9c422d3c10d287c895573f7108da1b3)
+2026-05-09T19:11:13.1818185Z Download action repository 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-05-09T19:11:13.5575946Z Complete job name: safe_outputs
+2026-05-09T19:11:13.6535267Z ##[group]Run github/gh-aw-actions/setup@v0.71.5
+2026-05-09T19:11:13.6536324Z with:
+2026-05-09T19:11:13.6536798Z   destination: /home/runner/work/_temp/gh-aw/actions
+2026-05-09T19:11:13.6537384Z   job-name: safe_outputs
+2026-05-09T19:11:13.6537861Z   trace-id: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:11:13.6538419Z   safe-output-artifact-client: false
+2026-05-09T19:11:13.6539097Z env:
+2026-05-09T19:11:13.6539443Z   CANDIDATE_REPOS: 
+2026-05-09T19:11:13.6539840Z   MAX_REPOS: 5
+2026-05-09T19:11:13.6540427Z   GH_AW_CALLER_WORKFLOW_ID: dollarlint/dollarlint/weekly-real-world-testing
+2026-05-09T19:11:13.6541146Z   GH_AW_DETECTION_CONCLUSION: success
+2026-05-09T19:11:13.6541635Z   GH_AW_DETECTION_REASON: 
+2026-05-09T19:11:13.6542090Z   GH_AW_EFFECTIVE_TOKENS: 3305977
+2026-05-09T19:11:13.6542584Z   GH_AW_ENGINE_ID: copilot
+2026-05-09T19:11:13.6543066Z   GH_AW_ENGINE_MODEL: claude-sonnet-4.6
+2026-05-09T19:11:13.6543589Z   GH_AW_ENGINE_VERSION: 1.0.40
+2026-05-09T19:11:13.6544118Z   GH_AW_WORKFLOW_ID: weekly-real-world-testing
+2026-05-09T19:11:13.6545034Z   GH_AW_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T19:11:13.6545662Z   GH_AW_SETUP_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T19:11:13.6546707Z   GH_AW_CURRENT_WORKFLOW_REF: dollarlint/dollarlint/.github/workflows/weekly-real-world-testing.lock.yml@refs/heads/main
+2026-05-09T19:11:13.6547702Z   GH_AW_INFO_VERSION: 1.0.40
+2026-05-09T19:11:13.6548134Z ##[endgroup]
+2026-05-09T19:11:14.8213194Z Successfully copied 363 files to /home/runner/work/_temp/gh-aw/actions
+2026-05-09T19:11:14.9546599Z Successfully copied 25 mcp-scripts files to /home/runner/work/_temp/gh-aw/mcp-scripts
+2026-05-09T19:11:15.0126478Z Successfully copied 62 safe-outputs files to /home/runner/work/_temp/gh-aw/safeoutputs
+2026-05-09T19:11:15.0314072Z [otlp] INPUT_TRACE_ID=2b44c10eb466e49ac4f139a9c5909344 (will reuse activation trace)
+2026-05-09T19:11:15.0320972Z [otlp] GH_AW_OTLP_ENDPOINTS not set, skipping setup span
+2026-05-09T19:11:15.0347216Z [otlp] resolved trace-id=2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:11:15.0351255Z [otlp] trace-id=2b44c10eb466e49ac4f139a9c5909344 written to GITHUB_OUTPUT
+2026-05-09T19:11:15.0355960Z [otlp] GITHUB_AW_OTEL_TRACE_ID written to GITHUB_ENV
+2026-05-09T19:11:15.0359985Z [otlp] GITHUB_AW_OTEL_PARENT_SPAN_ID written to GITHUB_ENV
+2026-05-09T19:11:15.0363602Z [otlp] GITHUB_AW_OTEL_JOB_START_MS written to GITHUB_ENV
+2026-05-09T19:11:15.0556321Z ##[group]Run actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+2026-05-09T19:11:15.0557080Z with:
+2026-05-09T19:11:15.0557423Z   name: agent
+2026-05-09T19:11:15.0557805Z   path: /tmp/gh-aw/
+2026-05-09T19:11:15.0558211Z   merge-multiple: false
+2026-05-09T19:11:15.0558651Z   repository: dollarlint/dollarlint
+2026-05-09T19:11:15.0559141Z   run-id: 25609301820
+2026-05-09T19:11:15.0559596Z   skip-decompress: false
+2026-05-09T19:11:15.0560054Z   digest-mismatch: error
+2026-05-09T19:11:15.0560462Z env:
+2026-05-09T19:11:15.0560806Z   CANDIDATE_REPOS: 
+2026-05-09T19:11:15.0561191Z   MAX_REPOS: 5
+2026-05-09T19:11:15.0561774Z   GH_AW_CALLER_WORKFLOW_ID: dollarlint/dollarlint/weekly-real-world-testing
+2026-05-09T19:11:15.0562469Z   GH_AW_DETECTION_CONCLUSION: success
+2026-05-09T19:11:15.0562978Z   GH_AW_DETECTION_REASON: 
+2026-05-09T19:11:15.0563431Z   GH_AW_EFFECTIVE_TOKENS: 3305977
+2026-05-09T19:11:15.0563893Z   GH_AW_ENGINE_ID: copilot
+2026-05-09T19:11:15.0564379Z   GH_AW_ENGINE_MODEL: claude-sonnet-4.6
+2026-05-09T19:11:15.0565308Z   GH_AW_ENGINE_VERSION: 1.0.40
+2026-05-09T19:11:15.0565825Z   GH_AW_WORKFLOW_ID: weekly-real-world-testing
+2026-05-09T19:11:15.0566392Z   GH_AW_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T19:11:15.0576211Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T19:11:15.0587582Z   GITHUB_AW_OTEL_TRACE_ID: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:11:15.0588257Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: b117e18bc7215f2a
+2026-05-09T19:11:15.0588835Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353875036
+2026-05-09T19:11:15.0589489Z ##[endgroup]
+2026-05-09T19:11:15.6690304Z (node:1146) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-05-09T19:11:15.6732301Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-05-09T19:11:15.6733091Z Downloading single artifact
+2026-05-09T19:11:15.6735953Z Preparing to download the following artifacts:
+2026-05-09T19:11:15.6736991Z - agent (ID: 6897978836, Size: 214224, Expected Digest: sha256:ae3d3ab81ab26856951ad78fc3e9e868353f0be5250ceedc13c041732fe39e4e)
+2026-05-09T19:11:15.6768885Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/938bb28a-05b0-4124-82ce-9634cec77e11/workflow-job-run-956a1bc5-9ffe-5c0c-9a57-150d1ba3c793/artifacts/d4f0bc5a29de06b510f9aa428f1eedba926012b591fef7a518e776a7c9bd1824.zip
+2026-05-09T19:11:15.6771446Z Starting download of artifact to: /tmp/gh-aw
+2026-05-09T19:11:15.7699392Z SHA256 digest of downloaded artifact is ae3d3ab81ab26856951ad78fc3e9e868353f0be5250ceedc13c041732fe39e4e
+2026-05-09T19:11:15.7700900Z Artifact download completed successfully.
+2026-05-09T19:11:15.7701970Z Total of 1 artifact(s) downloaded
+2026-05-09T19:11:15.7702560Z Download artifact has finished successfully
+2026-05-09T19:11:15.7779886Z ##[group]Run mkdir -p /tmp/gh-aw/
+2026-05-09T19:11:15.7780551Z [36;1mmkdir -p /tmp/gh-aw/[0m
+2026-05-09T19:11:15.7781110Z [36;1mfind "/tmp/gh-aw/" -type f -print[0m
+2026-05-09T19:11:15.7781926Z [36;1mecho "GH_AW_AGENT_OUTPUT=/tmp/gh-aw/agent_output.json" >> "$GITHUB_OUTPUT"[0m
+2026-05-09T19:11:15.7793082Z shell: /usr/bin/bash -e {0}
+2026-05-09T19:11:15.7793615Z env:
+2026-05-09T19:11:15.7793980Z   CANDIDATE_REPOS: 
+2026-05-09T19:11:15.7794401Z   MAX_REPOS: 5
+2026-05-09T19:11:15.7795402Z   GH_AW_CALLER_WORKFLOW_ID: dollarlint/dollarlint/weekly-real-world-testing
+2026-05-09T19:11:15.7796145Z   GH_AW_DETECTION_CONCLUSION: success
+2026-05-09T19:11:15.7796691Z   GH_AW_DETECTION_REASON: 
+2026-05-09T19:11:15.7797168Z   GH_AW_EFFECTIVE_TOKENS: 3305977
+2026-05-09T19:11:15.7797664Z   GH_AW_ENGINE_ID: copilot
+2026-05-09T19:11:15.7798140Z   GH_AW_ENGINE_MODEL: claude-sonnet-4.6
+2026-05-09T19:11:15.7798677Z   GH_AW_ENGINE_VERSION: 1.0.40
+2026-05-09T19:11:15.7799250Z   GH_AW_WORKFLOW_ID: weekly-real-world-testing
+2026-05-09T19:11:15.7799859Z   GH_AW_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T19:11:15.7809735Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T19:11:15.7820602Z   GITHUB_AW_OTEL_TRACE_ID: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:11:15.7821266Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: b117e18bc7215f2a
+2026-05-09T19:11:15.7821867Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353875036
+2026-05-09T19:11:15.7822389Z ##[endgroup]
+2026-05-09T19:11:15.7912094Z /tmp/gh-aw/mcp-logs/gateway.md
+2026-05-09T19:11:15.7929574Z /tmp/gh-aw/mcp-logs/safeoutputs/server.log
+2026-05-09T19:11:15.7930176Z /tmp/gh-aw/mcp-logs/github.log
+2026-05-09T19:11:15.7930682Z /tmp/gh-aw/mcp-logs/stderr.log
+2026-05-09T19:11:15.7931198Z /tmp/gh-aw/mcp-logs/start-gateway.log
+2026-05-09T19:11:15.7931972Z /tmp/gh-aw/mcp-logs/rpc-messages.jsonl
+2026-05-09T19:11:15.7932555Z /tmp/gh-aw/mcp-logs/dollarlint-repo.log
+2026-05-09T19:11:15.7933107Z /tmp/gh-aw/mcp-logs/tools.json
+2026-05-09T19:11:15.7933611Z /tmp/gh-aw/mcp-logs/mcp-gateway.log
+2026-05-09T19:11:15.7934136Z /tmp/gh-aw/mcp-logs/safeoutputs.log
+2026-05-09T19:11:15.7935248Z /tmp/gh-aw/safeoutputs.jsonl
+2026-05-09T19:11:15.7935784Z /tmp/gh-aw/sandbox/firewall/awf-reflect.json
+2026-05-09T19:11:15.7936394Z /tmp/gh-aw/sandbox/firewall/logs/audit.jsonl
+2026-05-09T19:11:15.7936982Z /tmp/gh-aw/sandbox/firewall/logs/access.log
+2026-05-09T19:11:15.7937643Z /tmp/gh-aw/sandbox/firewall/logs/api-proxy-logs/models.json
+2026-05-09T19:11:15.7938414Z /tmp/gh-aw/sandbox/firewall/logs/api-proxy-logs/token-usage.jsonl
+2026-05-09T19:11:15.7939123Z /tmp/gh-aw/sandbox/firewall/logs/cache.log
+2026-05-09T19:11:15.7939751Z /tmp/gh-aw/sandbox/firewall/audit/iptables-audit.txt
+2026-05-09T19:11:15.7940496Z /tmp/gh-aw/sandbox/firewall/audit/docker-compose.redacted.yml
+2026-05-09T19:11:15.7941175Z /tmp/gh-aw/sandbox/firewall/audit/squid.conf
+2026-05-09T19:11:15.7941801Z /tmp/gh-aw/sandbox/firewall/audit/policy-manifest.json
+2026-05-09T19:11:15.7942503Z /tmp/gh-aw/sandbox/agent/logs/process-1778353414042-170.log
+2026-05-09T19:11:15.7943119Z /tmp/gh-aw/agent_output.json
+2026-05-09T19:11:15.7943613Z /tmp/gh-aw/aw-prompts/prompt.txt
+2026-05-09T19:11:15.7944124Z /tmp/gh-aw/github_rate_limits.jsonl
+2026-05-09T19:11:15.7944995Z /tmp/gh-aw/agent-stdio.log
+2026-05-09T19:11:15.7945471Z /tmp/gh-aw/agent_usage.json
+2026-05-09T19:11:15.7945985Z /tmp/gh-aw/awf-config.json
+2026-05-09T19:11:15.7946499Z /tmp/gh-aw/pre-agent-audit.txt
+2026-05-09T19:11:15.7946982Z /tmp/gh-aw/otel.jsonl
+2026-05-09T19:11:15.8036135Z ##[group]Run actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+2026-05-09T19:11:15.8036914Z with:
+2026-05-09T19:11:15.8037274Z   name: agent
+2026-05-09T19:11:15.8037781Z   path: /tmp/gh-aw/
+2026-05-09T19:11:15.8038203Z   merge-multiple: false
+2026-05-09T19:11:15.8038656Z   repository: dollarlint/dollarlint
+2026-05-09T19:11:15.8039149Z   run-id: 25609301820
+2026-05-09T19:11:15.8039578Z   skip-decompress: false
+2026-05-09T19:11:15.8040015Z   digest-mismatch: error
+2026-05-09T19:11:15.8040436Z env:
+2026-05-09T19:11:15.8040792Z   CANDIDATE_REPOS: 
+2026-05-09T19:11:15.8041175Z   MAX_REPOS: 5
+2026-05-09T19:11:15.8041781Z   GH_AW_CALLER_WORKFLOW_ID: dollarlint/dollarlint/weekly-real-world-testing
+2026-05-09T19:11:15.8042708Z   GH_AW_DETECTION_CONCLUSION: success
+2026-05-09T19:11:15.8043209Z   GH_AW_DETECTION_REASON: 
+2026-05-09T19:11:15.8043667Z   GH_AW_EFFECTIVE_TOKENS: 3305977
+2026-05-09T19:11:15.8044168Z   GH_AW_ENGINE_ID: copilot
+2026-05-09T19:11:15.8044985Z   GH_AW_ENGINE_MODEL: claude-sonnet-4.6
+2026-05-09T19:11:15.8045532Z   GH_AW_ENGINE_VERSION: 1.0.40
+2026-05-09T19:11:15.8046049Z   GH_AW_WORKFLOW_ID: weekly-real-world-testing
+2026-05-09T19:11:15.8046654Z   GH_AW_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T19:11:15.8079369Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T19:11:15.8090095Z   GITHUB_AW_OTEL_TRACE_ID: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:11:15.8090781Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: b117e18bc7215f2a
+2026-05-09T19:11:15.8091368Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353875036
+2026-05-09T19:11:15.8091900Z ##[endgroup]
+2026-05-09T19:11:16.4315271Z (node:1169) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-05-09T19:11:16.4317350Z Downloading single artifact
+2026-05-09T19:11:16.4396660Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-05-09T19:11:16.4399448Z Preparing to download the following artifacts:
+2026-05-09T19:11:16.4400509Z - agent (ID: 6897978836, Size: 214224, Expected Digest: sha256:ae3d3ab81ab26856951ad78fc3e9e868353f0be5250ceedc13c041732fe39e4e)
+2026-05-09T19:11:16.4408029Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/938bb28a-05b0-4124-82ce-9634cec77e11/workflow-job-run-956a1bc5-9ffe-5c0c-9a57-150d1ba3c793/artifacts/d4f0bc5a29de06b510f9aa428f1eedba926012b591fef7a518e776a7c9bd1824.zip
+2026-05-09T19:11:16.4410022Z Starting download of artifact to: /tmp/gh-aw
+2026-05-09T19:11:16.5433451Z SHA256 digest of downloaded artifact is ae3d3ab81ab26856951ad78fc3e9e868353f0be5250ceedc13c041732fe39e4e
+2026-05-09T19:11:16.5438053Z Artifact download completed successfully.
+2026-05-09T19:11:16.5441151Z Total of 1 artifact(s) downloaded
+2026-05-09T19:11:16.5449019Z Download artifact has finished successfully
+2026-05-09T19:11:16.5596619Z ##[group]Run # Derive GH_HOST from GITHUB_SERVER_URL so the gh CLI targets the correct
+2026-05-09T19:11:16.5597686Z [36;1m# Derive GH_HOST from GITHUB_SERVER_URL so the gh CLI targets the correct[0m
+2026-05-09T19:11:16.5598631Z [36;1m# GitHub instance (GHES/GHEC). On github.com this is a harmless no-op.[0m
+2026-05-09T19:11:16.5599446Z [36;1mGH_HOST="${GITHUB_SERVER_URL#https://}"[0m
+2026-05-09T19:11:16.5600062Z [36;1mGH_HOST="${GH_HOST#http://}"[0m
+2026-05-09T19:11:16.5601079Z [36;1mecho "GH_HOST=${GH_HOST}" >> "$GITHUB_ENV"[0m
+2026-05-09T19:11:16.5608761Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-05-09T19:11:16.5609419Z env:
+2026-05-09T19:11:16.5609797Z   CANDIDATE_REPOS: 
+2026-05-09T19:11:16.5610226Z   MAX_REPOS: 5
+2026-05-09T19:11:16.5610847Z   GH_AW_CALLER_WORKFLOW_ID: dollarlint/dollarlint/weekly-real-world-testing
+2026-05-09T19:11:16.5611605Z   GH_AW_DETECTION_CONCLUSION: success
+2026-05-09T19:11:16.5612133Z   GH_AW_DETECTION_REASON: 
+2026-05-09T19:11:16.5612641Z   GH_AW_EFFECTIVE_TOKENS: 3305977
+2026-05-09T19:11:16.5613139Z   GH_AW_ENGINE_ID: copilot
+2026-05-09T19:11:16.5613615Z   GH_AW_ENGINE_MODEL: claude-sonnet-4.6
+2026-05-09T19:11:16.5614155Z   GH_AW_ENGINE_VERSION: 1.0.40
+2026-05-09T19:11:16.5615045Z   GH_AW_WORKFLOW_ID: weekly-real-world-testing
+2026-05-09T19:11:16.5615662Z   GH_AW_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T19:11:16.5625633Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T19:11:16.5636795Z   GITHUB_AW_OTEL_TRACE_ID: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:11:16.5637506Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: b117e18bc7215f2a
+2026-05-09T19:11:16.5638121Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353875036
+2026-05-09T19:11:16.5638655Z ##[endgroup]
+2026-05-09T19:11:16.5772596Z ##[group]Run actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+2026-05-09T19:11:16.5773370Z with:
+2026-05-09T19:11:16.5774001Z   github-token: ***
+2026-05-09T19:11:16.5776038Z   script: const { setupGlobals } = require('/home/runner/work/_temp/gh-aw/actions/setup_globals.cjs');
+setupGlobals(core, github, context, exec, io, getOctokit);
+const { main } = require('/home/runner/work/_temp/gh-aw/actions/safe_output_handler_manager.cjs');
+await main();
+
+2026-05-09T19:11:16.5777829Z   debug: false
+2026-05-09T19:11:16.5778257Z   user-agent: actions/github-script
+2026-05-09T19:11:16.5778780Z   result-encoding: json
+2026-05-09T19:11:16.5779210Z   retries: 0
+2026-05-09T19:11:16.5779673Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-05-09T19:11:16.5780245Z env:
+2026-05-09T19:11:16.5780616Z   CANDIDATE_REPOS: 
+2026-05-09T19:11:16.5781037Z   MAX_REPOS: 5
+2026-05-09T19:11:16.5781640Z   GH_AW_CALLER_WORKFLOW_ID: dollarlint/dollarlint/weekly-real-world-testing
+2026-05-09T19:11:16.5782403Z   GH_AW_DETECTION_CONCLUSION: success
+2026-05-09T19:11:16.5782934Z   GH_AW_DETECTION_REASON: 
+2026-05-09T19:11:16.5783434Z   GH_AW_EFFECTIVE_TOKENS: 3305977
+2026-05-09T19:11:16.5783931Z   GH_AW_ENGINE_ID: copilot
+2026-05-09T19:11:16.5784413Z   GH_AW_ENGINE_MODEL: claude-sonnet-4.6
+2026-05-09T19:11:16.5785180Z   GH_AW_ENGINE_VERSION: 1.0.40
+2026-05-09T19:11:16.5785715Z   GH_AW_WORKFLOW_ID: weekly-real-world-testing
+2026-05-09T19:11:16.5786330Z   GH_AW_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T19:11:16.5796920Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T19:11:16.5807454Z   GITHUB_AW_OTEL_TRACE_ID: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:11:16.5808145Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: b117e18bc7215f2a
+2026-05-09T19:11:16.5808750Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353875036
+2026-05-09T19:11:16.5809446Z   GH_HOST: github.com
+2026-05-09T19:11:16.5809966Z   GH_AW_AGENT_OUTPUT: /tmp/gh-aw/agent_output.json
+2026-05-09T19:11:16.5924710Z   GH_AW_ALLOWED_DOMAINS: *.githubusercontent.com,*.gradle-enterprise.cloud,*.pythonhosted.org,*.rvm.io,*.vsblob.vsassets.io,adoptium.net,anaconda.org,api.adoptium.net,api.business.githubcopilot.com,api.enterprise.githubcopilot.com,api.foojay.io,api.github.com,api.githubcopilot.com,api.individual.githubcopilot.com,api.npms.io,api.nuget.org,api.rubygems.org,api.snapcraft.io,apt.llvm.org,apt.releases.hashicorp.com,archive.apache.org,archive.ubuntu.com,archlinux.org,azure.archive.ubuntu.com,azuresearch-usnc.nuget.org,azuresearch-ussc.nuget.org,binstar.org,bitbucket.org,bootstrap.pypa.io,builds.dotnet.microsoft.com,bun.sh,bundler.rubygems.org,cache.ruby-lang.org,cdn.azul.com,cdn.jsdelivr.net,cdn.redhat.com,central.sonatype.com,changie.dev,ci.dot.net,codeload.github.com,conda.anaconda.org,conda.binstar.org,crates.io,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,dc.services.visualstudio.com,deb.debian.org,deb.nodesource.com,debian.map.fastlydns.net,deno.land,develocity.apache.org,dist.nuget.org,dl-cdn.alpinelinux.org,dl.fedoraproject.org,dl.google.com,dlcdn.apache.org,docs.github.com,dot.net,dotnet.microsoft.com,dotnetcli.blob.core.windows.net,download.eclipse.org,download.fedoraproject.org,download.java.net,download.opensuse.org,download.oracle.com,downloads.gradle-dn.com,esm.sh,files.pythonhosted.org,ge.spockframework.org,gems.rubyforge.org,gems.rubyonrails.org,get.pnpm.io,getcomposer.org,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,go.dev,golang.org,googleapis.deno.dev,googlechromelabs.github.io,goproxy.io,gradle.org,host.docker.internal,index.crates.io,index.rubygems.org,jcenter.bintray.com,jdk.java.net,json-schema.org,json.schemastore.org,jsr.io,keyring.debian.org,keyserver.ubuntu.com,lfs.github.com,maven-central.storage-download.googleapis.com,maven.apache.org,maven.google.com,maven.oracle.com,maven.pkg.github.com,mirror.archlinux.org,mirror.centos.org,mirrors.fedoraproject.org,nodejs.org,npm.pkg.github.com,npmjs.com,npmjs.org,nuget.org,nuget.pkg.github.com,nugetregistryv2prod.blob.core.windows.net,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,oneocsp.microsoft.com,openapi.vercel.sh,packagecloud.io,packages.cloud.google.com,packages.debian.org,packages.microsoft.com,packagist.org,pip.pypa.io,pkg.alpinelinux.org,pkg.go.dev,pkgs.dev.azure.com,plugins-artifacts.gradle.org,plugins.gradle.org,ppa.launchpad.net,proxy.golang.org,pub.dartlang.org,pub.dev,pypi.org,pypi.python.org,raw.githubusercontent.com,registry.bower.io,registry.npmjs.com,registry.npmjs.org,registry.terraform.io,registry.yarnpkg.com,releases.hashicorp.com,repo.anaconda.com,repo.continuum.io,repo.gradle.org,repo.grails.org,repo.maven.apache.org,repo.packagist.org,repo.spring.io,repo.yarnpkg.com,repo1.maven.org,repository.apache.org,rubygems.org,rubygems.pkg.github.com,s.symcb.com,s.symcd.com,scans-in.gradle.com,security.debian.org,security.ubuntu.com,services.gradle.org,sh.rustup.rs,skimdb.npmjs.com,static.crates.io,static.rust-lang.org,storage.googleapis.com,sum.golang.org,telemetry.enterprise.githubcopilot.com,telemetry.vercel.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,vault.centos.org,www.googleapis.com,www.java.com,www.microsoft.com,www.npmjs.com,www.npmjs.org,yarnpkg.com,yum.releases.hashicorp.com
+2026-05-09T19:11:16.6040410Z   GITHUB_SERVER_URL: https://github.com
+2026-05-09T19:11:16.6041005Z   GITHUB_API_URL: https://api.github.com
+2026-05-09T19:11:16.6048199Z   GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: {"create_discussion":{"close_older_discussions":true,"expires":720,"fallback_to_issue":true,"max":1,"title_prefix":"Weekly real-world testing: "},"create_pull_request":{"draft":false,"max":1,"max_patch_files":100,"max_patch_size":1024,"protect_top_level_dot_folders":true,"protected_files":["package.json","bun.lockb","bunfig.toml","deno.json","deno.jsonc","deno.lock","global.json","NuGet.Config","Directory.Packages.props","mix.exs","mix.lock","go.mod","go.sum","stack.yaml","stack.yaml.lock","pom.xml","build.gradle","build.gradle.kts","settings.gradle","settings.gradle.kts","gradle.properties","package-lock.json","yarn.lock","pnpm-lock.yaml","npm-shrinkwrap.json","requirements.txt","Pipfile","Pipfile.lock","pyproject.toml","setup.py","setup.cfg","Gemfile","Gemfile.lock","uv.lock","CODEOWNERS","DESIGN.md","README.md","CONTRIBUTING.md","CHANGELOG.md","SECURITY.md","CODE_OF_CONDUCT.md","AGENTS.md","CLAUDE.md","GEMINI.md"],"protected_files_policy":"fallback-to-issue","title_prefix":"Update real-world test results: "},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"report_incomplete":{}}
+2026-05-09T19:11:16.6055177Z   GH_AW_CI_TRIGGER_TOKEN: 
+2026-05-09T19:11:16.6055632Z ##[endgroup]
+2026-05-09T19:11:16.7542357Z Safe Output Handler Manager starting...
+2026-05-09T19:11:16.7553400Z Loaded config from GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: {"create_discussion":{"close_older_discussions":true,"expires":720,"fallback_to_issue":true,"max":1,"title_prefix":"Weekly real-world testing: "},"create_pull_request":{"draft":false,"max":1,"max_patch_files":100,"max_patch_size":1024,"protect_top_level_dot_folders":true,"protected_files":["package.json","bun.lockb","bunfig.toml","deno.json","deno.jsonc","deno.lock","global.json","NuGet.Config","Directory.Packages.props","mix.exs","mix.lock","go.mod","go.sum","stack.yaml","stack.yaml.lock","pom.xml","build.gradle","build.gradle.kts","settings.gradle","settings.gradle.kts","gradle.properties","package-lock.json","yarn.lock","pnpm-lock.yaml","npm-shrinkwrap.json","requirements.txt","Pipfile","Pipfile.lock","pyproject.toml","setup.py","setup.cfg","Gemfile","Gemfile.lock","uv.lock","CODEOWNERS","DESIGN.md","README.md","CONTRIBUTING.md","CHANGELOG.md","SECURITY.md","CODE_OF_CONDUCT.md","AGENTS.md","CLAUDE.md","GEMINI.md"],"protected_files_policy":"fallback-to-issue","title_prefix":"Update real-world test results: "},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"report_incomplete":{}}
+2026-05-09T19:11:16.7568499Z Agent output content length: 3684
+2026-05-09T19:11:16.7570414Z Found 2 message(s) in agent output
+2026-05-09T19:11:16.7576320Z Loading and initializing safe output handlers based on configuration...
+2026-05-09T19:11:16.7628795Z Create discussion configuration: max=1
+2026-05-09T19:11:16.7630345Z Default target repo: dollarlint/dollarlint
+2026-05-09T19:11:16.7631932Z Fallback to issue enabled: will create an issue if discussion creation fails due to permissions
+2026-05-09T19:11:16.7633769Z Close older discussions enabled: will close older discussions/issues with same workflow-id marker
+2026-05-09T19:11:17.4149675Z Default target repo: dollarlint/dollarlint
+2026-05-09T19:11:17.4166130Z Title prefix: Weekly real-world testing: 
+2026-05-09T19:11:17.4166747Z Issues expire after: 720 hours
+2026-05-09T19:11:17.4167235Z Max count: 1
+2026-05-09T19:11:17.4167903Z Close older issues enabled: older issues with same workflow-id marker will be closed
+2026-05-09T19:11:17.4169038Z ✓ Loaded and initialized handler for: create_discussion
+2026-05-09T19:11:17.4172909Z Base branch: (dynamic - resolved per target repo)
+2026-05-09T19:11:17.4173540Z Default target repo: dollarlint/dollarlint
+2026-05-09T19:11:17.4174147Z Title prefix: Update real-world test results: 
+2026-05-09T19:11:17.4175021Z Draft default: false
+2026-05-09T19:11:17.4175465Z If no changes: warn
+2026-05-09T19:11:17.4175881Z Allow empty: false
+2026-05-09T19:11:17.4176587Z Auto-merge: false
+2026-05-09T19:11:17.4177003Z Max count: 1
+2026-05-09T19:11:17.4177405Z Max patch size: 1024 KB
+2026-05-09T19:11:17.4177855Z Max patch files: 100
+2026-05-09T19:11:17.4178595Z ✓ Loaded and initialized handler for: create_pull_request
+2026-05-09T19:11:17.4184053Z Max count: unlimited
+2026-05-09T19:11:17.4184843Z ✓ Loaded and initialized handler for: missing_tool
+2026-05-09T19:11:17.4185694Z Max count: unlimited
+2026-05-09T19:11:17.4186224Z ✓ Loaded and initialized handler for: missing_data
+2026-05-09T19:11:17.4186790Z Max count: 1
+2026-05-09T19:11:17.4187269Z ✓ Loaded and initialized handler for: noop
+2026-05-09T19:11:17.4187808Z Max count: unlimited
+2026-05-09T19:11:17.4188377Z ✓ Loaded and initialized handler for: report_incomplete
+2026-05-09T19:11:17.4188998Z Title prefix: [incomplete]
+2026-05-09T19:11:17.4189479Z Default labels: agentic-workflows
+2026-05-09T19:11:17.4189981Z Max count: 1
+2026-05-09T19:11:17.4190628Z ✓ Loaded and initialized handler for: create_report_incomplete_issue
+2026-05-09T19:11:17.4195441Z Loaded 7 handler(s)
+2026-05-09T19:11:17.4196494Z ℹ️ Rate-limit headroom: 4891/5000 requests remaining (97%) [safe_outputs_pre_check]
+2026-05-09T19:11:17.4197670Z Collected 0 missing tool(s), 0 missing data item(s), 0 noop message(s), and 1 incomplete signal(s)
+2026-05-09T19:11:17.4198629Z Processing 2 message(s) in order of appearance...
+2026-05-09T19:11:17.4199283Z Processing message 1/2: create_discussion
+2026-05-09T19:11:17.4199982Z Fetched discussion categories for dollarlint/dollarlint
+2026-05-09T19:11:17.4200637Z Using category: General (name)
+2026-05-09T19:11:17.4202056Z Processing create_discussion: title=2026-05-09 - Infrastructure blocker: dollarlint-repo MCP server unavailable, bodyLength=3131, temporaryId=aw_Iw2tAnbk, repo=dollarlint/dollarlint
+2026-05-09T19:11:17.4203648Z Discussion will expire on 2026-06-08T19:11:17.207Z (720 hours)
+2026-05-09T19:11:17.4205287Z Creating discussion in dollarlint/dollarlint with title: Weekly real-world testing: 2026-05-09 - Infrastructure blocker: dollarlint-repo MCP server unavailable
+2026-05-09T19:11:18.4165041Z Created discussion dollarlint/dollarlint#13: https://github.com/dollarlint/dollarlint/discussions/13
+2026-05-09T19:11:18.4166667Z Attempting to close older discussions for dollarlint/dollarlint#13 using workflow-id: weekly-real-world-testing
+2026-05-09T19:11:18.4167778Z ======================================================================
+2026-05-09T19:11:18.4168434Z Starting closeOlderDiscussions operation
+2026-05-09T19:11:18.4169085Z ======================================================================
+2026-05-09T19:11:18.4170000Z Search criteria: workflow-id marker: "gh-aw-workflow-id: weekly-real-world-testing"
+2026-05-09T19:11:18.4171143Z New discussion reference: #13 (https://github.com/dollarlint/dollarlint/discussions/13)
+2026-05-09T19:11:18.4172031Z Workflow: Weekly Real-World Testing
+2026-05-09T19:11:18.4172809Z Run URL: https://github.com/dollarlint/dollarlint/actions/runs/25609301820
+2026-05-09T19:11:18.4173410Z 
+2026-05-09T19:11:18.4173770Z Starting search for older discussions in dollarlint/dollarlint
+2026-05-09T19:11:18.4174698Z   Workflow ID: weekly-real-world-testing
+2026-05-09T19:11:18.4175335Z   Exclude discussion number: 13
+2026-05-09T19:11:18.4176244Z   Added workflow-id marker filter to query: "gh-aw-workflow-id: weekly-real-world-testing" in:body
+2026-05-09T19:11:18.4177685Z Executing GitHub search with query: repo:dollarlint/dollarlint is:open "gh-aw-workflow-id: weekly-real-world-testing" in:body
+2026-05-09T19:11:18.4178854Z Search API returned 1 total results
+2026-05-09T19:11:18.4179418Z Filtering search results...
+2026-05-09T19:11:18.4180688Z   ✓ Discussion #12 matches criteria: Weekly real-world testing: 2026-05-09 - Corpus Run Blocked: Environment Constraints
+2026-05-09T19:11:18.4181696Z Filtering complete:
+2026-05-09T19:11:18.4182173Z   - Matched discussions: 1
+2026-05-09T19:11:18.4182705Z   - Excluded closed discussions: 0
+2026-05-09T19:11:18.4183276Z   - Excluded new discussion: 0
+2026-05-09T19:11:18.4184180Z   - Excluded marker mismatch: 0
+2026-05-09T19:11:18.4184778Z 
+2026-05-09T19:11:18.4185068Z Found 1 older discussion(s) matching the criteria
+2026-05-09T19:11:18.4186370Z   - Discussion #12: Weekly real-world testing: 2026-05-09 - Corpus Run Blocked: Environment Constraints
+2026-05-09T19:11:18.4187448Z     URL: https://github.com/dollarlint/dollarlint/discussions/12
+2026-05-09T19:11:18.4187954Z 
+2026-05-09T19:11:18.4188182Z Preparing to close 1 discussion(s)...
+2026-05-09T19:11:18.4188646Z 
+2026-05-09T19:11:18.4188963Z ----------------------------------------------------------------------
+2026-05-09T19:11:18.4189661Z Processing discussion 1/1: #12
+2026-05-09T19:11:18.4190526Z   Title: Weekly real-world testing: 2026-05-09 - Corpus Run Blocked: Environment Constraints
+2026-05-09T19:11:18.4191523Z   URL: https://github.com/dollarlint/dollarlint/discussions/12
+2026-05-09T19:11:18.4192275Z   Message length: 261 characters
+2026-05-09T19:11:18.4192624Z 
+2026-05-09T19:11:19.7102874Z 
+2026-05-09T19:11:19.7105792Z ✓ Successfully closed discussion #12
+2026-05-09T19:11:19.7107586Z 
+2026-05-09T19:11:19.7109527Z ======================================================================
+2026-05-09T19:11:19.7112686Z Closed 1 of 1 discussion(s) successfully
+2026-05-09T19:11:19.7115053Z ======================================================================
+2026-05-09T19:11:19.7118088Z Closed 1 older discussion(s)
+2026-05-09T19:11:19.7123404Z 📝 Manifest: logged create_discussion → https://github.com/dollarlint/dollarlint/discussions/13
+2026-05-09T19:11:19.7129180Z ✓ Message 1 (create_discussion) completed successfully
+2026-05-09T19:11:19.7131480Z Processing message 2/2: report_incomplete
+2026-05-09T19:11:19.7224105Z ##[warning]⚠️ report_incomplete: The dollarlint-repo MCP server (required to build dollarlint and clone repos) was not running — port 8080 not bound. The bash security policy also blocks git clone and go build. No corpus validation could be performed. See the published Discussion for full diagnostics and next steps.
+2026-05-09T19:11:19.7261388Z ✓ Message 2 (report_incomplete) completed successfully
+2026-05-09T19:11:19.7263685Z Stored 0 missing tool(s), 0 missing data item(s), 0 noop message(s), and 1 incomplete signal(s) for footer generation
+2026-05-09T19:11:19.7276939Z 📝 Safe output summaries written to step summary
+2026-05-09T19:11:19.7277863Z 
+2026-05-09T19:11:19.7278206Z === Processing Summary ===
+2026-05-09T19:11:19.7279087Z Total messages: 2
+2026-05-09T19:11:19.7279829Z Successful: 2
+2026-05-09T19:11:19.7280565Z Failed: 0
+2026-05-09T19:11:19.7281493Z Temporary IDs registered: 0
+2026-05-09T19:11:19.7282697Z Synthetic updates: 0
+2026-05-09T19:11:19.7283892Z Exported temporary ID map with 0 mapping(s)
+2026-05-09T19:11:19.7308148Z Wrote temporary ID map to file for artifact upload
+2026-05-09T19:11:19.7309746Z Safe Output Handler Manager completed
+2026-05-09T19:11:19.7510582Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-05-09T19:11:19.7512414Z with:
+2026-05-09T19:11:19.7513269Z   name: safe-outputs-items
+2026-05-09T19:11:19.7515439Z   path: /tmp/gh-aw/safe-output-items.jsonl
+/tmp/gh-aw/temporary-id-map.json
+
+2026-05-09T19:11:19.7517166Z   if-no-files-found: ignore
+2026-05-09T19:11:19.7518180Z   compression-level: 6
+2026-05-09T19:11:19.7519138Z   overwrite: false
+2026-05-09T19:11:19.7520069Z   include-hidden-files: false
+2026-05-09T19:11:19.7521115Z   archive: true
+2026-05-09T19:11:19.7521972Z env:
+2026-05-09T19:11:19.7522755Z   CANDIDATE_REPOS: 
+2026-05-09T19:11:19.7523642Z   MAX_REPOS: 5
+2026-05-09T19:11:19.7527303Z   GH_AW_CALLER_WORKFLOW_ID: dollarlint/dollarlint/weekly-real-world-testing
+2026-05-09T19:11:19.7529010Z   GH_AW_DETECTION_CONCLUSION: success
+2026-05-09T19:11:19.7530143Z   GH_AW_DETECTION_REASON: 
+2026-05-09T19:11:19.7531156Z   GH_AW_EFFECTIVE_TOKENS: 3305977
+2026-05-09T19:11:19.7532269Z   GH_AW_ENGINE_ID: copilot
+2026-05-09T19:11:19.7533294Z   GH_AW_ENGINE_MODEL: claude-sonnet-4.6
+2026-05-09T19:11:19.7534674Z   GH_AW_ENGINE_VERSION: 1.0.40
+2026-05-09T19:11:19.7536000Z   GH_AW_WORKFLOW_ID: weekly-real-world-testing
+2026-05-09T19:11:19.7538318Z   GH_AW_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T19:11:19.7564185Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T19:11:19.7592721Z   GITHUB_AW_OTEL_TRACE_ID: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:11:19.7594229Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: b117e18bc7215f2a
+2026-05-09T19:11:19.7595700Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353875036
+2026-05-09T19:11:19.7596862Z   GH_HOST: github.com
+2026-05-09T19:11:19.7597731Z ##[endgroup]
+2026-05-09T19:11:19.9507427Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-05-09T19:11:19.9520767Z The least common ancestor is /tmp/gh-aw. This will be the root directory of the artifact
+2026-05-09T19:11:19.9524193Z With the provided path, there will be 2 files uploaded
+2026-05-09T19:11:19.9533727Z Artifact name is valid!
+2026-05-09T19:11:19.9536834Z Root directory input is valid!
+2026-05-09T19:11:20.0776538Z Uploading artifact: safe-outputs-items.zip
+2026-05-09T19:11:20.0840830Z Beginning upload of artifact content to blob storage
+2026-05-09T19:11:20.2597016Z Uploaded bytes 424
+2026-05-09T19:11:20.2966294Z Finished uploading artifact content to blob storage!
+2026-05-09T19:11:20.2973958Z SHA256 digest of uploaded artifact is 5dd6936d9f100fb3d31fe8ce54c0518d79334eaf7be4ed8fbf0368b8ca95a7fe
+2026-05-09T19:11:20.2979370Z Finalizing artifact upload
+2026-05-09T19:11:20.4995449Z Artifact safe-outputs-items successfully finalized. Artifact ID 6897985858
+2026-05-09T19:11:20.4999963Z Artifact safe-outputs-items has been successfully uploaded! Final size is 424 bytes. Artifact ID is 6897985858
+2026-05-09T19:11:20.5008400Z Artifact download URL: https://github.com/dollarlint/dollarlint/actions/runs/25609301820/artifacts/6897985858
+2026-05-09T19:11:20.5176932Z Post job cleanup.
+2026-05-09T19:11:20.5519108Z [otlp] GH_AW_OTLP_ENDPOINTS not set, skipping OTLP export (will attempt JSONL mirror)
+2026-05-09T19:11:20.5553288Z Cleaning up /tmp/gh-aw...
+2026-05-09T19:11:20.5683033Z Cleaned up /tmp/gh-aw
+2026-05-09T19:11:20.5846019Z Evaluate and set job outputs
+2026-05-09T19:11:20.5858069Z Set output 'code_push_failure_count'
+2026-05-09T19:11:20.5861013Z Set output 'create_discussion_error_count'
+2026-05-09T19:11:20.5862877Z Set output 'process_safe_outputs_processed_count'
+2026-05-09T19:11:20.5864871Z Set output 'process_safe_outputs_temporary_id_map'
+2026-05-09T19:11:20.5866950Z Cleaning up orphan processes

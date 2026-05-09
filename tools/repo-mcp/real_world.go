@@ -17,9 +17,12 @@ import (
 )
 
 const (
-	realWorldResultsRelPath = "reports/real-world-results.json"
-	realWorldResultsSchema  = "./real-world-results.schema.json"
-	realWorldManifestName   = "real-world-manifest.json"
+	realWorldResultsRelPath       = "reports/real-world-results.json"
+	realWorldResultsDirRelPath    = "reports/real-world-results"
+	realWorldResultsSchema        = "./real-world-results.schema.json"
+	realWorldEntrySchema          = "../real-world-result-entry.schema.json"
+	realWorldHistorySchemaVersion = 3
+	realWorldManifestName         = "real-world-manifest.json"
 )
 
 type realWorldHistory struct {
@@ -28,22 +31,59 @@ type realWorldHistory struct {
 	Entries       []realWorldEntry `json:"entries"`
 }
 
+type realWorldHistoryIndex struct {
+	Schema        string              `json:"$schema,omitempty"`
+	SchemaVersion int                 `json:"schemaVersion"`
+	Entries       []realWorldEntryRef `json:"entries"`
+}
+
+type realWorldEntryRef struct {
+	ID        string `json:"id"`
+	Date      string `json:"date"`
+	Title     string `json:"title"`
+	Path      string `json:"path"`
+	RepoCount int    `json:"repoCount,omitempty"`
+}
+
+type realWorldEntryFile struct {
+	Schema        string `json:"$schema,omitempty"`
+	SchemaVersion int    `json:"schemaVersion"`
+	realWorldEntry
+}
+
 type realWorldEntry struct {
-	ID                 string                `json:"id"`
-	Date               string                `json:"date"`
-	Title              string                `json:"title"`
-	DollarLintRevision string                `json:"dollarlintRevision"`
-	WorkingTreeNote    string                `json:"workingTreeNote,omitempty"`
-	Corpus             string                `json:"corpus"`
-	CacheDir           string                `json:"cacheDir,omitempty"`
-	Command            string                `json:"command"`
-	OutputArtifact     string                `json:"outputArtifact"`
-	Repositories       []realWorldRepository `json:"repositories"`
-	Result             *realWorldResult      `json:"result,omitempty"`
-	BeforeResult       *realWorldResult      `json:"beforeResult,omitempty"`
-	Findings           []string              `json:"findings,omitempty"`
-	ProductDecisions   []string              `json:"productDecisions,omitempty"`
-	FollowUp           []string              `json:"followUp,omitempty"`
+	ID                     string                           `json:"id"`
+	Date                   string                           `json:"date"`
+	Title                  string                           `json:"title"`
+	DollarLintRevision     string                           `json:"dollarlintRevision"`
+	WorkingTreeNote        string                           `json:"workingTreeNote,omitempty"`
+	Corpus                 string                           `json:"corpus"`
+	CacheDir               string                           `json:"cacheDir,omitempty"`
+	Command                string                           `json:"command"`
+	OutputArtifact         string                           `json:"outputArtifact"`
+	DependencyPrep         []realWorldDependencyPrep        `json:"dependencyPrep,omitempty"`
+	Repositories           []realWorldRepository            `json:"repositories"`
+	Result                 *realWorldResult                 `json:"result,omitempty"`
+	BeforeResult           *realWorldResult                 `json:"beforeResult,omitempty"`
+	Findings               []string                         `json:"findings,omitempty"`
+	ProductRecommendations []realWorldProductRecommendation `json:"productRecommendations,omitempty"`
+	ProductDecisions       []string                         `json:"productDecisions,omitempty"`
+	FollowUp               []string                         `json:"followUp,omitempty"`
+}
+
+type realWorldDependencyPrep struct {
+	Repository string `json:"repository,omitempty"`
+	Command    string `json:"command,omitempty"`
+	Status     string `json:"status,omitempty"`
+	Notes      string `json:"notes,omitempty"`
+	Error      string `json:"error,omitempty"`
+	Output     string `json:"output,omitempty"`
+}
+
+type realWorldProductRecommendation struct {
+	Strength       string `json:"strength"`
+	Recommendation string `json:"recommendation"`
+	Rationale      string `json:"rationale"`
 }
 
 type realWorldRepository struct {
@@ -105,21 +145,23 @@ type realWorldManifest struct {
 }
 
 type realWorldRecordArgs struct {
-	ID                 string                `json:"id"`
-	Date               string                `json:"date"`
-	Title              string                `json:"title"`
-	DollarLintRevision string                `json:"dollarlintRevision"`
-	WorkingTreeNote    string                `json:"workingTreeNote"`
-	Corpus             string                `json:"corpus"`
-	CacheDir           string                `json:"cacheDir"`
-	Command            string                `json:"command"`
-	OutputArtifact     string                `json:"outputArtifact"`
-	ManifestPath       string                `json:"manifestPath"`
-	Repositories       []realWorldRepository `json:"repositories"`
-	Findings           []string              `json:"findings"`
-	ProductDecisions   []string              `json:"productDecisions"`
-	FollowUp           []string              `json:"followUp"`
-	Replace            bool                  `json:"replace"`
+	ID                     string                           `json:"id"`
+	Date                   string                           `json:"date"`
+	Title                  string                           `json:"title"`
+	DollarLintRevision     string                           `json:"dollarlintRevision"`
+	WorkingTreeNote        string                           `json:"workingTreeNote"`
+	Corpus                 string                           `json:"corpus"`
+	CacheDir               string                           `json:"cacheDir"`
+	Command                string                           `json:"command"`
+	OutputArtifact         string                           `json:"outputArtifact"`
+	ManifestPath           string                           `json:"manifestPath"`
+	Repositories           []realWorldRepository            `json:"repositories"`
+	DependencyPrep         []realWorldDependencyPrep        `json:"dependencyPrep"`
+	Findings               []string                         `json:"findings"`
+	ProductRecommendations []realWorldProductRecommendation `json:"productRecommendations"`
+	ProductDecisions       []string                         `json:"productDecisions"`
+	FollowUp               []string                         `json:"followUp"`
+	Replace                bool                             `json:"replace"`
 }
 
 func (s *repoServer) handleRealWorldHistory(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -149,6 +191,7 @@ func (s *repoServer) handleRealWorldHistory(ctx context.Context, request mcp.Cal
 	}
 	out := map[string]any{
 		"path":          filepath.Join(s.root, realWorldResultsRelPath),
+		"entriesDir":    filepath.Join(s.root, realWorldResultsDirRelPath),
 		"schema":        history.Schema,
 		"schemaVersion": history.SchemaVersion,
 		"entryCount":    len(history.Entries),
@@ -385,6 +428,7 @@ func (s *repoServer) handleRealWorldRecordResult(ctx context.Context, request mc
 	return structured(map[string]any{
 		"ok":          true,
 		"path":        filepath.Join(s.root, realWorldResultsRelPath),
+		"entryPath":   filepath.Join(s.root, realWorldEntryRelPath(entry)),
 		"entry":       entry,
 		"replaced":    replaced,
 		"entryCount":  len(history.Entries),
@@ -448,20 +492,22 @@ func (s *repoServer) realWorldEntryFromArgs(args realWorldRecordArgs) (realWorld
 		command = realWorldValidationCommand(args.Corpus, args.CacheDir, args.OutputArtifact, true, "warn", 1, "1ms", "1ms", nil)
 	}
 	return realWorldEntry{
-		ID:                 id,
-		Date:               date,
-		Title:              args.Title,
-		DollarLintRevision: revision,
-		WorkingTreeNote:    workingTreeNote,
-		Corpus:             args.Corpus,
-		CacheDir:           args.CacheDir,
-		Command:            command,
-		OutputArtifact:     args.OutputArtifact,
-		Repositories:       repositories,
-		Result:             result,
-		Findings:           args.Findings,
-		ProductDecisions:   args.ProductDecisions,
-		FollowUp:           args.FollowUp,
+		ID:                     id,
+		Date:                   date,
+		Title:                  args.Title,
+		DollarLintRevision:     revision,
+		WorkingTreeNote:        workingTreeNote,
+		Corpus:                 args.Corpus,
+		CacheDir:               args.CacheDir,
+		Command:                command,
+		OutputArtifact:         args.OutputArtifact,
+		DependencyPrep:         args.DependencyPrep,
+		Repositories:           repositories,
+		Result:                 result,
+		Findings:               args.Findings,
+		ProductRecommendations: args.ProductRecommendations,
+		ProductDecisions:       args.ProductDecisions,
+		FollowUp:               args.FollowUp,
 	}, nil
 }
 
@@ -469,33 +515,121 @@ func loadRealWorldHistory(root string) (realWorldHistory, error) {
 	path := filepath.Join(root, realWorldResultsRelPath)
 	data, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
-		return realWorldHistory{Schema: realWorldResultsSchema, SchemaVersion: 1}, nil
+		return realWorldHistory{Schema: realWorldResultsSchema, SchemaVersion: realWorldHistorySchemaVersion}, nil
 	}
 	if err != nil {
 		return realWorldHistory{}, err
 	}
-	var history realWorldHistory
-	if err := json.Unmarshal(data, &history); err != nil {
+	return loadSplitRealWorldHistory(root, path, data)
+}
+
+func loadSplitRealWorldHistory(root, path string, data []byte) (realWorldHistory, error) {
+	var index realWorldHistoryIndex
+	if err := json.Unmarshal(data, &index); err != nil {
 		return realWorldHistory{}, fmt.Errorf("parse %s: %w", path, err)
 	}
-	if history.SchemaVersion == 0 {
-		history.SchemaVersion = 1
+	if index.Schema != realWorldResultsSchema {
+		return realWorldHistory{}, fmt.Errorf("parse %s: unsupported schema %q", path, index.Schema)
 	}
-	if history.Schema == "" {
-		history.Schema = realWorldResultsSchema
+	if index.SchemaVersion != realWorldHistorySchemaVersion {
+		return realWorldHistory{}, fmt.Errorf("parse %s: unsupported schemaVersion %d", path, index.SchemaVersion)
+	}
+	history := realWorldHistory{Schema: index.Schema, SchemaVersion: index.SchemaVersion}
+	for _, ref := range index.Entries {
+		entry, err := readRealWorldEntryFile(root, ref)
+		if err != nil {
+			return realWorldHistory{}, err
+		}
+		history.Entries = append(history.Entries, entry)
 	}
 	return history, nil
+}
+
+func readRealWorldEntryFile(root string, ref realWorldEntryRef) (realWorldEntry, error) {
+	relPath := ref.Path
+	if relPath == "" {
+		return realWorldEntry{}, fmt.Errorf("real-world history entry %q is missing path", ref.ID)
+	}
+	clean, err := cleanRelativePath(relPath)
+	if err != nil {
+		return realWorldEntry{}, fmt.Errorf("invalid real-world result path %q: %w", relPath, err)
+	}
+	path := filepath.Join(root, clean)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return realWorldEntry{}, err
+	}
+	var file realWorldEntryFile
+	if err := json.Unmarshal(data, &file); err != nil {
+		return realWorldEntry{}, fmt.Errorf("parse %s: %w", path, err)
+	}
+	if file.Schema != realWorldEntrySchema {
+		return realWorldEntry{}, fmt.Errorf("parse %s: unsupported schema %q", path, file.Schema)
+	}
+	if file.SchemaVersion != realWorldHistorySchemaVersion {
+		return realWorldEntry{}, fmt.Errorf("parse %s: unsupported schemaVersion %d", path, file.SchemaVersion)
+	}
+	entry := file.realWorldEntry
+	if entry.ID == "" || entry.Date == "" || entry.Title == "" {
+		return realWorldEntry{}, fmt.Errorf("parse %s: entry is missing id, date, or title", path)
+	}
+	if entry.ID != ref.ID {
+		return realWorldEntry{}, fmt.Errorf("parse %s: entry id %q does not match index id %q", path, entry.ID, ref.ID)
+	}
+	if entry.Date != ref.Date || entry.Title != ref.Title {
+		return realWorldEntry{}, fmt.Errorf("parse %s: entry metadata does not match index metadata", path)
+	}
+	return entry, nil
 }
 
 func saveRealWorldHistory(root string, history realWorldHistory) error {
 	if history.Schema == "" {
 		history.Schema = realWorldResultsSchema
 	}
-	if history.SchemaVersion == 0 {
-		history.SchemaVersion = 1
+	history.SchemaVersion = realWorldHistorySchemaVersion
+	usedPaths := map[string]string{}
+	index := realWorldHistoryIndex{
+		Schema:        realWorldResultsSchema,
+		SchemaVersion: realWorldHistorySchemaVersion,
+		Entries:       make([]realWorldEntryRef, 0, len(history.Entries)),
 	}
-	path := filepath.Join(root, realWorldResultsRelPath)
-	return writeJSONFile(path, history)
+	for _, entry := range history.Entries {
+		if entry.ID == "" {
+			return fmt.Errorf("real-world history entry is missing id")
+		}
+		relPath := realWorldEntryRelPath(entry)
+		if previousID := usedPaths[relPath]; previousID != "" {
+			return fmt.Errorf("real-world history entries %q and %q map to %s", previousID, entry.ID, relPath)
+		}
+		usedPaths[relPath] = entry.ID
+		file := realWorldEntryFile{
+			Schema:         realWorldEntrySchema,
+			SchemaVersion:  realWorldHistorySchemaVersion,
+			realWorldEntry: entry,
+		}
+		if err := writeJSONFile(filepath.Join(root, relPath), file); err != nil {
+			return err
+		}
+		index.Entries = append(index.Entries, realWorldEntryRef{
+			ID:        entry.ID,
+			Date:      entry.Date,
+			Title:     entry.Title,
+			Path:      relPath,
+			RepoCount: len(entry.Repositories),
+		})
+	}
+	return writeJSONFile(filepath.Join(root, realWorldResultsRelPath), index)
+}
+
+func realWorldEntryRelPath(entry realWorldEntry) string {
+	name := slugify(entry.ID)
+	if name == "" {
+		name = slugify(entry.Date + "-" + entry.Title)
+	}
+	if name == "" {
+		name = "entry"
+	}
+	return filepath.ToSlash(filepath.Join(realWorldResultsDirRelPath, name+".json"))
 }
 
 func readRealWorldManifest(path string) (realWorldManifest, error) {

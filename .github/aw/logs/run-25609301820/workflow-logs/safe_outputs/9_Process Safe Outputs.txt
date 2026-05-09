@@ -1,0 +1,224 @@
+﻿2026-05-09T19:11:16.5772577Z ##[group]Run actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+2026-05-09T19:11:16.5773366Z with:
+2026-05-09T19:11:16.5773998Z   github-token: ***
+2026-05-09T19:11:16.5775993Z   script: const { setupGlobals } = require('/home/runner/work/_temp/gh-aw/actions/setup_globals.cjs');
+setupGlobals(core, github, context, exec, io, getOctokit);
+const { main } = require('/home/runner/work/_temp/gh-aw/actions/safe_output_handler_manager.cjs');
+await main();
+
+2026-05-09T19:11:16.5777826Z   debug: false
+2026-05-09T19:11:16.5778254Z   user-agent: actions/github-script
+2026-05-09T19:11:16.5778777Z   result-encoding: json
+2026-05-09T19:11:16.5779207Z   retries: 0
+2026-05-09T19:11:16.5779670Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-05-09T19:11:16.5780242Z env:
+2026-05-09T19:11:16.5780613Z   CANDIDATE_REPOS: 
+2026-05-09T19:11:16.5781034Z   MAX_REPOS: 5
+2026-05-09T19:11:16.5781637Z   GH_AW_CALLER_WORKFLOW_ID: dollarlint/dollarlint/weekly-real-world-testing
+2026-05-09T19:11:16.5782372Z   GH_AW_DETECTION_CONCLUSION: success
+2026-05-09T19:11:16.5782930Z   GH_AW_DETECTION_REASON: 
+2026-05-09T19:11:16.5783430Z   GH_AW_EFFECTIVE_TOKENS: 3305977
+2026-05-09T19:11:16.5783928Z   GH_AW_ENGINE_ID: copilot
+2026-05-09T19:11:16.5784410Z   GH_AW_ENGINE_MODEL: claude-sonnet-4.6
+2026-05-09T19:11:16.5785176Z   GH_AW_ENGINE_VERSION: 1.0.40
+2026-05-09T19:11:16.5785712Z   GH_AW_WORKFLOW_ID: weekly-real-world-testing
+2026-05-09T19:11:16.5786327Z   GH_AW_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T19:11:16.5796673Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T19:11:16.5807445Z   GITHUB_AW_OTEL_TRACE_ID: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:11:16.5808143Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: b117e18bc7215f2a
+2026-05-09T19:11:16.5808746Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353875036
+2026-05-09T19:11:16.5809283Z   GH_HOST: github.com
+2026-05-09T19:11:16.5809964Z   GH_AW_AGENT_OUTPUT: /tmp/gh-aw/agent_output.json
+2026-05-09T19:11:16.5924647Z   GH_AW_ALLOWED_DOMAINS: *.githubusercontent.com,*.gradle-enterprise.cloud,*.pythonhosted.org,*.rvm.io,*.vsblob.vsassets.io,adoptium.net,anaconda.org,api.adoptium.net,api.business.githubcopilot.com,api.enterprise.githubcopilot.com,api.foojay.io,api.github.com,api.githubcopilot.com,api.individual.githubcopilot.com,api.npms.io,api.nuget.org,api.rubygems.org,api.snapcraft.io,apt.llvm.org,apt.releases.hashicorp.com,archive.apache.org,archive.ubuntu.com,archlinux.org,azure.archive.ubuntu.com,azuresearch-usnc.nuget.org,azuresearch-ussc.nuget.org,binstar.org,bitbucket.org,bootstrap.pypa.io,builds.dotnet.microsoft.com,bun.sh,bundler.rubygems.org,cache.ruby-lang.org,cdn.azul.com,cdn.jsdelivr.net,cdn.redhat.com,central.sonatype.com,changie.dev,ci.dot.net,codeload.github.com,conda.anaconda.org,conda.binstar.org,crates.io,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,dc.services.visualstudio.com,deb.debian.org,deb.nodesource.com,debian.map.fastlydns.net,deno.land,develocity.apache.org,dist.nuget.org,dl-cdn.alpinelinux.org,dl.fedoraproject.org,dl.google.com,dlcdn.apache.org,docs.github.com,dot.net,dotnet.microsoft.com,dotnetcli.blob.core.windows.net,download.eclipse.org,download.fedoraproject.org,download.java.net,download.opensuse.org,download.oracle.com,downloads.gradle-dn.com,esm.sh,files.pythonhosted.org,ge.spockframework.org,gems.rubyforge.org,gems.rubyonrails.org,get.pnpm.io,getcomposer.org,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,go.dev,golang.org,googleapis.deno.dev,googlechromelabs.github.io,goproxy.io,gradle.org,host.docker.internal,index.crates.io,index.rubygems.org,jcenter.bintray.com,jdk.java.net,json-schema.org,json.schemastore.org,jsr.io,keyring.debian.org,keyserver.ubuntu.com,lfs.github.com,maven-central.storage-download.googleapis.com,maven.apache.org,maven.google.com,maven.oracle.com,maven.pkg.github.com,mirror.archlinux.org,mirror.centos.org,mirrors.fedoraproject.org,nodejs.org,npm.pkg.github.com,npmjs.com,npmjs.org,nuget.org,nuget.pkg.github.com,nugetregistryv2prod.blob.core.windows.net,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,oneocsp.microsoft.com,openapi.vercel.sh,packagecloud.io,packages.cloud.google.com,packages.debian.org,packages.microsoft.com,packagist.org,pip.pypa.io,pkg.alpinelinux.org,pkg.go.dev,pkgs.dev.azure.com,plugins-artifacts.gradle.org,plugins.gradle.org,ppa.launchpad.net,proxy.golang.org,pub.dartlang.org,pub.dev,pypi.org,pypi.python.org,raw.githubusercontent.com,registry.bower.io,registry.npmjs.com,registry.npmjs.org,registry.terraform.io,registry.yarnpkg.com,releases.hashicorp.com,repo.anaconda.com,repo.continuum.io,repo.gradle.org,repo.grails.org,repo.maven.apache.org,repo.packagist.org,repo.spring.io,repo.yarnpkg.com,repo1.maven.org,repository.apache.org,rubygems.org,rubygems.pkg.github.com,s.symcb.com,s.symcd.com,scans-in.gradle.com,security.debian.org,security.ubuntu.com,services.gradle.org,sh.rustup.rs,skimdb.npmjs.com,static.crates.io,static.rust-lang.org,storage.googleapis.com,sum.golang.org,telemetry.enterprise.githubcopilot.com,telemetry.vercel.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,vault.centos.org,www.googleapis.com,www.java.com,www.microsoft.com,www.npmjs.com,www.npmjs.org,yarnpkg.com,yum.releases.hashicorp.com
+2026-05-09T19:11:16.6040388Z   GITHUB_SERVER_URL: https://github.com
+2026-05-09T19:11:16.6041002Z   GITHUB_API_URL: https://api.github.com
+2026-05-09T19:11:16.6048048Z   GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: {"create_discussion":{"close_older_discussions":true,"expires":720,"fallback_to_issue":true,"max":1,"title_prefix":"Weekly real-world testing: "},"create_pull_request":{"draft":false,"max":1,"max_patch_files":100,"max_patch_size":1024,"protect_top_level_dot_folders":true,"protected_files":["package.json","bun.lockb","bunfig.toml","deno.json","deno.jsonc","deno.lock","global.json","NuGet.Config","Directory.Packages.props","mix.exs","mix.lock","go.mod","go.sum","stack.yaml","stack.yaml.lock","pom.xml","build.gradle","build.gradle.kts","settings.gradle","settings.gradle.kts","gradle.properties","package-lock.json","yarn.lock","pnpm-lock.yaml","npm-shrinkwrap.json","requirements.txt","Pipfile","Pipfile.lock","pyproject.toml","setup.py","setup.cfg","Gemfile","Gemfile.lock","uv.lock","CODEOWNERS","DESIGN.md","README.md","CONTRIBUTING.md","CHANGELOG.md","SECURITY.md","CODE_OF_CONDUCT.md","AGENTS.md","CLAUDE.md","GEMINI.md"],"protected_files_policy":"fallback-to-issue","title_prefix":"Update real-world test results: "},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"report_incomplete":{}}
+2026-05-09T19:11:16.6055167Z   GH_AW_CI_TRIGGER_TOKEN: 
+2026-05-09T19:11:16.6055629Z ##[endgroup]
+2026-05-09T19:11:16.7542278Z Safe Output Handler Manager starting...
+2026-05-09T19:11:16.7553315Z Loaded config from GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: {"create_discussion":{"close_older_discussions":true,"expires":720,"fallback_to_issue":true,"max":1,"title_prefix":"Weekly real-world testing: "},"create_pull_request":{"draft":false,"max":1,"max_patch_files":100,"max_patch_size":1024,"protect_top_level_dot_folders":true,"protected_files":["package.json","bun.lockb","bunfig.toml","deno.json","deno.jsonc","deno.lock","global.json","NuGet.Config","Directory.Packages.props","mix.exs","mix.lock","go.mod","go.sum","stack.yaml","stack.yaml.lock","pom.xml","build.gradle","build.gradle.kts","settings.gradle","settings.gradle.kts","gradle.properties","package-lock.json","yarn.lock","pnpm-lock.yaml","npm-shrinkwrap.json","requirements.txt","Pipfile","Pipfile.lock","pyproject.toml","setup.py","setup.cfg","Gemfile","Gemfile.lock","uv.lock","CODEOWNERS","DESIGN.md","README.md","CONTRIBUTING.md","CHANGELOG.md","SECURITY.md","CODE_OF_CONDUCT.md","AGENTS.md","CLAUDE.md","GEMINI.md"],"protected_files_policy":"fallback-to-issue","title_prefix":"Update real-world test results: "},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"report_incomplete":{}}
+2026-05-09T19:11:16.7568474Z Agent output content length: 3684
+2026-05-09T19:11:16.7570395Z Found 2 message(s) in agent output
+2026-05-09T19:11:16.7576297Z Loading and initializing safe output handlers based on configuration...
+2026-05-09T19:11:16.7628765Z Create discussion configuration: max=1
+2026-05-09T19:11:16.7630331Z Default target repo: dollarlint/dollarlint
+2026-05-09T19:11:16.7631917Z Fallback to issue enabled: will create an issue if discussion creation fails due to permissions
+2026-05-09T19:11:16.7633749Z Close older discussions enabled: will close older discussions/issues with same workflow-id marker
+2026-05-09T19:11:17.4149610Z Default target repo: dollarlint/dollarlint
+2026-05-09T19:11:17.4166109Z Title prefix: Weekly real-world testing: 
+2026-05-09T19:11:17.4166742Z Issues expire after: 720 hours
+2026-05-09T19:11:17.4167232Z Max count: 1
+2026-05-09T19:11:17.4167899Z Close older issues enabled: older issues with same workflow-id marker will be closed
+2026-05-09T19:11:17.4169032Z ✓ Loaded and initialized handler for: create_discussion
+2026-05-09T19:11:17.4172896Z Base branch: (dynamic - resolved per target repo)
+2026-05-09T19:11:17.4173537Z Default target repo: dollarlint/dollarlint
+2026-05-09T19:11:17.4174144Z Title prefix: Update real-world test results: 
+2026-05-09T19:11:17.4175016Z Draft default: false
+2026-05-09T19:11:17.4175463Z If no changes: warn
+2026-05-09T19:11:17.4175878Z Allow empty: false
+2026-05-09T19:11:17.4176582Z Auto-merge: false
+2026-05-09T19:11:17.4177001Z Max count: 1
+2026-05-09T19:11:17.4177402Z Max patch size: 1024 KB
+2026-05-09T19:11:17.4177852Z Max patch files: 100
+2026-05-09T19:11:17.4178463Z ✓ Loaded and initialized handler for: create_pull_request
+2026-05-09T19:11:17.4184049Z Max count: unlimited
+2026-05-09T19:11:17.4184836Z ✓ Loaded and initialized handler for: missing_tool
+2026-05-09T19:11:17.4185691Z Max count: unlimited
+2026-05-09T19:11:17.4186221Z ✓ Loaded and initialized handler for: missing_data
+2026-05-09T19:11:17.4186788Z Max count: 1
+2026-05-09T19:11:17.4187265Z ✓ Loaded and initialized handler for: noop
+2026-05-09T19:11:17.4187805Z Max count: unlimited
+2026-05-09T19:11:17.4188374Z ✓ Loaded and initialized handler for: report_incomplete
+2026-05-09T19:11:17.4188995Z Title prefix: [incomplete]
+2026-05-09T19:11:17.4189476Z Default labels: agentic-workflows
+2026-05-09T19:11:17.4189978Z Max count: 1
+2026-05-09T19:11:17.4190624Z ✓ Loaded and initialized handler for: create_report_incomplete_issue
+2026-05-09T19:11:17.4195405Z Loaded 7 handler(s)
+2026-05-09T19:11:17.4196488Z ℹ️ Rate-limit headroom: 4891/5000 requests remaining (97%) [safe_outputs_pre_check]
+2026-05-09T19:11:17.4197643Z Collected 0 missing tool(s), 0 missing data item(s), 0 noop message(s), and 1 incomplete signal(s)
+2026-05-09T19:11:17.4198625Z Processing 2 message(s) in order of appearance...
+2026-05-09T19:11:17.4199279Z Processing message 1/2: create_discussion
+2026-05-09T19:11:17.4199979Z Fetched discussion categories for dollarlint/dollarlint
+2026-05-09T19:11:17.4200634Z Using category: General (name)
+2026-05-09T19:11:17.4202043Z Processing create_discussion: title=2026-05-09 - Infrastructure blocker: dollarlint-repo MCP server unavailable, bodyLength=3131, temporaryId=aw_Iw2tAnbk, repo=dollarlint/dollarlint
+2026-05-09T19:11:17.4203644Z Discussion will expire on 2026-06-08T19:11:17.207Z (720 hours)
+2026-05-09T19:11:17.4205280Z Creating discussion in dollarlint/dollarlint with title: Weekly real-world testing: 2026-05-09 - Infrastructure blocker: dollarlint-repo MCP server unavailable
+2026-05-09T19:11:18.4164984Z Created discussion dollarlint/dollarlint#13: https://github.com/dollarlint/dollarlint/discussions/13
+2026-05-09T19:11:18.4166624Z Attempting to close older discussions for dollarlint/dollarlint#13 using workflow-id: weekly-real-world-testing
+2026-05-09T19:11:18.4167774Z ======================================================================
+2026-05-09T19:11:18.4168431Z Starting closeOlderDiscussions operation
+2026-05-09T19:11:18.4169081Z ======================================================================
+2026-05-09T19:11:18.4169996Z Search criteria: workflow-id marker: "gh-aw-workflow-id: weekly-real-world-testing"
+2026-05-09T19:11:18.4171139Z New discussion reference: #13 (https://github.com/dollarlint/dollarlint/discussions/13)
+2026-05-09T19:11:18.4172024Z Workflow: Weekly Real-World Testing
+2026-05-09T19:11:18.4172805Z Run URL: https://github.com/dollarlint/dollarlint/actions/runs/25609301820
+2026-05-09T19:11:18.4173404Z 
+2026-05-09T19:11:18.4173766Z Starting search for older discussions in dollarlint/dollarlint
+2026-05-09T19:11:18.4174692Z   Workflow ID: weekly-real-world-testing
+2026-05-09T19:11:18.4175331Z   Exclude discussion number: 13
+2026-05-09T19:11:18.4176200Z   Added workflow-id marker filter to query: "gh-aw-workflow-id: weekly-real-world-testing" in:body
+2026-05-09T19:11:18.4177659Z Executing GitHub search with query: repo:dollarlint/dollarlint is:open "gh-aw-workflow-id: weekly-real-world-testing" in:body
+2026-05-09T19:11:18.4178849Z Search API returned 1 total results
+2026-05-09T19:11:18.4179415Z Filtering search results...
+2026-05-09T19:11:18.4180681Z   ✓ Discussion #12 matches criteria: Weekly real-world testing: 2026-05-09 - Corpus Run Blocked: Environment Constraints
+2026-05-09T19:11:18.4181691Z Filtering complete:
+2026-05-09T19:11:18.4182169Z   - Matched discussions: 1
+2026-05-09T19:11:18.4182701Z   - Excluded closed discussions: 0
+2026-05-09T19:11:18.4183273Z   - Excluded new discussion: 0
+2026-05-09T19:11:18.4184175Z   - Excluded marker mismatch: 0
+2026-05-09T19:11:18.4184770Z 
+2026-05-09T19:11:18.4185063Z Found 1 older discussion(s) matching the criteria
+2026-05-09T19:11:18.4186192Z   - Discussion #12: Weekly real-world testing: 2026-05-09 - Corpus Run Blocked: Environment Constraints
+2026-05-09T19:11:18.4187444Z     URL: https://github.com/dollarlint/dollarlint/discussions/12
+2026-05-09T19:11:18.4187950Z 
+2026-05-09T19:11:18.4188178Z Preparing to close 1 discussion(s)...
+2026-05-09T19:11:18.4188642Z 
+2026-05-09T19:11:18.4188959Z ----------------------------------------------------------------------
+2026-05-09T19:11:18.4189658Z Processing discussion 1/1: #12
+2026-05-09T19:11:18.4190522Z   Title: Weekly real-world testing: 2026-05-09 - Corpus Run Blocked: Environment Constraints
+2026-05-09T19:11:18.4191520Z   URL: https://github.com/dollarlint/dollarlint/discussions/12
+2026-05-09T19:11:18.4192272Z   Message length: 261 characters
+2026-05-09T19:11:18.4192621Z 
+2026-05-09T19:11:19.7102781Z 
+2026-05-09T19:11:19.7105765Z ✓ Successfully closed discussion #12
+2026-05-09T19:11:19.7107570Z 
+2026-05-09T19:11:19.7109494Z ======================================================================
+2026-05-09T19:11:19.7112605Z Closed 1 of 1 discussion(s) successfully
+2026-05-09T19:11:19.7115032Z ======================================================================
+2026-05-09T19:11:19.7118069Z Closed 1 older discussion(s)
+2026-05-09T19:11:19.7123377Z 📝 Manifest: logged create_discussion → https://github.com/dollarlint/dollarlint/discussions/13
+2026-05-09T19:11:19.7129156Z ✓ Message 1 (create_discussion) completed successfully
+2026-05-09T19:11:19.7131465Z Processing message 2/2: report_incomplete
+2026-05-09T19:11:19.7224053Z ##[warning]⚠️ report_incomplete: The dollarlint-repo MCP server (required to build dollarlint and clone repos) was not running — port 8080 not bound. The bash security policy also blocks git clone and go build. No corpus validation could be performed. See the published Discussion for full diagnostics and next steps.
+2026-05-09T19:11:19.7261353Z ✓ Message 2 (report_incomplete) completed successfully
+2026-05-09T19:11:19.7263672Z Stored 0 missing tool(s), 0 missing data item(s), 0 noop message(s), and 1 incomplete signal(s) for footer generation
+2026-05-09T19:11:19.7276870Z 📝 Safe output summaries written to step summary
+2026-05-09T19:11:19.7277857Z 
+2026-05-09T19:11:19.7278201Z === Processing Summary ===
+2026-05-09T19:11:19.7279083Z Total messages: 2
+2026-05-09T19:11:19.7279825Z Successful: 2
+2026-05-09T19:11:19.7280562Z Failed: 0
+2026-05-09T19:11:19.7281481Z Temporary IDs registered: 0
+2026-05-09T19:11:19.7282693Z Synthetic updates: 0
+2026-05-09T19:11:19.7283888Z Exported temporary ID map with 0 mapping(s)
+2026-05-09T19:11:19.7308127Z Wrote temporary ID map to file for artifact upload
+2026-05-09T19:11:19.7309742Z Safe Output Handler Manager completed

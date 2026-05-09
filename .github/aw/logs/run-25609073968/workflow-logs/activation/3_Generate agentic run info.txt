@@ -1,0 +1,172 @@
+﻿2026-05-09T18:50:57.6644649Z ##[group]Run actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+2026-05-09T18:50:57.6645396Z with:
+2026-05-09T18:50:57.6646978Z   script: const { setupGlobals } = require('/home/runner/work/_temp/gh-aw/actions/setup_globals.cjs');
+setupGlobals(core, github, context, exec, io, getOctokit);
+const { main } = require('/home/runner/work/_temp/gh-aw/actions/generate_aw_info.cjs');
+await main(core, context);
+
+2026-05-09T18:50:57.6649201Z   github-token: ***
+2026-05-09T18:50:57.6649595Z   debug: false
+2026-05-09T18:50:57.6650319Z   user-agent: actions/github-script
+2026-05-09T18:50:57.6650816Z   result-encoding: json
+2026-05-09T18:50:57.6651214Z   retries: 0
+2026-05-09T18:50:57.6651611Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-05-09T18:50:57.6652125Z env:
+2026-05-09T18:50:57.6652452Z   CANDIDATE_REPOS: 
+2026-05-09T18:50:57.6652836Z   MAX_REPOS: 5
+2026-05-09T18:50:57.6662416Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T18:50:57.6673289Z   GITHUB_AW_OTEL_TRACE_ID: 9be79f811a481947cc30da41afffae00
+2026-05-09T18:50:57.6673933Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: e809c7dc79d314d4
+2026-05-09T18:50:57.6674482Z   GITHUB_AW_OTEL_JOB_START_MS: 1778352657602
+2026-05-09T18:50:57.6674986Z   GH_AW_INFO_ENGINE_ID: copilot
+2026-05-09T18:50:57.6675465Z   GH_AW_INFO_ENGINE_NAME: GitHub Copilot CLI
+2026-05-09T18:50:57.6675991Z   GH_AW_INFO_MODEL: claude-sonnet-4.6
+2026-05-09T18:50:57.6676477Z   GH_AW_INFO_VERSION: 1.0.40
+2026-05-09T18:50:57.6676907Z   GH_AW_INFO_AGENT_VERSION: 1.0.40
+2026-05-09T18:50:57.6677370Z   GH_AW_INFO_CLI_VERSION: v0.71.5
+2026-05-09T18:50:57.6677883Z   GH_AW_INFO_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T18:50:57.6678416Z   GH_AW_INFO_EXPERIMENTAL: false
+2026-05-09T18:50:57.6678889Z   GH_AW_INFO_SUPPORTS_TOOLS_ALLOWLIST: true
+2026-05-09T18:50:57.6679568Z   GH_AW_INFO_STAGED: false
+2026-05-09T18:50:57.6681019Z   GH_AW_INFO_ALLOWED_DOMAINS: ["defaults","github","go","node","python","ruby","rust","java","dotnet","php","dart","terraform","linux-distros","openapi.vercel.sh","changie.dev"]
+2026-05-09T18:50:57.6683300Z   GH_AW_INFO_FIREWALL_ENABLED: true
+2026-05-09T18:50:57.6683790Z   GH_AW_INFO_AWF_VERSION: v0.25.40
+2026-05-09T18:50:57.6684249Z   GH_AW_INFO_AWMG_VERSION: 
+2026-05-09T18:50:57.6684879Z   GH_AW_INFO_FIREWALL_TYPE: squid
+2026-05-09T18:50:57.6685330Z   GH_AW_COMPILED_STRICT: true
+2026-05-09T18:50:57.6685756Z ##[endgroup]
+2026-05-09T18:50:57.8694471Z Starting context variable validation...
+2026-05-09T18:50:57.8703085Z ✓ github.event.organization.id is valid: 283041597
+2026-05-09T18:50:57.8707318Z ✓ github.event.repository.id is valid: 1231499217
+2026-05-09T18:50:57.8711084Z ✓ github.event.sender.id is valid: 6295280
+2026-05-09T18:50:57.8716355Z Validated 3 context variables
+2026-05-09T18:50:57.8719351Z ✅ All context variables validated successfully
+2026-05-09T18:50:57.8724167Z Lockdown mode not explicitly enabled, skipping validation
+2026-05-09T18:50:57.8727192Z Repository visibility: unknown
+2026-05-09T18:50:57.8731430Z Compiled with strict mode: true
+2026-05-09T18:50:57.8794378Z Generated aw_info.json at: /tmp/gh-aw/aw_info.json
+2026-05-09T18:50:57.8798495Z {
+2026-05-09T18:50:57.8799052Z   "engine_id": "copilot",
+2026-05-09T18:50:57.8841346Z   "engine_name": "GitHub Copilot CLI",
+2026-05-09T18:50:57.8841988Z   "model": "claude-sonnet-4.6",
+2026-05-09T18:50:57.8842446Z   "version": "1.0.40",
+2026-05-09T18:50:57.8842864Z   "agent_version": "1.0.40",
+2026-05-09T18:50:57.8843351Z   "workflow_name": "Weekly Real-World Testing",
+2026-05-09T18:50:57.8843882Z   "experimental": false,
+2026-05-09T18:50:57.8844319Z   "supports_tools_allowlist": true,
+2026-05-09T18:50:57.8845235Z   "run_id": 25609073968,
+2026-05-09T18:50:57.8845653Z   "run_number": 6,
+2026-05-09T18:50:57.8846026Z   "run_attempt": "1",
+2026-05-09T18:50:57.8846447Z   "repository": "dollarlint/dollarlint",
+2026-05-09T18:50:57.8847034Z   "ref": "refs/heads/main",
+2026-05-09T18:50:57.8847521Z   "sha": "d09bf40d24d3d947fd85b587b2439006ebb118ce",
+2026-05-09T18:50:57.8848424Z   "actor": "agorischek",
+2026-05-09T18:50:57.8848849Z   "event_name": "workflow_dispatch",
+2026-05-09T18:50:57.8849318Z   "target_repo": "",
+2026-05-09T18:50:57.8849700Z   "staged": false,
+2026-05-09T18:50:57.8850312Z   "allowed_domains": [
+2026-05-09T18:50:57.8850712Z     "defaults",
+2026-05-09T18:50:57.8851068Z     "github",
+2026-05-09T18:50:57.8851421Z     "go",
+2026-05-09T18:50:57.8852146Z     "node",
+2026-05-09T18:50:57.8852494Z     "python",
+2026-05-09T18:50:57.8852849Z     "ruby",
+2026-05-09T18:50:57.8853191Z     "rust",
+2026-05-09T18:50:57.8853529Z     "java",
+2026-05-09T18:50:57.8853868Z     "dotnet",
+2026-05-09T18:50:57.8854207Z     "php",
+2026-05-09T18:50:57.8854536Z     "dart",
+2026-05-09T18:50:57.8854867Z     "terraform",
+2026-05-09T18:50:57.8855240Z     "linux-distros",
+2026-05-09T18:50:57.8855645Z     "openapi.vercel.sh",
+2026-05-09T18:50:57.8856046Z     "changie.dev"
+2026-05-09T18:50:57.8856412Z   ],
+2026-05-09T18:50:57.8856759Z   "firewall_enabled": true,
+2026-05-09T18:50:57.8857634Z   "awf_version": "v0.25.40",
+2026-05-09T18:50:57.8858088Z   "awmg_version": "",
+2026-05-09T18:50:57.8858472Z   "steps": {
+2026-05-09T18:50:57.8858828Z     "firewall": "squid"
+2026-05-09T18:50:57.8859213Z   },
+2026-05-09T18:50:57.8859576Z   "created_at": "2026-05-09T18:50:57.873Z",
+2026-05-09T18:50:57.8860256Z   "cli_version": "v0.71.5"
+2026-05-09T18:50:57.8860649Z }
+2026-05-09T18:50:57.8894648Z Generated workflow overview in step summary

@@ -1,0 +1,32 @@
+﻿2026-05-09T18:57:27.0176690Z ##[group]Run github/gh-aw-actions/setup@v0.71.5
+2026-05-09T18:57:27.0177667Z with:
+2026-05-09T18:57:27.0178139Z   destination: /home/runner/work/_temp/gh-aw/actions
+2026-05-09T18:57:27.0178719Z   job-name: safe_outputs
+2026-05-09T18:57:27.0179933Z   trace-id: 9be79f811a481947cc30da41afffae00
+2026-05-09T18:57:27.0180507Z   safe-output-artifact-client: false
+2026-05-09T18:57:27.0181427Z env:
+2026-05-09T18:57:27.0181813Z   CANDIDATE_REPOS: 
+2026-05-09T18:57:27.0183946Z   MAX_REPOS: 5
+2026-05-09T18:57:27.0186471Z   GH_AW_CALLER_WORKFLOW_ID: dollarlint/dollarlint/weekly-real-world-testing
+2026-05-09T18:57:27.0187276Z   GH_AW_DETECTION_CONCLUSION: success
+2026-05-09T18:57:27.0187774Z   GH_AW_DETECTION_REASON: 
+2026-05-09T18:57:27.0188699Z   GH_AW_EFFECTIVE_TOKENS: 1875356
+2026-05-09T18:57:27.0189184Z   GH_AW_ENGINE_ID: copilot
+2026-05-09T18:57:27.0189679Z   GH_AW_ENGINE_MODEL: claude-sonnet-4.6
+2026-05-09T18:57:27.0190182Z   GH_AW_ENGINE_VERSION: 1.0.40
+2026-05-09T18:57:27.0191077Z   GH_AW_WORKFLOW_ID: weekly-real-world-testing
+2026-05-09T18:57:27.0191727Z   GH_AW_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T18:57:27.0192359Z   GH_AW_SETUP_WORKFLOW_NAME: Weekly Real-World Testing
+2026-05-09T18:57:27.0193392Z   GH_AW_CURRENT_WORKFLOW_REF: dollarlint/dollarlint/.github/workflows/weekly-real-world-testing.lock.yml@refs/heads/main
+2026-05-09T18:57:27.0194363Z   GH_AW_INFO_VERSION: 1.0.40
+2026-05-09T18:57:27.0195030Z ##[endgroup]
+2026-05-09T18:57:28.6898476Z Successfully copied 363 files to /home/runner/work/_temp/gh-aw/actions
+2026-05-09T18:57:28.6899604Z Successfully copied 25 mcp-scripts files to /home/runner/work/_temp/gh-aw/mcp-scripts
+2026-05-09T18:57:28.6901763Z Successfully copied 62 safe-outputs files to /home/runner/work/_temp/gh-aw/safeoutputs
+2026-05-09T18:57:28.6902813Z [otlp] INPUT_TRACE_ID=9be79f811a481947cc30da41afffae00 (will reuse activation trace)
+2026-05-09T18:57:28.6904650Z [otlp] GH_AW_OTLP_ENDPOINTS not set, skipping setup span
+2026-05-09T18:57:28.6907308Z [otlp] resolved trace-id=9be79f811a481947cc30da41afffae00
+2026-05-09T18:57:28.6908648Z [otlp] trace-id=9be79f811a481947cc30da41afffae00 written to GITHUB_OUTPUT
+2026-05-09T18:57:28.6909941Z [otlp] GITHUB_AW_OTEL_TRACE_ID written to GITHUB_ENV
+2026-05-09T18:57:28.6911627Z [otlp] GITHUB_AW_OTEL_PARENT_SPAN_ID written to GITHUB_ENV
+2026-05-09T18:57:28.6912453Z [otlp] GITHUB_AW_OTEL_JOB_START_MS written to GITHUB_ENV

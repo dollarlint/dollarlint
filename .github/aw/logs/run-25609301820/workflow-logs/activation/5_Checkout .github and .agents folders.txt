@@ -1,0 +1,204 @@
+﻿2026-05-09T19:02:02.9708312Z ##[group]Run actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+2026-05-09T19:02:02.9709030Z with:
+2026-05-09T19:02:02.9709406Z   persist-credentials: false
+2026-05-09T19:02:02.9710077Z   sparse-checkout: .github
+.agents
+.claude
+.codex
+.crush
+.gemini
+.opencode
+.pi
+
+2026-05-09T19:02:02.9710850Z   sparse-checkout-cone-mode: true
+2026-05-09T19:02:02.9711333Z   fetch-depth: 1
+2026-05-09T19:02:02.9711735Z   repository: dollarlint/dollarlint
+2026-05-09T19:02:02.9712642Z   token: ***
+2026-05-09T19:02:02.9713006Z   ssh-strict: true
+2026-05-09T19:02:02.9713388Z   ssh-user: git
+2026-05-09T19:02:02.9713750Z   clean: true
+2026-05-09T19:02:02.9714115Z   fetch-tags: false
+2026-05-09T19:02:02.9714503Z   show-progress: true
+2026-05-09T19:02:02.9714891Z   lfs: false
+2026-05-09T19:02:02.9715255Z   submodules: false
+2026-05-09T19:02:02.9715645Z   set-safe-directory: true
+2026-05-09T19:02:02.9716071Z env:
+2026-05-09T19:02:02.9716433Z   CANDIDATE_REPOS: 
+2026-05-09T19:02:02.9716806Z   MAX_REPOS: 5
+2026-05-09T19:02:02.9728160Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T19:02:02.9763966Z   GITHUB_AW_OTEL_TRACE_ID: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:02:02.9764616Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: 1d92b25b59892842
+2026-05-09T19:02:02.9765200Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353322745
+2026-05-09T19:02:02.9765706Z ##[endgroup]
+2026-05-09T19:02:03.7255726Z Syncing repository: dollarlint/dollarlint
+2026-05-09T19:02:03.7257475Z ##[group]Getting Git version info
+2026-05-09T19:02:03.7258175Z Working directory is '/home/runner/work/dollarlint/dollarlint'
+2026-05-09T19:02:03.7259118Z [command]/usr/bin/git version
+2026-05-09T19:02:03.7259574Z git version 2.43.0
+2026-05-09T19:02:03.7260963Z ##[endgroup]
+2026-05-09T19:02:03.7265286Z Temporarily overriding HOME='/home/runner/work/_temp/7977db4a-9a90-4cc6-b7bb-1a53f8b19972' before making global git config changes
+2026-05-09T19:02:03.7266862Z Adding repository directory to the temporary git global config as a safe directory
+2026-05-09T19:02:03.7267920Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/dollarlint/dollarlint
+2026-05-09T19:02:03.7269402Z Deleting the contents of '/home/runner/work/dollarlint/dollarlint'
+2026-05-09T19:02:03.7270378Z ##[group]Initializing the repository
+2026-05-09T19:02:03.7271005Z [command]/usr/bin/git init /home/runner/work/dollarlint/dollarlint
+2026-05-09T19:02:03.7271905Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-05-09T19:02:03.7273164Z hint: is subject to change. To configure the initial branch name to use in all
+2026-05-09T19:02:03.7274042Z hint: of your new repositories, which will suppress this warning, call:
+2026-05-09T19:02:03.7274685Z hint: 
+2026-05-09T19:02:03.7275120Z hint: 	git config --global init.defaultBranch <name>
+2026-05-09T19:02:03.7275666Z hint: 
+2026-05-09T19:02:03.7276184Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-05-09T19:02:03.7277040Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-05-09T19:02:03.7277718Z hint: 
+2026-05-09T19:02:03.7278068Z hint: 	git branch -m <name>
+2026-05-09T19:02:03.7278752Z Initialized empty Git repository in /home/runner/work/dollarlint/dollarlint/.git/
+2026-05-09T19:02:03.7280368Z [command]/usr/bin/git remote add origin https://github.com/dollarlint/dollarlint
+2026-05-09T19:02:03.7281775Z ##[endgroup]
+2026-05-09T19:02:03.7282638Z ##[group]Disabling automatic garbage collection
+2026-05-09T19:02:03.7283237Z [command]/usr/bin/git config --local gc.auto 0
+2026-05-09T19:02:03.7284464Z ##[endgroup]
+2026-05-09T19:02:03.7285062Z ##[group]Setting up auth
+2026-05-09T19:02:03.7285507Z Removing SSH command configuration
+2026-05-09T19:02:03.7286224Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-05-09T19:02:03.7288170Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-05-09T19:02:03.7289917Z Removing HTTP extra header
+2026-05-09T19:02:03.7290699Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-05-09T19:02:03.7293167Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-05-09T19:02:03.7295282Z Removing includeIf entries pointing to credentials config files
+2026-05-09T19:02:03.7296134Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-05-09T19:02:03.7297799Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-05-09T19:02:03.7300416Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-05-09T19:02:03.7303256Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/dollarlint/dollarlint/.git.path /home/runner/work/_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.7306028Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/dollarlint/dollarlint/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.7308625Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.7311062Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.7313164Z ##[endgroup]
+2026-05-09T19:02:03.7313931Z ##[group]Fetching the repository
+2026-05-09T19:02:03.7315281Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin +1613f9485076dd8f106fc3608b974604b68a2c92:refs/remotes/origin/main
+2026-05-09T19:02:03.7316914Z From https://github.com/dollarlint/dollarlint
+2026-05-09T19:02:03.7317599Z  * [new ref]         1613f9485076dd8f106fc3608b974604b68a2c92 -> origin/main
+2026-05-09T19:02:03.7318807Z [command]/usr/bin/git branch --list --remote origin/main
+2026-05-09T19:02:03.7319377Z   origin/main
+2026-05-09T19:02:03.7320312Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+2026-05-09T19:02:03.7320907Z 1613f9485076dd8f106fc3608b974604b68a2c92
+2026-05-09T19:02:03.7322369Z ##[endgroup]
+2026-05-09T19:02:03.7323128Z ##[group]Determining the checkout info
+2026-05-09T19:02:03.7323859Z ##[endgroup]
+2026-05-09T19:02:03.7324574Z ##[group]Setting up sparse checkout
+2026-05-09T19:02:03.7325499Z [command]/usr/bin/git sparse-checkout set .github .agents .claude .codex .crush .gemini .opencode .pi
+2026-05-09T19:02:03.7327074Z ##[endgroup]
+2026-05-09T19:02:03.7327679Z ##[group]Checking out the ref
+2026-05-09T19:02:03.7328362Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-05-09T19:02:03.9683879Z Switched to a new branch 'main'
+2026-05-09T19:02:03.9684626Z branch 'main' set up to track 'origin/main'.
+2026-05-09T19:02:03.9686016Z ##[endgroup]
+2026-05-09T19:02:03.9686927Z [command]/usr/bin/git log -1 --format=%H
+2026-05-09T19:02:03.9687498Z 1613f9485076dd8f106fc3608b974604b68a2c92
+2026-05-09T19:02:03.9688705Z ##[group]Removing auth
+2026-05-09T19:02:03.9689134Z Removing SSH command configuration
+2026-05-09T19:02:03.9689830Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-05-09T19:02:03.9691755Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-05-09T19:02:03.9694011Z Removing HTTP extra header
+2026-05-09T19:02:03.9694816Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-05-09T19:02:03.9697160Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-05-09T19:02:03.9699295Z Removing includeIf entries pointing to credentials config files
+2026-05-09T19:02:03.9700162Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-05-09T19:02:03.9701050Z includeif.gitdir:/home/runner/work/dollarlint/dollarlint/.git.path
+2026-05-09T19:02:03.9701973Z includeif.gitdir:/home/runner/work/dollarlint/dollarlint/.git/worktrees/*.path
+2026-05-09T19:02:03.9702946Z includeif.gitdir:/github/workspace/.git.path
+2026-05-09T19:02:03.9703598Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-05-09T19:02:03.9705128Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/dollarlint/dollarlint/.git.path
+2026-05-09T19:02:03.9706334Z /home/runner/work/_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.9708456Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/dollarlint/dollarlint/.git.path /home/runner/work/_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.9710785Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/dollarlint/dollarlint/.git/worktrees/*.path
+2026-05-09T19:02:03.9711998Z /home/runner/work/_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.9714410Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/dollarlint/dollarlint/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.9716641Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-05-09T19:02:03.9717833Z /github/runner_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.9719793Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.9721849Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-05-09T19:02:03.9723113Z /github/runner_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.9725124Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config
+2026-05-09T19:02:03.9727348Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-05-09T19:02:03.9729234Z Removing credentials config '/home/runner/work/_temp/git-credentials-d156628c-3148-4fcb-8bf1-bc1caa29b35f.config'
+2026-05-09T19:02:03.9730711Z ##[endgroup]

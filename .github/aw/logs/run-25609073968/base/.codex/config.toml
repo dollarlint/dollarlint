@@ -1,0 +1,3 @@
+[mcp_servers.dollarlint_repo]
+command = "go"
+args = ["run", "./tools/repo-mcp"]

@@ -1,0 +1,135 @@
+﻿2026-05-09T18:56:23.5517961Z ##[group]Run # Fix permissions on firewall logs/audit dirs so they can be uploaded as artifacts
+2026-05-09T18:56:23.5518277Z [36;1m# Fix permissions on firewall logs/audit dirs so they can be uploaded as artifacts[0m
+2026-05-09T18:56:23.5518426Z [36;1m# AWF runs with sudo, creating files owned by root[0m
+2026-05-09T18:56:23.5518623Z [36;1msudo chmod -R a+r /tmp/gh-aw/sandbox/firewall 2>/dev/null || true[0m
+2026-05-09T18:56:23.5518951Z [36;1m# Only run awf logs summary if awf command exists (it may not be installed if workflow failed before install step)[0m
+2026-05-09T18:56:23.5519070Z [36;1mif command -v awf &> /dev/null; then[0m
+2026-05-09T18:56:23.5519204Z [36;1m  awf logs summary | tee -a "$GITHUB_STEP_SUMMARY"[0m
+2026-05-09T18:56:23.5519281Z [36;1melse[0m
+2026-05-09T18:56:23.5519457Z [36;1m  echo 'AWF binary not installed, skipping firewall log summary'[0m
+2026-05-09T18:56:23.5519530Z [36;1mfi[0m
+2026-05-09T18:56:23.5539574Z shell: /usr/bin/bash -e {0}
+2026-05-09T18:56:23.5539652Z env:
+2026-05-09T18:56:23.5539760Z   CANDIDATE_REPOS: 
+2026-05-09T18:56:23.5539833Z   MAX_REPOS: 5
+2026-05-09T18:56:23.5539912Z   DEFAULT_BRANCH: main
+2026-05-09T18:56:23.5539993Z   GH_AW_ASSETS_ALLOWED_EXTS: 
+2026-05-09T18:56:23.5540072Z   GH_AW_ASSETS_BRANCH: 
+2026-05-09T18:56:23.5540149Z   GH_AW_ASSETS_MAX_SIZE_KB: 0
+2026-05-09T18:56:23.5540284Z   GH_AW_MCP_LOG_DIR: /tmp/gh-aw/mcp-logs/safeoutputs
+2026-05-09T18:56:23.5540421Z   GH_AW_WORKFLOW_ID_SANITIZED: weeklyrealworldtesting
+2026-05-09T18:56:23.5546385Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T18:56:23.5546748Z   GITHUB_AW_OTEL_TRACE_ID: 9be79f811a481947cc30da41afffae00
+2026-05-09T18:56:23.5546863Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: 5146b91f02588dc1
+2026-05-09T18:56:23.5546964Z   GITHUB_AW_OTEL_JOB_START_MS: 1778352673706
+2026-05-09T18:56:23.5547042Z   GOTOOLCHAIN: local
+2026-05-09T18:56:23.5547285Z   GOROOT: /opt/hostedtoolcache/go/1.25.9/x64
+2026-05-09T18:56:23.5547404Z   GH_AW_AGENT_OUTPUT: /tmp/gh-aw/agent_output.json
+2026-05-09T18:56:23.5547490Z   GH_AW_EFFECTIVE_TOKENS: 1875356
+2026-05-09T18:56:23.5547602Z   AWF_LOGS_DIR: /tmp/gh-aw/sandbox/firewall/logs
+2026-05-09T18:56:23.5547677Z ##[endgroup]
+2026-05-09T18:56:23.8725647Z <details>
+2026-05-09T18:56:23.8726126Z <summary>Firewall Activity</summary>
+2026-05-09T18:56:23.8726501Z 
+2026-05-09T18:56:23.8726951Z ▼ 50 requests | 50 allowed | 0 blocked | 1 unique domain
+2026-05-09T18:56:23.8727317Z 
+2026-05-09T18:56:23.8727537Z | Domain | Allowed | Denied |
+2026-05-09T18:56:23.8727993Z |--------|---------|--------|
+2026-05-09T18:56:23.8728467Z | api.githubcopilot.com | 50 | 0 |
+2026-05-09T18:56:23.8728743Z 
+2026-05-09T18:56:23.8728939Z <details>
+2026-05-09T18:56:23.8729344Z <summary>Policy Rules</summary>
+2026-05-09T18:56:23.8729592Z 
+2026-05-09T18:56:23.8729796Z | Rule | Action | Hits | Description |
+2026-05-09T18:56:23.8730288Z |------|--------|------|-------------|
+2026-05-09T18:56:23.8731196Z | deny-unsafe-ports | 🚫 deny | 0 | Deny requests to ports not in Safe_ports ACL (only 80, 443, and user-specified ports allowed) |
+2026-05-09T18:56:23.8732238Z | deny-connect-unsafe-ports | 🚫 deny | 0 | Deny CONNECT (HTTPS) to ports not in Safe_ports ACL |
+2026-05-09T18:56:23.8733183Z | deny-raw-ipv4 | 🚫 deny | 0 | Deny requests to raw IPv4 addresses (bypasses domain filtering) |
+2026-05-09T18:56:23.8734247Z | deny-raw-ipv6 | 🚫 deny | 0 | Deny requests to raw IPv6 addresses (bypasses domain filtering) |
+2026-05-09T18:56:23.8735147Z | allow-both-plain | ✅ allow | 50 | Allow HTTP and HTTPS traffic to these domains |
+2026-05-09T18:56:23.8736032Z | allow-both-regex | ✅ allow | 0 | Allow HTTP and HTTPS traffic matching these patterns |
+2026-05-09T18:56:23.8736920Z | deny-default | 🚫 deny | 0 | Deny all traffic not matching any allow rule (default deny) |
+2026-05-09T18:56:23.8737352Z 
+2026-05-09T18:56:23.8737566Z </details>
+2026-05-09T18:56:23.8737793Z 
+2026-05-09T18:56:23.8737996Z </details>
+2026-05-09T18:56:23.8738224Z 

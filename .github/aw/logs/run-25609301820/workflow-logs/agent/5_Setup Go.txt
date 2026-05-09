@@ -1,0 +1,161 @@
+﻿2026-05-09T19:02:17.5381220Z ##[group]Run actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
+2026-05-09T19:02:17.5381594Z with:
+2026-05-09T19:02:17.5381762Z   go-version: 1.26.3
+2026-05-09T19:02:17.5381955Z   cache: false
+2026-05-09T19:02:17.5382137Z   check-latest: false
+2026-05-09T19:02:17.5382455Z   token: ***
+2026-05-09T19:02:17.5382623Z env:
+2026-05-09T19:02:17.5382784Z   CANDIDATE_REPOS: 
+2026-05-09T19:02:17.5382963Z   MAX_REPOS: 5
+2026-05-09T19:02:17.5383141Z   DEFAULT_BRANCH: main
+2026-05-09T19:02:17.5383339Z   GH_AW_ASSETS_ALLOWED_EXTS: 
+2026-05-09T19:02:17.5383894Z   GH_AW_ASSETS_BRANCH: 
+2026-05-09T19:02:17.5384102Z   GH_AW_ASSETS_MAX_SIZE_KB: 0
+2026-05-09T19:02:17.5384357Z   GH_AW_MCP_LOG_DIR: /tmp/gh-aw/mcp-logs/safeoutputs
+2026-05-09T19:02:17.5384691Z   GH_AW_WORKFLOW_ID_SANITIZED: weeklyrealworldtesting
+2026-05-09T19:02:17.5390678Z   GH_AW_MODEL_MULTIPLIERS: {
+  "version": "1",
+  "description": "Effective Tokens (ET) computation data per the gh-aw Effective Tokens Specification v0.2.0. Token class weights are applied first to normalize across token classes, then the per-model multiplier scales the result relative to the reference model.",
+  "reference_model": "claude-sonnet-4.5",
+  "token_class_weights": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "output": 4.0,
+    "reasoning": 4.0,
+    "cache_write": 1.0
+  },
+  "multipliers": {
+    "claude-haiku-4-5": 0.1,
+    "claude-haiku-4.5": 0.1,
+    "claude-3-5-haiku": 0.1,
+    "claude-3-haiku": 0.1,
+    "claude-sonnet-4": 1.0,
+    "claude-sonnet-4-5": 1.0,
+    "claude-sonnet-4.5": 1.0,
+    "claude-sonnet-4.6": 1.0,
+    "claude-3-5-sonnet": 1.0,
+    "claude-3-7-sonnet": 1.0,
+    "claude-3-sonnet": 1.0,
+    "claude-opus-4": 5.0,
+    "claude-opus-4-1": 5.0,
+    "claude-opus-4-5": 5.0,
+    "claude-opus-4-6": 5.0,
+    "claude-opus-4-7": 5.0,
+    "claude-opus-4.5": 5.0,
+    "claude-opus-4.6": 5.0,
+    "claude-3-5-opus": 5.0,
+    "claude-3-opus": 5.0,
+    "gpt-4o": 1.0,
+    "gpt-4o-mini": 0.1,
+    "gpt-4.1": 1.0,
+    "gpt-4.1-2025-04-14": 1.0,
+    "gpt-41-copilot": 1.0,
+    "gpt-4.1-mini": 0.1,
+    "gpt-4.1-nano": 0.05,
+    "gpt-4-turbo": 1.0,
+    "gpt-4": 1.0,
+    "gpt-5": 1.0,
+    "gpt-5-mini": 0.33,
+    "gpt-5-nano": 0.05,
+    "gpt-5-pro": 2.0,
+    "gpt-5.1": 1.0,
+    "gpt-5.1-codex": 1.0,
+    "gpt-5.1-codex-mini": 0.33,
+    "gpt-5.1-codex-max": 1.0,
+    "gpt-5.2": 1.0,
+    "gpt-5.2-codex": 1.0,
+    "gpt-5.2-pro": 2.0,
+    "gpt-5.3-codex": 1.0,
+    "gpt-5.4": 1.0,
+    "gpt-5.4-mini": 0.33,
+    "gpt-5.4-pro": 2.0,
+    "gpt-5.5": 1.0,
+    "gpt-5.5-pro": 2.0,
+    "o1": 3.0,
+    "o1-mini": 0.5,
+    "o1-pro": 10.0,
+    "o3": 3.0,
+    "o3-mini": 0.5,
+    "o3-pro": 10.0,
+    "o4-mini": 0.5,
+    "gemini-2.5-pro": 1.0,
+    "gemini-2.5-flash": 0.2,
+    "gemini-2.5-flash-image": 0.2,
+    "gemini-2.5-flash-lite": 0.1,
+    "gemini-2.0-flash": 0.1,
+    "gemini-1.5-pro": 1.0,
+    "gemini-1.5-flash": 0.1,
+    "gemini-3-flash-preview": 0.33,
+    "gemini-3-pro-preview": 6.0,
+    "gemini-3-pro-image-preview": 6.0,
+    "gemini-3.1-pro-preview": 6.0,
+    "gemini-3.1-flash-lite-preview": 0.1,
+    "gemini-3.1-flash-image-preview": 0.33
+  }
+}
+2026-05-09T19:02:17.5397543Z   GITHUB_AW_OTEL_TRACE_ID: 2b44c10eb466e49ac4f139a9c5909344
+2026-05-09T19:02:17.5397891Z   GITHUB_AW_OTEL_PARENT_SPAN_ID: dc173ed08ab73d05
+2026-05-09T19:02:17.5398205Z   GITHUB_AW_OTEL_JOB_START_MS: 1778353336808
+2026-05-09T19:02:17.5398455Z ##[endgroup]
+2026-05-09T19:02:17.6801327Z Setup go version spec 1.26.3
+2026-05-09T19:02:17.6814875Z Attempting to download 1.26.3...
+2026-05-09T19:02:18.2160037Z matching 1.26.3...
+2026-05-09T19:02:18.2186210Z Acquiring 1.26.3 from https://github.com/actions/go-versions/releases/download/1.26.3-25533533231/go-1.26.3-linux-x64.tar.gz
+2026-05-09T19:02:18.6614902Z Extracting Go...
+2026-05-09T19:02:18.6721228Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/390febe8-9e94-4728-a344-3932cd67111d -f /home/runner/work/_temp/56460f13-fc6c-4f5e-a030-e5d80bdfcb2d
+2026-05-09T19:02:20.2547831Z Successfully extracted go to /home/runner/work/_temp/390febe8-9e94-4728-a344-3932cd67111d
+2026-05-09T19:02:20.2548807Z Adding to the cache ...
+2026-05-09T19:02:25.8675096Z Successfully cached go to /opt/hostedtoolcache/go/1.26.3/x64
+2026-05-09T19:02:25.8699765Z Added go to the path
+2026-05-09T19:02:25.8700207Z Successfully set up Go version 1.26.3
+2026-05-09T19:02:25.8869209Z go version go1.26.3 linux/amd64
+2026-05-09T19:02:25.8869430Z 
+2026-05-09T19:02:25.8869709Z ##[group]go env
+2026-05-09T19:02:26.1520019Z AR='ar'
+2026-05-09T19:02:26.1520399Z CC='gcc'
+2026-05-09T19:02:26.1522778Z CGO_CFLAGS='-O2 -g'
+2026-05-09T19:02:26.1523135Z CGO_CPPFLAGS=''
+2026-05-09T19:02:26.1523648Z CGO_CXXFLAGS='-O2 -g'
+2026-05-09T19:02:26.1523928Z CGO_ENABLED='1'
+2026-05-09T19:02:26.1524127Z CGO_FFLAGS='-O2 -g'
+2026-05-09T19:02:26.1524322Z CGO_LDFLAGS='-O2 -g'
+2026-05-09T19:02:26.1524508Z CXX='g++'
+2026-05-09T19:02:26.1524677Z GCCGO='gccgo'
+2026-05-09T19:02:26.1524851Z GO111MODULE=''
+2026-05-09T19:02:26.1525018Z GOAMD64='v1'
+2026-05-09T19:02:26.1525239Z GOARCH='amd64'
+2026-05-09T19:02:26.1525405Z GOAUTH='netrc'
+2026-05-09T19:02:26.1525577Z GOBIN=''
+2026-05-09T19:02:26.1525767Z GOCACHE='/home/runner/.cache/go-build'
+2026-05-09T19:02:26.1526034Z GOCACHEPROG=''
+2026-05-09T19:02:26.1526204Z GODEBUG=''
+2026-05-09T19:02:26.1526387Z GOENV='/home/runner/.config/go/env'
+2026-05-09T19:02:26.1526608Z GOEXE=''
+2026-05-09T19:02:26.1526772Z GOEXPERIMENT=''
+2026-05-09T19:02:26.1527006Z GOFIPS140='off'
+2026-05-09T19:02:26.1527173Z GOFLAGS=''
+2026-05-09T19:02:26.1527851Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build3999170527=/tmp/go-build -gno-record-gcc-switches'
+2026-05-09T19:02:26.1528510Z GOHOSTARCH='amd64'
+2026-05-09T19:02:26.1528702Z GOHOSTOS='linux'
+2026-05-09T19:02:26.1528877Z GOINSECURE=''
+2026-05-09T19:02:26.1529210Z GOMOD='/home/runner/work/dollarlint/dollarlint/go.mod'
+2026-05-09T19:02:26.1529539Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-05-09T19:02:26.1529781Z GONOPROXY=''
+2026-05-09T19:02:26.1530181Z GONOSUMDB=''
+2026-05-09T19:02:26.1530341Z GOOS='linux'
+2026-05-09T19:02:26.1530524Z GOPATH='/home/runner/go'
+2026-05-09T19:02:26.1530726Z GOPRIVATE=''
+2026-05-09T19:02:26.1530950Z GOPROXY='https://proxy.golang.org,direct'
+2026-05-09T19:02:26.1531255Z GOROOT='/opt/hostedtoolcache/go/1.26.3/x64'
+2026-05-09T19:02:26.1531522Z GOSUMDB='sum.golang.org'
+2026-05-09T19:02:26.1531725Z GOTELEMETRY='local'
+2026-05-09T19:02:26.1531964Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-05-09T19:02:26.1532234Z GOTMPDIR=''
+2026-05-09T19:02:26.1532408Z GOTOOLCHAIN='local'
+2026-05-09T19:02:26.1532704Z GOTOOLDIR='/opt/hostedtoolcache/go/1.26.3/x64/pkg/tool/linux_amd64'
+2026-05-09T19:02:26.1533025Z GOVCS=''
+2026-05-09T19:02:26.1533199Z GOVERSION='go1.26.3'
+2026-05-09T19:02:26.1533377Z GOWORK=''
+2026-05-09T19:02:26.1533914Z PKG_CONFIG='pkg-config'
+2026-05-09T19:02:26.1534062Z 
+2026-05-09T19:02:26.1534441Z ##[endgroup]

@@ -1,0 +1,32 @@
+﻿2026-05-09T19:11:11.1897981Z Current runner version: '2.334.0'
+2026-05-09T19:11:11.1922689Z ##[group]Runner Image Provisioner
+2026-05-09T19:11:11.1923540Z Hosted Compute Agent
+2026-05-09T19:11:11.1924063Z Version: 20260415.520
+2026-05-09T19:11:11.1925055Z Commit: af089020f5f67b61ccc91db6c07980876c02bf7b
+2026-05-09T19:11:11.1925803Z Build Date: 2026-04-15T18:07:08Z
+2026-05-09T19:11:11.1926406Z Worker ID: {2ebd3d06-b094-4c56-8e47-86e97218e71e}
+2026-05-09T19:11:11.1927074Z Azure Region: northcentralus
+2026-05-09T19:11:11.1927649Z ##[endgroup]
+2026-05-09T19:11:11.1929003Z ##[group]VM Image
+2026-05-09T19:11:11.1929585Z - OS: Linux (x64)
+2026-05-09T19:11:11.1930101Z - Source: Docker
+2026-05-09T19:11:11.1930597Z - Name: ubuntu:24.04
+2026-05-09T19:11:11.1931069Z - Version: 20260504.56.2
+2026-05-09T19:11:11.1931602Z ##[endgroup]
+2026-05-09T19:11:11.1932860Z ##[group]GITHUB_TOKEN Permissions
+2026-05-09T19:11:11.1934978Z Contents: write
+2026-05-09T19:11:11.1935675Z Discussions: write
+2026-05-09T19:11:11.1936200Z Issues: write
+2026-05-09T19:11:11.1936968Z Metadata: read
+2026-05-09T19:11:11.1937485Z PullRequests: write
+2026-05-09T19:11:11.1937958Z ##[endgroup]
+2026-05-09T19:11:11.1940212Z Secret source: Actions
+2026-05-09T19:11:11.1940893Z Prepare workflow directory
+2026-05-09T19:11:11.2554368Z Prepare all required actions
+2026-05-09T19:11:11.2592571Z Getting action download info
+2026-05-09T19:11:11.8077645Z Download action repository 'github/gh-aw-actions@v0.71.5' (SHA:b8068426813005612b960b5ab0b8bd2c27142323)
+2026-05-09T19:11:12.4500207Z Download action repository 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c' (SHA:3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c)
+2026-05-09T19:11:12.7970948Z Download action repository 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd' (SHA:de0fac2e4500dabe0009e67214ff5f5447ce83dd)
+2026-05-09T19:11:12.8606917Z Download action repository 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3' (SHA:3a2844b7e9c422d3c10d287c895573f7108da1b3)
+2026-05-09T19:11:13.1818138Z Download action repository 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-05-09T19:11:13.5575910Z Complete job name: safe_outputs

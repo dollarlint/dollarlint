@@ -1,0 +1,140 @@
+[2026-05-09T19:02:52Z] [INFO] [difc] Guard policy: {"write-sink":{"accept":["*"]}}
+[2026-05-09T19:02:52Z] [INFO] [difc] Created write-sink guard with 1 accept patterns
+[2026-05-09T19:02:52Z] [INFO] [difc] Registered guard 'write-sink'
+[2026-05-09T19:02:52Z] [DEBUG] [backend] GetOrLaunch called for server: dollarlint-repo
+[2026-05-09T19:02:52Z] [INFO] [backend] Launching MCP backend server: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp]
+[2026-05-09T19:02:52Z] [INFO] [backend] [stderr] go: downloading github.com/mark3labs/mcp-go v0.52.0
+[2026-05-09T19:02:52Z] [INFO] [backend] [stderr] go: downloading github.com/bmatcuk/doublestar/v4 v4.10.0
+[2026-05-09T19:02:52Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/lipgloss v1.1.0
+[2026-05-09T19:02:52Z] [INFO] [backend] [stderr] go: downloading github.com/dlclark/regexp2 v1.12.0
+[2026-05-09T19:02:52Z] [INFO] [backend] [stderr] go: downloading github.com/hashicorp/go-retryablehttp v0.7.8
+[2026-05-09T19:02:52Z] [INFO] [backend] [stderr] go: downloading github.com/pelletier/go-toml/v2 v2.3.1
+[2026-05-09T19:02:52Z] [INFO] [backend] [stderr] go: downloading github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+[2026-05-09T19:02:52Z] [INFO] [backend] [stderr] go: downloading github.com/tailscale/hujson v0.0.0-20260302212456-ecc657c15afd
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/titanous/json5 v1.0.0
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading gopkg.in/yaml.v3 v3.0.1
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/ansi v0.8.0
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/muesli/termenv v0.16.0
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/rivo/uniseg v0.4.7
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/hashicorp/go-cleanhttp v0.5.2
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/google/jsonschema-go v0.4.2
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/spf13/cast v1.7.1
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/yosida95/uritemplate/v3 v3.0.2
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/google/uuid v1.6.0
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading golang.org/x/text v0.37.0
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/term v0.2.1
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/mattn/go-runewidth v0.0.16
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/lucasb-eyer/go-colorful v1.2.0
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/aymanbagabas/go-osc52/v2 v2.0.1
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/mattn/go-isatty v0.0.20
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading golang.org/x/sys v0.30.0
+[2026-05-09T19:02:53Z] [INFO] [backend] [stderr] go: downloading github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e
+[2026-05-09T19:03:09Z] [INFO] [backend] [stderr] 2026/05/09 19:03:09 find repo root: exit status 128
+[2026-05-09T19:03:09Z] [INFO] [backend] [stderr] exit status 1
+[2026-05-09T19:03:10Z] [ERROR] [backend] MCP backend connection failed: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp], error=calling "initialize": EOF
+[2026-05-09T19:03:10Z] [ERROR] [backend] MCP backend connection failed: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp], error=failed to connect: calling "initialize": EOF
+[2026-05-09T19:03:10Z] [ERROR] [backend] Failed to register tools from dollarlint-repo (took 17.806713419s): failed to connect: failed to create connection: failed to connect: calling "initialize": EOF
+[2026-05-09T19:03:40Z] [DEBUG] [backend] GetOrLaunch called for server: dollarlint-repo
+[2026-05-09T19:03:40Z] [INFO] [backend] Launching MCP backend server: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp]
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/mark3labs/mcp-go v0.52.0
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/bmatcuk/doublestar/v4 v4.10.0
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/lipgloss v1.1.0
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/dlclark/regexp2 v1.12.0
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/hashicorp/go-retryablehttp v0.7.8
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/pelletier/go-toml/v2 v2.3.1
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/tailscale/hujson v0.0.0-20260302212456-ecc657c15afd
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/titanous/json5 v1.0.0
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading gopkg.in/yaml.v3 v3.0.1
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/ansi v0.8.0
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/muesli/termenv v0.16.0
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/rivo/uniseg v0.4.7
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/hashicorp/go-cleanhttp v0.5.2
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/google/jsonschema-go v0.4.2
+[2026-05-09T19:03:40Z] [INFO] [backend] [stderr] go: downloading github.com/spf13/cast v1.7.1
+[2026-05-09T19:03:41Z] [INFO] [backend] [stderr] go: downloading github.com/yosida95/uritemplate/v3 v3.0.2
+[2026-05-09T19:03:41Z] [INFO] [backend] [stderr] go: downloading github.com/google/uuid v1.6.0
+[2026-05-09T19:03:41Z] [INFO] [backend] [stderr] go: downloading golang.org/x/text v0.37.0
+[2026-05-09T19:03:41Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc
+[2026-05-09T19:03:41Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/term v0.2.1
+[2026-05-09T19:03:41Z] [INFO] [backend] [stderr] go: downloading github.com/mattn/go-runewidth v0.0.16
+[2026-05-09T19:03:41Z] [INFO] [backend] [stderr] go: downloading github.com/lucasb-eyer/go-colorful v1.2.0
+[2026-05-09T19:03:41Z] [INFO] [backend] [stderr] go: downloading github.com/aymanbagabas/go-osc52/v2 v2.0.1
+[2026-05-09T19:03:41Z] [INFO] [backend] [stderr] go: downloading github.com/mattn/go-isatty v0.0.20
+[2026-05-09T19:03:41Z] [INFO] [backend] [stderr] go: downloading golang.org/x/sys v0.30.0
+[2026-05-09T19:03:41Z] [INFO] [backend] [stderr] go: downloading github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e
+[2026-05-09T19:03:59Z] [INFO] [backend] [stderr] 2026/05/09 19:03:59 find repo root: exit status 128
+[2026-05-09T19:03:59Z] [INFO] [backend] [stderr] exit status 1
+[2026-05-09T19:03:59Z] [ERROR] [backend] MCP backend connection failed: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp], error=calling "initialize": EOF
+[2026-05-09T19:03:59Z] [ERROR] [backend] MCP backend connection failed: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp], error=failed to connect: calling "initialize": EOF
+[2026-05-09T19:04:10Z] [DEBUG] [backend] GetOrLaunch called for server: dollarlint-repo
+[2026-05-09T19:04:10Z] [INFO] [backend] Launching MCP backend server: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp]
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/mark3labs/mcp-go v0.52.0
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/bmatcuk/doublestar/v4 v4.10.0
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/lipgloss v1.1.0
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/dlclark/regexp2 v1.12.0
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/hashicorp/go-retryablehttp v0.7.8
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/pelletier/go-toml/v2 v2.3.1
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/tailscale/hujson v0.0.0-20260302212456-ecc657c15afd
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/titanous/json5 v1.0.0
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading gopkg.in/yaml.v3 v3.0.1
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/ansi v0.8.0
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/muesli/termenv v0.16.0
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/rivo/uniseg v0.4.7
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/hashicorp/go-cleanhttp v0.5.2
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/google/jsonschema-go v0.4.2
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/spf13/cast v1.7.1
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/yosida95/uritemplate/v3 v3.0.2
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading github.com/google/uuid v1.6.0
+[2026-05-09T19:04:10Z] [INFO] [backend] [stderr] go: downloading golang.org/x/text v0.37.0
+[2026-05-09T19:04:11Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc
+[2026-05-09T19:04:11Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/term v0.2.1
+[2026-05-09T19:04:11Z] [INFO] [backend] [stderr] go: downloading github.com/mattn/go-runewidth v0.0.16
+[2026-05-09T19:04:11Z] [INFO] [backend] [stderr] go: downloading github.com/lucasb-eyer/go-colorful v1.2.0
+[2026-05-09T19:04:11Z] [INFO] [backend] [stderr] go: downloading github.com/aymanbagabas/go-osc52/v2 v2.0.1
+[2026-05-09T19:04:11Z] [INFO] [backend] [stderr] go: downloading github.com/mattn/go-isatty v0.0.20
+[2026-05-09T19:04:11Z] [INFO] [backend] [stderr] go: downloading golang.org/x/sys v0.30.0
+[2026-05-09T19:04:11Z] [INFO] [backend] [stderr] go: downloading github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e
+[2026-05-09T19:04:28Z] [INFO] [backend] [stderr] 2026/05/09 19:04:28 find repo root: exit status 128
+[2026-05-09T19:04:28Z] [INFO] [backend] [stderr] exit status 1
+[2026-05-09T19:04:28Z] [ERROR] [backend] MCP backend connection failed: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp], error=calling "initialize": EOF
+[2026-05-09T19:04:28Z] [ERROR] [backend] MCP backend connection failed: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp], error=failed to connect: calling "initialize": EOF
+[2026-05-09T19:04:40Z] [DEBUG] [backend] GetOrLaunch called for server: dollarlint-repo
+[2026-05-09T19:04:40Z] [INFO] [backend] Launching MCP backend server: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp]
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/mark3labs/mcp-go v0.52.0
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/bmatcuk/doublestar/v4 v4.10.0
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/lipgloss v1.1.0
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/dlclark/regexp2 v1.12.0
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/hashicorp/go-retryablehttp v0.7.8
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/pelletier/go-toml/v2 v2.3.1
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/tailscale/hujson v0.0.0-20260302212456-ecc657c15afd
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/titanous/json5 v1.0.0
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading gopkg.in/yaml.v3 v3.0.1
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/ansi v0.8.0
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/muesli/termenv v0.16.0
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/rivo/uniseg v0.4.7
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/hashicorp/go-cleanhttp v0.5.2
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/google/jsonschema-go v0.4.2
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/spf13/cast v1.7.1
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/yosida95/uritemplate/v3 v3.0.2
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/google/uuid v1.6.0
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading golang.org/x/text v0.37.0
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/charmbracelet/x/term v0.2.1
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/mattn/go-runewidth v0.0.16
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/lucasb-eyer/go-colorful v1.2.0
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/aymanbagabas/go-osc52/v2 v2.0.1
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/mattn/go-isatty v0.0.20
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading golang.org/x/sys v0.30.0
+[2026-05-09T19:04:40Z] [INFO] [backend] [stderr] go: downloading github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e
+[2026-05-09T19:04:58Z] [INFO] [backend] [stderr] 2026/05/09 19:04:58 find repo root: exit status 128
+[2026-05-09T19:04:58Z] [INFO] [backend] [stderr] exit status 1
+[2026-05-09T19:04:58Z] [ERROR] [backend] MCP backend connection failed: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp], error=calling "initialize": EOF
+[2026-05-09T19:04:58Z] [ERROR] [backend] MCP backend connection failed: server=dollarlint-repo, command=docker, args=[run --rm -i -e NO_COLOR=... -e TERM=... -e PYTHONUNBUFFERED=... --entrypoint /bin/sh -v /home/runner/work/dollarlint/dollarlint:/home/runner/work/dollarlint/dollarlint:rw -e PATH=/usr... -e GITHUB_WORKSPACE=/hom... -e GOCACHE=/tmp... -e GOMODCACHE=/tmp... golang:1.26.3 -lc export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd /home/runner/work/dollarlint/dollarlint && go run ./tools/repo-mcp], error=failed to connect: calling "initialize": EOF

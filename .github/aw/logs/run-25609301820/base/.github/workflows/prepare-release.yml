@@ -1,0 +1,54 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release tag to create, for example v0.1.0
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Validate version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          case "$VERSION" in
+            v*) ;;
+            *)
+              echo "version must start with v"
+              exit 1
+              ;;
+          esac
+
+      - name: Ensure tag does not already exist
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "tag $VERSION already exists locally"
+            exit 1
+          fi
+          if git ls-remote --tags origin "refs/tags/$VERSION" | grep -q .; then
+            echo "tag $VERSION already exists on origin"
+            exit 1
+          fi
+
+      - name: Create and push tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$VERSION" -m "Release $VERSION"
+          git push origin "refs/tags/$VERSION"

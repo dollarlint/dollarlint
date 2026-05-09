@@ -110,12 +110,12 @@ timeout-minutes: 90
 
 # Weekly Real-World Testing
 
-Run DollarLint against a fresh, bounded set of public repositories, persist the structured result, and publish a Discussion report.
+Run DollarLint against a fresh, bounded set of public repositories, persist the structured MCP result, and publish a GitHub Discussion summary for this workflow run.
 
 ## Workflow
 
 1. Use the `dollarlint-repo` MCP server first.
-   - Call `real_world_history` to inspect `reports/real-world-results.json`.
+   - Call `real_world_history` to inspect the `reports/real-world-results.json` index and split entry files under `reports/real-world-results/`.
    - Use it to avoid repositories that have already been tested unless the manual input explicitly asks for a rerun.
 
 2. Choose the corpus.
@@ -155,11 +155,12 @@ Run DollarLint against a fresh, bounded set of public repositories, persist the 
    - Summarize product recommendations before finishing the run. Each recommendation must include a strength label of `high`, `med`, or `low`, based on frequency, severity, reproducibility, and expected user impact.
 
 5. Persist repository memory.
-   - Call `real_world_record_result` with the title, corpus, cache directory, command, output artifact, repositories, findings, product recommendations with strength labels in `productDecisions`, and follow-up notes.
-   - Also append a factual narrative entry to `reports/REAL-WORLD-TESTS.md` using the existing report shape.
-   - If files changed, request a pull request through the configured `create-pull-request` safe output. Keep the PR title concise and mention the structured result file.
+   - Call `real_world_record_result` with the title, corpus, cache directory, command, output artifact, repositories, dependency prep entries, findings, `productRecommendations` objects with `high`/`med`/`low` strength and rationale, product changes/decisions in `productDecisions`, and follow-up notes.
+   - Do not create or update Markdown report files in the repository. Durable repository memory belongs in the MCP structured result.
+   - If files changed, request a pull request through the configured `create-pull-request` safe output. Keep the PR title concise and mention the structured result entry.
 
-6. Publish the report.
+6. Publish the GitHub Agentic Workflow summary.
+   - This Discussion is only for this GitHub Agentic Workflow run. The durable source of truth must already be the MCP structured result from step 5.
    - Request one GitHub Discussion through the configured `create-discussion` safe output.
    - Title: use the run date and a short result summary, for example `2026-05-09 - 5 repo corpus`.
    - Body style:

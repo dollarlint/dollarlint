@@ -35,7 +35,7 @@ const validateArguments = `{
       <span class="eyebrow">Guide</span>
       <h1>MCP server</h1>
       <p class="lead">
-        Give agents and editors a structured way to run dollarlint without
+        Give agents and editors a structured way to run DollarLint without
         shelling out through a prompt.
       </p>
     </header>
@@ -65,7 +65,7 @@ const validateArguments = `{
     <h2>Use the validate tool</h2>
     <p>
       The server exposes a single <code>validate</code> tool. It validates JSON, JSONC,
-      JSON5, JSON Lines, YAML, and TOML files using your dollarlint config, then returns
+      JSON5, JSON Lines, YAML, and TOML files using your DollarLint config, then returns
       the same result shape as <code>dollarlint validate --format json</code>,
       wrapped with a boolean <code>ok</code> field.
     </p>
@@ -74,7 +74,7 @@ const validateArguments = `{
     <p>
       The only tool argument is <code>include</code>, an optional array of file
       or glob patterns relative to the server working directory. When omitted,
-      dollarlint uses configured discovery. Source locations are included
+      DollarLint uses configured discovery. Source locations are included
       automatically so agents can point fixes at the right line and column.
     </p>
 

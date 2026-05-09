@@ -51,7 +51,7 @@ schema = "./schemas/event.schema.json"`;
     <CodeBlock code={yamlRoot} language="yaml" />
     <p>
       The comment directive follows the YAML Language Server convention.
-      dollarlint scans the first 25 lines for it before looking for a root <code
+      DollarLint scans the first 25 lines for it before looking for a root <code
         >$schema</code
       > key.
     </p>
@@ -81,7 +81,7 @@ schema = "./schemas/event.schema.json"`;
     <div class="note">
       <p>
         Precedence order: in-file declaration first, then config association,
-        then dollarlint's built-in <code>.dollarlint.toml</code> association, then
+        then DollarLint's built-in <code>.dollarlint.toml</code> association, then
         catalog match. If none of those hit, the file gets skipped unless <code
           >schemas.requireCoverage = true</code
         >.

@@ -2,29 +2,36 @@
 import DocsLayout from "../../layouts/DocsLayout.astro";
 ---
 
-<DocsLayout title="Install dollarlint" current="/guides/installation/">
+<DocsLayout title="Install DollarLint" current="/guides/installation/">
   <article class="doc">
     <header class="doc-header">
       <span class="eyebrow">Guide</span>
       <h1>Installation</h1>
       <p class="lead">
-        Install the dollarlint CLI from npm, Go, or a release archive, then
+        Install the DollarLint CLI from npm, Go, or a release archive, then
         point it at any project with JSON, YAML, or TOML config files. It's a
         small investment that pays dividends.
       </p>
     </header>
 
-    <h2>Install from source with Go</h2>
-    <pre><code>go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest</code></pre>
+    <h2>Install with Homebrew</h2>
+    <pre><code>brew install dollarlint/tap/dollarlint</code></pre>
     <p>
-      This installs the <code>dollarlint</code> command from the latest module version
-      available to your Go toolchain.
+      Homebrew installs the latest release binary and keeps updates in the same
+      workflow as the rest of your command-line tools.
     </p>
 
     <h2>Install with npm</h2>
     <pre><code>npm install -g dollarlint</code></pre>
     <p>
-      The npm package installs the matching release binary for your platform.
+      The npm package uses a <code>postinstall</code> script to fetch the matching
+      release binary for your platform. npm lifecycle scripts need to be allowed;
+      installs run with <code>--ignore-scripts</code> or <code>ignore-scripts=true</code>
+      will not install the <code>dollarlint</code> binary.
+    </p>
+    <p>
+      If your environment blocks post-install scripts, use Homebrew, Go, or a
+      release archive instead.
     </p>
 
     <h2>Release binaries</h2>
@@ -34,6 +41,13 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
         >GitHub Releases</a
       > when you want a standalone binary without installing through npm or building
       from source.
+    </p>
+
+    <h2>Install from source with Go</h2>
+    <pre><code>go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest</code></pre>
+    <p>
+      This builds and installs the <code>dollarlint</code> command from the latest
+      module version available to your Go toolchain.
     </p>
 
     <h2>Verify the install</h2>

@@ -24,7 +24,7 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <h2>2. Validate a directory</h2>
     <pre><code>dollarlint validate .</code></pre>
     <p>
-      dollarlint discovers JSON, JSONC, JSON5, JSON Lines, YAML, and TOML files,
+      DollarLint discovers JSON, JSONC, JSON5, JSON Lines, YAML, and TOML files,
       skips common dependency and cache directories, respects the root <code
         >.gitignore</code
       >, loads declared schemas, and groups results by file.
@@ -36,7 +36,7 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
         association, or catalog match are skipped by default, but still counted
         in the summary so discovery remains visible. <code
           >.dollarlint.toml</code
-        > is covered automatically by dollarlint's embedded config schema. Set <code
+        > is covered automatically by DollarLint's embedded config schema. Set <code
           >schemas.requireCoverage = true</code
         > when every included file must be covered by one of those schema sources.
       </p>

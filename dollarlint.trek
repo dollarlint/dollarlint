@@ -3,5 +3,7 @@
 
   ],
   "command" : "npm --prefix docs run dev",
+  "deployments" : "https:\/\/vercel.com\/alex-gorischeks-projects\/dollarlint\/deployments",
+  "publishedDomain" : "dollarlint.dev",
   "title" : "dollarlint Docs"
 }

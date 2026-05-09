@@ -25,7 +25,7 @@ enabled = true`;
       <span class="eyebrow">Guide</span>
       <h1>Catalogs and SchemaStore</h1>
       <p class="lead">
-        Catalog matching lets dollarlint infer schemas for well-known filenames
+        Catalog matching lets DollarLint infer schemas for well-known filenames
         — think <code>package.json</code>, <code>tsconfig.json</code>, and
         friends — without anyone having to declare <code>$schema</code> by hand. SchemaStore
         is the built-in catalog.
@@ -37,7 +37,7 @@ enabled = true`;
     <p>
       Catalog matching is optional at runtime unless it is enabled in <code
         >.dollarlint.toml</code
-      >. Explicit in-file schemas, config associations, and dollarlint's
+      >. Explicit in-file schemas, config associations, and DollarLint's
       built-in <code>.dollarlint.toml</code> association still take precedence.
     </p>
 
@@ -94,7 +94,7 @@ enabled = true`;
     <pre><code>dollarlint validate . --schema-store --schema-store-failure error</code></pre>
     <p>
       If <code>schemas.fetch.enabled = false</code>, remote catalogs are
-      unavailable. With the default <code>warn</code> policy, dollarlint warns and
+      unavailable. With the default <code>warn</code> policy, DollarLint warns and
       keeps validating explicit or configured local schemas. The same policy applies
       when a catalog loads but the schema it matched cannot be fetched or compiled.
       Files that explicitly declare remote schemas still report schema-loading issues

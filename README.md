@@ -1,8 +1,8 @@
-<img src="docs/public/logo.svg" alt="dollarlint logo" height="58">
+<img src="docs/public/logo.svg" alt="DollarLint logo" height="58">
 
-# dollarlint
+# DollarLint
 
-`dollarlint` validates JSON (including JSONC, JSON5, JSON Lines), YAML, and TOML files against JSON Schemas.
+DollarLint validates JSON (including JSONC, JSON5, JSON Lines), YAML, and TOML files against JSON Schemas.
 
 ## Install
 
@@ -89,7 +89,7 @@ Config-level schema associations can validate files that do not declare a schema
 
 ## Configuration
 
-`dollarlint` configuration is TOML only. For each run, the CLI looks for one `.dollarlint.toml` in the target root, or beside an explicitly passed file. Nested `.dollarlint.toml` files are not applied as separate project configs during a single parent-directory run.
+DollarLint configuration is TOML only. For each run, the CLI looks for one `.dollarlint.toml` in the target root, or beside an explicitly passed file. Nested `.dollarlint.toml` files are not applied as separate project configs during a single parent-directory run.
 
 Example:
 
@@ -162,7 +162,7 @@ Output format and artifact location are run-time options, not persistent config.
 
 ### Discovery defaults
 
-If `discovery.include` is unset, dollarlint discovers JSON, JSONC, JSON5, JSON Lines (`.jsonl` and `.ndjson`), YAML, YML, and TOML files at any depth.
+If `discovery.include` is unset, DollarLint discovers JSON, JSONC, JSON5, JSON Lines (`.jsonl` and `.ndjson`), YAML, YML, and TOML files at any depth.
 
 - Set `discovery.include` only when you want to replace the default file set.
 - A glob without a slash matches basenames at any depth (`*.json` matches `package.json` and `config/settings.json`).
@@ -197,15 +197,15 @@ When `schemas.catalogs.enabled = true`, files without explicit schemas can match
 Precedence is:
 1. in-file schema declaration
 2. config association
-3. dollarlint's built-in `.dollarlint.toml` association
+3. DollarLint's built-in `.dollarlint.toml` association
 4. catalog match
 5. skipped
 
 Set `schemas.requireCoverage = true` to fail the run when any discovered included file is not covered by one of those sources.
 
-dollarlint also validates discovered `.dollarlint.toml` files against its embedded config schema. You can override that with an in-file schema declaration or a config association for `.dollarlint.toml`.
+DollarLint also validates discovered `.dollarlint.toml` files against its embedded config schema. You can override that with an in-file schema declaration or a config association for `.dollarlint.toml`.
 
-Catalog failures are separate from validation issues. With `schemas.catalogs.failure = "warn"` (default), dollarlint records a warning, skips catalog inference or catalog-inferred validation, still validates explicit/configured schemas, and exits `0` unless validation issues exist. Use `"error"` to fail with exit `2`, or `"skip"` for a silent fallback. Files with explicit in-file schemas still report schema load or compile failures as issues.
+Catalog failures are separate from validation issues. With `schemas.catalogs.failure = "warn"` (default), DollarLint records a warning, skips catalog inference or catalog-inferred validation, still validates explicit/configured schemas, and exits `0` unless validation issues exist. Use `"error"` to fail with exit `2`, or `"skip"` for a silent fallback. Files with explicit in-file schemas still report schema load or compile failures as issues.
 
 Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
 
@@ -260,7 +260,7 @@ Use `--format sarif` to emit SARIF 2.1.0 for GitHub code scanning and similar to
 dollarlint validate . --format sarif --output dollarlint.sarif
 ```
 
-`dollarlint` builds source-location maps only for SARIF runs or when `--locations` is requested, keeping ordinary text and JSON validation on the simpler validation path. SARIF locations are best-effort:
+DollarLint builds source-location maps only for SARIF runs or when `--locations` is requested, keeping ordinary text and JSON validation on the simpler validation path. SARIF locations are best-effort:
 
 - JSON-family positions are derived from a token walk over the source.
 - YAML positions come from `yaml.Node` line/column metadata.

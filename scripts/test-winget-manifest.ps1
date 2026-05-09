@@ -69,28 +69,38 @@ function Get-ManifestPathFromBranch {
         [string]$PackageVersion
     )
 
-    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("dollarlint-winget-" + [guid]::NewGuid())
-    $zipPath = Join-Path $tempRoot "winget-pkgs.zip"
-    $extractPath = Join-Path $tempRoot "extract"
-    New-Item -ItemType Directory -Path $tempRoot, $extractPath | Out-Null
+    $savedProgressPref = $ProgressPreference
+    $ProgressPreference = "SilentlyContinue"
 
-    $zipUrl = "https://codeload.github.com/$Owner/$Repo/zip/refs/heads/$Branch"
-    Write-Step "Downloading manifest branch"
-    Write-Host $zipUrl
-    Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
+    try {
+        $manifestDir = "manifests/d/DollarLint/DollarLint/$PackageVersion"
+        $apiUrl = "https://api.github.com/repos/$Owner/$Repo/contents/$manifestDir`?ref=$Branch"
 
-    Write-Step "Extracting manifest branch"
-    Expand-Archive -Path $zipPath -DestinationPath $extractPath
+        Write-Step "Fetching manifest file list"
+        Write-Host $apiUrl
+        $files = Invoke-RestMethod -Uri $apiUrl -Headers @{ Accept = "application/vnd.github.v3+json" }
 
-    $manifestPath = Get-ChildItem -Path $extractPath -Recurse -Directory |
-        Where-Object { $_.FullName -like "*\manifests\d\DollarLint\DollarLint\$PackageVersion" } |
-        Select-Object -First 1 -ExpandProperty FullName
+        if (-not $files -or $files.Count -eq 0) {
+            throw "No manifest files found at $manifestDir on branch $Branch."
+        }
 
-    if (-not $manifestPath) {
-        throw "Could not find DollarLint manifest version $PackageVersion in downloaded branch."
+        $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("dollarlint-winget-" + [guid]::NewGuid())
+        $manifestPath = Join-Path $tempRoot $manifestDir
+        New-Item -ItemType Directory -Path $manifestPath -Force | Out-Null
+
+        Write-Step "Downloading manifest files"
+        foreach ($file in $files) {
+            if ($file.type -ne "file") { continue }
+            $outFile = Join-Path $manifestPath $file.name
+            Write-Host "  $($file.name)"
+            Invoke-WebRequest -Uri $file.download_url -OutFile $outFile
+        }
+
+        return $manifestPath
     }
-
-    return $manifestPath
+    finally {
+        $ProgressPreference = $savedProgressPref
+    }
 }
 
 Write-Step "Checking winget availability"
@@ -125,7 +135,6 @@ Invoke-Checked winget settings --enable LocalManifestFiles
 Write-Step "Installing DollarLint from local manifest"
 Invoke-Checked winget install `
     --manifest $ManifestPath `
-    --id $PackageIdentifier `
     --accept-source-agreements `
     --accept-package-agreements `
     --disable-interactivity

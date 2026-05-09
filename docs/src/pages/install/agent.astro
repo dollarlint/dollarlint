@@ -73,13 +73,13 @@ You may use dollarlint init --defaults to generate the full starter, but direct 
 
        dollarlint validate . --locations --show-skipped
 
-2. If important first-party files are skipped, add [[schemas.associations]] entries or add in-file schema declarations.
+2. If important first-party files are skipped, add [[schemas.associations]] entries or add in-file schema declarations. Leave unimportant skipped files alone.
 
-3. Exclude generated files, dependency folders, snapshots, baselines, and intentionally invalid fixtures with narrow discovery.exclude patterns.
+3. Exclude generated files, dependency folders, snapshots, baselines, and intentionally invalid fixtures with narrow discovery.exclude patterns only when they produce parse errors, validation noise, or excessive discovery volume. Do not exclude a file solely because it is skipped.
 
 4. Use [[ignore]] only for known accepted validation issues. Do not hide unknown failures with broad excludes or ignores.
 
-5. Re-run until discovered, validated, skipped, warning, and issue counts look reasonable for this repository.
+5. Re-run until discovered, validated, skipped, warning, and issue counts look reasonable for this repository. A nonzero skipped count is acceptable when the skipped files do not need schema coverage.
 
 ## 4. Report to the user
 
@@ -89,9 +89,10 @@ Include:
 - the config file created or changed
 - the final validation command and summary counts
 - remaining active findings grouped by file with line/column when available
-- which findings were ignored or excluded and why
+- which active findings were ignored or excluded and why
+- which skipped files still need schema coverage, if any
 
-Separate parse errors, schema-fetch warnings, and coverage gaps from user-actionable validation findings. Do not summarize skipped files as failures.
+Separate parse errors, schema-fetch warnings, coverage gaps, and skipped files from user-actionable validation findings. Do not summarize skipped files as failures, and do not tune them away unless they are causing real parse, validation, or discovery noise.
 
 Human docs:
 

@@ -36,7 +36,10 @@ jobs:
         with:
           distribution: goreleaser-pro
           version: "~> v2"
-          args: release --clean
+          # Homebrew tap publishing needs a token that can write to
+          # dollarlint/homebrew-tap. Keep GitHub/npm releases unblocked while
+          # that credential is managed separately.
+          args: release --clean --skip=homebrew
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}

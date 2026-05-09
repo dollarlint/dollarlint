@@ -285,7 +285,7 @@ func TestLintValidatesJSONLinesAsIndependentDocuments(t *testing.T) {
 		t.Fatalf("jsonl additional issue = %+v", additionalIssue)
 	}
 	parseIssue := findMessageIssue(result.Issues, "parse line 5")
-	if parseIssue.Line != 5 || parseIssue.Column == 0 {
+	if parseIssue.Keyword != issueKeywordParse || parseIssue.Line != 5 || parseIssue.Column == 0 {
 		t.Fatalf("jsonl parse issue = %+v", parseIssue)
 	}
 }
@@ -303,16 +303,19 @@ func TestLintParseSchemaAndPrimeErrors(t *testing.T) {
 	if result.Summary.Issues == 0 {
 		t.Fatalf("expected parse/schema issues")
 	}
-	var parseIssue, compileIssue bool
+	var parseIssue, loadIssue, compileIssue bool
 	for _, issue := range result.Issues {
-		if strings.Contains(issue.Message, "parse") {
+		if issue.Keyword == issueKeywordParse && strings.Contains(issue.Message, "parse") {
 			parseIssue = true
 		}
-		if strings.Contains(issue.Message, "schema compile failed") {
+		if issue.Keyword == issueKeywordSchema && strings.Contains(issue.Message, "schema load failed") {
+			loadIssue = true
+		}
+		if issue.Keyword == issueKeywordSchema && strings.Contains(issue.Message, "schema compile failed") {
 			compileIssue = true
 		}
 	}
-	if !parseIssue || !compileIssue {
+	if !parseIssue || !loadIssue || !compileIssue {
 		t.Fatalf("issues = %+v", result.Issues)
 	}
 }
@@ -666,12 +669,12 @@ func TestLintCanDisableSchemaStoreAssociations(t *testing.T) {
 
 func TestValidateDocumentNonValidationError(t *testing.T) {
 	err := errors.New("plain")
-	issue := issueForError(DiscoveredFile{Path: "/tmp/a.json", RelativePath: "a.json"}, "schema", err)
-	if issue.Message != "plain" || issue.Schema != "schema" {
+	issue := issueForError(DiscoveredFile{Path: "/tmp/a.json", RelativePath: "a.json"}, "schema", issueKeywordSchema, err)
+	if issue.Message != "plain" || issue.Schema != "schema" || issue.Keyword != issueKeywordSchema {
 		t.Fatalf("issueForError = %+v", issue)
 	}
 	issues := issuesFromSchemaError(&Document{Path: "/tmp/a.json", RelativePath: "a.json", Schema: "schema"}, err, OutputConfig{})
-	if len(issues) != 1 || issues[0].Message != "plain" {
+	if len(issues) != 1 || issues[0].Message != "plain" || issues[0].Keyword != issueKeywordSchema {
 		t.Fatalf("issuesFromSchemaError = %+v", issues)
 	}
 	issue = Issue{}

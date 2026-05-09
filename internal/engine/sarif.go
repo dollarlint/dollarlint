@@ -208,10 +208,18 @@ func sarifRuleID(issue Issue) string {
 }
 
 func sarifRuleDescription(issue Issue) string {
-	if issue.Keyword != "" {
+	switch issue.Keyword {
+	case "":
+		return "dollarlint issue"
+	case issueKeywordParse:
+		return "Document parse issue"
+	case issueKeywordSchema:
+		return "Schema issue"
+	case "schemaCoverage":
+		return "Schema coverage issue"
+	default:
 		return "JSON Schema " + issue.Keyword + " validation"
 	}
-	return "dollarlint issue"
 }
 
 func sarifLevel(issue Issue) string {

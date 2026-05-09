@@ -30,6 +30,7 @@ func TestFormatSARIF(t *testing.T) {
 			},
 			{
 				RelativePath: "schema.json",
+				Keyword:      issueKeywordSchema,
 				Message:      "compile schema failed",
 			},
 		},
@@ -60,7 +61,7 @@ func TestFormatSARIF(t *testing.T) {
 	if run.Results[1].Level != "none" || len(run.Results[1].Suppressions) != 1 {
 		t.Fatalf("ignored result = %+v", run.Results[1])
 	}
-	if run.Results[2].RuleID != "dollarlint" || run.Results[2].Locations[0].PhysicalLocation.Region != nil {
+	if run.Results[2].RuleID != issueKeywordSchema || run.Results[2].Locations[0].PhysicalLocation.Region != nil {
 		t.Fatalf("file-level result = %+v", run.Results[2])
 	}
 	if run.Results[3].RuleID != "dollarlint.warning.schemaCatalogUnavailable" || run.Results[3].Level != "warning" || len(run.Results[3].Locations) != 0 {
@@ -68,6 +69,9 @@ func TestFormatSARIF(t *testing.T) {
 	}
 	if sarifRuleDescription(Issue{}) != "dollarlint issue" {
 		t.Fatalf("default rule description mismatch")
+	}
+	if sarifRuleDescription(Issue{Keyword: issueKeywordParse}) != "Document parse issue" || sarifRuleDescription(Issue{Keyword: issueKeywordSchema}) != "Schema issue" {
+		t.Fatalf("synthetic rule description mismatch")
 	}
 	if sarifWarningRuleID(Warning{}) != "dollarlint.warning" || sarifWarningDescription(Warning{}) != "dollarlint warning" {
 		t.Fatalf("default warning helpers mismatch")

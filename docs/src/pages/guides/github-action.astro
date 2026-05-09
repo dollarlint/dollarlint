@@ -65,26 +65,26 @@ const argsWorkflow = `- uses: dollarlint/dollarlint@vX.Y.Z
     <h2>Basic workflow</h2>
     <CodeBlock code={basicWorkflow} language="yaml" />
     <p>
-      Pin <code>dollarlint/dollarlint</code> to the release tag you want. When the
-      action ref is a full <code>vX.Y.Z</code> tag, the action downloads that matching
-      DollarLint release archive for the runner, verifies it against
-      <code>checksums.txt</code>, and runs <code>dollarlint validate</code>.
+      Pin <code>dollarlint/dollarlint</code> to a specific release tag. When the
+      action ref is a <code>vX.Y.Z</code> tag, the action downloads that version,
+      verifies it against <code>checksums.txt</code>, and runs
+      <code>dollarlint validate</code>.
     </p>
 
     <h2>Upload SARIF</h2>
     <CodeBlock code={sarifWorkflow} language="yaml" />
     <p>
-      Set <code>upload-sarif: true</code> to force SARIF output and upload the result
-      to GitHub code scanning. The upload step runs before the action fails the job
-      for validation issues, so findings still make it to the security tab.
+      Set <code>upload-sarif: true</code> to generate SARIF output and upload it
+      to GitHub code scanning. Results are uploaded before the job fails, so any
+      findings still appear in the security tab.
     </p>
 
     <h2>Pass validate flags</h2>
     <CodeBlock code={argsWorkflow} language="yaml" />
     <p>
-      Put additional <code>dollarlint validate</code> flags in <code>args</code
-      >, one argument per line. This keeps globs and schema associations intact
-      without relying on shell parsing.
+      Additional <code>dollarlint validate</code> flags go in <code>args</code
+      >, one per line. This avoids shell parsing issues with globs and schema
+      associations.
     </p>
 
     <h2>Common inputs</h2>
@@ -136,13 +136,12 @@ const argsWorkflow = `- uses: dollarlint/dollarlint@vX.Y.Z
 
     <h2>Version behavior</h2>
     <p>
-      Release tags are the sharpest pin: <code
-        >dollarlint/dollarlint@vX.Y.Z</code
-      >
-      installs <code>vX.Y.Z</code>. If you use a branch or moving tag, set <code
-        >version</code
-      > explicitly when you need a fixed CLI version. Without either, the action installs
-      the latest published DollarLint release.
+      The most reliable way to pin a version is to use a release tag directly:
+      <code>dollarlint/dollarlint@vX.Y.Z</code> installs exactly <code
+        >vX.Y.Z</code
+      >. If you use a branch or moving tag instead, set <code>version</code> explicitly
+      to fix the CLI version. Without either, the action installs the latest published
+      DollarLint release.
     </p>
   </article>
 </DocsLayout>

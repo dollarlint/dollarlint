@@ -67,6 +67,9 @@ func TestTextHelpers(t *testing.T) {
 	if issueLocation(Issue{}, OutputConfig{}) != "/" {
 		t.Fatalf("fallback issue location mismatch")
 	}
+	if widths := issueColumnWidths([]Issue{{Message: "unknown"}}, OutputConfig{}); widths.Keyword != len("keyword") {
+		t.Fatalf("fallback keyword width should stay at header width, got %+v", widths)
+	}
 	if styledCell(textStyleMuted, "x", 0) != textStyleMuted.Render("x") {
 		t.Fatalf("unstyled-width cell mismatch")
 	}

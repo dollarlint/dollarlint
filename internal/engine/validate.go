@@ -68,7 +68,7 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 			fileResult.Status = StatusError
 			fileResult.Message = parsed.err.Error()
 			result.Files = append(result.Files, fileResult)
-			addIssue(&result, issueForError(file, "", parsed.err))
+			addIssue(&result, issueForError(file, "", issueKeywordParse, parsed.err))
 			continue
 		}
 		fileResult.Format = document.Format
@@ -105,7 +105,7 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		if err != nil {
 			result.Files[index].Status = StatusError
 			result.Files[index].Message = err.Error()
-			addIssue(&result, issueForError(DiscoveredFile{Path: document.Path, RelativePath: document.RelativePath}, document.Schema, err))
+			addIssue(&result, issueForError(DiscoveredFile{Path: document.Path, RelativePath: document.RelativePath}, document.Schema, issueKeywordSchema, err))
 			continue
 		}
 		document.Schema = resolved
@@ -346,6 +346,7 @@ func validationForSchemaFailure(document *Document, cfg Config, phase string, er
 			File:         document.Path,
 			RelativePath: document.RelativePath,
 			Schema:       document.Schema,
+			Keyword:      issueKeywordSchema,
 			Message:      message,
 		}}}
 	}
@@ -385,6 +386,7 @@ func issuesFromSchemaError(document *Document, err error, output OutputConfig) [
 		File:         document.Path,
 		RelativePath: document.RelativePath,
 		Schema:       document.Schema,
+		Keyword:      issueKeywordSchema,
 		Message:      err.Error(),
 	}}
 }
@@ -736,11 +738,12 @@ func ratString(value *big.Rat) string {
 	return strings.TrimRight(strings.TrimRight(value.FloatString(6), "0"), ".")
 }
 
-func issueForError(file DiscoveredFile, schema string, err error) Issue {
+func issueForError(file DiscoveredFile, schema, keyword string, err error) Issue {
 	return Issue{
 		File:         file.Path,
 		RelativePath: file.RelativePath,
 		Schema:       schema,
+		Keyword:      keyword,
 		Message:      err.Error(),
 	}
 }
@@ -763,6 +766,7 @@ func issuesForDocumentParseErrors(document *Document) []Issue {
 		issues = append(issues, Issue{
 			File:         document.Path,
 			RelativePath: document.RelativePath,
+			Keyword:      issueKeywordParse,
 			Line:         parseErr.Line,
 			Column:       parseErr.Column,
 			Message:      parseErr.Message,

@@ -100,7 +100,7 @@ func writeGroupedIssues(builder *strings.Builder, result Result, output OutputCo
 
 func writeIssueRow(builder *strings.Builder, issue Issue, output OutputConfig, widths textWidths) {
 	location := issueLocation(issue, output)
-	keyword := fallback(issue.Keyword, "dollarlint")
+	keyword := fallback(issue.Keyword, "issue")
 	messageWidth := 0
 	if output.Locations && !output.Verbose {
 		messageWidth = widths.Message
@@ -202,7 +202,7 @@ func issueColumnWidths(issues []Issue, output OutputConfig) textWidths {
 	widths := textWidths{Location: len("location"), Keyword: len("keyword")}
 	for _, issue := range issues {
 		widths.Location = max(widths.Location, len(issueLocation(issue, output)))
-		widths.Keyword = max(widths.Keyword, len(fallback(issue.Keyword, "dollarlint")))
+		widths.Keyword = max(widths.Keyword, len(fallback(issue.Keyword, "issue")))
 		widths.Message = max(widths.Message, len(issue.Message))
 	}
 	return widths

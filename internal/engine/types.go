@@ -9,6 +9,11 @@ const (
 )
 
 const (
+	issueKeywordParse  = "parse"
+	issueKeywordSchema = "schema"
+)
+
+const (
 	CatalogFailureWarn  = "warn"
 	CatalogFailureError = "error"
 	CatalogFailureSkip  = "skip"

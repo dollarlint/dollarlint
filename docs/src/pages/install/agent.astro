@@ -6,7 +6,9 @@ const configurationUrl = new URL(
 ).toString();
 const releasesUrl = "https://github.com/dollarlint/dollarlint/releases/latest";
 
-const instructions = `Install DollarLint, add project config, validate the repository, tune noisy behavior, and summarize only the remaining real findings.
+const instructions = `# DollarLint installation instructions for agents
+
+Install DollarLint, add project config, validate the repository, tune noisy behavior, and summarize only the remaining real findings.
 
 ## 1. Install the CLI
 
@@ -110,11 +112,10 @@ Human docs:
       name="description"
       content="Token-light DollarLint setup instructions."
     />
-    <title>DollarLint install</title>
+    <title>DollarLint installation instructions for agents</title>
   </head>
   <body>
     <main>
-      <h1>DollarLint install</h1>
       <pre><code>{instructions}</code></pre>
     </main>
   </body>

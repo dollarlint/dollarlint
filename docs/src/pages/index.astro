@@ -10,16 +10,18 @@ import LogoOutline from "../components/LogoOutline.astro";
 >
   <section class="hero">
     <div class="hero-marks" aria-hidden="true">
-      {Array.from({ length: 4 }).map(() => (
-        <span class="hero-mark" data-hero-mark>
-          <LogoOutline class="hero-mark-logo" />
-        </span>
-      ))}
+      {
+        Array.from({ length: 4 }).map(() => (
+          <span class="hero-mark" data-hero-mark>
+            <LogoOutline class="hero-mark-logo" />
+          </span>
+        ))
+      }
     </div>
     <h1>dollarlint</h1>
     <p class="hero-copy">
-      <code>$schema</code> validation worth every JSON, YAML, &amp; TOML file
-      you've got.
+      <code>$schema</code> validation worth every JSON, YAML, &amp; TOML file you've
+      got.
     </p>
     <div class="hero-actions">
       <a class="button primary" href="/guides/installation/">Get started</a>
@@ -46,7 +48,10 @@ import LogoOutline from "../components/LogoOutline.astro";
         const zone = zones[index % zones.length];
         mark.style.setProperty("--mark-x", `${rand(zone.x).toFixed(2)}%`);
         mark.style.setProperty("--mark-y", `${rand(zone.y).toFixed(2)}%`);
-        mark.style.setProperty("--mark-rotate", `${rand([-45, 45]).toFixed(2)}deg`);
+        mark.style.setProperty(
+          "--mark-rotate",
+          `${rand([-45, 45]).toFixed(2)}deg`,
+        );
       });
     })();
   </script>
@@ -55,8 +60,8 @@ import LogoOutline from "../components/LogoOutline.astro";
     <article class="card">
       <h3>Repo-wide discovery</h3>
       <p>
-        Find JSON (and variants), YAML, and TOML files automatically,
-        respect your excludes, and validate matched files in parallel.
+        Find JSON (and variants), YAML, and TOML files automatically, respect
+        your excludes, and validate matched files in parallel.
       </p>
     </article>
     <article class="card">
@@ -113,7 +118,10 @@ import LogoOutline from "../components/LogoOutline.astro";
         </p>
       </div>
       <div class="command">
-        <code>dollarlint validate ./config <span class="no-break">--locations</span></code>
+        <code
+          >dollarlint validate ./config <span class="no-break">--locations</span
+          ></code
+        >
         <p>
           Get the exact line and column — no more hunting for where the bill
           comes due.
@@ -121,7 +129,9 @@ import LogoOutline from "../components/LogoOutline.astro";
       </div>
       <div class="command">
         <code
-          >dollarlint validate . <span class="no-break">--format</span> sarif <span class="no-break">--output</span> dollarlint.sarif</code
+          >dollarlint validate . <span class="no-break">--format</span> sarif <span
+            class="no-break">--output</span
+          > dollarlint.sarif</code
         >
         <p>Generate a CI-friendly code scanning artifact.</p>
       </div>

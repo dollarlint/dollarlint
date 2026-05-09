@@ -108,7 +108,10 @@ const slogans = [
         };
         const openMenu = () => {
           const menuTop = sidebar?.getBoundingClientRect().bottom ?? 0;
-          document.documentElement.style.setProperty("--mobile-menu-top", `${menuTop}px`);
+          document.documentElement.style.setProperty(
+            "--mobile-menu-top",
+            `${menuTop}px`,
+          );
           menu?.setAttribute("data-open", "true");
           document.documentElement.setAttribute("data-menu-open", "true");
           menuButton?.setAttribute("aria-expanded", "true");

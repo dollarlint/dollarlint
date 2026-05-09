@@ -21,20 +21,6 @@ type azureARMResourceRef struct {
 	SchemaRefPart string
 }
 
-func primeableSchemaRoots(cfg Config, documents []*Document, schemaRoots []string) []string {
-	if !azureResourcePruningEnabled(cfg.Schemas) {
-		return schemaRoots
-	}
-	roots := make([]string, 0, len(schemaRoots))
-	for i, root := range schemaRoots {
-		if i < len(documents) && shouldPruneRefs(cfg, root, documents[i].azureResourceRefs()) {
-			continue
-		}
-		roots = append(roots, root)
-	}
-	return roots
-}
-
 func primeableDocumentSchemaRoots(cfg Config, document *Document) []string {
 	if shouldPruneRefs(cfg, document.Schema, document.azureResourceRefs()) {
 		return nil

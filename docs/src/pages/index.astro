@@ -1,6 +1,8 @@
 ---
 import DocsLayout from "../layouts/DocsLayout.astro";
 import LogoOutline from "../components/LogoOutline.astro";
+
+const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
 ---
 
 <DocsLayout
@@ -30,6 +32,17 @@ import LogoOutline from "../components/LogoOutline.astro";
           type="button"
           role="tab"
           aria-selected="true"
+          aria-controls="install-agent"
+          id="install-agent-tab"
+          data-install-tab="agent"
+        >
+          Agents
+        </button>
+        <button
+          class="install-tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
           aria-controls="install-homebrew"
           id="install-homebrew-tab"
           data-install-tab="homebrew"
@@ -60,11 +73,32 @@ import LogoOutline from "../components/LogoOutline.astro";
         </button>
       </div>
       <div
+        class="install-panel install-panel-agent"
+        role="tabpanel"
+        id="install-agent"
+        aria-labelledby="install-agent-tab"
+        data-install-panel="agent"
+      >
+        <div class="install-panel-body">
+          <p class="install-prompt">Give your agent this URL</p>
+          <div class="install-command-line">
+            <span aria-hidden="true">URL</span><code>{agentInstallUrl}</code>
+          </div>
+        </div>
+        <div class="install-actions">
+          <a class="install-copy" href="/install/agent/">Open</a>
+          <button class="install-copy" type="button" data-install-copy
+            >Copy</button
+          >
+        </div>
+      </div>
+      <div
         class="install-panel"
         role="tabpanel"
         id="install-homebrew"
         aria-labelledby="install-homebrew-tab"
         data-install-panel="homebrew"
+        hidden
       >
         <span aria-hidden="true">$</span><code
           >brew install --cask dollarlint/tap/dollarlint</code

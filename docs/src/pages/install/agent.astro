@@ -1,0 +1,120 @@
+---
+const installationUrl = new URL("/guides/installation/", Astro.site).toString();
+const configurationUrl = new URL(
+  "/reference/configuration/",
+  Astro.site,
+).toString();
+const releasesUrl = "https://github.com/dollarlint/dollarlint/releases/latest";
+
+const instructions = `Install DollarLint, add project config, validate the repository, tune noisy behavior, and summarize only the remaining real findings.
+
+## 1. Install the CLI
+
+Pick the first method that fits the environment.
+
+1. Homebrew available:
+
+       brew install --cask dollarlint/tap/dollarlint
+
+2. npm available and lifecycle scripts are allowed:
+
+       npm install -g dollarlint
+
+3. Go available:
+
+       go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest
+
+   Ensure $(go env GOPATH)/bin is on PATH.
+
+4. Otherwise, download a release archive from:
+
+       ${releasesUrl}
+
+   Verify checksums when practical, and put dollarlint on PATH.
+
+Verify the install:
+
+    dollarlint version
+
+## 2. Create or update config
+
+Work from the repository root.
+
+Do not run interactive dollarlint init.
+
+If .dollarlint.toml already exists, read it and preserve intentional settings. If none exists, write this starter and then edit it for the repo:
+
+    version = 1
+
+    [configs]
+    mode = "single"
+
+    [discovery]
+    exclude = []
+    useDefaultExcludes = true
+    respectGitIgnore = true
+
+    [schemas]
+    requireCoverage = false
+
+    [schemas.catalogs]
+    enabled = true
+    failure = "warn"
+    match = "auto"
+
+    [output]
+    branchErrors = "best"
+
+You may use dollarlint init --defaults to generate the full starter, but direct config edits are usually clearer.
+
+## 3. Test and iterate
+
+1. Run:
+
+       dollarlint validate . --locations --show-skipped
+
+2. If important first-party files are skipped, add [[schemas.associations]] entries or add in-file schema declarations.
+
+3. Exclude generated files, dependency folders, snapshots, baselines, and intentionally invalid fixtures with narrow discovery.exclude patterns.
+
+4. Use [[ignore]] only for known accepted validation issues. Do not hide unknown failures with broad excludes or ignores.
+
+5. Re-run until discovered, validated, skipped, warning, and issue counts look reasonable for this repository.
+
+## 4. Report to the user
+
+Include:
+
+- the installer chosen and dollarlint version output
+- the config file created or changed
+- the final validation command and summary counts
+- remaining active findings grouped by file with line/column when available
+- which findings were ignored or excluded and why
+
+Separate parse errors, schema-fetch warnings, and coverage gaps from user-actionable validation findings. Do not summarize skipped files as failures.
+
+Human docs:
+
+- Installation: ${installationUrl}
+- Configuration: ${configurationUrl}
+`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Token-light DollarLint setup instructions."
+    />
+    <title>DollarLint install</title>
+  </head>
+  <body>
+    <main>
+      <h1>DollarLint install</h1>
+      <pre><code>{instructions}</code></pre>
+    </main>
+  </body>
+</html>

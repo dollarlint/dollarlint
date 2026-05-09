@@ -681,6 +681,43 @@ h1 {
   font-weight: 700;
 }
 
+.install-panel-agent {
+  align-items: flex-end;
+}
+
+.install-panel-body {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.install-prompt {
+  margin: 0 0 6px;
+  color: var(--install-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.install-command-line {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.install-command-line > span {
+  flex: 0 0 auto;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.install-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
 .install-tabs .install-panel code {
   display: block;
   min-width: 0;
@@ -696,17 +733,25 @@ h1 {
 }
 
 .install-copy {
+  display: inline-flex;
   flex: 0 0 auto;
-  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 52px;
+  height: 30px;
   border: 1px solid color-mix(in srgb, var(--gold) 42%, transparent);
   border-radius: 6px;
   background: color-mix(in srgb, var(--gold) 16%, var(--install-bg));
-  padding: 0 10px;
+  padding: 0 9px;
   color: var(--install-fg);
   cursor: pointer;
   font: inherit;
   font-size: 0.78rem;
   font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .install-copy:hover {
@@ -1334,6 +1379,15 @@ tr:last-child td {
 
   .hero {
     padding: 28px;
+  }
+
+  .install-panel-agent {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .install-actions {
+    justify-content: flex-end;
   }
 
   .hero-mark {

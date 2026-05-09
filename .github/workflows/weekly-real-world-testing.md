@@ -92,6 +92,13 @@ env:
   CANDIDATE_REPOS: ${{ inputs.candidate_repos || '' }}
   MAX_REPOS: ${{ inputs.max_repos || '5' }}
 
+pre-agent-steps:
+  - name: Build DollarLint CLI
+    run: |
+      mkdir -p bin
+      go build -o bin/dollarlint ./cmd/dollarlint
+      bin/dollarlint --version
+
 safe-outputs:
   mentions: false
   allowed-github-references: []
@@ -147,7 +154,7 @@ Run DollarLint against a fresh, bounded set of public repositories, persist the 
 3. Prepare and run.
    - Call `real_world_prepare_corpus` with `clone: true`.
    - If it reports duplicates, choose replacements unless this was an intentional manual rerun.
-   - Call `real_world_run_corpus` with the prepared `corpusDir`, `cacheDir`, and `outputArtifact`.
+   - The workflow pre-builds `bin/dollarlint` in a deterministic pre-agent step. Call `real_world_run_corpus` with the prepared `corpusDir`, `cacheDir`, `outputArtifact`, and `build: false`.
    - Nonzero validation exit code 1 is expected when real issues are found. Treat crashes, missing output JSON, hangs, and unexplained warnings as higher-severity product signals.
 
 4. Triage the output.

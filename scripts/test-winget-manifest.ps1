@@ -56,6 +56,7 @@ $WinGetErrors = @{
     "8A15002F" = "Portable install failed"
     "8A150035" = "Archive malware scan failed - rerun as admin or pass --ignore-local-archive-malware-scan"
 }
+$script:FailureReported = $false
 
 function Get-ExitCodeHex {
     param([int]$ExitCode)
@@ -100,6 +101,7 @@ function Invoke-Checked {
         Write-Host ""
         Write-Host "Command failed: $detail" -ForegroundColor Red
         Write-Host "Command: $FilePath $($Arguments -join ' ')"
+        $script:FailureReported = $true
 
         $latestLog = $null
         if ($FilePath -eq "winget") {
@@ -164,6 +166,7 @@ function Get-ManifestPathFromBranch {
     }
 }
 
+try {
 Write-Step "Checking winget availability"
 $winget = Get-Command winget -ErrorAction Stop
 Write-Host "winget: $($winget.Source)"
@@ -230,3 +233,11 @@ if ($UninstallAfter) {
 
 Write-Step "Done"
 Write-Host "WinGet validation and install test completed successfully." -ForegroundColor Green
+}
+catch {
+    if (-not $script:FailureReported) {
+        Write-Host ""
+        Write-Host "Script failed: $($_.Exception.Message)" -ForegroundColor Red
+    }
+    exit 1
+}

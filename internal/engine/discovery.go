@@ -45,6 +45,13 @@ func DiscoverFiles(root string, cfg DiscoveryConfig) ([]DiscoveredFile, error) {
 			if excluder.ignored(rel, true) {
 				return filepath.SkipDir
 			}
+			if discoveryRespectGitIgnore(cfg) {
+				rules, err := loadGitIgnoreRulesAt(path, rel)
+				if err != nil {
+					return err
+				}
+				excluder.gitIgnoreRules = append(excluder.gitIgnoreRules, rules...)
+			}
 			return nil
 		}
 		if !cfg.FollowSymlinks && entry.Type()&os.ModeSymlink != 0 {
@@ -88,6 +95,7 @@ var defaultDiscoveryExcludes = []string{
 	".svn", "**/.svn/**",
 	".tox", "**/.tox/**",
 	".venv", "**/.venv/**",
+	".build", "**/.build/**",
 	"__pypackages__", "**/__pypackages__/**",
 	".next", "**/.next/**",
 	".nuxt", "**/.nuxt/**",
@@ -96,12 +104,17 @@ var defaultDiscoveryExcludes = []string{
 	"buck-out", "**/buck-out/**",
 	"build", "**/build/**",
 	"coverage", "**/coverage/**",
+	"DerivedData", "**/DerivedData/**",
 	"dist", "**/dist/**",
+	"Intermediates.noindex", "**/Intermediates.noindex/**",
 	"node_modules", "**/node_modules/**",
+	"SourcePackages/checkouts", "**/SourcePackages/checkouts", "**/SourcePackages/checkouts/**",
 	"target", "**/target/**",
+	"temp", "**/temp/**",
 	"tmp", "**/tmp/**",
 	"vendor", "**/vendor/**",
 	"venv", "**/venv/**",
+	"*.dSYM", "**/*.dSYM/**",
 }
 
 type discoveryExcluder struct {
@@ -166,6 +179,10 @@ type gitIgnoreRule struct {
 }
 
 func loadGitIgnoreRules(root string) ([]gitIgnoreRule, error) {
+	return loadGitIgnoreRulesAt(root, "")
+}
+
+func loadGitIgnoreRulesAt(root, base string) ([]gitIgnoreRule, error) {
 	path := filepath.Join(root, ".gitignore")
 	file, err := os.Open(path)
 	if err != nil {
@@ -178,7 +195,7 @@ func loadGitIgnoreRules(root string) ([]gitIgnoreRule, error) {
 	var rules []gitIgnoreRule
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		if rule, ok := parseGitIgnoreRule("", scanner.Text()); ok {
+		if rule, ok := parseGitIgnoreRule(base, scanner.Text()); ok {
 			rules = append(rules, rule)
 		}
 	}

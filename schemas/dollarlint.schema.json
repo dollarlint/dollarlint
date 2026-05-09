@@ -12,6 +12,9 @@
     "discovery": {
       "$ref": "#/$defs/discovery"
     },
+    "parsing": {
+      "$ref": "#/$defs/parsing"
+    },
     "schemas": {
       "$ref": "#/$defs/schemas"
     },
@@ -57,6 +60,25 @@
         },
         "followSymlinks": {
           "type": "boolean"
+        }
+      }
+    },
+    "parsing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "json": {
+          "$ref": "#/$defs/jsonParsing"
+        }
+      }
+    },
+    "jsonParsing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["strict", "jsonc", "auto"]
         }
       }
     },

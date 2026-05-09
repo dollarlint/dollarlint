@@ -89,7 +89,7 @@ Config-level schema associations can validate files that do not declare a schema
 
 ## Configuration
 
-`dollarlint` configuration is TOML only. For each run, the CLI looks for `.dollarlint.toml` in the target root.
+`dollarlint` configuration is TOML only. For each run, the CLI looks for one `.dollarlint.toml` in the target root, or beside an explicitly passed file. Nested `.dollarlint.toml` files are not applied as separate project configs during a single parent-directory run.
 
 Example:
 
@@ -102,6 +102,9 @@ useDefaultExcludes = true
 respectGitIgnore = true
 forceExclude = false
 followSymlinks = false
+
+[parsing.json]
+mode = "auto"
 
 [schemas]
 maxDepth = 8
@@ -163,10 +166,18 @@ If `discovery.include` is unset, dollarlint discovers JSON, JSONC, JSON5, JSON L
 
 - Set `discovery.include` only when you want to replace the default file set.
 - A glob without a slash matches basenames at any depth (`*.json` matches `package.json` and `config/settings.json`).
-- `useDefaultExcludes = true` skips common dependency, generated, cache, and VCS directories (`node_modules`, `vendor`, `dist`, `build`, `.git`, `.venv`, `.cache`).
+- `useDefaultExcludes = true` skips common dependency, generated, cache, build, temp, and VCS directories (`node_modules`, `vendor`, `dist`, `build`, `.build`, `DerivedData`, `SourcePackages/checkouts`, `.git`, `.venv`, `.cache`).
 - `discovery.extendExclude` adds project-specific excludes on top of defaults.
-- `respectGitIgnore = true` applies root `.gitignore` patterns during directory discovery.
+- `respectGitIgnore = true` applies `.gitignore` patterns during directory discovery, including nested `.gitignore` files as the walk descends.
 - `forceExclude = true` also applies excludes to explicitly passed files.
+
+### JSON parsing
+
+`parsing.json.mode = "auto"` is the default. Ordinary `.json` files are parsed as strict JSON, while known JSONC-by-convention files such as `tsconfig*.json`, `jsconfig*.json`, `.vscode/settings.json`, and `devcontainer.json` allow comments and trailing commas.
+
+- Use `"strict"` to parse every `.json` file as standard JSON.
+- Use `"jsonc"` to allow JSONC syntax in every `.json` file.
+- Files ending in `.jsonc` always use JSONC parsing.
 
 ### Remote schema fetching
 
@@ -194,7 +205,7 @@ Set `schemas.requireCoverage = true` to fail the run when any discovered include
 
 dollarlint also validates discovered `.dollarlint.toml` files against its embedded config schema. You can override that with an in-file schema declaration or a config association for `.dollarlint.toml`.
 
-Catalog failures are separate from validation issues. With `schemas.catalogs.failure = "warn"` (default), dollarlint records a warning, skips catalog inference, still validates explicit/configured schemas, and exits `0` unless validation issues exist. Use `"error"` to fail with exit `2`, or `"skip"` for a silent fallback.
+Catalog failures are separate from validation issues. With `schemas.catalogs.failure = "warn"` (default), dollarlint records a warning, skips catalog inference or catalog-inferred validation, still validates explicit/configured schemas, and exits `0` unless validation issues exist. Use `"error"` to fail with exit `2`, or `"skip"` for a silent fallback. Files with explicit in-file schemas still report schema load or compile failures as issues.
 
 Known JSON Schema metaschemas are handled by the validator and are not pre-fetched as ordinary schema dependencies.
 

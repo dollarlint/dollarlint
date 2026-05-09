@@ -94,6 +94,9 @@ respectGitIgnore = false
 forceExclude = true
 followSymlinks = true
 
+[parsing.json]
+mode = "jsonc"
+
 [schemas]
 maxDepth = 3
 requireCoverage = true
@@ -182,6 +185,9 @@ keyword = "type"
 	if discoveryUseDefaultExcludes(cfg.Discovery) || discoveryRespectGitIgnore(cfg.Discovery) || !cfg.Discovery.ForceExclude || !cfg.Discovery.FollowSymlinks {
 		t.Fatalf("discovery booleans not decoded: %+v", cfg.Discovery)
 	}
+	if cfg.Parsing.JSON.Mode != JSONParsingJSONC {
+		t.Fatalf("parsing config not decoded: %+v", cfg.Parsing)
+	}
 	if len(cfg.Ignore) != 1 {
 		t.Fatalf("defaults or ignore missing: %+v", cfg)
 	}
@@ -209,6 +215,15 @@ schema = "./schema.json"
 	}
 	if !remoteFetchCacheEnabled(cfg.Schemas.Fetch) {
 		t.Fatalf("fetch cache default = %+v", cfg.Schemas.Fetch)
+	}
+	if mode, err := jsonParsingMode(cfg.Parsing); err != nil || mode != JSONParsingAuto {
+		t.Fatalf("json parsing default = %q, %v", mode, err)
+	}
+	if mode, err := jsonParsingMode(ParsingConfig{JSON: JSONParsingConfig{Mode: JSONParsingStrict}}); err != nil || mode != JSONParsingStrict {
+		t.Fatalf("json parsing strict = %q, %v", mode, err)
+	}
+	if _, err := jsonParsingMode(ParsingConfig{JSON: JSONParsingConfig{Mode: "loose"}}); err == nil {
+		t.Fatalf("expected invalid json parsing mode error")
 	}
 	if mode, err := catalogFailureMode(cfg.Schemas); err != nil || mode != CatalogFailureWarn {
 		t.Fatalf("catalog failure default = %q, %v", mode, err)

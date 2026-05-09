@@ -39,6 +39,9 @@ func DefaultConfig() Config {
 			UseDefaultExcludes: &useDefaultExcludes,
 			RespectGitIgnore:   &respectGitIgnore,
 		},
+		Parsing: ParsingConfig{
+			JSON: JSONParsingConfig{Mode: JSONParsingAuto},
+		},
 		Schemas: SchemaConfig{
 			Catalogs: CatalogConfig{
 				Sources: []CatalogSource{defaultSchemaStoreCatalogSource()},
@@ -82,6 +85,9 @@ func (c *Config) ApplyDefaults() {
 	}
 	if c.Discovery.RespectGitIgnore == nil {
 		c.Discovery.RespectGitIgnore = defaults.Discovery.RespectGitIgnore
+	}
+	if c.Parsing.JSON.Mode == "" {
+		c.Parsing.JSON.Mode = defaults.Parsing.JSON.Mode
 	}
 	if c.Schemas.MaxDepth == 0 {
 		c.Schemas.MaxDepth = defaults.Schemas.MaxDepth
@@ -188,6 +194,11 @@ func validateConfigValues(cfg Config) error {
 			return err
 		}
 	}
+	if cfg.Parsing.JSON.Mode != "" {
+		if _, err := jsonParsingMode(cfg.Parsing); err != nil {
+			return err
+		}
+	}
 	if cfg.Output.BranchErrors != "" {
 		if _, err := branchErrorMode(cfg.Output); err != nil {
 			return err
@@ -269,6 +280,19 @@ func catalogFailureMode(cfg SchemaConfig) (string, error) {
 		return mode, nil
 	default:
 		return "", fmt.Errorf("unsupported catalog failure policy %q; expected warn, error, or skip", mode)
+	}
+}
+
+func jsonParsingMode(cfg ParsingConfig) (string, error) {
+	mode := cfg.JSON.Mode
+	if mode == "" {
+		mode = JSONParsingAuto
+	}
+	switch mode {
+	case JSONParsingStrict, JSONParsingJSONC, JSONParsingAuto:
+		return mode, nil
+	default:
+		return "", fmt.Errorf("unsupported parsing.json.mode %q; expected strict, jsonc, or auto", mode)
 	}
 }
 

@@ -83,6 +83,74 @@ name = "ok"
 	}
 }
 
+func TestParseDocumentJSONParsingModes(t *testing.T) {
+	dir := t.TempDir()
+	tsconfig := filepath.Join(dir, "tsconfig.app.json")
+	writeFile(t, tsconfig, `{
+  // TypeScript config files commonly use JSON with comments.
+  "$schema": "./tsconfig.schema.json",
+  "compilerOptions": {},
+}`)
+	doc, err := ParseDocument(DiscoveredFile{Path: tsconfig, RelativePath: "tsconfig.app.json"})
+	if err != nil {
+		t.Fatalf("ParseDocument auto tsconfig: %v", err)
+	}
+	if doc.Format != DocumentFormatJSONC || doc.Schema != "./tsconfig.schema.json" {
+		t.Fatalf("auto tsconfig doc = %+v", doc)
+	}
+	strict := DefaultConfig().Parsing
+	strict.JSON.Mode = JSONParsingStrict
+	if _, err := parseDocument(DiscoveredFile{Path: tsconfig, RelativePath: "tsconfig.app.json"}, strict, false); err == nil {
+		t.Fatalf("expected strict mode to reject commented .json")
+	}
+	ordinary := filepath.Join(dir, "settings.json")
+	writeFile(t, ordinary, `{
+  // Ordinary .json stays strict in auto mode.
+  "$schema": "./settings.schema.json"
+}`)
+	if _, err := ParseDocument(DiscoveredFile{Path: ordinary, RelativePath: "settings.json"}); err == nil {
+		t.Fatalf("expected auto mode to keep ordinary .json strict")
+	}
+	jsonc := DefaultConfig().Parsing
+	jsonc.JSON.Mode = JSONParsingJSONC
+	doc, err = parseDocument(DiscoveredFile{Path: ordinary, RelativePath: "settings.json"}, jsonc, false)
+	if err != nil {
+		t.Fatalf("ParseDocument jsonc mode ordinary json: %v", err)
+	}
+	if doc.Format != DocumentFormatJSONC {
+		t.Fatalf("jsonc mode doc = %+v", doc)
+	}
+}
+
+func TestParseDocumentCanAttachSourceMapFromInitialRead(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "bad.json")
+	writeFile(t, path, `{
+  "$schema": "./schema.json",
+  "name": 42
+}`)
+	doc, err := parseDocument(DiscoveredFile{Path: path, RelativePath: "bad.json"}, DefaultConfig().Parsing, true)
+	if err != nil {
+		t.Fatalf("parseDocument with source map: %v", err)
+	}
+	if doc.SourceMap == nil {
+		t.Fatalf("expected source map to be attached")
+	}
+	if pos, ok := doc.SourceMap.Position("/name"); !ok || pos.Line != 3 || pos.Column == 0 {
+		t.Fatalf("source map position = %+v ok=%v", pos, ok)
+	}
+
+	linesPath := filepath.Join(dir, "events.jsonl")
+	writeFile(t, linesPath, "{\"name\":\"first\"}\n{\"name\":\"second\"}\n")
+	lines, err := parseDocument(DiscoveredFile{Path: linesPath, RelativePath: "events.jsonl"}, DefaultConfig().Parsing, true)
+	if err != nil {
+		t.Fatalf("parseDocument jsonl with source map: %v", err)
+	}
+	if lines.SourceMap == nil || len(lines.LineDocuments) != 2 || lines.LineDocuments[0].SourceMap == nil {
+		t.Fatalf("expected jsonl source maps to be attached: %+v", lines)
+	}
+}
+
 func TestParseDocumentErrorsAndHelpers(t *testing.T) {
 	dir := t.TempDir()
 	badJSON := filepath.Join(dir, "bad.json")

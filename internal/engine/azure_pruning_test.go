@@ -113,7 +113,7 @@ func TestAzureARMResourcePruningCanBeDisabled(t *testing.T) {
 	if !result.HasIssues() || *badRequests == 0 {
 		t.Fatalf("expected disabled pruning to fetch and compile unused provider schema: result=%+v badRequests=%d", result, *badRequests)
 	}
-	if !strings.Contains(result.Issues[0].Message, "compile schema") {
+	if !strings.Contains(result.Issues[0].Message, "schema compile failed") {
 		t.Fatalf("expected compile issue, got %+v", result.Issues)
 	}
 }
@@ -336,6 +336,19 @@ func TestCloneJSONValueMarshalError(t *testing.T) {
 	var raw json.RawMessage = []byte(`{"ok":true}`)
 	if cloned, ok := cloneJSONValue(raw).(map[string]any); !ok || cloned["ok"] != true {
 		t.Fatalf("raw clone = %#v", cloned)
+	}
+	original := map[string]any{
+		"child": map[string]any{"name": "before"},
+		"items": []any{map[string]any{"count": json.Number("1")}},
+	}
+	cloned, ok := cloneJSONValue(original).(map[string]any)
+	if !ok {
+		t.Fatalf("deep clone type = %#v", cloned)
+	}
+	cloned["child"].(map[string]any)["name"] = "after"
+	cloned["items"].([]any)[0].(map[string]any)["count"] = json.Number("2")
+	if original["child"].(map[string]any)["name"] != "before" || original["items"].([]any)[0].(map[string]any)["count"] != json.Number("1") {
+		t.Fatalf("clone mutated original: original=%#v cloned=%#v", original, cloned)
 	}
 }
 

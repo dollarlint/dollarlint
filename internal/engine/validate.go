@@ -42,7 +42,8 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 	result := Result{Root: root}
 	cache := NewSchemaCache(cfg)
 	catalogLoad := loadSchemaStoreCatalogAsync(ctx, cache, cfg)
-	parsedDocuments := parseDocuments(files, cfg)
+	wantSourceLocations := opts.SourceLocations || cfg.Output.Locations
+	parsedDocuments := parseDocuments(files, cfg, wantSourceLocations)
 	loadedCatalog := <-catalogLoad
 	if loadedCatalog.err != nil {
 		return Result{}, loadedCatalog.err
@@ -112,7 +113,7 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 		if len(parseIssues) == 0 {
 			result.Files[index].Status = StatusValidated
 		}
-		if opts.SourceLocations || cfg.Output.Locations {
+		if wantSourceLocations {
 			AttachSourceMap(document)
 		}
 		if !document.isEmptyLineDelimitedDocument() {
@@ -121,11 +122,25 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 	}
 	for _, validation := range validateDocuments(ctx, cache, cfg, validatedDocuments) {
 		document := validatedDocuments[validation.index]
+		index := fileIndexes[document.RelativePath]
+		if validation.err != nil {
+			return Result{}, validation.err
+		}
+		for _, warning := range validation.warnings {
+			addWarning(&result, warning)
+		}
+		if validation.skipped {
+			if result.Files[index].Status != StatusError {
+				result.Files[index].Status = StatusSkipped
+				result.Files[index].Message = validation.message
+				result.Summary.Skipped++
+			}
+			continue
+		}
 		issues := validation.issues
 		for _, issue := range issues {
 			applyIgnore(&issue, cfg.Ignore)
 			addIssue(&result, issue)
-			index := fileIndexes[document.RelativePath]
 			if issue.Ignored {
 				result.Files[index].Ignored++
 			} else {
@@ -145,8 +160,12 @@ func Lint(ctx context.Context, opts Options) (Result, error) {
 }
 
 type documentValidation struct {
-	index  int
-	issues []Issue
+	index    int
+	issues   []Issue
+	warnings []Warning
+	err      error
+	skipped  bool
+	message  string
 }
 
 type parsedDocument struct {
@@ -178,7 +197,7 @@ func loadSchemaStoreCatalogAsync(ctx context.Context, cache *SchemaCache, cfg Co
 	return results
 }
 
-func parseDocuments(files []DiscoveredFile, cfg Config) []parsedDocument {
+func parseDocuments(files []DiscoveredFile, cfg Config, sourceLocations bool) []parsedDocument {
 	results := make([]parsedDocument, len(files))
 	if len(files) == 0 {
 		return results
@@ -190,7 +209,7 @@ func parseDocuments(files []DiscoveredFile, cfg Config) []parsedDocument {
 		go func() {
 			defer wg.Done()
 			for index := range jobs {
-				document, err := ParseDocument(files[index])
+				document, err := parseDocument(files[index], cfg.Parsing, sourceLocations)
 				results[index] = parsedDocument{
 					file:     files[index],
 					document: document,
@@ -219,10 +238,9 @@ func validateDocuments(ctx context.Context, cache *SchemaCache, cfg Config, docu
 		go func() {
 			defer wg.Done()
 			for index := range jobs {
-				results[index] = documentValidation{
-					index:  index,
-					issues: validateDocument(ctx, cache, cfg, documents[index]),
-				}
+				validation := validateDocument(ctx, cache, cfg, documents[index])
+				validation.index = index
+				results[index] = validation
 			}
 		}()
 	}
@@ -284,50 +302,30 @@ func applyBuiltinSchemaAssociation(document *Document) {
 	document.SchemaSource = builtinDollarlintConfigSchemaSource
 }
 
-func validateDocument(ctx context.Context, cache *SchemaCache, cfg Config, document *Document) []Issue {
+func validateDocument(ctx context.Context, cache *SchemaCache, cfg Config, document *Document) documentValidation {
 	if document.isLineDelimited() {
 		return validateLineDelimitedDocument(ctx, cache, cfg, document)
 	}
 	if err := cache.Prime(ctx, primeableDocumentSchemaRoots(cfg, document)); err != nil {
-		return []Issue{{
-			File:         document.Path,
-			RelativePath: document.RelativePath,
-			Schema:       document.Schema,
-			Message:      err.Error(),
-		}}
+		return validationForSchemaFailure(document, cfg, "load", err)
 	}
 	schema, err := compileSchema(ctx, cache, cfg, document.Schema, document.Data)
 	if err != nil {
-		return []Issue{{
-			File:         document.Path,
-			RelativePath: document.RelativePath,
-			Schema:       document.Schema,
-			Message:      fmt.Sprintf("compile schema: %v", err),
-		}}
+		return validationForSchemaFailure(document, cfg, "compile", err)
 	}
 	if err := schema.Validate(document.Data); err != nil {
-		return issuesFromSchemaError(document, err, cfg.Output)
+		return documentValidation{issues: issuesFromSchemaError(document, err, cfg.Output)}
 	}
-	return nil
+	return documentValidation{}
 }
 
-func validateLineDelimitedDocument(ctx context.Context, cache *SchemaCache, cfg Config, document *Document) []Issue {
+func validateLineDelimitedDocument(ctx context.Context, cache *SchemaCache, cfg Config, document *Document) documentValidation {
 	if err := cache.Prime(ctx, primeableDocumentSchemaRoots(cfg, document)); err != nil {
-		return []Issue{{
-			File:         document.Path,
-			RelativePath: document.RelativePath,
-			Schema:       document.Schema,
-			Message:      err.Error(),
-		}}
+		return validationForSchemaFailure(document, cfg, "load", err)
 	}
 	schema, err := compileSchema(ctx, cache, cfg, document.Schema, nil)
 	if err != nil {
-		return []Issue{{
-			File:         document.Path,
-			RelativePath: document.RelativePath,
-			Schema:       document.Schema,
-			Message:      fmt.Sprintf("compile schema: %v", err),
-		}}
+		return validationForSchemaFailure(document, cfg, "compile", err)
 	}
 	var issues []Issue
 	for _, lineDocument := range document.LineDocuments {
@@ -338,7 +336,44 @@ func validateLineDelimitedDocument(ctx context.Context, cache *SchemaCache, cfg 
 			issues = append(issues, issuesFromSchemaError(&instance, err, cfg.Output)...)
 		}
 	}
-	return issues
+	return documentValidation{issues: issues}
+}
+
+func validationForSchemaFailure(document *Document, cfg Config, phase string, err error) documentValidation {
+	message := fmt.Sprintf("schema %s failed for %s: %v", phase, document.Schema, err)
+	if !isCatalogSchemaSource(document.SchemaSource) {
+		return documentValidation{issues: []Issue{{
+			File:         document.Path,
+			RelativePath: document.RelativePath,
+			Schema:       document.Schema,
+			Message:      message,
+		}}}
+	}
+	mode, modeErr := catalogFailureMode(cfg.Schemas)
+	if modeErr != nil {
+		return documentValidation{err: modeErr}
+	}
+	catalogMessage := fmt.Sprintf("catalog schema %s failed for %s using %s: %v", phase, document.RelativePath, document.Schema, err)
+	switch mode {
+	case CatalogFailureError:
+		return documentValidation{err: fmt.Errorf("%s", catalogMessage)}
+	case CatalogFailureSkip:
+		return documentValidation{skipped: true, message: fmt.Sprintf("catalog schema %s failed; skipped catalog-inferred validation", phase)}
+	default:
+		return documentValidation{
+			warnings: []Warning{{
+				Kind:    "schemaCatalogSchemaUnavailable",
+				Source:  document.SchemaSource,
+				Message: catalogMessage + "; skipped catalog-inferred validation",
+			}},
+			skipped: true,
+			message: fmt.Sprintf("catalog schema %s failed; skipped catalog-inferred validation", phase),
+		}
+	}
+}
+
+func isCatalogSchemaSource(source string) bool {
+	return source == "catalog" || strings.HasPrefix(source, "catalog:")
 }
 
 func issuesFromSchemaError(document *Document, err error, output OutputConfig) []Issue {

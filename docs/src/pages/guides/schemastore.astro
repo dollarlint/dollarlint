@@ -59,7 +59,7 @@ enabled = true`;
       catalog.
     </p>
 
-    <h2>Choose what happens when a catalog can't load</h2>
+    <h2>Choose what happens when catalog validation can't run</h2>
     <table>
       <thead>
         <tr>
@@ -71,8 +71,8 @@ enabled = true`;
         <tr>
           <td><code>warn</code></td>
           <td
-            >Log a warning, skip catalog inference, and keep validating explicit
-            or configured schemas.</td
+            >Log a warning, skip catalog inference or catalog-inferred
+            validation, and keep validating explicit or configured schemas.</td
           >
         </tr>
         <tr>
@@ -95,9 +95,10 @@ enabled = true`;
     <p>
       If <code>schemas.fetch.enabled = false</code>, remote catalogs are
       unavailable. With the default <code>warn</code> policy, dollarlint warns and
-      keeps validating explicit or configured local schemas. Files that explicitly
-      declare remote schemas still report schema-loading issues when remote fetching
-      is disabled.
+      keeps validating explicit or configured local schemas. The same policy applies
+      when a catalog loads but the schema it matched cannot be fetched or compiled.
+      Files that explicitly declare remote schemas still report schema-loading issues
+      when remote fetching is disabled.
     </p>
 
     <div class="note">

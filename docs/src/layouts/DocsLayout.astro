@@ -39,7 +39,8 @@ const currentLabel =
 const currentPageLabel = current === "/guides/" ? "Guides" : currentLabel;
 const navLinks = nav.flatMap((section) => section.links);
 const currentIndex = navLinks.findIndex((link) => link.href === current);
-const previousPage = current !== "/" && currentIndex > 0 ? navLinks[currentIndex - 1] : undefined;
+const previousPage =
+  current !== "/" && currentIndex > 0 ? navLinks[currentIndex - 1] : undefined;
 const nextPage =
   current !== "/" && currentIndex >= 0 && currentIndex < navLinks.length - 1
     ? navLinks[currentIndex + 1]
@@ -347,12 +348,15 @@ const slogans = [
             (previousPage || nextPage) && (
               <nav class="doc-pagination" aria-label="Previous and next pages">
                 {previousPage ? (
-                  <a class="doc-pagination-card previous" href={previousPage.href}>
+                  <a
+                    class="doc-pagination-card previous"
+                    href={previousPage.href}
+                  >
                     <span>Previous</span>
                     <strong>{previousPage.label}</strong>
                   </a>
                 ) : (
-                  <span></span>
+                  <span />
                 )}
                 {nextPage ? (
                   <a class="doc-pagination-card next" href={nextPage.href}>
@@ -360,7 +364,7 @@ const slogans = [
                     <strong>{nextPage.label}</strong>
                   </a>
                 ) : (
-                  <span></span>
+                  <span />
                 )}
               </nav>
             )

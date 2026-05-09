@@ -134,7 +134,7 @@ func addValidateFlags(cmd *cobra.Command, opts *validateOptions) {
 	cmd.Flags().StringArrayVar(&opts.includes, "include", nil, "Glob to include during discovery; repeatable")
 	cmd.Flags().StringArrayVar(&opts.extendExcludes, "extend-exclude", nil, "Additional discovery exclude glob; repeatable")
 	cmd.Flags().BoolVar(&opts.noDefaultExcludes, "no-default-excludes", false, "Disable built-in discovery excludes for common generated and dependency directories")
-	cmd.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "Do not apply root .gitignore patterns during discovery")
+	cmd.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "Do not apply .gitignore patterns during discovery")
 	cmd.Flags().BoolVar(&opts.forceExclude, "force-exclude", false, "Apply discovery excludes even to explicitly passed files")
 	cmd.Flags().StringArrayVar(&opts.associations, "schema", nil, "Associate a file glob with a schema as glob=uri; repeatable")
 	cmd.Flags().BoolVar(&opts.schemaStore, "schema-store", false, "Match conventional filenames using the SchemaStore catalog")

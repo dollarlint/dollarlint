@@ -11,6 +11,9 @@ respectGitIgnore = true
 forceExclude = false
 followSymlinks = false
 
+[parsing.json]
+mode = "auto"
+
 [schemas]
 maxDepth = 8
 concurrency = 8
@@ -81,8 +84,10 @@ reason = "legacy fixture kept for compatibility"`;
       <p class="lead">
         A <code>.dollarlint.toml</code> config is recommended for projects, but not
         required. Directory validation searches the target root; explicit file validation
-        searches beside the file. Use <code>--config</code> to point at a specific
-        config.
+        searches beside the file. Each run uses one config; nested <code
+          >.dollarlint.toml</code
+        > files are not applied as separate project configs during a parent-directory
+        run. Use <code>--config</code> to point at a specific config.
       </p>
     </header>
 
@@ -137,7 +142,8 @@ reason = "legacy fixture kept for compatibility"`;
         >
         <tr
           ><td><code>respectGitIgnore</code></td><td
-            >Apply the root <code>.gitignore</code> during directory discovery.</td
+            >Apply <code>.gitignore</code> patterns during directory discovery, including
+            nested <code>.gitignore</code> files as the walk descends.</td
           ></tr
         >
         <tr
@@ -158,6 +164,33 @@ reason = "legacy fixture kept for compatibility"`;
         >dollarlint init</code
       >. Keep project-specific ignores in <code>extendExclude</code>.
     </p>
+
+    <h2>Parsing</h2>
+    <p>
+      JSON parsing defaults to <code>auto</code>: ordinary <code>.json</code>
+      files stay strict, while known JSONC-by-convention files such as <code
+        >tsconfig*.json</code
+      >, <code>jsconfig*.json</code>, <code>.vscode/settings.json</code>, and
+      <code>devcontainer.json</code> allow comments and trailing commas. Files ending
+      in <code>.jsonc</code> always use JSONC parsing.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          ><td><code>parsing.json.mode</code></td><td
+            >Choose <code>auto</code>, <code>strict</code>, or <code>jsonc</code
+            >
+            for files ending in <code>.json</code>.</td
+          ></tr
+        >
+      </tbody>
+    </table>
 
     <h2>Schemas</h2>
     <table>
@@ -306,7 +339,10 @@ reason = "legacy fixture kept for compatibility"`;
       Catalogs map well-known filenames to schemas when a file doesn't declare <code
         >$schema</code
       > and no explicit or built-in association matches. SchemaStore is the built-in
-      catalog source, and custom sources can use the same catalog shape.
+      catalog source, and custom sources can use the same catalog shape. Explicit
+      in-file schemas still report schema load or compile failures as issues; the
+      catalog failure policy only applies to catalog loading and catalog-inferred
+      schemas.
     </p>
     <table>
       <thead>
@@ -324,7 +360,8 @@ reason = "legacy fixture kept for compatibility"`;
         <tr
           ><td><code>schemas.catalogs.failure</code></td><td
             >Choose <code>warn</code>, <code>error</code>, or <code>skip</code> when
-            a catalog cannot be loaded.</td
+            a catalog cannot be loaded or a catalog-inferred schema cannot be loaded
+            or compiled.</td
           ></tr
         >
         <tr

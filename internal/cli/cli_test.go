@@ -389,6 +389,8 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 		"cache = true",
 		`timeout = "10s"`,
 		`retries = 2`,
+		"[parsing.json]",
+		`mode = "auto"`,
 		"[schemas.compile]",
 		`timeout = "30s"`,
 		`failure = "warn"`,

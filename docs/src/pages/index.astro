@@ -66,8 +66,12 @@ import LogoOutline from "../components/LogoOutline.astro";
         aria-labelledby="install-homebrew-tab"
         data-install-panel="homebrew"
       >
-        <span aria-hidden="true">$</span><code>brew install dollarlint/tap/dollarlint</code>
-        <button class="install-copy" type="button" data-install-copy>Copy</button>
+        <span aria-hidden="true">$</span><code
+          >brew install dollarlint/tap/dollarlint</code
+        >
+        <button class="install-copy" type="button" data-install-copy
+          >Copy</button
+        >
       </div>
       <div
         class="install-panel"
@@ -78,7 +82,9 @@ import LogoOutline from "../components/LogoOutline.astro";
         hidden
       >
         <span aria-hidden="true">$</span><code>npm install -g dollarlint</code>
-        <button class="install-copy" type="button" data-install-copy>Copy</button>
+        <button class="install-copy" type="button" data-install-copy
+          >Copy</button
+        >
       </div>
       <div
         class="install-panel"
@@ -88,8 +94,12 @@ import LogoOutline from "../components/LogoOutline.astro";
         data-install-panel="go"
         hidden
       >
-        <span aria-hidden="true">$</span><code>go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest</code>
-        <button class="install-copy" type="button" data-install-copy>Copy</button>
+        <span aria-hidden="true">$</span><code
+          >go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest</code
+        >
+        <button class="install-copy" type="button" data-install-copy
+          >Copy</button
+        >
       </div>
     </div>
     <div class="hero-actions">
@@ -135,14 +145,19 @@ import LogoOutline from "../components/LogoOutline.astro";
             );
           });
           installPanels.forEach((panel) => {
-            panel.toggleAttribute("hidden", panel.dataset.installPanel !== target);
+            panel.toggleAttribute(
+              "hidden",
+              panel.dataset.installPanel !== target,
+            );
           });
         });
       });
 
       hero.querySelectorAll("[data-install-copy]").forEach((button) => {
         button.addEventListener("click", async () => {
-          const command = button.parentElement?.querySelector("code")?.textContent?.trim();
+          const command = button.parentElement
+            ?.querySelector("code")
+            ?.textContent?.trim();
           if (!command) return;
           try {
             await navigator.clipboard.writeText(command);

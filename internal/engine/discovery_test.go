@@ -56,6 +56,24 @@ func TestDiscoverFilesSkipsNonSourceAndMatchesGlobs(t *testing.T) {
 	}
 }
 
+func TestDiscoverFilesSkipsAdditionalGeneratedLocations(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "kept.json"), `{}`)
+	writeFile(t, filepath.Join(dir, ".build", "swift.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "DerivedData", "derived.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "Intermediates.noindex", "intermediate.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "temp", "run.jsonl"), `{}`)
+	writeFile(t, filepath.Join(dir, "Package.dSYM", "Contents", "Info.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "SourcePackages", "checkouts", "dependency.json"), `{}`)
+	files, err := DiscoverFiles(dir, DefaultConfig().Discovery)
+	if err != nil {
+		t.Fatalf("DiscoverFiles: %v", err)
+	}
+	if len(files) != 1 || files[0].RelativePath != "kept.json" {
+		t.Fatalf("generated-location discovery = %+v", files)
+	}
+}
+
 func TestDiscoverSingleFileAndSymlink(t *testing.T) {
 	dir := t.TempDir()
 	target := filepath.Join(dir, "target.json")
@@ -145,6 +163,29 @@ func TestDiscoverFilesRespectsGitIgnore(t *testing.T) {
 	}
 	if len(files) != 5 {
 		t.Fatalf("expected gitignore disabled to include all JSON files, got %+v", files)
+	}
+}
+
+func TestDiscoverFilesRespectsNestedGitIgnore(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, ".gitignore"), "root-ignored.json\n")
+	writeFile(t, filepath.Join(dir, "kept.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "root-ignored.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "nested", ".gitignore"), "ignored.json\n!keep.json\n")
+	writeFile(t, filepath.Join(dir, "nested", "ignored.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "nested", "keep.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "nested", "deeper", "ignored.json"), `{}`)
+	files, err := DiscoverFiles(dir, DefaultConfig().Discovery)
+	if err != nil {
+		t.Fatalf("DiscoverFiles nested gitignore: %v", err)
+	}
+	var rels []string
+	for _, file := range files {
+		rels = append(rels, file.RelativePath)
+	}
+	sort.Strings(rels)
+	if got := strings.Join(rels, ","); got != "kept.json,nested/keep.json" {
+		t.Fatalf("nested gitignore discovered %s", got)
 	}
 }
 

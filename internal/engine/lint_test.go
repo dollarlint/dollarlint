@@ -308,7 +308,7 @@ func TestLintParseSchemaAndPrimeErrors(t *testing.T) {
 		if strings.Contains(issue.Message, "parse") {
 			parseIssue = true
 		}
-		if strings.Contains(issue.Message, "compile schema") {
+		if strings.Contains(issue.Message, "schema compile failed") {
 			compileIssue = true
 		}
 	}

@@ -316,13 +316,38 @@ func walkJSON(value any, visit func(any) bool) bool {
 }
 
 func cloneJSONValue(value any) any {
-	data, err := json.Marshal(value)
-	if err != nil {
-		return value
+	switch typed := value.(type) {
+	case map[string]any:
+		cloned := make(map[string]any, len(typed))
+		for key, child := range typed {
+			cloned[key] = cloneJSONValue(child)
+		}
+		return cloned
+	case []any:
+		cloned := make([]any, len(typed))
+		for index, child := range typed {
+			cloned[index] = cloneJSONValue(child)
+		}
+		return cloned
+	case json.RawMessage:
+		return cloneJSONRawMessage(typed)
+	case []byte:
+		cloned := make([]byte, len(typed))
+		copy(cloned, typed)
+		return cloned
+	default:
+		return typed
 	}
-	decoder := json.NewDecoder(bytes.NewReader(data))
+}
+
+func cloneJSONRawMessage(raw json.RawMessage) any {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.UseNumber()
 	var cloned any
-	_ = decoder.Decode(&cloned)
-	return cloned
+	if err := decoder.Decode(&cloned); err != nil {
+		copied := make(json.RawMessage, len(raw))
+		copy(copied, raw)
+		return copied
+	}
+	return cloneJSONValue(cloned)
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"unicode"
@@ -77,11 +78,15 @@ func (d *Document) azureResourceRefs() []azureARMResourceRef {
 }
 
 func ParseDocument(file DiscoveredFile) (*Document, error) {
+	return parseDocument(file, DefaultConfig().Parsing, false)
+}
+
+func parseDocument(file DiscoveredFile, cfg ParsingConfig, sourceLocations bool) (*Document, error) {
 	raw, err := os.ReadFile(file.Path)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", file.Path, err)
 	}
-	format, err := formatForPath(file.Path)
+	format, err := formatForPath(file, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +95,7 @@ func ParseDocument(file DiscoveredFile) (*Document, error) {
 		return nil, fmt.Errorf("parse %s: %w", file.Path, err)
 	}
 	schema, source := extractSchema(raw, data, format)
-	return &Document{
+	document := &Document{
 		Path:          file.Path,
 		RelativePath:  file.RelativePath,
 		Format:        format,
@@ -99,7 +104,11 @@ func ParseDocument(file DiscoveredFile) (*Document, error) {
 		SchemaSource:  source,
 		LineDocuments: lineDocuments,
 		ParseErrors:   parseErrors,
-	}, nil
+	}
+	if sourceLocations {
+		attachSourceMapFromRaw(document, raw)
+	}
+	return document, nil
 }
 
 func AttachSourceMap(document *Document) {
@@ -108,6 +117,13 @@ func AttachSourceMap(document *Document) {
 	}
 	raw, err := os.ReadFile(document.Path)
 	if err != nil {
+		return
+	}
+	attachSourceMapFromRaw(document, raw)
+}
+
+func attachSourceMapFromRaw(document *Document, raw []byte) {
+	if document == nil || document.SourceMap != nil {
 		return
 	}
 	if document.isLineDelimited() {
@@ -121,10 +137,10 @@ func AttachSourceMap(document *Document) {
 	document.SourceMap = safeBuildSourceMap(raw, document.Format)
 }
 
-func formatForPath(path string) (string, error) {
-	switch strings.ToLower(filepath.Ext(path)) {
+func formatForPath(file DiscoveredFile, cfg ParsingConfig) (string, error) {
+	switch strings.ToLower(filepath.Ext(file.Path)) {
 	case ".json":
-		return DocumentFormatJSON, nil
+		return jsonFormatForPath(file, cfg)
 	case ".jsonc":
 		return DocumentFormatJSONC, nil
 	case ".json5":
@@ -136,8 +152,64 @@ func formatForPath(path string) (string, error) {
 	case ".toml":
 		return DocumentFormatTOML, nil
 	default:
-		return "", fmt.Errorf("unsupported file format %s", filepath.Ext(path))
+		return "", fmt.Errorf("unsupported file format %s", filepath.Ext(file.Path))
 	}
+}
+
+func jsonFormatForPath(file DiscoveredFile, cfg ParsingConfig) (string, error) {
+	mode, err := jsonParsingMode(cfg)
+	if err != nil {
+		return "", err
+	}
+	switch mode {
+	case JSONParsingJSONC:
+		return DocumentFormatJSONC, nil
+	case JSONParsingAuto:
+		rel := file.RelativePath
+		if rel == "" {
+			rel = file.Path
+		}
+		if isConventionalJSONCPath(rel) {
+			return DocumentFormatJSONC, nil
+		}
+	}
+	return DocumentFormatJSON, nil
+}
+
+func isConventionalJSONCPath(raw string) bool {
+	rel := strings.ToLower(cleanGlob(raw))
+	base := path.Base(rel)
+	if isTSOrJSConfigJSON(base) {
+		return true
+	}
+	switch base {
+	case "deno.json", "devcontainer.json":
+		return true
+	}
+	parts := strings.Split(rel, "/")
+	for i := 0; i < len(parts)-1; i++ {
+		next := parts[i+1]
+		switch parts[i] {
+		case ".vscode":
+			switch next {
+			case "settings.json", "tasks.json", "launch.json", "extensions.json":
+				return true
+			}
+		case ".devcontainer":
+			if next == "devcontainer.json" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func isTSOrJSConfigJSON(base string) bool {
+	if base == "tsconfig.json" || base == "jsconfig.json" {
+		return true
+	}
+	return (strings.HasPrefix(base, "tsconfig.") || strings.HasPrefix(base, "jsconfig.")) &&
+		strings.HasSuffix(base, ".json")
 }
 
 func parseDocumentData(raw []byte, format string) (any, []LineDocument, []DocumentParseError, error) {

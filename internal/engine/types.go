@@ -15,6 +15,12 @@ const (
 )
 
 const (
+	JSONParsingStrict = "strict"
+	JSONParsingJSONC  = "jsonc"
+	JSONParsingAuto   = "auto"
+)
+
+const (
 	BranchErrorsBest = "best"
 	BranchErrorsAll  = "all"
 )
@@ -22,6 +28,7 @@ const (
 type Config struct {
 	Version   int             `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
 	Discovery DiscoveryConfig `json:"discovery,omitempty" yaml:"discovery,omitempty" toml:"discovery,omitempty"`
+	Parsing   ParsingConfig   `json:"parsing,omitempty" yaml:"parsing,omitempty" toml:"parsing,omitempty"`
 	Schemas   SchemaConfig    `json:"schemas,omitempty" yaml:"schemas,omitempty" toml:"schemas,omitempty"`
 	Ignore    []IgnoreRule    `json:"ignore,omitempty" yaml:"ignore,omitempty" toml:"ignore,omitempty"`
 	Output    OutputConfig    `json:"output,omitempty" yaml:"output,omitempty" toml:"output,omitempty"`
@@ -34,6 +41,14 @@ type DiscoveryConfig struct {
 	RespectGitIgnore   *bool    `json:"respectGitIgnore,omitempty" yaml:"respectGitIgnore,omitempty" toml:"respectGitIgnore,omitempty"`
 	ForceExclude       bool     `json:"forceExclude,omitempty" yaml:"forceExclude,omitempty" toml:"forceExclude,omitempty"`
 	FollowSymlinks     bool     `json:"followSymlinks,omitempty" yaml:"followSymlinks,omitempty" toml:"followSymlinks,omitempty"`
+}
+
+type ParsingConfig struct {
+	JSON JSONParsingConfig `json:"json,omitempty" yaml:"json,omitempty" toml:"json,omitempty"`
+}
+
+type JSONParsingConfig struct {
+	Mode string `json:"mode,omitempty" yaml:"mode,omitempty" toml:"mode,omitempty"`
 }
 
 type SchemaConfig struct {

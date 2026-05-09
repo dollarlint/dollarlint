@@ -302,6 +302,9 @@ respectGitIgnore = true
 forceExclude = false
 followSymlinks = false
 
+[parsing.json]
+mode = "auto"
+
 [schemas]
 maxDepth = 8
 concurrency = 8

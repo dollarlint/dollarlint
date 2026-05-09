@@ -180,6 +180,47 @@ func TestSchemaStoreErrors(t *testing.T) {
 	}
 }
 
+func TestSchemaStoreMatchedSchemaFailurePolicy(t *testing.T) {
+	dir := t.TempDir()
+	catalogDir := filepath.Join(dir, "node_modules", "catalog-fixtures")
+	writeFile(t, filepath.Join(catalogDir, "catalog.json"), `{
+  "schemas": [
+    {"name": "Broken", "fileMatch": ["broken.json"], "url": "./broken.schema.json"}
+  ]
+}`)
+	writeFile(t, filepath.Join(catalogDir, "broken.schema.json"), `{"type":"not-a-json-schema-type"}`)
+	writeFile(t, filepath.Join(dir, "broken.json"), `{}`)
+
+	cfg := DefaultConfig()
+	cfg.Schemas.Catalogs.Enabled = true
+	cfg.Schemas.Catalogs.Sources = []CatalogSource{{Name: "test", Format: "schemastore", Path: filepath.Join(catalogDir, "catalog.json")}}
+
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("warn catalog schema failure should continue, got %v", err)
+	}
+	if result.Summary.Issues != 0 || result.Summary.Warnings != 1 || result.Summary.Validated != 0 || result.Summary.Skipped != 1 {
+		t.Fatalf("warn catalog schema failure summary = %+v issues=%+v warnings=%+v", result.Summary, result.Issues, result.Warnings)
+	}
+	if !strings.Contains(result.Warnings[0].Message, "catalog schema compile failed") || result.Warnings[0].Kind != "schemaCatalogSchemaUnavailable" {
+		t.Fatalf("catalog schema warning = %+v", result.Warnings[0])
+	}
+
+	cfg.Schemas.Catalogs.Failure = CatalogFailureSkip
+	result, err = Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("skip catalog schema failure should continue, got %v", err)
+	}
+	if result.Summary.Issues != 0 || result.Summary.Warnings != 0 || result.Summary.Validated != 0 || result.Summary.Skipped != 1 {
+		t.Fatalf("skip catalog schema failure summary = %+v issues=%+v warnings=%+v", result.Summary, result.Issues, result.Warnings)
+	}
+
+	cfg.Schemas.Catalogs.Failure = CatalogFailureError
+	if _, err := Lint(context.Background(), Options{Root: dir, Config: cfg}); err == nil || !strings.Contains(err.Error(), "catalog schema compile failed") {
+		t.Fatalf("expected error catalog schema failure, got %v", err)
+	}
+}
+
 func TestSchemaStoreCatalogSourceEdges(t *testing.T) {
 	enabled := true
 	disabled := false

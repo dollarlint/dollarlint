@@ -771,6 +771,11 @@ h1 {
   margin-top: 42px;
 }
 
+.section-rule {
+  border-top: 1px solid var(--rule);
+  padding-top: 28px;
+}
+
 .command-section h2 {
   margin-top: 0;
   border-top: 1px solid var(--rule);

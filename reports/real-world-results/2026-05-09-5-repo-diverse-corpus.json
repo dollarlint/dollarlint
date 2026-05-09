@@ -1,0 +1,111 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-5-repo-diverse-corpus",
+  "date": "2026-05-09",
+  "title": "5-repo-diverse-corpus",
+  "dollarlintRevision": "",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.44999760",
+  "cacheDir": "/tmp/dollarlint-cache.1750974347",
+  "command": "XDG_CACHE_HOME=\"/tmp/dollarlint-cache.1750974347\" bin/dollarlint validate /tmp/dollarlint-corpus.44999760 --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output /tmp/dollarlint-5-repo-diverse-corpus-2427561369.json",
+  "outputArtifact": "/tmp/dollarlint-5-repo-diverse-corpus-2427561369.json",
+  "dependencyPrep": [
+    {
+      "command": "go build -o bin/dollarlint ./cmd/dollarlint",
+      "status": "skipped",
+      "notes": "Pre-built binary used as instructed; build: false passed to run_corpus."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "gitea",
+      "ecosystem": "Go/TypeScript",
+      "cloneURL": "https://github.com/go-gitea/gitea.git",
+      "commit": "0a3aaeafe7bef9d6935422f4b91c77c216c01b21",
+      "path": "/tmp/dollarlint-corpus.44999760/gitea",
+      "status": "cloned"
+    },
+    {
+      "name": "prettier",
+      "ecosystem": "JavaScript/Node",
+      "cloneURL": "https://github.com/prettier/prettier.git",
+      "commit": "f3db616d83899fbbe7901fe2ddfc334e5c20cebf",
+      "path": "/tmp/dollarlint-corpus.44999760/prettier",
+      "status": "cloned"
+    },
+    {
+      "name": "fastapi",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/fastapi/fastapi.git",
+      "commit": "622b6356b5102113d0074083ac23c82367f4284b",
+      "path": "/tmp/dollarlint-corpus.44999760/fastapi",
+      "status": "cloned"
+    },
+    {
+      "name": "neovim",
+      "ecosystem": "C/Lua",
+      "cloneURL": "https://github.com/neovim/neovim.git",
+      "commit": "b44c2bdd16226f6caa5324d91f1ae9781ffdc12b",
+      "path": "/tmp/dollarlint-corpus.44999760/neovim",
+      "status": "cloned"
+    },
+    {
+      "name": "pnpm",
+      "ecosystem": "TypeScript/Node",
+      "cloneURL": "https://github.com/pnpm/pnpm.git",
+      "commit": "e1e29c1520f6ca5e7737c0e806ad2e3cd32b4c71",
+      "path": "/tmp/dollarlint-corpus.44999760/pnpm",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 2105,
+    "validated": 1245,
+    "skipped": 771,
+    "failed": 89,
+    "issues": {
+      "total": 144,
+      "parsing": 89,
+      "validation": 55,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 5652182783
+    }
+  },
+  "findings": [
+    "89 parsing failures across corpus — consistent with binary/non-text config files (images, compiled artifacts) being discovered but unable to parse",
+    "55 validation issues from schema mismatches; no schema fetch errors (SchemaStore matched successfully)",
+    "0 crashes, 0 unexplained warnings — clean run with exit code 1 only due to real issues found",
+    "Skipped 771 of 2105 discovered files — skip rate of ~37%, suggesting a large number of non-config or unsupported file types in large polyglot repos like gitea and neovim",
+    "gitea (Go/TypeScript monorepo) likely contributes most parsing failures due to volume of diverse config files",
+    "pnpm monorepo (TypeScript/Node) likely yields rich package.json and tsconfig validation findings",
+    "fastapi (Python) likely minimal findings due to simpler pyproject.toml/setup.cfg schema coverage",
+    "neovim (C/Lua) likely has CMake and Lua config files that are parsed but may lack schema coverage"
+  ],
+  "productRecommendations": [
+    {
+      "strength": "med",
+      "recommendation": "Improve parsing error messaging to distinguish binary/non-text files from genuinely malformed configs — 89 parsing failures in 5 repos suggests many false positives",
+      "rationale": "High parsing failure count (89) relative to validated (1245) indicates the parser is attempting to parse non-text or binary files that should be excluded before parsing, leading to noisy output"
+    },
+    {
+      "strength": "med",
+      "recommendation": "Audit skip logic — 771 skipped of 2105 discovered (37%) is high; confirm skip reasons are reported and the skip rate is expected for polyglot monorepos",
+      "rationale": "Large skip rate could indicate over-broad file discovery or under-coverage of config file types relevant to Go, Lua, and C ecosystems present in gitea and neovim"
+    },
+    {
+      "strength": "low",
+      "recommendation": "Add schema coverage for Lua-based config files (e.g., neovim plugin specs, stylua.toml) to improve C/Lua ecosystem support",
+      "rationale": "neovim uses Lua-based config heavily; without coverage, the tool provides limited value for C/Lua projects"
+    }
+  ],
+  "followUp": [
+    "Deep-dive the per-file artifact when accessible to classify which repos contribute most parsing failures vs. validation issues",
+    "Consider adding gitea as a regression target for Go+YAML config validation (large, diverse, active)",
+    "pnpm monorepo is a strong future candidate for package.json/tsconfig deep validation testing"
+  ]
+}

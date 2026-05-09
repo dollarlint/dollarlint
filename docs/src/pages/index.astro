@@ -20,9 +20,78 @@ import LogoOutline from "../components/LogoOutline.astro";
     </div>
     <h1>dollarlint</h1>
     <p class="hero-copy">
-      <code>$schema</code> validation worth every JSON, YAML, &amp; TOML file you've
+      <code>$schema</code> validation for every JSON, YAML, &amp; TOML file you've
       got.
     </p>
+    <div class="install-tabs" data-install-tabs>
+      <div class="install-tabs-list" role="tablist" aria-label="Install method">
+        <button
+          class="install-tab"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          aria-controls="install-homebrew"
+          id="install-homebrew-tab"
+          data-install-tab="homebrew"
+        >
+          Homebrew
+        </button>
+        <button
+          class="install-tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="install-npm"
+          id="install-npm-tab"
+          data-install-tab="npm"
+        >
+          npm
+        </button>
+        <button
+          class="install-tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="install-go"
+          id="install-go-tab"
+          data-install-tab="go"
+        >
+          Go
+        </button>
+      </div>
+      <div
+        class="install-panel"
+        role="tabpanel"
+        id="install-homebrew"
+        aria-labelledby="install-homebrew-tab"
+        data-install-panel="homebrew"
+      >
+        <span aria-hidden="true">$</span><code>brew install dollarlint/tap/dollarlint</code>
+        <button class="install-copy" type="button" data-install-copy>Copy</button>
+      </div>
+      <div
+        class="install-panel"
+        role="tabpanel"
+        id="install-npm"
+        aria-labelledby="install-npm-tab"
+        data-install-panel="npm"
+        hidden
+      >
+        <span aria-hidden="true">$</span><code>npm install -g dollarlint</code>
+        <button class="install-copy" type="button" data-install-copy>Copy</button>
+      </div>
+      <div
+        class="install-panel"
+        role="tabpanel"
+        id="install-go"
+        aria-labelledby="install-go-tab"
+        data-install-panel="go"
+        hidden
+      >
+        <span aria-hidden="true">$</span><code>go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest</code>
+        <button class="install-copy" type="button" data-install-copy>Copy</button>
+      </div>
+    </div>
     <div class="hero-actions">
       <a class="button primary" href="/guides/installation/">Get started</a>
       <a class="button secondary" href="/reference/configuration/"
@@ -52,6 +121,42 @@ import LogoOutline from "../components/LogoOutline.astro";
           "--mark-rotate",
           `${rand([-45, 45]).toFixed(2)}deg`,
         );
+      });
+
+      const installTabs = hero.querySelectorAll("[data-install-tab]");
+      const installPanels = hero.querySelectorAll("[data-install-panel]");
+      installTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const target = tab.dataset.installTab;
+          installTabs.forEach((item) => {
+            item.setAttribute(
+              "aria-selected",
+              String(item.dataset.installTab === target),
+            );
+          });
+          installPanels.forEach((panel) => {
+            panel.toggleAttribute("hidden", panel.dataset.installPanel !== target);
+          });
+        });
+      });
+
+      hero.querySelectorAll("[data-install-copy]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const command = button.parentElement?.querySelector("code")?.textContent?.trim();
+          if (!command) return;
+          try {
+            await navigator.clipboard.writeText(command);
+            button.textContent = "Copied";
+            window.setTimeout(() => {
+              button.textContent = "Copy";
+            }, 1400);
+          } catch {
+            button.textContent = "Copy failed";
+            window.setTimeout(() => {
+              button.textContent = "Copy";
+            }, 1400);
+          }
+        });
       });
     })();
   </script>

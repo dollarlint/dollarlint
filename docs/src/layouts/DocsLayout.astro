@@ -37,6 +37,13 @@ const currentLabel =
   nav.flatMap((section) => section.links).find((link) => link.href === current)
     ?.label ?? "Menu";
 const currentPageLabel = current === "/guides/" ? "Guides" : currentLabel;
+const navLinks = nav.flatMap((section) => section.links);
+const currentIndex = navLinks.findIndex((link) => link.href === current);
+const previousPage = current !== "/" && currentIndex > 0 ? navLinks[currentIndex - 1] : undefined;
+const nextPage =
+  current !== "/" && currentIndex >= 0 && currentIndex < navLinks.length - 1
+    ? navLinks[currentIndex + 1]
+    : undefined;
 const slogans = [
   ["Put your money", "where your schema is"],
   ["Time to audit", "those configs"],
@@ -143,6 +150,33 @@ const slogans = [
       href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700;800&family=Fjord+One&display=block"
       rel="stylesheet"
     />
+    <style is:inline>
+      :root {
+        --install-bg: #fff7d6;
+        --install-bg-soft: #f1dda1;
+        --install-fg: #3a2b0f;
+        --install-muted: #6d5520;
+        --install-border: rgba(179, 135, 40, 0.5);
+      }
+
+      html[data-theme="dark"] {
+        --install-bg: #211a0d;
+        --install-bg-soft: #332811;
+        --install-fg: #f6eed1;
+        --install-muted: #dfbd62;
+        --install-border: rgba(223, 189, 98, 0.5);
+      }
+
+      .install-tabs {
+        background: var(--install-bg);
+        border-color: var(--install-border);
+        color: var(--install-fg);
+      }
+
+      .install-tabs-list {
+        background: var(--install-bg-soft);
+      }
+    </style>
     <link rel="icon" type="image/png" sizes="1024x1024" href="/site-icon.png" />
     <link rel="apple-touch-icon" sizes="1024x1024" href="/site-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -309,6 +343,28 @@ const slogans = [
       <main class="content">
         <div class="page">
           <slot />
+          {
+            (previousPage || nextPage) && (
+              <nav class="doc-pagination" aria-label="Previous and next pages">
+                {previousPage ? (
+                  <a class="doc-pagination-card previous" href={previousPage.href}>
+                    <span>Previous</span>
+                    <strong>{previousPage.label}</strong>
+                  </a>
+                ) : (
+                  <span></span>
+                )}
+                {nextPage ? (
+                  <a class="doc-pagination-card next" href={nextPage.href}>
+                    <span>Next</span>
+                    <strong>{nextPage.label}</strong>
+                  </a>
+                ) : (
+                  <span></span>
+                )}
+              </nav>
+            )
+          }
         </div>
       </main>
     </div>

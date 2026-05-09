@@ -58,6 +58,11 @@
   --logo-check: var(--green-dark);
   --logo-texture-ink: rgba(15, 90, 63, 0.34);
   --logo-texture-paper: rgba(251, 247, 232, 0.5);
+  --install-bg: #fff7d6;
+  --install-bg-soft: #f1dda1;
+  --install-fg: #3a2b0f;
+  --install-muted: #6d5520;
+  --install-border: rgba(179, 135, 40, 0.5);
   --display: "Fjord One", Georgia, "Times New Roman", serif;
   --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   --sans:
@@ -124,6 +129,11 @@ html[data-theme="dark"] {
   --logo-check: var(--green-dark);
   --logo-texture-ink: rgba(8, 20, 15, 0.36);
   --logo-texture-paper: rgba(216, 231, 215, 0.34);
+  --install-bg: #211a0d;
+  --install-bg-soft: #332811;
+  --install-fg: #f6eed1;
+  --install-muted: #dfbd62;
+  --install-border: rgba(223, 189, 98, 0.5);
 }
 
 *,
@@ -603,7 +613,104 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  margin-top: 22px;
+}
+
+.install-tabs {
+  max-width: min(100%, 620px);
+  overflow: hidden;
+  border: 1px solid var(--install-border);
+  border-radius: 8px;
+  background: var(--install-bg);
+  box-shadow:
+    var(--card-shadow),
+    inset 0 1px 0 color-mix(in srgb, var(--gold) 14%, transparent);
   margin-top: 28px;
+}
+
+.install-tabs-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--gold) 26%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--gold) 18%, transparent),
+      transparent
+    ),
+    var(--install-bg-soft);
+  padding: 6px;
+}
+
+.install-tab {
+  min-height: 30px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  padding: 0 10px;
+  color: var(--install-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.install-tab:hover,
+.install-tab[aria-selected="true"] {
+  background: color-mix(in srgb, var(--gold) 24%, transparent);
+  color: var(--install-fg);
+}
+
+.install-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  color: var(--install-fg);
+  padding: 14px 16px;
+}
+
+.install-panel[hidden] {
+  display: none;
+}
+
+.install-panel > span {
+  flex: 0 0 auto;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.install-tabs .install-panel code {
+  display: block;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow-x: auto;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.install-copy {
+  flex: 0 0 auto;
+  min-height: 30px;
+  border: 1px solid color-mix(in srgb, var(--gold) 42%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--gold) 16%, var(--install-bg));
+  padding: 0 10px;
+  color: var(--install-fg);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.install-copy:hover {
+  background: color-mix(in srgb, var(--gold) 20%, transparent);
 }
 
 .button {
@@ -765,6 +872,58 @@ h1 {
 
 .doc li + li {
   margin-top: 0.35rem;
+}
+
+.doc-pagination {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 850px;
+  margin-top: 42px;
+  border-top: 1px solid var(--rule);
+  padding-top: 22px;
+}
+
+.doc-pagination-card {
+  display: block;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 16px 18px;
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: var(--card-shadow);
+}
+
+.doc-pagination-card:hover {
+  border-color: var(--nav-active-border);
+  background: var(--surface-soft);
+}
+
+.doc-pagination-card span {
+  display: block;
+  color: var(--gold);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.doc-pagination-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.02rem;
+}
+
+.doc-pagination-card.previous strong::before {
+  content: "← ";
+}
+
+.doc-pagination-card.next {
+  text-align: right;
+}
+
+.doc-pagination-card.next strong::after {
+  content: " →";
 }
 
 .command-section {
@@ -1150,6 +1309,10 @@ tr:last-child td {
   }
 
   .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .doc-pagination {
     grid-template-columns: 1fr;
   }
 

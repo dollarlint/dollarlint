@@ -23,7 +23,9 @@ permissions:
   pull-requests: read
   actions: read
 
-engine: copilot
+engine:
+  id: copilot
+  model: gpt-5.5
 
 runtimes:
   go:

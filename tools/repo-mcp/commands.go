@@ -29,6 +29,8 @@ type namedCommand struct {
 	Dir  string
 }
 
+const goreleaserSnapshotCheckCommand = "go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean --skip=publish"
+
 func verifyCommands(profile string) ([]namedCommand, error) {
 	switch profile {
 	case "quick":
@@ -41,8 +43,7 @@ func verifyCommands(profile string) ([]namedCommand, error) {
 		}, nil
 	case "release":
 		return []namedCommand{
-			{Name: "goreleaser check", Cmd: "go run github.com/goreleaser/goreleaser/v2@latest check"},
-			{Name: "snapshot", Cmd: "go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean --skip=publish"},
+			{Name: "goreleaser snapshot", Cmd: goreleaserSnapshotCheckCommand},
 		}, nil
 	case "examples":
 		return exampleCommands("all", "text", true)
@@ -59,7 +60,7 @@ func verifyCommands(profile string) ([]namedCommand, error) {
 			{Name: "docs format", Cmd: "npm run format:check", Dir: "docs"},
 			{Name: "docs audit", Cmd: "npm run audit", Dir: "docs"},
 			{Name: "docs build", Cmd: "npm run build", Dir: "docs"},
-			{Name: "goreleaser check", Cmd: "go run github.com/goreleaser/goreleaser/v2@latest check"},
+			{Name: "goreleaser snapshot", Cmd: goreleaserSnapshotCheckCommand},
 			{Name: "diff check", Cmd: "git diff --check"},
 		}, nil
 	default:

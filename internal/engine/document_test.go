@@ -2,6 +2,7 @@ package engine
 
 import (
 	"encoding/json"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -126,6 +127,58 @@ func TestParseDocumentJSONParsingModes(t *testing.T) {
 	}
 	if doc.Format != DocumentFormatJSONC {
 		t.Fatalf("jsonc mode doc = %+v", doc)
+	}
+}
+
+func TestParseDocumentAllowsUTF8BOM(t *testing.T) {
+	dir := t.TempDir()
+	for _, test := range []struct {
+		name    string
+		file    string
+		content string
+		format  string
+		schema  string
+		source  string
+	}{
+		{
+			name:    "json",
+			file:    "data.json",
+			content: `{"$schema":"./schema.json","name":"ok"}`,
+			format:  DocumentFormatJSON,
+			schema:  "./schema.json",
+			source:  "$schema",
+		},
+		{
+			name:    "yaml",
+			file:    "data.yaml",
+			content: "# yaml-language-server: $schema=./schema.yaml\nname: ok\n",
+			format:  DocumentFormatYAML,
+			schema:  "./schema.yaml",
+			source:  "yaml-language-server",
+		},
+		{
+			name:    "toml",
+			file:    "data.toml",
+			content: "#:schema ./schema.toml\nname = \"ok\"\n",
+			format:  DocumentFormatTOML,
+			schema:  "./schema.toml",
+			source:  "taplo-directive",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			path := filepath.Join(dir, test.file)
+			raw := append([]byte{0xef, 0xbb, 0xbf}, []byte(test.content)...)
+			if err := os.WriteFile(path, raw, 0o644); err != nil {
+				t.Fatalf("write %s: %v", path, err)
+			}
+			doc, err := ParseDocument(DiscoveredFile{Path: path, RelativePath: test.file})
+			if err != nil {
+				t.Fatalf("ParseDocument: %v", err)
+			}
+			if doc.Format != test.format || doc.Schema != test.schema || doc.SchemaSource != test.source {
+				t.Fatalf("bom doc = %+v", doc)
+			}
+		})
 	}
 }
 

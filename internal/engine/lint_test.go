@@ -728,6 +728,8 @@ func TestLintAppliesSchemaStoreAssociationsWhenEnabled(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.Schemas.Catalogs.Enabled = true
 	cfg.Schemas.Catalogs.Sources = []CatalogSource{{Name: "schemastore", Format: "schemastore", URL: server.URL + "/catalog.json"}}
+	cache := false
+	cfg.Schemas.Fetch.Cache = &cache
 	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
 	if err != nil {
 		t.Fatalf("Lint: %v", err)

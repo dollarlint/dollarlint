@@ -87,6 +87,7 @@ func parseDocument(file DiscoveredFile, cfg ParsingConfig, sourceLocations bool)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", file.Path, err)
 	}
+	raw = stripUTF8BOM(raw)
 	format, err := formatForPath(file, cfg)
 	if err != nil {
 		return nil, err
@@ -120,6 +121,7 @@ func AttachSourceMap(document *Document) {
 	if err != nil {
 		return
 	}
+	raw = stripUTF8BOM(raw)
 	attachSourceMapFromRaw(document, raw)
 }
 
@@ -196,6 +198,7 @@ func parseDocumentData(raw []byte, format string) (string, any, []LineDocument, 
 }
 
 func decodeDocument(raw []byte, format string) (any, error) {
+	raw = stripUTF8BOM(raw)
 	switch format {
 	case DocumentFormatJSON:
 		return decodeJSON(raw)
@@ -218,6 +221,13 @@ func decodeDocument(raw []byte, format string) (any, error) {
 	default:
 		return nil, fmt.Errorf("unsupported document format %s", format)
 	}
+}
+
+func stripUTF8BOM(raw []byte) []byte {
+	if len(raw) >= 3 && raw[0] == 0xef && raw[1] == 0xbb && raw[2] == 0xbf {
+		return raw[3:]
+	}
+	return raw
 }
 
 func decodeJSON(raw []byte) (any, error) {

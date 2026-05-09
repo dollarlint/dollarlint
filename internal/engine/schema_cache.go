@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -194,6 +195,8 @@ func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error)
 	switch parsed.Scheme {
 	case "dollarlint":
 		return loadBuiltinSchema(raw)
+	case "vscode":
+		return map[string]any{}, nil
 	case "file":
 		path, err := filePathFromURL(parsed)
 		if err != nil {
@@ -303,12 +306,30 @@ func removePersistentSchemaCache(raw string) {
 }
 
 func persistentSchemaCachePath(raw string) (string, bool) {
+	if !persistentSchemaCacheable(raw) {
+		return "", false
+	}
 	dir := persistentSchemaCacheDir()
 	if dir == "" {
 		return "", false
 	}
 	sum := sha256.Sum256([]byte(raw))
 	return filepath.Join(dir, fmt.Sprintf("%x.schema", sum)), true
+}
+
+func persistentSchemaCacheable(raw string) bool {
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return false
+	}
+	host := strings.ToLower(parsed.Hostname())
+	if host == "" || host == "localhost" {
+		return false
+	}
+	if ip := net.ParseIP(host); ip != nil && ip.IsLoopback() {
+		return false
+	}
+	return true
 }
 
 var persistentSchemaCacheDirFunc = defaultPersistentSchemaCacheDir

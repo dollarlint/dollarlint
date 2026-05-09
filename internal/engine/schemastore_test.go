@@ -115,6 +115,53 @@ func TestSchemaStoreAutoSkipsGenericBasenameMatches(t *testing.T) {
 	}
 }
 
+func TestSchemaStoreAutoSkipsLeadingWildcardBasenameGlobs(t *testing.T) {
+	dir := t.TempDir()
+	catalogPath := filepath.Join(dir, "catalog.json")
+	writeFile(t, catalogPath, `{
+  "schemas": [
+    {"name": "Broad app", "fileMatch": ["*.app.json"], "url": "./broad.schema.json"},
+    {"name": "TypeScript", "fileMatch": ["tsconfig*.json"], "url": "./tsconfig.schema.json"}
+  ]
+}`)
+	writeFile(t, filepath.Join(dir, "broad.schema.json"), `{"type":"object","required":["protocol"]}`)
+	writeFile(t, filepath.Join(dir, "tsconfig.schema.json"), `{"type":"object","properties":{"compilerOptions":{"type":"object"}}}`)
+	writeFile(t, filepath.Join(dir, "tsconfig.app.json"), `{"compilerOptions":{}}`)
+	writeFile(t, filepath.Join(dir, "custom.app.json"), `{}`)
+
+	cfg := DefaultConfig()
+	cfg.Schemas.Catalogs.Enabled = true
+	cfg.Schemas.Catalogs.Sources = []CatalogSource{{Name: "test", Format: "schemastore", Path: catalogPath}}
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint auto: %v", err)
+	}
+	if result.Summary.Issues.Total != 0 {
+		t.Fatalf("auto summary = %+v issues=%+v", result.Summary, result.Issues)
+	}
+	for _, file := range result.Files {
+		switch file.RelativePath {
+		case "tsconfig.app.json":
+			if file.SchemaSource != "catalog:test:TypeScript" {
+				t.Fatalf("tsconfig should use specific glob: %+v", file)
+			}
+		case "custom.app.json":
+			if file.SchemaSource != "" || file.Status != StatusSkipped {
+				t.Fatalf("leading wildcard glob should be skipped in auto mode: %+v", file)
+			}
+		}
+	}
+
+	cfg.Schemas.Catalogs.Match = CatalogMatchAll
+	result, err = Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint all: %v", err)
+	}
+	if result.Summary.Issues.Total != 2 {
+		t.Fatalf("all summary = %+v issues=%+v", result.Summary, result.Issues)
+	}
+}
+
 func TestSchemaStorePrecedenceAndDisabledDefault(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "catalog.json"), `{
@@ -271,6 +318,34 @@ func TestSchemaStoreMatchedSchemaFailurePolicy(t *testing.T) {
 	cfg.Schemas.Catalogs.Failure = CatalogFailureError
 	if _, err := Lint(context.Background(), Options{Root: dir, Config: cfg}); err == nil || !strings.Contains(err.Error(), "catalog schema compile failed") {
 		t.Fatalf("expected error catalog schema failure, got %v", err)
+	}
+}
+
+func TestSchemaStoreCatalogSchemaAllowsVscodeReferences(t *testing.T) {
+	dir := t.TempDir()
+	catalogPath := filepath.Join(dir, "catalog.json")
+	writeFile(t, catalogPath, `{
+  "schemas": [
+    {"name": "Dev Container", "fileMatch": ["devcontainer.json"], "url": "./devcontainer.schema.json"}
+  ]
+}`)
+	writeFile(t, filepath.Join(dir, "devcontainer.schema.json"), `{
+  "type": "object",
+  "properties": {
+    "settings": {"$ref": "vscode://schemas/settings/machine"}
+  }
+}`)
+	writeFile(t, filepath.Join(dir, "devcontainer.json"), `{"settings":{"editor.tabSize":2}}`)
+
+	cfg := DefaultConfig()
+	cfg.Schemas.Catalogs.Enabled = true
+	cfg.Schemas.Catalogs.Sources = []CatalogSource{{Name: "test", Format: "schemastore", Path: catalogPath}}
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if result.Summary.Warnings != 0 || result.Summary.Issues.Total != 0 || result.Summary.Validated != 1 {
+		t.Fatalf("summary = %+v warnings=%+v issues=%+v", result.Summary, result.Warnings, result.Issues)
 	}
 }
 

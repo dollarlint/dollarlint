@@ -221,6 +221,9 @@ func (catalog *schemaStoreCatalog) match(rel, matchMode string) (schemaStoreEntr
 		return entry, true
 	}
 	for _, candidate := range catalog.globs {
+		if matchMode == CatalogMatchAuto && lowConfidenceSchemaStoreGlob(candidate.pattern) {
+			continue
+		}
 		if matchPattern(candidate.pattern, rel) {
 			return candidate.entry, true
 		}
@@ -250,6 +253,13 @@ func lowConfidenceSchemaStoreBasename(base string) bool {
 	default:
 		return false
 	}
+}
+
+func lowConfidenceSchemaStoreGlob(pattern string) bool {
+	if strings.Contains(pattern, "/") {
+		return false
+	}
+	return strings.HasPrefix(pattern, "*")
 }
 
 func hasGlobMeta(pattern string) bool {

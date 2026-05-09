@@ -25,7 +25,7 @@ func (s *repoServer) addTools() {
 		"branchErrors": enumSchema([]string{"best", "all"}, "Temporarily override output.branchErrors."),
 	}), s.handleAzurePruningReport, true)
 	s.addTool("release_readiness", "Run release-readiness checks without publishing anything.", schemaObject(map[string]any{
-		"snapshot": map[string]any{"type": "boolean", "description": "Also run GoReleaser snapshot build. Defaults to false."},
+		"snapshot": map[string]any{"type": "boolean", "description": "Deprecated; GoReleaser snapshot validation always runs for the Pro config."},
 	}), s.handleReleaseReadiness, false)
 	s.addTool("release_status", "Inspect recent release-related workflow runs and tags.", schemaObject(nil), s.handleReleaseStatus, true)
 	s.addTool("prepare_release", "Dry-run or trigger the Prepare Release workflow. dryRun defaults to true; dryRun=false triggers an externally visible GitHub workflow.", schemaObject(map[string]any{

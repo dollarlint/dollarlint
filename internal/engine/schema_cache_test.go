@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -86,6 +87,37 @@ func TestSchemaCacheRemoteFetch(t *testing.T) {
 func TestSchemaCacheUsesPersistentRemoteCache(t *testing.T) {
 	usePersistentSchemaCacheDir(t)
 	var attempts int32
+	schemaURL := "https://schemas.example.test/schema.json"
+	cache := NewSchemaCache(DefaultConfig())
+	cache.client = &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		atomic.AddInt32(&attempts, 1)
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{},
+			Body:       io.NopCloser(strings.NewReader(`{"type":"object"}`)),
+			Request:    r,
+		}, nil
+	})}
+
+	if _, err := cache.Load(schemaURL); err != nil {
+		t.Fatalf("initial remote load: %v", err)
+	}
+	cache = NewSchemaCache(DefaultConfig())
+	cache.client = &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		t.Fatalf("unexpected fetch for cached schema")
+		return nil, nil
+	})}
+	if _, err := cache.Load(schemaURL); err != nil {
+		t.Fatalf("cached remote load: %v", err)
+	}
+	if attempts != 1 {
+		t.Fatalf("attempts = %d", attempts)
+	}
+}
+
+func TestSchemaCacheSkipsPersistentRemoteCacheForLoopback(t *testing.T) {
+	usePersistentSchemaCacheDir(t)
+	var attempts int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt32(&attempts, 1)
 		w.Write([]byte(`{"type":"object"}`))
@@ -96,8 +128,8 @@ func TestSchemaCacheUsesPersistentRemoteCache(t *testing.T) {
 		t.Fatalf("initial remote load: %v", err)
 	}
 	server.Close()
-	if _, err := NewSchemaCache(DefaultConfig()).Load(schemaURL); err != nil {
-		t.Fatalf("cached remote load: %v", err)
+	if _, err := NewSchemaCache(DefaultConfig()).Load(schemaURL); err == nil {
+		t.Fatalf("expected second load to fetch instead of using disk cache")
 	}
 	if attempts != 1 {
 		t.Fatalf("attempts = %d", attempts)
@@ -310,4 +342,10 @@ func mustURLHost(t *testing.T, raw string) string {
 		return ip.String()
 	}
 	return host
+}
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) {
+	return f(r)
 }

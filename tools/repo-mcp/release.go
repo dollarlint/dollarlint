@@ -20,11 +20,8 @@ func (s *repoServer) handleReleaseReadiness(ctx context.Context, request mcp.Cal
 		{Name: "go vet", Cmd: "go vet ./..."},
 		{Name: "actionlint", Cmd: "go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12"},
 		{Name: "docs build", Cmd: "npm run build", Dir: "docs"},
-		{Name: "goreleaser check", Cmd: "go run github.com/goreleaser/goreleaser/v2@latest check"},
+		{Name: "goreleaser snapshot", Cmd: goreleaserSnapshotCheckCommand},
 		{Name: "remote tags", Cmd: "git ls-remote --tags origin 'refs/tags/v*' | tail -10"},
-	}
-	if args.Snapshot {
-		commands = append(commands, namedCommand{Name: "goreleaser snapshot", Cmd: "go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean --skip=publish"})
 	}
 	return s.runCommandSet(ctx, request, "release-readiness", commands)
 }
@@ -64,7 +61,7 @@ func (s *repoServer) handlePrepareRelease(ctx context.Context, request mcp.CallT
 	commands := []namedCommand{
 		{Name: "working tree", Cmd: "git diff --quiet && git diff --cached --quiet"},
 		{Name: "remote tag check", Cmd: fmt.Sprintf("test -z \"$(git ls-remote --tags origin refs/tags/%s)\"", shellQuote(args.Version))},
-		{Name: "goreleaser check", Cmd: "go run github.com/goreleaser/goreleaser/v2@latest check"},
+		{Name: "goreleaser snapshot", Cmd: goreleaserSnapshotCheckCommand},
 	}
 	if dryRun {
 		result, err := s.runCommandSetData(ctx, request, "prepare-release-dry-run", commands)

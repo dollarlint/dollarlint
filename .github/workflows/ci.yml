@@ -70,6 +70,9 @@ jobs:
       - name: Lint GitHub Actions workflows
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
 
+      - name: Validate repository configs
+        run: go run ./cmd/dollarlint validate . --extend-exclude .goreleaser.yaml
+
   build:
     runs-on: ubuntu-latest
     steps:

@@ -3,7 +3,7 @@
 version = 1
 
 [discovery]
-extendExclude = []
+extendExclude = ["examples", "examples/**"]
 useDefaultExcludes = true
 respectGitIgnore = true
 forceExclude = false
@@ -23,9 +23,10 @@ retries = 2
 retryMinWait = "250ms"
 retryMaxWait = "2s"
 allowedDomains = [
-  "www.schemastore.org",
+  "*.schemastore.org",
   "schema.management.azure.com",
   "json-schema.org",
+  "developers.openai.com",
 ]
 blockedDomains = ["untrusted.example.com"]
 

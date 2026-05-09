@@ -8,9 +8,9 @@ PR branch for v0.1.3, runs winget validation, enables local manifest files,
 installs the package from the manifest, verifies the dollarlint command, and
 optionally uninstalls it.
 
-Run from an elevated PowerShell prompt if LocalManifestFiles is not already
-enabled. The install itself is the same local-manifest check requested by the
-microsoft/winget-pkgs PR template.
+Run from an elevated (Administrator) PowerShell prompt. The script enables
+the LocalManifestFiles and LocalArchiveMalwareScanOverride admin settings
+required for local-manifest installs.
 
 .EXAMPLE
 .\scripts\test-winget-manifest.ps1
@@ -49,6 +49,42 @@ function Test-IsAdministrator {
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
+$WinGetErrors = @{
+    "8A150001" = "WinGet internal error"
+    "8A150002" = "Invalid command line arguments"
+    "8A15002B" = "Portable package already exists"
+    "8A15002F" = "Portable install failed"
+    "8A150035" = "Archive malware scan failed - rerun as admin or pass --ignore-local-archive-malware-scan"
+}
+
+function Get-ExitCodeHex {
+    param([int]$ExitCode)
+    return "{0:X8}" -f ($ExitCode -band 0xFFFFFFFF)
+}
+
+function Get-LatestWinGetLog {
+    $logDir = Join-Path $env:LOCALAPPDATA "Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\DiagOutputDir"
+    if (-not (Test-Path $logDir)) {
+        return $null
+    }
+
+    return Get-ChildItem -Path $logDir -Filter "WinGet-*.log" |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1 -ExpandProperty FullName
+}
+
+function Get-LastLogLine {
+    param([string]$Path)
+
+    if (-not $Path -or -not (Test-Path $Path)) {
+        return $null
+    }
+
+    return Get-Content -Path $Path |
+        Where-Object { $_ -match "\S" } |
+        Select-Object -Last 1
+}
+
 function Invoke-Checked {
     param(
         [Parameter(Mandatory = $true)][string]$FilePath,
@@ -57,7 +93,32 @@ function Invoke-Checked {
 
     & $FilePath @Arguments
     if ($LASTEXITCODE -ne 0) {
-        throw "Command failed with exit code ${LASTEXITCODE}: $FilePath $($Arguments -join ' ')"
+        $hexCode = Get-ExitCodeHex $LASTEXITCODE
+        $hint = $WinGetErrors[$hexCode]
+        $detail = if ($hint) { "$hint (0x$hexCode)" } else { "exit code $LASTEXITCODE (0x$hexCode)" }
+
+        Write-Host ""
+        Write-Host "Command failed: $detail" -ForegroundColor Red
+        Write-Host "Command: $FilePath $($Arguments -join ' ')"
+
+        $latestLog = $null
+        if ($FilePath -eq "winget") {
+            $latestLog = Get-LatestWinGetLog
+            if ($latestLog) {
+                Write-Host "Latest WinGet log: $latestLog"
+
+                $lastLogLine = Get-LastLogLine $latestLog
+                if ($lastLogLine) {
+                    Write-Host "Last WinGet log line: $lastLogLine"
+
+                    if ($lastLogLine -like "*IAttachmentExecute*") {
+                        Write-Host "Hint: WinGet failed while applying Mark-of-the-Web with IAttachmentExecute after the installer hash was verified. This points to a Desktop App Installer/SmartScreen failure before archive extraction, not a manifest validation failure." -ForegroundColor Yellow
+                    }
+                }
+            }
+        }
+
+        throw "Command failed: $detail"
     }
 }
 
@@ -126,17 +187,25 @@ Get-ChildItem -Path $ManifestPath -File | Select-Object Name, Length | Format-Ta
 Write-Step "Validating manifest"
 Invoke-Checked winget validate --manifest $ManifestPath
 
-Write-Step "Enabling local manifest installs"
+Write-Step "Enabling admin settings for local manifest installs"
 if (-not (Test-IsAdministrator)) {
-    Write-Warning "This may require an elevated PowerShell prompt. If it fails, rerun this script as Administrator."
+    throw "This script requires an elevated (Administrator) PowerShell prompt."
 }
 Invoke-Checked winget settings --enable LocalManifestFiles
+Invoke-Checked winget settings --enable LocalArchiveMalwareScanOverride
 
 Write-Step "Installing DollarLint from local manifest"
+$wingetCache = Join-Path $env:TEMP "WinGet"
+if (Test-Path $wingetCache) {
+    Write-Host "Clearing winget download cache"
+    Remove-Item $wingetCache -Recurse -Force
+}
 Invoke-Checked winget install `
     --manifest $ManifestPath `
     --accept-source-agreements `
     --accept-package-agreements `
+    --ignore-local-archive-malware-scan `
+    --verbose-logs `
     --disable-interactivity
 
 Write-Step "Checking installed package"

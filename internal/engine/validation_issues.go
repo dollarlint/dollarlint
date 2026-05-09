@@ -75,6 +75,7 @@ func leafValidationIssues(document *Document, err *jsonschema.ValidationError) [
 		File:             document.Path,
 		RelativePath:     document.RelativePath,
 		Schema:           document.Schema,
+		SchemaSource:     document.SchemaSource,
 		Keyword:          keywordName(err),
 		KeywordLocation:  keywordLocation(err),
 		Property:         propertyName(err),
@@ -89,6 +90,7 @@ func leafValidationIssues(document *Document, err *jsonschema.ValidationError) [
 			issue := base
 			issue.Property = missing
 			issue.Message = fmt.Sprintf("must have required property %q", missing)
+			applyValidationIssueHint(document, &issue)
 			issues = append(issues, issue)
 		}
 	case *kind.AdditionalProperties:
@@ -100,12 +102,40 @@ func leafValidationIssues(document *Document, err *jsonschema.ValidationError) [
 			issue.Column = 0
 			applyIssuePosition(document, &issue)
 			issue.Message = fmt.Sprintf("must not have additional property %q", property)
+			applyValidationIssueHint(document, &issue)
 			issues = append(issues, issue)
 		}
 	default:
+		applyValidationIssueHint(document, &base)
 		issues = append(issues, base)
 	}
 	return issues
+}
+
+func applyValidationIssueHint(document *Document, issue *Issue) {
+	if issue.Hint != "" {
+		return
+	}
+	if isMkDocsInheritedRequiredIssue(document, *issue) {
+		issue.Hint = "This MkDocs config declares top-level INHERIT; MkDocs merges inherited settings before use, so validate the rendered config or add a narrow ignore rule for the inherited required property."
+	}
+}
+
+func isMkDocsInheritedRequiredIssue(document *Document, issue Issue) bool {
+	if document == nil || issue.Keyword != "required" || issue.Property == "" {
+		return false
+	}
+	source := strings.ToLower(document.SchemaSource)
+	schema := strings.ToLower(document.Schema)
+	if !strings.Contains(source, "mkdocs") && !strings.Contains(schema, "mkdocs") {
+		return false
+	}
+	root, ok := document.Data.(map[string]any)
+	if !ok {
+		return false
+	}
+	_, ok = root["INHERIT"]
+	return ok
 }
 
 func isChoiceValidationError(err *jsonschema.ValidationError) bool {

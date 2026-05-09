@@ -43,6 +43,13 @@
       "title": "three-real-world-tests",
       "path": "reports/real-world-results/2026-05-09-three-real-world-tests.json",
       "repoCount": 3
+    },
+    {
+      "id": "2026-05-09-fresh-3-repo-real-world-tests",
+      "date": "2026-05-09",
+      "title": "fresh-3-repo-real-world-tests",
+      "path": "reports/real-world-results/2026-05-09-fresh-3-repo-real-world-tests.json",
+      "repoCount": 3
     }
   ]
 }

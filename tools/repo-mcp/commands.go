@@ -179,13 +179,17 @@ func newProgress(ctx context.Context, srv *server.MCPServer, request mcp.CallToo
 
 func (p *progress) step(message string) {
 	p.done++
+	p.report(p.done, p.total, message)
+}
+
+func (p *progress) report(done, total int, message string) {
 	if p.token == nil || p.server == nil {
 		return
 	}
 	_ = p.server.SendNotificationToClient(p.ctx, "notifications/progress", map[string]any{
 		"progressToken": p.token,
-		"progress":      p.done,
-		"total":         p.total,
+		"progress":      done,
+		"total":         total,
 		"message":       message,
 	})
 }

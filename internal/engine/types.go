@@ -141,10 +141,11 @@ type OutputConfig struct {
 }
 
 type IgnoreRule struct {
-	File     string `json:"file,omitempty" yaml:"file,omitempty" toml:"file,omitempty"`
-	Keyword  string `json:"keyword,omitempty" yaml:"keyword,omitempty" toml:"keyword,omitempty"`
-	Property string `json:"property,omitempty" yaml:"property,omitempty" toml:"property,omitempty"`
-	Reason   string `json:"reason,omitempty" yaml:"reason,omitempty" toml:"reason,omitempty"`
+	File         string `json:"file,omitempty" yaml:"file,omitempty" toml:"file,omitempty"`
+	Keyword      string `json:"keyword,omitempty" yaml:"keyword,omitempty" toml:"keyword,omitempty"`
+	SchemaSource string `json:"schemaSource,omitempty" yaml:"schemaSource,omitempty" toml:"schemaSource,omitempty"`
+	Property     string `json:"property,omitempty" yaml:"property,omitempty" toml:"property,omitempty"`
+	Reason       string `json:"reason,omitempty" yaml:"reason,omitempty" toml:"reason,omitempty"`
 }
 
 type Options struct {
@@ -203,6 +204,7 @@ type Issue struct {
 	File             string `json:"file"`
 	RelativePath     string `json:"relativePath"`
 	Schema           string `json:"schema,omitempty"`
+	SchemaSource     string `json:"schemaSource,omitempty"`
 	Keyword          string `json:"keyword,omitempty"`
 	KeywordLocation  string `json:"keywordLocation,omitempty"`
 	Property         string `json:"property,omitempty"`

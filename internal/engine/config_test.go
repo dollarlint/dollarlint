@@ -146,6 +146,7 @@ branchErrors = "all"
 [[ignore]]
 file = "*.json"
 keyword = "type"
+schemaSource = "config-association"
 `)
 	cfg, path, err = LoadConfig(dir, "")
 	if err != nil {
@@ -200,7 +201,7 @@ keyword = "type"
 	if cfg.Parsing.JSON.Mode != JSONParsingJSONC {
 		t.Fatalf("parsing config not decoded: %+v", cfg.Parsing)
 	}
-	if len(cfg.Ignore) != 1 {
+	if len(cfg.Ignore) != 1 || cfg.Ignore[0].SchemaSource != "config-association" {
 		t.Fatalf("defaults or ignore missing: %+v", cfg)
 	}
 	customPath := filepath.Join(dir, "nested", ".dollarlint.toml")

@@ -24,6 +24,8 @@ const (
 	realWorldEntrySchema          = "../real-world-result-entry.schema.json"
 	realWorldHistorySchemaVersion = 3
 	realWorldManifestName         = "real-world-manifest.json"
+	realWorldCorpusTempPrefix     = "dollarlint-corpus."
+	realWorldCacheTempPrefix      = "dollarlint-cache."
 )
 
 type realWorldHistory struct {
@@ -80,6 +82,14 @@ type realWorldDependencyPrep struct {
 	Notes      string `json:"notes,omitempty"`
 	Error      string `json:"error,omitempty"`
 	Output     string `json:"output,omitempty"`
+}
+
+type realWorldCleanupResult struct {
+	Kind   string `json:"kind"`
+	Path   string `json:"path,omitempty"`
+	Status string `json:"status"`
+	Reason string `json:"reason,omitempty"`
+	Error  string `json:"error,omitempty"`
 }
 
 type realWorldProductRecommendation struct {
@@ -225,6 +235,8 @@ func (s *repoServer) handleRealWorldStartTesting(ctx context.Context, request mc
 		"rules": []string{
 			"Do not create or update Markdown report files for repository memory.",
 			"Record dependency preparation in dependencyPrep, including skipped or not-needed prep.",
+			"Do not run dependency lifecycle scripts, postinstall hooks, package-manager plugins, or repository install scripts during dependency prep.",
+			"Use managed per-repository validation tools for long runs; do not monitor validation with shell sleep loops.",
 			"Record recommendations in productRecommendations with strength, recommendation, and rationale.",
 			"Record product changes or decisions in productDecisions; use a no-change note when nothing changed.",
 			"After recording, the final user message must either recommend product changes to consider or state that the product behaved reasonably.",
@@ -310,11 +322,11 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 	if len(repositories) == 0 {
 		return mcp.NewToolResultError("repositories is required; call real_world_start_testing first if you need repository guidance"), nil
 	}
-	corpusDir, err := os.MkdirTemp("", "dollarlint-corpus.")
+	corpusDir, err := os.MkdirTemp("", realWorldCorpusTempPrefix)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
-	cacheDir, err := os.MkdirTemp("", "dollarlint-cache.")
+	cacheDir, err := os.MkdirTemp("", realWorldCacheTempPrefix)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
@@ -366,7 +378,18 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 	if err := writeJSONFile(manifestPath, manifest); err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
-	return structured(map[string]any{
+	inspection, inspectErr := realWorldInspectCorpus(realWorldInspectArgs{
+		CorpusDir:      corpusDir,
+		CacheDir:       cacheDir,
+		OutputArtifact: outputArtifact,
+		ManifestPath:   manifestPath,
+		Repositories:   repositories,
+	})
+	nextStep := realWorldNextInspectCorpus(corpusDir, manifestPath)
+	if inspectErr == nil {
+		nextStep = realWorldNextRunCorpus(corpusDir, cacheDir, outputArtifact, manifestPath, inspection.DraftDependencyPrep)
+	}
+	out := map[string]any{
 		"ok":                ok,
 		"corpusDir":         corpusDir,
 		"cacheDir":          cacheDir,
@@ -379,29 +402,42 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 		"cloneResults":      cloneResults,
 		"buildCommand":      "go build -o bin/dollarlint ./cmd/dollarlint",
 		"validationCommand": realWorldValidationCommand(corpusDir, cacheDir, outputArtifact, true, "warn", 1, "1ms", "1ms", nil),
-		"nextStep":          realWorldNextDependencyPrep(corpusDir, cacheDir, outputArtifact, repositories),
-	})
+		"nextStep":          nextStep,
+	}
+	if inspectErr != nil {
+		out["dependencyPrepInspectionError"] = inspectErr.Error()
+	} else {
+		out["dependencyPrepInspection"] = inspection.Repositories
+		out["dependencyPrep"] = inspection.DraftDependencyPrep
+		out["prepSecurityPolicy"] = inspection.PrepSecurityPolicy
+		out["dependencyPrepSummary"] = inspection.Summary
+		out["dependencyPrepNeedsReview"] = inspection.NeedsReview
+	}
+	return structured(out)
 }
 
 func (s *repoServer) handleRealWorldRunCorpus(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	var args struct {
-		CorpusDir          string   `json:"corpusDir"`
-		CacheDir           string   `json:"cacheDir"`
-		OutputArtifact     string   `json:"outputArtifact"`
-		Build              *bool    `json:"build"`
-		SchemaStore        *bool    `json:"schemaStore"`
-		SchemaStoreFailure string   `json:"schemaStoreFailure"`
-		FetchRetries       *int     `json:"fetchRetries"`
-		FetchRetryMinWait  string   `json:"fetchRetryMinWait"`
-		FetchRetryMaxWait  string   `json:"fetchRetryMaxWait"`
-		ExtraArgs          []string `json:"extraArgs"`
+		CorpusDir          string                    `json:"corpusDir"`
+		CacheDir           string                    `json:"cacheDir"`
+		OutputArtifact     string                    `json:"outputArtifact"`
+		ManifestPath       string                    `json:"manifestPath"`
+		Repositories       []realWorldRepository     `json:"repositories"`
+		DependencyPrep     []realWorldDependencyPrep `json:"dependencyPrep"`
+		Build              *bool                     `json:"build"`
+		SchemaStore        *bool                     `json:"schemaStore"`
+		SchemaStoreFailure string                    `json:"schemaStoreFailure"`
+		FetchRetries       *int                      `json:"fetchRetries"`
+		FetchRetryMinWait  string                    `json:"fetchRetryMinWait"`
+		FetchRetryMaxWait  string                    `json:"fetchRetryMaxWait"`
+		ExtraArgs          []string                  `json:"extraArgs"`
 	}
 	_ = request.BindArguments(&args)
 	if args.CorpusDir == "" {
 		return mcp.NewToolResultError("corpusDir is required; call real_world_prepare_corpus first"), nil
 	}
 	if args.CacheDir == "" {
-		cacheDir, err := os.MkdirTemp("", "dollarlint-cache.")
+		cacheDir, err := os.MkdirTemp("", realWorldCacheTempPrefix)
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
@@ -435,6 +471,32 @@ func (s *repoServer) handleRealWorldRunCorpus(ctx context.Context, request mcp.C
 	if args.FetchRetryMaxWait == "" {
 		args.FetchRetryMaxWait = "1ms"
 	}
+	manifestPath := args.ManifestPath
+	if manifestPath == "" {
+		manifestPath = filepath.Join(args.CorpusDir, realWorldManifestName)
+	}
+	repositories := append([]realWorldRepository{}, args.Repositories...)
+	dependencyPrep := append([]realWorldDependencyPrep{}, args.DependencyPrep...)
+	var dependencyInspection *realWorldCorpusInspection
+	if len(dependencyPrep) == 0 {
+		inspection, err := realWorldInspectCorpus(realWorldInspectArgs{
+			CorpusDir:      args.CorpusDir,
+			CacheDir:       args.CacheDir,
+			OutputArtifact: args.OutputArtifact,
+			ManifestPath:   manifestPath,
+			Repositories:   repositories,
+		})
+		if err == nil {
+			dependencyInspection = &inspection
+			dependencyPrep = inspection.DraftDependencyPrep
+			if len(repositories) == 0 {
+				manifest, manifestErr := readRealWorldManifest(manifestPath)
+				if manifestErr == nil {
+					repositories = manifest.Repositories
+				}
+			}
+		}
+	}
 
 	p := newProgress(ctx, s.mcp, request, 2)
 	var buildResult *commandResult
@@ -456,17 +518,27 @@ func (s *repoServer) handleRealWorldRunCorpus(ctx context.Context, request mcp.C
 	validation := runProcess(ctx, s.root, []string{"XDG_CACHE_HOME=" + args.CacheDir}, filepath.Join(s.root, "bin/dollarlint"), validationArgs...)
 	summary, warnings, outputErr := readRealWorldOutputSummary(args.OutputArtifact)
 	out := map[string]any{
-		"ok":                validation.Succeeded || (validation.ExitCode == 1 && outputErr == nil),
-		"build":             buildResult,
-		"validation":        validation,
-		"summary":           summary,
-		"warnings":          warnings,
-		"outputReadError":   errorString(outputErr),
-		"corpusDir":         args.CorpusDir,
-		"cacheDir":          args.CacheDir,
-		"outputArtifact":    args.OutputArtifact,
-		"validationCommand": validationCommand,
-		"nextStep":          realWorldNextTriageOutput(args.CorpusDir, args.CacheDir, args.OutputArtifact, validationCommand),
+		"ok":                 validation.Succeeded || (validation.ExitCode == 1 && outputErr == nil),
+		"build":              buildResult,
+		"validation":         validation,
+		"summary":            summary,
+		"warnings":           warnings,
+		"outputReadError":    errorString(outputErr),
+		"corpusDir":          args.CorpusDir,
+		"cacheDir":           args.CacheDir,
+		"outputArtifact":     args.OutputArtifact,
+		"manifestPath":       manifestPath,
+		"repositories":       repositories,
+		"dependencyPrep":     dependencyPrep,
+		"prepSecurityPolicy": realWorldDependencyPrepSecurityPolicy(),
+		"validationCommand":  validationCommand,
+		"nextStep":           realWorldNextTriageOutput(args.CorpusDir, args.CacheDir, args.OutputArtifact, manifestPath, validationCommand, repositories, dependencyPrep),
+	}
+	if dependencyInspection != nil {
+		out["dependencyPrepInspection"] = dependencyInspection.Repositories
+		out["prepSecurityPolicy"] = dependencyInspection.PrepSecurityPolicy
+		out["dependencyPrepSummary"] = dependencyInspection.Summary
+		out["dependencyPrepNeedsReview"] = dependencyInspection.NeedsReview
 	}
 	if summary != nil {
 		out["hasIssues"] = summary.Issues.Total > 0
@@ -514,6 +586,7 @@ func (s *repoServer) handleRealWorldRecordResult(ctx context.Context, request mc
 	if err := saveRealWorldHistory(s.root, history); err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
+	cleanup := realWorldCleanupRecordTemps(entry)
 	return structured(map[string]any{
 		"ok":                      true,
 		"path":                    filepath.Join(s.root, realWorldResultsRelPath),
@@ -524,6 +597,8 @@ func (s *repoServer) handleRealWorldRecordResult(ctx context.Context, request mc
 		"entryCount":              len(history.Entries),
 		"repoCount":               len(entry.Repositories),
 		"testedRepos":             realWorldTestedRepos(history),
+		"cleanup":                 cleanup,
+		"cleanupOK":               realWorldCleanupOK(cleanup),
 		"nextStep":                realWorldNextAfterRecord(entry),
 	})
 }
@@ -600,6 +675,107 @@ func (s *repoServer) realWorldEntryFromArgs(args realWorldRecordArgs) (realWorld
 		ProductDecisions:       args.ProductDecisions,
 		FollowUp:               args.FollowUp,
 	}, nil
+}
+
+func realWorldCleanupRecordTemps(entry realWorldEntry) []realWorldCleanupResult {
+	var results []realWorldCleanupResult
+	seen := map[string]bool{}
+	for _, item := range []struct {
+		kind   string
+		path   string
+		prefix string
+	}{
+		{kind: "corpusDir", path: entry.Corpus, prefix: realWorldCorpusTempPrefix},
+		{kind: "cacheDir", path: entry.CacheDir, prefix: realWorldCacheTempPrefix},
+	} {
+		clean := filepath.Clean(item.path)
+		if item.path != "" && seen[clean] {
+			results = append(results, realWorldCleanupResult{
+				Kind:   item.kind,
+				Path:   item.path,
+				Status: "skipped",
+				Reason: "same path was already considered for cleanup",
+			})
+			continue
+		}
+		if item.path != "" {
+			seen[clean] = true
+		}
+		results = append(results, realWorldCleanupTempDir(item.kind, item.path, item.prefix))
+	}
+	return results
+}
+
+func realWorldCleanupTempDir(kind, path, prefix string) realWorldCleanupResult {
+	result := realWorldCleanupResult{Kind: kind, Path: path}
+	ok, reason := realWorldManagedTempDir(path, prefix)
+	if !ok {
+		result.Status = "skipped"
+		result.Reason = reason
+		return result
+	}
+	clean := filepath.Clean(path)
+	info, err := os.Lstat(clean)
+	if errors.Is(err, os.ErrNotExist) {
+		result.Status = "missing"
+		return result
+	}
+	if err != nil {
+		result.Status = "failed"
+		result.Error = err.Error()
+		return result
+	}
+	if info.Mode()&os.ModeSymlink != 0 {
+		result.Status = "skipped"
+		result.Reason = "managed temp path is a symlink"
+		return result
+	}
+	if !info.IsDir() {
+		result.Status = "skipped"
+		result.Reason = "managed temp path is not a directory"
+		return result
+	}
+	if err := os.RemoveAll(clean); err != nil {
+		result.Status = "failed"
+		result.Error = err.Error()
+		return result
+	}
+	result.Status = "removed"
+	return result
+}
+
+func realWorldManagedTempDir(path, prefix string) (bool, string) {
+	if path == "" {
+		return false, "path is empty"
+	}
+	clean := filepath.Clean(path)
+	if !filepath.IsAbs(clean) {
+		return false, "path is not absolute"
+	}
+	tempDir := filepath.Clean(os.TempDir())
+	rel, err := filepath.Rel(tempDir, clean)
+	if err != nil {
+		return false, err.Error()
+	}
+	if rel == "." || rel == ".." || filepath.IsAbs(rel) || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return false, "path is outside the OS temp directory"
+	}
+	if strings.Contains(rel, string(filepath.Separator)) {
+		return false, "path is not a direct child of the OS temp directory"
+	}
+	if !strings.HasPrefix(filepath.Base(clean), prefix) {
+		return false, fmt.Sprintf("path does not use managed temp prefix %q", prefix)
+	}
+	return true, ""
+}
+
+func realWorldCleanupOK(results []realWorldCleanupResult) bool {
+	for _, result := range results {
+		if result.Status == "failed" {
+			return false
+		}
+	}
+	return true
 }
 
 func validateRealWorldEntryForRecord(entry realWorldEntry) error {
@@ -684,6 +860,7 @@ func realWorldRecordResultContract() map[string]any {
 		"productDecisions":        "Use for product changes or decisions made after triage. If none were made, include an explicit no-change decision.",
 		"result":                  "Read automatically from outputArtifact when outputArtifact is provided.",
 		"persistedOutputArtifact": "Written automatically from outputArtifact into reports/real-world-artifacts/.",
+		"cleanup":                 "After recording succeeds, managed temp corpus/cache dirs are removed automatically. Non-temp paths are skipped.",
 		"repositories":            "Read automatically from manifestPath when repositories is omitted and a manifest is available.",
 		"finalResponseContract":   realWorldFinalResponseContract(),
 	}
@@ -716,21 +893,40 @@ func realWorldNextPrepareCorpus(title string, repositories []realWorldRepository
 	}
 }
 
-func realWorldNextDependencyPrep(corpusDir, cacheDir, outputArtifact string, repositories []realWorldRepository) map[string]any {
+func realWorldNextInspectCorpus(corpusDir, manifestPath string) map[string]any {
 	return map[string]any{
-		"tool": "real_world_run_corpus",
-		"why":  "First inspect cloned repositories for dependency metadata and record dependencyPrep notes; then run validation.",
-		"beforeCalling": []string{
-			"Inspect each clone for lockfiles, local $schema refs, and node_modules/file schemas that affect validation fidelity.",
-			"Run bounded, script-suppressed dependency prep when realistic.",
-			"Record run/skipped/failed/not-needed prep entries for real_world_record_result.dependencyPrep.",
-		},
+		"tool": "real_world_inspect_corpus",
+		"why":  "Scan cloned repositories for lockfiles and local schema refs before deciding whether dependency prep affects validation fidelity.",
 		"suggestedArgs": map[string]any{
-			"corpusDir":      corpusDir,
-			"cacheDir":       cacheDir,
-			"outputArtifact": outputArtifact,
+			"corpusDir":    corpusDir,
+			"manifestPath": manifestPath,
 		},
-		"repositories": repositories,
+	}
+}
+
+func realWorldNextRunCorpus(corpusDir, cacheDir, outputArtifact, manifestPath string, dependencyPrep []realWorldDependencyPrep) map[string]any {
+	return map[string]any{
+		"tool": "real_world_start_validation",
+		"why":  "Start managed per-repository validation jobs after reviewing the MCP dependency-prep scan.",
+		"beforeCalling": []string{
+			"Use dependencyPrep entries from real_world_inspect_corpus as the first-pass notes.",
+			"Never run dependency lifecycle scripts, postinstall hooks, package-manager plugins, or repository install scripts.",
+			"If any entry has status needs-review, run a bounded prep command only when lifecycle scripts are disabled; otherwise replace it with a skipped/not-needed note before recording.",
+			"Do not start shell sleep loops to monitor validation.",
+			"Keep real_world_start_validation or real_world_next_validation_result open while waiting; those tools send progress notifications and return completed per-repo results.",
+			"Pass dependencyPrep into real_world_start_validation so it is carried forward to triage and record_result.",
+		},
+		"prepSecurityPolicy": realWorldDependencyPrepSecurityPolicy(),
+		"suggestedArgs": map[string]any{
+			"corpusDir":          corpusDir,
+			"cacheDir":           cacheDir,
+			"outputArtifact":     outputArtifact,
+			"manifestPath":       manifestPath,
+			"dependencyPrep":     dependencyPrep,
+			"build":              true,
+			"concurrency":        realWorldValidationDefaultConcurrency,
+			"waitForFirstResult": true,
+		},
 	}
 }
 
@@ -744,7 +940,7 @@ func realWorldNextFixBuild() map[string]any {
 	}
 }
 
-func realWorldNextTriageOutput(corpusDir, cacheDir, outputArtifact, command string) map[string]any {
+func realWorldNextTriageOutput(corpusDir, cacheDir, outputArtifact, manifestPath, command string, repositories []realWorldRepository, dependencyPrep []realWorldDependencyPrep) map[string]any {
 	return map[string]any{
 		"tool": "real_world_triage_output",
 		"why":  "Sanity-check the JSON output, group issues/warnings by repository and signal, and draft the structured record fields before persisting.",
@@ -752,7 +948,10 @@ func realWorldNextTriageOutput(corpusDir, cacheDir, outputArtifact, command stri
 			"corpusDir":      corpusDir,
 			"cacheDir":       cacheDir,
 			"outputArtifact": outputArtifact,
+			"manifestPath":   manifestPath,
 			"command":        command,
+			"repositories":   repositories,
+			"dependencyPrep": dependencyPrep,
 		},
 	}
 }
@@ -766,6 +965,7 @@ func realWorldNextRecordTriagedResult(suggestedArgs map[string]any, missingArgs 
 			"Account for dependencyPrep when interpreting missing local schemas or skipped validation.",
 			"Keep productRecommendations limited to concrete product changes worth considering, or use an explicit no-change recommendation.",
 			"real_world_record_result will persist the raw outputArtifact JSON into reports/real-world-artifacts/ for later per-file triage.",
+			"real_world_record_result will clean managed temp corpus/cache dirs after the structured result is saved.",
 			"Do not create or update Markdown report files.",
 		},
 		"requiredArgs":          realWorldRecordResultContract()["required"],
@@ -777,7 +977,7 @@ func realWorldNextRecordTriagedResult(suggestedArgs map[string]any, missingArgs 
 
 func realWorldNextAfterRecord(entry realWorldEntry) map[string]any {
 	next := map[string]any{
-		"message":               "Real-world result recorded. Use the structured entry as the durable source of truth.",
+		"message":               "Real-world result recorded and managed temp corpus/cache cleanup attempted. Use the structured entry as the durable source of truth.",
 		"entryID":               entry.ID,
 		"finalResponseContract": realWorldFinalResponseContract(),
 	}

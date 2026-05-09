@@ -100,6 +100,29 @@ func TestDecodeTOMLEmptyDocumentsAsObjects(t *testing.T) {
 	}
 }
 
+func TestDecodeJSON5AllowsTrailingComments(t *testing.T) {
+	for _, raw := range []string{
+		"{name: 'foo'} // trailing line comment",
+		"{name: 'foo'} /* trailing block comment */",
+		"{name: 'foo'}\n/* trailing block comment with no final newline */",
+	} {
+		data, err := decodeDocument([]byte(raw), DocumentFormatJSON5)
+		if err != nil {
+			t.Fatalf("decodeDocument JSON5 %q: %v", raw, err)
+		}
+		root, ok := data.(map[string]any)
+		if !ok || root["name"] != "foo" {
+			t.Fatalf("decodeDocument JSON5 %q = %#v", raw, data)
+		}
+	}
+}
+
+func TestDecodeJSON5RejectsMultipleTopLevelValues(t *testing.T) {
+	if _, err := decodeDocument([]byte("{name: 'foo'} {name: 'bar'}"), DocumentFormatJSON5); err == nil {
+		t.Fatalf("expected multiple JSON5 values to fail")
+	}
+}
+
 func TestParseDocumentJSONParsingModes(t *testing.T) {
 	dir := t.TempDir()
 	tsconfig := filepath.Join(dir, "tsconfig.app.json")

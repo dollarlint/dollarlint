@@ -267,18 +267,9 @@ func decodeJSONC(raw []byte) (any, error) {
 }
 
 func decodeJSON5(raw []byte) (any, error) {
-	decoder := json5.NewDecoder(bytes.NewReader(raw))
 	var value any
-	if err := decoder.Decode(&value); err != nil {
+	if err := json5.Unmarshal(raw, &value); err != nil {
 		return nil, err
-	}
-	var extra any
-	err := decoder.Decode(&extra)
-	if err != io.EOF {
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("multiple JSON values")
 	}
 	return toJSONValue(value)
 }

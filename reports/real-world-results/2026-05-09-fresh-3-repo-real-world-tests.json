@@ -1,0 +1,115 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-fresh-3-repo-real-world-tests",
+  "date": "2026-05-09",
+  "title": "fresh-3-repo-real-world-tests",
+  "dollarlintRevision": "8bf34c5b1b99f25f9e3962b4e079874457d24182",
+  "workingTreeNote": "Clean working tree before recording the structured real-world result; this record persists the sweep artifact and result entry.",
+  "corpus": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.3844903482",
+  "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.539509851",
+  "command": "XDG_CACHE_HOME=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.539509851\" bin/dollarlint \"validate\" \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.3844903482\" \"--schema-store\" \"--schema-store-failure\" \"warn\" \"--fetch-retries\" \"1\" \"--fetch-retry-min-wait\" \"1ms\" \"--fetch-retry-max-wait\" \"1ms\" \"--format\" \"json\" \"--output\" \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-fresh-3-repo-real-world-tests-3242221864.json\"",
+  "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-fresh-3-repo-real-world-tests-3242221864.json",
+  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-fresh-3-repo-real-world-tests.dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "fastapi",
+      "command": "uv sync --no-dev --no-install-project --no-managed-python --frozen",
+      "status": "not-needed",
+      "notes": "FastAPI clone had uv.lock but no config $schema references or local schema paths requiring installed dependencies for DollarLint validation, so dependency prep was unnecessary."
+    },
+    {
+      "repository": "pnpm",
+      "command": "pnpm install --ignore-scripts --frozen-lockfile",
+      "status": "not-needed",
+      "notes": "pnpm clone had a large workspace and lockfiles, but the only explicit config $schema found was a remote Changesets schema; installing the monorepo was not needed for schema resolution fidelity."
+    },
+    {
+      "repository": "cli",
+      "command": "go mod download",
+      "status": "not-needed",
+      "notes": "GitHub CLI clone had go.mod/go.sum and no config $schema references or local schema paths requiring module downloads for DollarLint validation."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "fastapi",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/fastapi/fastapi.git",
+      "commit": "622b6356b5102113d0074083ac23c82367f4284b",
+      "notes": "Python web framework with pyproject, CI, and packaging configs.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.3844903482/fastapi",
+      "status": "cloned"
+    },
+    {
+      "name": "pnpm",
+      "ecosystem": "TypeScript/Node",
+      "cloneURL": "https://github.com/pnpm/pnpm.git",
+      "commit": "e1e29c1520f6ca5e7737c0e806ad2e3cd32b4c71",
+      "notes": "Package manager monorepo with workspace and toolchain configs.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.3844903482/pnpm",
+      "status": "cloned"
+    },
+    {
+      "name": "cli",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/cli/cli.git",
+      "commit": "9b505c3fb8c3e52100575adbad2da7c4714684d8",
+      "notes": "GitHub CLI with Go module, CI, release, and tooling configs.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.3844903482/cli",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 1395,
+    "validated": 1121,
+    "skipped": 269,
+    "failed": 5,
+    "issues": {
+      "total": 50,
+      "parsing": 5,
+      "validation": 45,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 1101505792
+    }
+  },
+  "findings": [
+    "DollarLint built successfully with go build -o bin/dollarlint ./cmd/dollarlint, then validated the prepared 3-repo corpus.",
+    "Corpus summary: discovered 1395 files, validated 1121, skipped 269, failed 5 parse cases, reported 50 issues, and emitted 0 warnings.",
+    "Repository results: cli had 93 discovered files, 17 validated, 76 skipped, and 0 issues; fastapi had 52 discovered, 39 validated, 13 skipped, and 15 validation issues; pnpm had 1249 discovered, 1065 validated, 179 skipped, 5 parse failures, and 35 total issues.",
+    "FastAPI signal: 11 localized docs/*/mkdocs.yml files contain only INHERIT: ../en/mkdocs.yml and are flagged by the MkDocs schema for missing site_name when validated before inherited config is merged.",
+    "pnpm signal: two package.json5 fixtures under workspace/project-manifest-reader/__fixtures__/commented-package-json5 look like intentionally valid JSON5 with comments and trailing block comments, but DollarLint reports unexpected EOF.",
+    "Fixture noise: most pnpm validation issues are intentional fixtures under __fixtures__, test fixtures, or committed node_modules fixture data; these are useful parser/schema stress cases but weak evidence of user-facing config failures."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "med",
+      "recommendation": "Investigate JSON5 parser compatibility for valid commented package.json5 files with trailing block comments and no final newline.",
+      "rationale": "pnpm's commented-package-json5/package.json5 and modified.json5 are fixtures that appear intentionally valid, but both failed with unexpected EOF; that points to a parser edge case DollarLint can likely improve."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider MkDocs INHERIT-aware validation or clearer diagnostics for inherited MkDocs configs.",
+      "rationale": "FastAPI has 11 localized mkdocs.yml files containing only INHERIT: ../en/mkdocs.yml; schema validation reports missing site_name before inheritance is resolved, which may be noisy for MkDocs users."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider stronger fixture/noise classification in real-world triage for __fixtures__, test/fixtures, and committed node_modules fixture trees.",
+      "rationale": "The pnpm sweep produced many intentional fixture-data findings, including invalid workspace manifests and package metadata inside fixture node_modules trees; better classification would keep real product signal easier to see."
+    }
+  ],
+  "productDecisions": [
+    "No product code changes were made during this sweep; this run only records validation evidence and follow-up recommendations.",
+    "Dependency preparation was intentionally skipped for all three repositories because inspection found no local schema paths or dependency-installed schemas needed for validation fidelity.",
+    "Classified cli as clean for this run, fastapi as mostly schema-context/noise around inherited or versioned config semantics, and pnpm as mostly fixture noise plus one parser-compatibility follow-up."
+  ],
+  "followUp": [
+    "Open a focused issue or implementation task for the JSON5 unexpected EOF edge case, using the two pnpm commented-package-json5 fixtures as reproduction material.",
+    "If MkDocs support becomes a priority, prototype validation that resolves INHERIT before applying the MkDocs schema or emits an inheritance-specific note instead of a plain missing-site_name error.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting this corpus by default."
+  ]
+}

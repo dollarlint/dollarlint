@@ -142,10 +142,14 @@ func newJSONSummary(summary Summary) jsonSummary {
 
 func newJSONIssue(issue Issue, schemaSources map[string]string, root string) jsonIssue {
 	path := resultPath(issue.RelativePath, issue.File)
+	schemaSource := issue.SchemaSource
+	if schemaSource == "" {
+		schemaSource = schemaSources[path]
+	}
 	return jsonIssue{
 		Path:             path,
 		Schema:           displaySchema(issue.Schema, root),
-		SchemaSource:     schemaSources[path],
+		SchemaSource:     schemaSource,
 		Category:         issueCategory(issue),
 		Keyword:          issue.Keyword,
 		KeywordLocation:  issue.KeywordLocation,

@@ -146,7 +146,7 @@ func (s *repoServer) handleRealWorldTriageOutput(_ context.Context, request mcp.
 		}
 	}
 	if args.OutputArtifact == "" {
-		return mcp.NewToolResultError("outputArtifact is required; call real_world_run_corpus first or pass manifestPath"), nil
+		return mcp.NewToolResultError("outputArtifact is required; call real_world_finish_validation first or pass manifestPath"), nil
 	}
 	if args.Command == "" && args.CorpusDir != "" && args.CacheDir != "" {
 		args.Command = realWorldValidationCommand(args.CorpusDir, args.CacheDir, args.OutputArtifact, true, "warn", 1, "1ms", "1ms", nil)

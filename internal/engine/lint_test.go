@@ -506,6 +506,20 @@ func TestValidationIssueHelpers(t *testing.T) {
 	if validationMessage(noKind) == "" {
 		t.Fatalf("expected fallback validation message")
 	}
+	mkdocs := &Document{
+		Path:         "/tmp/mkdocs.yml",
+		RelativePath: "mkdocs.yml",
+		Schema:       "https://www.schemastore.org/mkdocs-1.6.json",
+		SchemaSource: "catalog:schemastore:mkdocs.yml",
+		Data:         map[string]any{"INHERIT": "../en/mkdocs.yml"},
+	}
+	mkdocsIssues := issuesFromValidationError(mkdocs, &jsonschema.ValidationError{
+		InstanceLocation: nil,
+		ErrorKind:        &kind.Required{Missing: []string{"site_name"}},
+	})
+	if len(mkdocsIssues) != 1 || !strings.Contains(mkdocsIssues[0].Hint, "top-level INHERIT") {
+		t.Fatalf("mkdocs inherited hint = %+v", mkdocsIssues)
+	}
 	messageCases := map[jsonschema.ErrorKind]string{
 		&kind.Type{Got: "number", Want: []string{"string"}}: "expected string, received number",
 		&kind.MinProperties{Want: 2}:                        "must have at least 2 properties",
@@ -702,8 +716,8 @@ func TestLintBranchErrorsOutputMode(t *testing.T) {
 }
 
 func TestIgnoreMatching(t *testing.T) {
-	issue := Issue{RelativePath: "nested/file.json", Keyword: "type", KeywordLocation: "/properties/name/type", Property: "name", InstanceLocation: "/name"}
-	if !ignoreMatches(issue, IgnoreRule{File: "**/*.json", Keyword: "/properties/name/type", Property: "/name"}) {
+	issue := Issue{RelativePath: "nested/file.json", Keyword: "type", KeywordLocation: "/properties/name/type", SchemaSource: "catalog:schemastore:Example", Property: "name", InstanceLocation: "/name"}
+	if !ignoreMatches(issue, IgnoreRule{File: "**/*.json", Keyword: "/properties/name/type", SchemaSource: "catalog:schemastore:Example", Property: "/name"}) {
 		t.Fatalf("expected ignore by keyword location and instance pointer")
 	}
 	if ignoreMatches(issue, IgnoreRule{File: "*.yaml"}) {
@@ -714,6 +728,9 @@ func TestIgnoreMatching(t *testing.T) {
 	}
 	if ignoreMatches(issue, IgnoreRule{Property: "/other"}) {
 		t.Fatalf("unexpected property pointer match")
+	}
+	if ignoreMatches(issue, IgnoreRule{SchemaSource: "config-association"}) {
+		t.Fatalf("unexpected schema source match")
 	}
 	applyIgnore(&issue, []IgnoreRule{{Property: "na*"}})
 	if !issue.Ignored || issue.IgnoreReason != "matched ignore rule" {

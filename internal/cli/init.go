@@ -357,6 +357,7 @@ branchErrors = "best"
 # [[ignore]]
 # file = "fixtures/*.json"
 # keyword = "required"
+# schemaSource = "config-association"
 # property = "legacyName"
 # reason = "legacy fixture kept for compatibility"
 `

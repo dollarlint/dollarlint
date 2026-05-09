@@ -37,10 +37,38 @@ func (s *repoServer) addTools() {
 		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Allow intentional reruns of repositories already present in real-world history."},
 		"outputName":            map[string]any{"type": "string", "description": "Optional output JSON filename or absolute path."},
 	}), s.handleRealWorldPrepareCorpus, toolHints{ReadOnly: false, OpenWorld: true})
-	s.addToolWithHints("real_world_run_corpus", "Build the CLI if requested and run the standard schema-backed real-world corpus validation command.", schemaObject(map[string]any{
+	s.addTool("real_world_inspect_corpus", "Scan prepared real-world clones for lockfiles, dependency manifests, and local or remote $schema refs, then draft script-suppressed dependency-prep notes.", schemaObject(map[string]any{
+		"corpusDir":      map[string]any{"type": "string", "description": "Prepared corpus directory."},
+		"cacheDir":       map[string]any{"type": "string", "description": "Cache directory to carry forward to real_world_start_validation. Defaults from manifestPath when available."},
+		"outputArtifact": map[string]any{"type": "string", "description": "Output artifact path to carry forward to real_world_start_validation. Defaults from manifestPath when available."},
+		"manifestPath":   map[string]any{"type": "string", "description": "Prepared corpus manifest path. Defaults to <corpusDir>/real-world-manifest.json."},
+		"repositories":   realWorldRepositoryArraySchema("Repositories included in the sweep. Defaults from manifestPath when available."),
+		"maxMatches":     map[string]any{"type": "integer", "description": "Maximum matches to retain per category per repository. Defaults to 12."},
+	}), s.handleRealWorldInspectCorpus, true)
+	s.addToolWithHints("real_world_start_validation", "Start managed per-repository DollarLint validation jobs and optionally wait with progress notifications until the first repo result is ready.", realWorldValidationToolSchema(map[string]any{
+		"concurrency":        map[string]any{"type": "integer", "description": "Maximum repository validations to run at once. Defaults to 4; capped at 16."},
+		"waitForFirstResult": map[string]any{"type": "boolean", "description": "When true, keep this tool call open with progress notifications until the first repository result is ready. Defaults to true."},
+	}), s.handleRealWorldStartValidation, toolHints{ReadOnly: false, OpenWorld: true})
+	s.addTool("real_world_next_validation_result", "Wait with progress notifications until the next per-repository real-world validation result is ready.", schemaObject(map[string]any{
+		"runID": map[string]any{"type": "string", "description": "Managed validation run id returned by real_world_start_validation."},
+	}), s.handleRealWorldNextValidationResult, false)
+	s.addTool("real_world_validation_status", "Return the current status of a managed per-repository real-world validation run.", schemaObject(map[string]any{
+		"runID": map[string]any{"type": "string", "description": "Managed validation run id returned by real_world_start_validation."},
+	}), s.handleRealWorldValidationStatus, true)
+	s.addToolWithHints("real_world_finish_validation", "Merge completed per-repository validation artifacts into the standard real-world JSON artifact for triage.", schemaObject(map[string]any{
+		"runID":          map[string]any{"type": "string", "description": "Managed validation run id returned by real_world_start_validation."},
+		"outputArtifact": map[string]any{"type": "string", "description": "Optional merged JSON artifact path. Defaults to the run outputArtifact."},
+	}), s.handleRealWorldFinishValidation, toolHints{ReadOnly: false})
+	s.addToolWithHints("real_world_cancel_validation", "Cancel a managed per-repository real-world validation run.", schemaObject(map[string]any{
+		"runID": map[string]any{"type": "string", "description": "Managed validation run id returned by real_world_start_validation."},
+	}), s.handleRealWorldCancelValidation, toolHints{ReadOnly: false})
+	s.addToolWithHints("real_world_run_corpus", "Legacy blocking runner for the standard schema-backed real-world corpus validation command. Prefer real_world_start_validation for long runs.", schemaObject(map[string]any{
 		"corpusDir":          map[string]any{"type": "string", "description": "Prepared corpus directory to validate."},
 		"cacheDir":           map[string]any{"type": "string", "description": "Isolated XDG cache directory. Created automatically when omitted."},
 		"outputArtifact":     map[string]any{"type": "string", "description": "JSON output artifact path. Created automatically when omitted."},
+		"manifestPath":       map[string]any{"type": "string", "description": "Prepared corpus manifest path. Defaults to <corpusDir>/real-world-manifest.json."},
+		"repositories":       realWorldRepositoryArraySchema("Repositories included in the sweep, carried forward to triage."),
+		"dependencyPrep":     realWorldDependencyPrepArraySchema("Dependency-prep notes from real_world_inspect_corpus, carried forward to triage. Do not run dependency lifecycle scripts during prep."),
 		"build":              map[string]any{"type": "boolean", "description": "Build bin/dollarlint before validating. Defaults to true."},
 		"schemaStore":        map[string]any{"type": "boolean", "description": "Enable SchemaStore catalog matching. Defaults to true."},
 		"schemaStoreFailure": enumSchema([]string{"warn", "error", "skip"}, "SchemaStore catalog failure policy. Defaults to warn."),
@@ -62,7 +90,7 @@ func (s *repoServer) addTools() {
 		"productDecisions":       arrayStringSchema("Optional product changes or decisions to use instead of the triage draft."),
 		"followUp":               arrayStringSchema("Optional follow-up notes to use instead of the triage draft."),
 	}), s.handleRealWorldTriageOutput, true)
-	s.addTool("real_world_record_result", "Persist a real-world sweep result to split reports/real-world-results storage and copy the DollarLint JSON output into reports/real-world-artifacts.", schemaObject(map[string]any{
+	s.addTool("real_world_record_result", "Persist a real-world sweep result, copy the DollarLint JSON output into reports/real-world-artifacts, and clean managed temp corpus/cache dirs.", schemaObject(map[string]any{
 		"id":                     map[string]any{"type": "string", "description": "Stable entry id. Defaults to a slug from date and title."},
 		"date":                   map[string]any{"type": "string", "description": "Entry date in YYYY-MM-DD. Defaults to today."},
 		"title":                  map[string]any{"type": "string", "description": "Short sweep title."},
@@ -115,6 +143,28 @@ func (s *repoServer) addToolWithHints(name, description string, input map[string
 		OpenWorldHint:   mcp.ToBoolPtr(hints.OpenWorld),
 	}
 	s.mcp.AddTool(tool, handler)
+}
+
+func realWorldValidationToolSchema(extra map[string]any) map[string]any {
+	properties := map[string]any{
+		"corpusDir":          map[string]any{"type": "string", "description": "Prepared corpus directory to validate."},
+		"cacheDir":           map[string]any{"type": "string", "description": "Isolated XDG cache directory. Created automatically when omitted."},
+		"outputArtifact":     map[string]any{"type": "string", "description": "Merged JSON output artifact path. Created automatically when omitted."},
+		"manifestPath":       map[string]any{"type": "string", "description": "Prepared corpus manifest path. Defaults to <corpusDir>/real-world-manifest.json."},
+		"repositories":       realWorldRepositoryArraySchema("Repositories included in the sweep. Defaults from manifestPath when available."),
+		"dependencyPrep":     realWorldDependencyPrepArraySchema("Dependency-prep notes from real_world_inspect_corpus, carried forward to triage. Do not run dependency lifecycle scripts during prep."),
+		"build":              map[string]any{"type": "boolean", "description": "Build bin/dollarlint before validating. Defaults to true."},
+		"schemaStore":        map[string]any{"type": "boolean", "description": "Enable SchemaStore catalog matching. Defaults to true."},
+		"schemaStoreFailure": enumSchema([]string{"warn", "error", "skip"}, "SchemaStore catalog failure policy. Defaults to warn."),
+		"fetchRetries":       map[string]any{"type": "integer", "description": "Remote schema fetch retries. Defaults to 1."},
+		"fetchRetryMinWait":  map[string]any{"type": "string", "description": "Minimum retry wait. Defaults to 1ms."},
+		"fetchRetryMaxWait":  map[string]any{"type": "string", "description": "Maximum retry wait. Defaults to 1ms."},
+		"extraArgs":          arrayStringSchema("Additional dollarlint validate arguments."),
+	}
+	for key, value := range extra {
+		properties[key] = value
+	}
+	return schemaObject(properties)
 }
 
 func realWorldRepositoryArraySchema(description string) map[string]any {

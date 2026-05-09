@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -180,6 +182,127 @@ func TestTriageRealWorldOutputRejectsCountMismatch(t *testing.T) {
 	}
 	if _, err := triageRealWorldOutput(path, nil); err == nil || !strings.Contains(err.Error(), "summary.issues.total=2") {
 		t.Fatalf("expected count mismatch error, got %v", err)
+	}
+}
+
+func TestRealWorldInspectCorpusDraftsDependencyPrep(t *testing.T) {
+	root := t.TempDir()
+	corpus := filepath.Join(root, "corpus")
+	cache := filepath.Join(root, "cache")
+	output := filepath.Join(root, "out.json")
+	remoteRepo := filepath.Join(corpus, "remote")
+	localRepo := filepath.Join(corpus, "local")
+	for _, dir := range []string{
+		filepath.Join(remoteRepo, ".github", "workflows"),
+		filepath.Join(localRepo, "config"),
+	} {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	files := map[string]string{
+		filepath.Join(remoteRepo, "package-lock.json"):              `{"lockfileVersion": 3}`,
+		filepath.Join(remoteRepo, "package.json"):                   `{"name":"remote"}`,
+		filepath.Join(remoteRepo, ".github", "workflows", "ci.yml"): `"$schema": "https://json.schemastore.org/github-workflow.json"`,
+		filepath.Join(localRepo, "pnpm-lock.yaml"):                  `lockfileVersion: '9.0'`,
+		filepath.Join(localRepo, "package.json"):                    `{"name":"local"}`,
+		filepath.Join(localRepo, "config", "tool.json"):             `{"$schema":"./schema.json","enabled":true}`,
+		filepath.Join(localRepo, "config", "node-schema.json"):      `{"$schema":"../node_modules/tool/schema.json"}`,
+		filepath.Join(localRepo, "config", "schema.json"):           `{"type":"object"}`,
+	}
+	for path, text := range files {
+		if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	manifestPath := filepath.Join(corpus, realWorldManifestName)
+	if err := writeJSONFile(manifestPath, realWorldManifest{
+		SchemaVersion:  1,
+		CorpusDir:      corpus,
+		CacheDir:       cache,
+		OutputArtifact: output,
+		Repositories: []realWorldRepository{
+			{Name: "remote", CloneURL: "https://github.com/example/remote.git", Path: remoteRepo, Status: "cloned"},
+			{Name: "local", CloneURL: "https://github.com/example/local.git", Path: localRepo, Status: "cloned"},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	inspection, err := realWorldInspectCorpus(realWorldInspectArgs{CorpusDir: corpus, ManifestPath: manifestPath})
+	if err != nil {
+		t.Fatalf("inspect corpus: %v", err)
+	}
+	if inspection.CacheDir != cache || inspection.OutputArtifact != output {
+		t.Fatalf("carried paths = cache %q output %q", inspection.CacheDir, inspection.OutputArtifact)
+	}
+	if len(inspection.Repositories) != 2 || len(inspection.DraftDependencyPrep) != 2 {
+		t.Fatalf("inspection = %+v", inspection)
+	}
+	byRepo := map[string]realWorldDependencyPrepScan{}
+	for _, scan := range inspection.Repositories {
+		byRepo[scan.Repository] = scan
+	}
+	if byRepo["remote"].NeedsDependencyPrep || len(byRepo["remote"].RemoteSchemaRefs) != 1 || len(byRepo["remote"].Lockfiles) != 1 {
+		t.Fatalf("remote scan = %+v", byRepo["remote"])
+	}
+	if !byRepo["local"].NeedsDependencyPrep || len(byRepo["local"].LocalSchemaRefs) != 2 {
+		t.Fatalf("local scan = %+v", byRepo["local"])
+	}
+	var remotePrep, localPrep realWorldDependencyPrep
+	for _, prep := range inspection.DraftDependencyPrep {
+		if prep.Repository == "remote" {
+			remotePrep = prep
+		}
+		if prep.Repository == "local" {
+			localPrep = prep
+		}
+	}
+	if remotePrep.Status != "not-needed" || !strings.Contains(remotePrep.Notes, "no local $schema refs") {
+		t.Fatalf("remote prep = %+v", remotePrep)
+	}
+	if localPrep.Status != "needs-review" || !strings.Contains(localPrep.Command, "pnpm install") || !strings.Contains(localPrep.Command, "--ignore-scripts") {
+		t.Fatalf("local prep = %+v", localPrep)
+	}
+	if inspection.PrepSecurityPolicy["lifecycleScripts"] != "disabled" {
+		t.Fatalf("prep security policy = %+v", inspection.PrepSecurityPolicy)
+	}
+	if !inspection.NeedsReview || !strings.Contains(inspection.Summary, "2 local schema refs") {
+		t.Fatalf("summary=%q needsReview=%v", inspection.Summary, inspection.NeedsReview)
+	}
+}
+
+func TestRealWorldSuggestedPrepCommandsSuppressScripts(t *testing.T) {
+	commands := realWorldSuggestedPrepCommands(realWorldDependencyPrepScan{Lockfiles: []string{
+		"package-lock.json",
+		"pnpm-lock.yaml",
+		"yarn.lock",
+		"bun.lock",
+		"composer.lock",
+		"cargo.lock",
+		"go.sum",
+		"poetry.lock",
+		"Pipfile.lock",
+		"Gemfile.lock",
+	}})
+	joined := strings.Join(commands, "\n")
+	for _, want := range []string{
+		"npm_config_ignore_scripts=true npm ci --ignore-scripts",
+		"npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts",
+		"YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
+		"bun install --frozen-lockfile --ignore-scripts",
+		"composer install --no-scripts --no-plugins",
+		"cargo fetch --locked",
+		"go mod download",
+	} {
+		if !strings.Contains(joined, want) {
+			t.Fatalf("missing safe prep command %q in %q", want, joined)
+		}
+	}
+	for _, forbidden := range []string{"poetry install", "pipenv sync", "bundle install"} {
+		if strings.Contains(joined, forbidden) {
+			t.Fatalf("unsafe prep command %q in %q", forbidden, joined)
+		}
 	}
 }
 
@@ -384,5 +507,120 @@ func TestPersistRealWorldOutputArtifactRejectsInvalidJSON(t *testing.T) {
 	}
 	if _, err := persistRealWorldOutputArtifact(root, realWorldEntry{ID: "bad", OutputArtifact: src}); err == nil {
 		t.Fatal("expected invalid JSON error")
+	}
+}
+
+func TestRealWorldCleanupRecordTempsRemovesManagedTempDirs(t *testing.T) {
+	corpus, err := os.MkdirTemp("", realWorldCorpusTempPrefix)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cache, err := os.MkdirTemp("", realWorldCacheTempPrefix)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range []string{filepath.Join(corpus, "repo"), filepath.Join(cache, "schemas")} {
+		if err := os.MkdirAll(path, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	results := realWorldCleanupRecordTemps(realWorldEntry{Corpus: corpus, CacheDir: cache})
+	if !realWorldCleanupOK(results) {
+		t.Fatalf("cleanup should be ok: %+v", results)
+	}
+	for _, result := range results {
+		if result.Status != "removed" {
+			t.Fatalf("cleanup result = %+v", result)
+		}
+		if _, err := os.Stat(result.Path); !errors.Is(err, os.ErrNotExist) {
+			t.Fatalf("expected %s to be removed, stat err=%v", result.Path, err)
+		}
+	}
+}
+
+func TestRealWorldCleanupRecordTempsSkipsUnmanagedDirs(t *testing.T) {
+	unmanaged := t.TempDir()
+	results := realWorldCleanupRecordTemps(realWorldEntry{Corpus: unmanaged, CacheDir: unmanaged})
+	for _, result := range results {
+		if result.Status != "skipped" {
+			t.Fatalf("cleanup result = %+v", result)
+		}
+	}
+	if _, err := os.Stat(unmanaged); err != nil {
+		t.Fatalf("unmanaged dir should remain, stat err=%v", err)
+	}
+}
+
+func TestRealWorldMergeValidationArtifactsPrefixesRepoPaths(t *testing.T) {
+	root := t.TempDir()
+	repoA := filepath.Join(root, "repo-a")
+	repoB := filepath.Join(root, "repo-b")
+	if err := os.MkdirAll(repoA, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(repoB, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	outA := filepath.Join(root, "a.json")
+	outB := filepath.Join(root, "b.json")
+	for path, payload := range map[string]realWorldMergedOutput{
+		outA: {
+			Schema:        "https://example.test/result.schema.json",
+			FormatVersion: 1,
+			Root:          repoA,
+			Summary: realWorldMergedSummary{
+				Discovered: 1,
+				Validated:  1,
+				Issues:     realWorldIssueSummary{Total: 1, Validation: 1},
+			},
+			Files:  []map[string]any{{"path": "config/a.json", "format": "json", "status": "validated", "issues": float64(1)}},
+			Issues: []map[string]any{{"path": "config/a.json", "category": "validation", "message": "bad"}},
+		},
+		outB: {
+			Schema:        "https://example.test/result.schema.json",
+			FormatVersion: 1,
+			Root:          repoB,
+			Summary: realWorldMergedSummary{
+				Discovered: 1,
+				Failed:     1,
+				Issues:     realWorldIssueSummary{Total: 1, Parsing: 1},
+				Warnings:   1,
+			},
+			Files:    []map[string]any{{"path": "broken.yaml", "format": "yaml", "status": "error", "issues": float64(1)}},
+			Issues:   []map[string]any{{"path": "broken.yaml", "category": "parsing", "message": "parse failed"}},
+			Warnings: []map[string]any{{"path": "broken.yaml", "kind": "schemaCatalogSchemaUnavailable", "message": "warn"}},
+		},
+	} {
+		if err := writeJSONFile(path, payload); err != nil {
+			t.Fatal(err)
+		}
+	}
+	run := &realWorldValidationRun{
+		CorpusDir: root,
+		resultsByID: map[string]realWorldRepoValidationResult{
+			"a": {Repository: "repo-a", Path: repoA, OutputArtifact: outA, Accepted: true},
+			"b": {Repository: "repo-b", Path: repoB, OutputArtifact: outB, Accepted: true},
+		},
+	}
+	mergedPath := filepath.Join(root, "merged.json")
+	summary, err := realWorldMergeValidationArtifacts(run, mergedPath)
+	if err != nil {
+		t.Fatalf("merge validation artifacts: %v", err)
+	}
+	if summary.Discovered != 2 || summary.Issues.Total != 2 || summary.Issues.Parsing != 1 || summary.Warnings != 1 {
+		t.Fatalf("summary = %+v", summary)
+	}
+	details, err := readRealWorldOutputDetails(mergedPath)
+	if err != nil {
+		t.Fatalf("read merged details: %v", err)
+	}
+	paths := []string{details.Files[0].Path, details.Files[1].Path, details.Issues[0].Path, details.Issues[1].Path}
+	sort.Strings(paths)
+	want := []string{"repo-a/config/a.json", "repo-a/config/a.json", "repo-b/broken.yaml", "repo-b/broken.yaml"}
+	for i := range want {
+		if paths[i] != want[i] {
+			t.Fatalf("paths = %+v, want %+v", paths, want)
+		}
 	}
 }

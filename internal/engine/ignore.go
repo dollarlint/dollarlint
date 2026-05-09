@@ -23,6 +23,9 @@ func ignoreMatches(issue Issue, rule IgnoreRule) bool {
 	if rule.Keyword != "" && rule.Keyword != issue.Keyword && rule.Keyword != issue.KeywordLocation {
 		return false
 	}
+	if rule.SchemaSource != "" && rule.SchemaSource != issue.SchemaSource {
+		return false
+	}
 	if rule.Property != "" && !propertyMatches(issue, rule.Property) {
 		return false
 	}

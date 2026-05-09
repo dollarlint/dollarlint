@@ -27,7 +27,7 @@ engine: copilot
 
 runtimes:
   go:
-    version: "1.25"
+    version: "1.26.3"
 
 network:
   allowed:
@@ -68,7 +68,7 @@ tools:
 mcp-servers:
   dollarlint-repo:
     type: stdio
-    container: golang:1.25
+    container: golang:1.26.3
     entrypoint: /bin/sh
     entrypointArgs:
       - -lc

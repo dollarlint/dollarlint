@@ -1,4 +1,4 @@
-module github.com/agorischek/dollarlint
+module github.com/dollarlint/dollarlint
 
 go 1.26.3
 

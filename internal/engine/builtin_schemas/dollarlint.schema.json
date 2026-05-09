@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/agorischek/dollarlint/schemas/dollarlint.schema.json",
+  "$id": "https://github.com/dollarlint/dollarlint/schemas/dollarlint.schema.json",
   "title": "dollarlint configuration",
   "type": "object",
   "additionalProperties": false,

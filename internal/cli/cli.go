@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/agorischek/dollarlint"
+	"github.com/dollarlint/dollarlint"
 	"github.com/spf13/cobra"
 )
 

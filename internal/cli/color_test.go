@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/agorischek/dollarlint"
+	"github.com/dollarlint/dollarlint"
 	"github.com/orochaa/go-clack/third_party/picocolors"
 )
 

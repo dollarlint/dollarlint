@@ -4,8 +4,6 @@
 
 `dollarlint` validates JSON (including JSONC, JSON5, JSON Lines), YAML, and TOML files against JSON Schemas.
 
-By default, files that do not resolve to a schema are skipped and reported in the summary. If you want every included file to be covered, set `schemas.requireCoverage = true`.
-
 ## Install
 
 ```sh

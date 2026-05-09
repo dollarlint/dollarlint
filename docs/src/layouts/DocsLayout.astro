@@ -100,11 +100,12 @@ const slogans = [
           `html[data-slogan-index="${sloganIndex}"] .brand-subtitle .brand-slogan[data-slogan-option="${sloganIndex}"]{display:block}`,
           ...zones.map(
             (zone, index) =>
-              `.hero-mark:nth-child(${index + 1}){--mark-x:${rand(zone.x).toFixed(
+              `.hero-mark:nth-child(${index + 1}){--mark-x:${rand(
+                zone.x,
+              ).toFixed(
                 2,
               )}%;--mark-y:${rand(zone.y).toFixed(2)}%;--mark-rotate:${rand([
-                -45,
-                45,
+                -45, 45,
               ]).toFixed(2)}deg}`,
           ),
         ].join("");

@@ -87,6 +87,9 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 		}
 		document := parsed.document
 		if parsed.err != nil {
+			if document != nil {
+				fileResult.Format = document.Format
+			}
 			fileResult.Status = StatusError
 			fileResult.Message = parsed.err.Error()
 			result.Files = append(result.Files, fileResult)

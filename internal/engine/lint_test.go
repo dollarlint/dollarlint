@@ -402,6 +402,16 @@ func TestLintParseSchemaAndPrimeErrors(t *testing.T) {
 	if result.Summary.Issues.Total == 0 {
 		t.Fatalf("expected parse/schema issues")
 	}
+	var parseFile FileResult
+	for _, file := range result.Files {
+		if file.RelativePath == "bad.json" {
+			parseFile = file
+			break
+		}
+	}
+	if parseFile.Format == "" || parseFile.Status != StatusError {
+		t.Fatalf("parse error file result = %+v", parseFile)
+	}
 	var parseIssue, loadIssue, compileIssue bool
 	for _, issue := range result.Issues {
 		if issue.Keyword == issueKeywordParse && strings.Contains(issue.Message, "parse") {

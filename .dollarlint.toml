@@ -26,6 +26,7 @@ allowedDomains = [
   "*.schemastore.org",
   "schema.management.azure.com",
   "json-schema.org",
+  "raw.githubusercontent.com",
   "developers.openai.com",
 ]
 blockedDomains = ["untrusted.example.com"]

@@ -94,7 +94,11 @@ func parseDocument(file DiscoveredFile, cfg ParsingConfig, sourceLocations bool)
 	}
 	effectiveFormat, data, lineDocuments, parseErrors, err := parseDocumentData(raw, format)
 	if err != nil {
-		return nil, fmt.Errorf("parse %s: %w", file.Path, err)
+		return &Document{
+			Path:         file.Path,
+			RelativePath: file.RelativePath,
+			Format:       effectiveFormat,
+		}, fmt.Errorf("parse %s: %w", file.Path, err)
 	}
 	schema, source := extractSchema(raw, data, effectiveFormat)
 	document := &Document{

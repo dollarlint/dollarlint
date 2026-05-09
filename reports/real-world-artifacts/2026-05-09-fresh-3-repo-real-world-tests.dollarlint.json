@@ -11135,7 +11135,7 @@
     },
     {
       "path": "pnpm/workspace/project-manifest-reader/__fixtures__/commented-package-json5/modified.json5",
-      "format": "",
+      "format": "json5",
       "status": "error",
       "issues": 0,
       "ignored": 0,
@@ -11143,7 +11143,7 @@
     },
     {
       "path": "pnpm/workspace/project-manifest-reader/__fixtures__/commented-package-json5/package.json5",
-      "format": "",
+      "format": "json5",
       "status": "error",
       "issues": 0,
       "ignored": 0,
@@ -11151,7 +11151,7 @@
     },
     {
       "path": "pnpm/workspace/project-manifest-reader/__fixtures__/invalid-package-json/package.json",
-      "format": "",
+      "format": "jsonc",
       "status": "error",
       "issues": 0,
       "ignored": 0,
@@ -11159,7 +11159,7 @@
     },
     {
       "path": "pnpm/workspace/project-manifest-reader/__fixtures__/invalid-package-json5/package.json5",
-      "format": "",
+      "format": "json5",
       "status": "error",
       "issues": 0,
       "ignored": 0,
@@ -11167,7 +11167,7 @@
     },
     {
       "path": "pnpm/workspace/project-manifest-reader/__fixtures__/invalid-package-yaml/package.yaml",
-      "format": "",
+      "format": "yaml",
       "status": "error",
       "issues": 0,
       "ignored": 0,

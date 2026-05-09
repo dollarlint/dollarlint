@@ -255,7 +255,7 @@
     },
     {
       "path": "hugo/hugolib/testdata/fakejson.json",
-      "format": "",
+      "format": "jsonc",
       "status": "error",
       "issues": 0,
       "ignored": 0,

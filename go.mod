@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/charmbracelet/lipgloss v1.1.0
-	github.com/dlclark/regexp2 v1.11.0
+	github.com/dlclark/regexp2 v1.12.0
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/mark3labs/mcp-go v0.52.0
 	github.com/muesli/termenv v0.16.0

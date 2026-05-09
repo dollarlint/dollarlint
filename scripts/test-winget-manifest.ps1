@@ -4,7 +4,7 @@ Validates and test-installs the DollarLint WinGet manifest on Windows.
 
 .DESCRIPTION
 By default this downloads the manifest from the dollarlint/winget-pkgs
-PR branch for v0.1.3, runs winget validation, enables local manifest files,
+newest dollarlint-x.y.z PR branch, runs winget validation, enables local manifest files,
 installs the package from the manifest, verifies the dollarlint command, and
 optionally uninstalls it.
 
@@ -20,6 +20,12 @@ required for local-manifest installs.
 
 .EXAMPLE
 .\scripts\test-winget-manifest.ps1 -ManifestPath C:\src\winget-pkgs\manifests\d\DollarLint\DollarLint\0.1.3
+
+.EXAMPLE
+.\scripts\test-winget-manifest.ps1 -PackageVersion 0.1.5 -UninstallAfter
+
+.EXAMPLE
+.\scripts\test-winget-manifest.ps1 -Branch dollarlint-0.1.5 -UninstallAfter
 #>
 
 [CmdletBinding()]
@@ -27,9 +33,9 @@ param(
     [string]$ManifestPath,
     [string]$Owner = "dollarlint",
     [string]$Repo = "winget-pkgs",
-    [string]$Branch = "dollarlint-0.1.3",
+    [string]$Branch,
     [string]$PackageIdentifier = "DollarLint.DollarLint",
-    [string]$PackageVersion = "0.1.3",
+    [string]$PackageVersion,
     [switch]$UninstallAfter,
     [switch]$SkipCommandCheck
 )
@@ -84,6 +90,84 @@ function Get-LastLogLine {
     return Get-Content -Path $Path |
         Where-Object { $_ -match "\S" } |
         Select-Object -Last 1
+}
+
+function Get-SemVerFromBranch {
+    param([string]$Branch)
+
+    if ($Branch -match "^dollarlint-v?(?<version>\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$") {
+        return $Matches.version
+    }
+
+    return $null
+}
+
+function Resolve-ManifestSource {
+    param(
+        [string]$Owner,
+        [string]$Repo,
+        [string]$Branch,
+        [string]$PackageVersion
+    )
+
+    if ($Branch -and -not $PackageVersion) {
+        $PackageVersion = Get-SemVerFromBranch $Branch
+        if (-not $PackageVersion) {
+            throw "PackageVersion is required when Branch does not look like dollarlint-x.y.z."
+        }
+    }
+
+    if ($PackageVersion -and -not $Branch) {
+        $Branch = "dollarlint-$PackageVersion"
+    }
+
+    if ($Branch -and $PackageVersion) {
+        return @{
+            Branch = $Branch
+            PackageVersion = $PackageVersion
+        }
+    }
+
+    $savedProgressPref = $ProgressPreference
+    $ProgressPreference = "SilentlyContinue"
+
+    try {
+        Write-Step "Discovering latest DollarLint WinGet branch"
+        $apiUrl = "https://api.github.com/repos/$Owner/$Repo/branches?per_page=100"
+        Write-Host $apiUrl
+
+        $branches = Invoke-RestMethod -Uri $apiUrl -Headers @{ Accept = "application/vnd.github.v3+json" }
+        $candidates = @()
+
+        foreach ($candidateBranch in $branches) {
+            $versionText = Get-SemVerFromBranch $candidateBranch.name
+            if (-not $versionText) { continue }
+
+            try {
+                $candidates += [pscustomobject]@{
+                    Branch = $candidateBranch.name
+                    Version = [version]$versionText
+                    VersionText = $versionText
+                }
+            }
+            catch {
+                Write-Host "Skipping branch with non-numeric version: $($candidateBranch.name)" -ForegroundColor Yellow
+            }
+        }
+
+        $latest = $candidates | Sort-Object Version -Descending | Select-Object -First 1
+        if (-not $latest) {
+            throw "Could not find a branch named like dollarlint-x.y.z in $Owner/$Repo. Pass -Branch and -PackageVersion explicitly."
+        }
+
+        return @{
+            Branch = $latest.Branch
+            PackageVersion = $latest.VersionText
+        }
+    }
+    finally {
+        $ProgressPreference = $savedProgressPref
+    }
 }
 
 function Invoke-Checked {
@@ -173,6 +257,18 @@ Write-Host "winget: $($winget.Source)"
 Invoke-Checked winget --version
 
 if (-not $ManifestPath) {
+    $manifestSource = Resolve-ManifestSource `
+        -Owner $Owner `
+        -Repo $Repo `
+        -Branch $Branch `
+        -PackageVersion $PackageVersion
+
+    $Branch = $manifestSource.Branch
+    $PackageVersion = $manifestSource.PackageVersion
+
+    Write-Host "Manifest branch: $Branch"
+    Write-Host "Package version: $PackageVersion"
+
     $ManifestPath = Get-ManifestPathFromBranch `
         -Owner $Owner `
         -Repo $Repo `

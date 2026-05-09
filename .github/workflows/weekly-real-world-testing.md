@@ -67,8 +67,18 @@ tools:
 
 mcp-servers:
   dollarlint-repo:
-    command: go
-    args: ["run", "./tools/repo-mcp"]
+    type: stdio
+    container: golang:1.25
+    entrypoint: /bin/sh
+    entrypointArgs:
+      - -lc
+      - cd $GITHUB_WORKSPACE && go run ./tools/repo-mcp
+    mounts:
+      - "${GITHUB_WORKSPACE}:${GITHUB_WORKSPACE}:rw"
+    env:
+      GITHUB_WORKSPACE: "${GITHUB_WORKSPACE}"
+      GOCACHE: /tmp/go-cache
+      GOMODCACHE: /tmp/go-mod-cache
     allowed:
       - real_world_history
       - real_world_prepare_corpus

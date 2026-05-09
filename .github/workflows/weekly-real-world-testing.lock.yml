@@ -22,7 +22,7 @@
 #
 # Run DollarLint against a fresh real-world corpus and publish a weekly report.
 #
-# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"67b71a9c06b2725b0494cf0f23befc92aae74e652d19fda585c1c547289dec85","compiler_version":"v0.62.5","strict":true,"agent_id":"copilot"}
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"4e734270a4b221a0f66ffcfa3cf1009e9607d978729456e7bc8be7fe710f4b1a","compiler_version":"v0.62.5","strict":true,"agent_id":"copilot"}
 
 name: "Weekly Real-World Testing"
 "on":
@@ -342,7 +342,7 @@ jobs:
             const determineAutomaticLockdown = require('${{ runner.temp }}/gh-aw/actions/determine_automatic_lockdown.cjs');
             await determineAutomaticLockdown(github, context, core);
       - name: Download container images
-        run: bash ${RUNNER_TEMP}/gh-aw/actions/download_docker_images.sh ghcr.io/github/gh-aw-firewall/agent:0.24.5 ghcr.io/github/gh-aw-firewall/api-proxy:0.24.5 ghcr.io/github/gh-aw-firewall/squid:0.24.5 ghcr.io/github/gh-aw-mcpg:v0.1.20 ghcr.io/github/github-mcp-server:v0.32.0 node:lts-alpine
+        run: bash ${RUNNER_TEMP}/gh-aw/actions/download_docker_images.sh ghcr.io/github/gh-aw-firewall/agent:0.24.5 ghcr.io/github/gh-aw-firewall/api-proxy:0.24.5 ghcr.io/github/gh-aw-firewall/squid:0.24.5 ghcr.io/github/gh-aw-mcpg:v0.1.20 ghcr.io/github/github-mcp-server:v0.32.0 golang:1.25 node:lts-alpine
       - name: Write Safe Outputs Config
         run: |
           mkdir -p ${RUNNER_TEMP}/gh-aw/safeoutputs
@@ -558,10 +558,14 @@ jobs:
             "mcpServers": {
               "dollarlint-repo": {
                 "type": "stdio",
-                "command": "go",
-                "args": [
-                  "run",
-                  "./tools/repo-mcp"
+                "container": "golang:1.25",
+                "entrypoint": "/bin/sh",
+                "entrypointArgs": [
+                  "-lc",
+                  "cd $GITHUB_WORKSPACE && go run ./tools/repo-mcp"
+                ],
+                "mounts": [
+                  "${GITHUB_WORKSPACE}:${GITHUB_WORKSPACE}:rw"
                 ],
                 "tools": [
                   "real_world_history",
@@ -569,6 +573,11 @@ jobs:
                   "real_world_run_corpus",
                   "real_world_record_result"
                 ],
+                "env": {
+                  "GITHUB_WORKSPACE": "${GITHUB_WORKSPACE}",
+                  "GOCACHE": "/tmp/go-cache",
+                  "GOMODCACHE": "/tmp/go-mod-cache"
+                },
                 "guard-policies": {
                   "write-sink": {
                     "accept": [

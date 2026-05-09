@@ -62,6 +62,59 @@ func TestSchemaStoreCatalogAssociations(t *testing.T) {
 	}
 }
 
+func TestSchemaStoreAutoSkipsGenericBasenameMatches(t *testing.T) {
+	dir := t.TempDir()
+	catalogPath := filepath.Join(dir, "catalog.json")
+	writeFile(t, catalogPath, `{
+  "schemas": [
+    {"name": "Generic tasks", "fileMatch": ["tasks.json"], "url": "./generic.schema.json"},
+    {"name": "Path tasks", "fileMatch": ["config/tasks.json"], "url": "./generic.schema.json"},
+    {"name": "Package", "fileMatch": ["package.json"], "url": "./package.schema.json"}
+  ]
+}`)
+	writeFile(t, filepath.Join(dir, "generic.schema.json"), `{"type":"object","required":["ok"],"properties":{"ok":{"type":"boolean"}}}`)
+	writeFile(t, filepath.Join(dir, "package.schema.json"), `{"type":"object","required":["name"],"properties":{"name":{"type":"string"}}}`)
+	writeFile(t, filepath.Join(dir, "tasks.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "config", "tasks.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "package.json"), `{}`)
+
+	cfg := DefaultConfig()
+	cfg.Schemas.Catalogs.Enabled = true
+	cfg.Schemas.Catalogs.Sources = []CatalogSource{{Name: "test", Format: "schemastore", Path: catalogPath}}
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint auto: %v", err)
+	}
+	if result.Summary.Validated != 2 || result.Summary.Issues.Total != 2 {
+		t.Fatalf("auto summary = %+v issues=%+v", result.Summary, result.Issues)
+	}
+	for _, file := range result.Files {
+		switch file.RelativePath {
+		case "tasks.json":
+			if file.Status != StatusSkipped || file.SchemaSource != "" {
+				t.Fatalf("generic basename should be skipped in auto mode: %+v", file)
+			}
+		case "config/tasks.json":
+			if file.SchemaSource != "catalog:test:Path tasks" {
+				t.Fatalf("path-specific match was not applied: %+v", file)
+			}
+		case "package.json":
+			if file.SchemaSource != "catalog:test:Package" {
+				t.Fatalf("distinctive basename match was not applied: %+v", file)
+			}
+		}
+	}
+
+	cfg.Schemas.Catalogs.Match = CatalogMatchAll
+	result, err = Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint all: %v", err)
+	}
+	if result.Summary.Validated != 3 || result.Summary.Issues.Total != 3 {
+		t.Fatalf("all summary = %+v issues=%+v", result.Summary, result.Issues)
+	}
+}
+
 func TestSchemaStorePrecedenceAndDisabledDefault(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "catalog.json"), `{

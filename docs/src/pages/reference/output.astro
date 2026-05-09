@@ -49,12 +49,26 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues (2 parsing, 6 validation
     <pre><code>dollarlint validate . --format json</code></pre>
     <p>
       JSON output gives you the full accounting: run root, summary counts,
-      duration, per-file results, issues, parsing hints, warnings, schema
-      locations, and optional source positions. The summary's
-      <code>issues</code> object includes <code>total</code>, <code
-        >parsing</code
-      >, <code>validation</code>, <code>schema</code>, and <code>coverage</code>
-      counts.
+      numeric duration, per-file results, active issues, ignored issues,
+      parsing hints, warnings, schema locations, and source positions when
+      available. The top-level <code>formatVersion</code> field versions this
+      machine-readable contract.
+    </p>
+    <p>
+      File and issue entries use <code>path</code> for the path relative to the
+      validation root; local file schemas under that root are reported as
+      relative paths while remote schemas remain URLs. Active findings live in
+      <code>issues</code>; ignored findings live in <code>ignoredIssues</code>. Both
+      arrays, plus <code
+        >warnings</code
+      >, are always present even when empty. Each issue includes a <code
+        >category</code
+      > of <code>parsing</code>, <code>validation</code>, <code>schema</code>, or
+      <code>coverage</code>. The summary's <code>issues</code> object includes
+      <code>total</code>, <code>parsing</code>, <code>validation</code>, <code
+        >schema</code
+      >, and <code>coverage</code> counts, and <code>durationNanos</code> is the
+      stable numeric duration field.
     </p>
 
     <h2>Branch errors</h2>

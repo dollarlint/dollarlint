@@ -131,6 +131,7 @@ blockedDomains = ["bad.example.com"]
 [schemas.catalogs]
 enabled = true
 failure = "skip"
+match = "all"
 
 [[schemas.catalogs.sources]]
 name = "company"
@@ -175,7 +176,7 @@ keyword = "type"
 	if !cfg.Schemas.RequireCoverage {
 		t.Fatalf("schema coverage requirement not decoded: %+v", cfg.Schemas)
 	}
-	if !cfg.Schemas.Catalogs.Enabled || cfg.Schemas.Catalogs.Failure != "skip" || len(cfg.Schemas.Catalogs.Sources) != 1 || cfg.Schemas.Catalogs.Sources[0].Path != filepath.Join(dir, "catalog.json") {
+	if !cfg.Schemas.Catalogs.Enabled || cfg.Schemas.Catalogs.Failure != "skip" || cfg.Schemas.Catalogs.Match != CatalogMatchAll || len(cfg.Schemas.Catalogs.Sources) != 1 || cfg.Schemas.Catalogs.Sources[0].Path != filepath.Join(dir, "catalog.json") {
 		t.Fatalf("catalogs not decoded: %+v", cfg.Schemas.Catalogs)
 	}
 	if fetchRetries(cfg.Schemas.Fetch) != 4 || cfg.Schemas.Fetch.RetryMinWait.Duration != 100*time.Millisecond || cfg.Schemas.Fetch.RetryMaxWait.Duration != time.Second {
@@ -254,6 +255,15 @@ schema = "./schema.json"
 	if _, err := catalogFailureMode(SchemaConfig{Catalogs: CatalogConfig{Failure: "explode"}}); err == nil {
 		t.Fatalf("expected invalid catalog failure mode error")
 	}
+	if mode, err := catalogMatchMode(cfg.Schemas); err != nil || mode != CatalogMatchAuto {
+		t.Fatalf("catalog match default = %q, %v", mode, err)
+	}
+	if mode, err := catalogMatchMode(SchemaConfig{Catalogs: CatalogConfig{Match: CatalogMatchAll}}); err != nil || mode != CatalogMatchAll {
+		t.Fatalf("catalog match all = %q, %v", mode, err)
+	}
+	if _, err := catalogMatchMode(SchemaConfig{Catalogs: CatalogConfig{Match: "explode"}}); err == nil {
+		t.Fatalf("expected invalid catalog match mode error")
+	}
 	if mode, err := branchErrorMode(OutputConfig{}); err != nil || mode != BranchErrorsBest {
 		t.Fatalf("branch errors default = %q, %v", mode, err)
 	}
@@ -288,6 +298,7 @@ maxDepth = 4
 [schemas.catalogs]
 enabled = true
 failure = "error"
+match = "all"
 
 [[schemas.catalogs.sources]]
 name = "company"
@@ -320,6 +331,7 @@ requireCoverage = false
 
 [schemas.catalogs]
 enabled = false
+match = "auto"
 
 [[schemas.catalogs.sources]]
 name = "company"
@@ -360,7 +372,7 @@ locations = false
 	if cfg.Schemas.RequireCoverage || cfg.Schemas.MaxDepth != 4 {
 		t.Fatalf("schema merge = %+v", cfg.Schemas)
 	}
-	if cfg.Schemas.Catalogs.Enabled || cfg.Schemas.Catalogs.Failure != "error" || len(cfg.Schemas.Catalogs.Sources) != 1 {
+	if cfg.Schemas.Catalogs.Enabled || cfg.Schemas.Catalogs.Failure != "error" || cfg.Schemas.Catalogs.Match != CatalogMatchAuto || len(cfg.Schemas.Catalogs.Sources) != 1 {
 		t.Fatalf("catalog merge = %+v", cfg.Schemas.Catalogs)
 	}
 	if cfg.Schemas.Catalogs.Sources[0].Path != filepath.Join(dir, "packages", "api", "child-catalog.json") || cfg.Schemas.Catalogs.Sources[0].Enabled == nil || *cfg.Schemas.Catalogs.Sources[0].Enabled {

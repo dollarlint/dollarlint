@@ -49,6 +49,7 @@ func DefaultConfig() Config {
 		},
 		Schemas: SchemaConfig{
 			Catalogs: CatalogConfig{
+				Match:   CatalogMatchAuto,
 				Sources: []CatalogSource{defaultSchemaStoreCatalogSource()},
 			},
 			Optimizations: OptimizationConfig{
@@ -114,6 +115,9 @@ func (c *Config) ApplyDefaults() {
 	}
 	if c.Schemas.Catalogs.Failure == "" {
 		c.Schemas.Catalogs.Failure = CatalogFailureWarn
+	}
+	if c.Schemas.Catalogs.Match == "" {
+		c.Schemas.Catalogs.Match = CatalogMatchAuto
 	}
 	if len(c.Schemas.Catalogs.Sources) == 0 {
 		c.Schemas.Catalogs.Sources = []CatalogSource{defaultSchemaStoreCatalogSource()}
@@ -204,6 +208,11 @@ func validateConfigValues(cfg Config) error {
 	}
 	if cfg.Schemas.Catalogs.Failure != "" {
 		if _, err := catalogFailureMode(cfg.Schemas); err != nil {
+			return err
+		}
+	}
+	if cfg.Schemas.Catalogs.Match != "" {
+		if _, err := catalogMatchMode(cfg.Schemas); err != nil {
 			return err
 		}
 	}
@@ -420,6 +429,9 @@ func mergeSchemaConfig(parent *SchemaConfig, child SchemaConfig, presence config
 	}
 	if presence.has("schemas.catalogs.failure") {
 		parent.Catalogs.Failure = child.Catalogs.Failure
+	}
+	if presence.has("schemas.catalogs.match") {
+		parent.Catalogs.Match = child.Catalogs.Match
 	}
 	if presence.has("schemas.catalogs.sources") {
 		parent.Catalogs.Sources = mergeCatalogSources(parent.Catalogs.Sources, child.Catalogs.Sources)
@@ -668,6 +680,19 @@ func catalogFailureMode(cfg SchemaConfig) (string, error) {
 		return mode, nil
 	default:
 		return "", fmt.Errorf("unsupported catalog failure policy %q; expected warn, error, or skip", mode)
+	}
+}
+
+func catalogMatchMode(cfg SchemaConfig) (string, error) {
+	mode := cfg.Catalogs.Match
+	if mode == "" {
+		mode = CatalogMatchAuto
+	}
+	switch mode {
+	case CatalogMatchAuto, CatalogMatchAll:
+		return mode, nil
+	default:
+		return "", fmt.Errorf("unsupported catalog match mode %q; expected auto or all", mode)
 	}
 }
 

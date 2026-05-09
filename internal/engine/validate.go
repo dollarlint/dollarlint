@@ -70,6 +70,10 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 		addWarning(&result, *loadedCatalog.warning)
 	}
 	schemaStoreCatalog := loadedCatalog.catalog
+	catalogMatch, err := catalogMatchMode(cfg.Schemas)
+	if err != nil {
+		return Result{}, err
+	}
 	documents := make([]*Document, 0, len(files))
 	validatedDocuments := make([]*Document, 0, len(files))
 	fileIndexes := map[string]int{}
@@ -95,7 +99,7 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 		documents = append(documents, document)
 		applySchemaAssociation(document, cfg.Schemas.Associations, "config-association")
 		applyBuiltinSchemaAssociation(document)
-		applySchemaStoreAssociation(document, schemaStoreCatalog)
+		applySchemaStoreAssociation(document, schemaStoreCatalog, catalogMatch)
 	}
 	for _, document := range documents {
 		index := fileIndexes[document.RelativePath]

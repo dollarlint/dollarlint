@@ -190,6 +190,7 @@ timeout = "30s"
 [schemas.catalogs]
 enabled = false
 failure = "warn"
+match = "auto"
 
 [[schemas.catalogs.sources]]
 name = "schemastore"
@@ -269,7 +270,7 @@ Remote `http(s)` schema fetching is enabled by default, and successful schemas/c
 
 ### Catalog matching and coverage
 
-When `schemas.catalogs.enabled = true`, files without explicit schemas can match by filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional sources.
+When `schemas.catalogs.enabled = true`, files without explicit schemas can match by filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional sources. The default `schemas.catalogs.match = "auto"` skips low-confidence generic bare filename matches such as `tasks.json`; use `"all"` when you want every catalog filename match applied.
 
 Precedence is:
 1. in-file schema declaration
@@ -317,7 +318,7 @@ settings.json
 Summary: 4 discovered, 3 validated, 1 skipped, 2 validation issues in 47ms
 ```
 
-Use `--locations` to opt into line/column source mapping for text and JSON output:
+Use `--locations` to opt into line/column source mapping for text output. JSON and SARIF request source mapping automatically.
 
 ```text
 settings.json
@@ -327,6 +328,8 @@ settings.json
 
 Use `--verbose` to show schema URI and keyword metadata under each issue. Use `--quiet` for terse success output.
 Set `output.branchErrors = "all"` when you need every failed `oneOf`/`anyOf` branch leaf for schema debugging; the default `"best"` reports the closest matching branch.
+
+JSON output (`--format json`) includes a top-level `formatVersion`, relative `path` fields, root-relative local schemas, active findings in `issues`, ignored findings in `ignoredIssues`, always-present arrays, per-issue `category`, structured warnings, and numeric `summary.durationNanos`.
 
 Text output uses subtle terminal styling when color is available and stays plain for machine-readable formats such as `--format json` and `--format sarif`.
 
@@ -338,7 +341,7 @@ Use `--format sarif` to emit SARIF 2.1.0 for GitHub code scanning and similar to
 dollarlint validate . --format sarif --output dollarlint.sarif
 ```
 
-DollarLint builds source-location maps only for SARIF runs or when `--locations` is requested, keeping ordinary text and JSON validation on the simpler validation path. SARIF locations are best-effort:
+DollarLint builds source-location maps for JSON and SARIF runs, and for text output when `--locations` is requested. Source locations are best-effort:
 
 - JSON-family positions are derived from a token walk over the source.
 - YAML positions come from `yaml.Node` line/column metadata.

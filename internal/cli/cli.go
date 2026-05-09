@@ -130,7 +130,7 @@ func addValidateFlags(cmd *cobra.Command, opts *validateOptions) {
 	cmd.Flags().BoolVar(&opts.showSkipped, "show-skipped", false, "Show files skipped because they do not declare a schema")
 	cmd.Flags().BoolVar(&opts.verbose, "verbose", false, "Show expanded issue metadata in text output")
 	cmd.Flags().BoolVar(&opts.quiet, "quiet", false, "Use terse text output")
-	cmd.Flags().BoolVar(&opts.locations, "locations", false, "Include line and column locations in text and JSON output")
+	cmd.Flags().BoolVar(&opts.locations, "locations", false, "Include line and column locations in text output")
 	cmd.Flags().StringArrayVar(&opts.includes, "include", nil, "Glob to include during discovery; repeatable")
 	cmd.Flags().StringArrayVar(&opts.excludes, "exclude", nil, "Additional discovery exclude glob; repeatable")
 	cmd.Flags().BoolVar(&opts.noDefaultExcludes, "no-default-excludes", false, "Disable built-in discovery excludes for common generated and dependency directories")
@@ -182,7 +182,7 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 		ConfigPath:      configPath,
 		ExplicitConfig:  *opts.configPath != "",
 		ConfigOverlay:   overlay,
-		SourceLocations: format == outputFormatSARIF,
+		SourceLocations: format == outputFormatJSON || format == outputFormatSARIF,
 		StartedAt:       startedAt,
 	})
 	if err != nil {

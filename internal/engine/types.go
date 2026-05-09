@@ -8,6 +8,8 @@ const (
 	StatusError     = "error"
 )
 
+const JSONFormatVersion = 1
+
 const (
 	issueKeywordParse  = "parse"
 	issueKeywordSchema = "schema"
@@ -17,6 +19,11 @@ const (
 	CatalogFailureWarn  = "warn"
 	CatalogFailureError = "error"
 	CatalogFailureSkip  = "skip"
+)
+
+const (
+	CatalogMatchAuto = "auto"
+	CatalogMatchAll  = "all"
 )
 
 const (
@@ -90,6 +97,7 @@ type AzureOptimization struct {
 type CatalogConfig struct {
 	Enabled bool            `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
 	Failure string          `json:"failure,omitempty" yaml:"failure,omitempty" toml:"failure,omitempty"`
+	Match   string          `json:"match,omitempty" yaml:"match,omitempty" toml:"match,omitempty"`
 	Sources []CatalogSource `json:"sources,omitempty" yaml:"sources,omitempty" toml:"sources,omitempty"`
 }
 
@@ -205,9 +213,13 @@ type Issue struct {
 }
 
 type Warning struct {
-	Kind    string `json:"kind"`
-	Source  string `json:"source,omitempty"`
-	Message string `json:"message"`
+	Kind         string `json:"kind"`
+	Source       string `json:"source,omitempty"`
+	Path         string `json:"path,omitempty"`
+	Schema       string `json:"schema,omitempty"`
+	SchemaSource string `json:"schemaSource,omitempty"`
+	Message      string `json:"message"`
+	Hint         string `json:"hint,omitempty"`
 }
 
 func (r Result) HasIssues() bool {

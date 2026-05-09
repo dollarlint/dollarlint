@@ -438,14 +438,27 @@ func addIssue(result *Result, issue Issue) {
 
 func addIssueSummary(summary *IssueSummary, issue Issue) {
 	summary.Total++
-	switch issue.Keyword {
-	case issueKeywordParse:
+	switch issueCategory(issue) {
+	case "parsing":
 		summary.Parsing++
-	case issueKeywordSchema:
+	case "schema":
 		summary.Schema++
-	case "schemaCoverage":
+	case "coverage":
 		summary.Coverage++
 	default:
 		summary.Validation++
+	}
+}
+
+func issueCategory(issue Issue) string {
+	switch issue.Keyword {
+	case issueKeywordParse:
+		return "parsing"
+	case issueKeywordSchema:
+		return "schema"
+	case "schemaCoverage":
+		return "coverage"
+	default:
+		return "validation"
 	}
 }

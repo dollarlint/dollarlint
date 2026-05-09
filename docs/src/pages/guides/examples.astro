@@ -55,11 +55,12 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     </p>
 
     <h2>Machine-readable output</h2>
-    <pre><code>dollarlint validate ./examples/basics --format json --locations
+    <pre><code>dollarlint validate ./examples/basics --format json
 dollarlint validate ./examples/basics --format sarif --output dollarlint.sarif</code></pre>
     <p>
-      Use JSON when a script needs run summaries and issue metadata. Use SARIF
-      when CI should upload code scanning results.
+      Use JSON when a script needs run summaries, relative paths, issue
+      categories, ignored issue details, and line/column metadata. Use SARIF when
+      CI should upload code scanning results.
     </p>
   </article>
 </DocsLayout>

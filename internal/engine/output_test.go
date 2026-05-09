@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 	"time"
@@ -76,6 +77,137 @@ func TestFormatTextIssueBreakdownAndHints(t *testing.T) {
 	assertContains(t, text, "dollarlint found 2 issues (1 parsing, 1 validation) in 2 files after 123ms")
 	assertContains(t, text, "hint: Use .jsonl for line-delimited data.")
 	assertContains(t, text, "Summary: 0 discovered, 0 validated, 0 skipped, 2 issues (1 parsing, 1 validation) in 123ms")
+}
+
+func TestFormatJSONContract(t *testing.T) {
+	result := Result{
+		Root: "/tmp/repo",
+		Summary: Summary{
+			Discovered:    1,
+			Validated:     1,
+			Issues:        IssueSummary{Total: 1, Validation: 1},
+			Ignored:       1,
+			Warnings:      1,
+			Duration:      NewDuration(123 * time.Millisecond),
+			DurationNanos: int64(123 * time.Millisecond),
+		},
+		Files: []FileResult{{
+			Path:         "/tmp/repo/config.json",
+			RelativePath: "config.json",
+			Format:       DocumentFormatJSON,
+			Schema:       "file:///tmp/repo/schema.json",
+			SchemaSource: "$schema",
+			Status:       StatusError,
+			Issues:       1,
+			Ignored:      1,
+		}},
+		Issues: []Issue{
+			{
+				File:             "/tmp/repo/config.json",
+				RelativePath:     "config.json",
+				Schema:           "file:///tmp/repo/schema.json",
+				Keyword:          "type",
+				InstanceLocation: "/name",
+				Line:             2,
+				Column:           11,
+				Message:          "expected string, received number",
+			},
+			{
+				File:             "/tmp/repo/config.json",
+				RelativePath:     "config.json",
+				Schema:           "file:///tmp/repo/schema.json",
+				Keyword:          "additionalProperties",
+				Property:         "extra",
+				InstanceLocation: "/extra",
+				Message:          "must not have additional property \"extra\"",
+				Ignored:          true,
+				IgnoreReason:     "known extra",
+			},
+		},
+		Warnings: []Warning{{
+			Kind:         "schemaCatalogSchemaUnavailable",
+			Source:       "catalog:schemastore:devcontainer.json",
+			Path:         "config.json",
+			Schema:       "https://example.com/schema.json",
+			SchemaSource: "catalog:schemastore:devcontainer.json",
+			Message:      "catalog schema load failed",
+			Hint:         "Try again later.",
+		}},
+	}
+
+	data, err := FormatJSON(result)
+	if err != nil {
+		t.Fatalf("FormatJSON: %v", err)
+	}
+	text := string(data)
+	for _, removed := range []string{`"duration":`, `"relativePath":`, `"file":`, `"file:///tmp/repo"`, `"ignored": true`} {
+		if strings.Contains(text, removed) {
+			t.Fatalf("json output contains removed field %q:\n%s", removed, text)
+		}
+	}
+	var decoded struct {
+		FormatVersion int `json:"formatVersion"`
+		Summary       struct {
+			DurationNanos int64        `json:"durationNanos"`
+			Issues        IssueSummary `json:"issues"`
+		} `json:"summary"`
+		Files []struct {
+			Path         string `json:"path"`
+			Schema       string `json:"schema"`
+			SchemaSource string `json:"schemaSource"`
+			Issues       int    `json:"issues"`
+			Ignored      int    `json:"ignored"`
+		} `json:"files"`
+		Issues []struct {
+			Path         string `json:"path"`
+			Schema       string `json:"schema"`
+			Category     string `json:"category"`
+			SchemaSource string `json:"schemaSource"`
+			Line         int    `json:"line"`
+			Column       int    `json:"column"`
+		} `json:"issues"`
+		IgnoredIssues []struct {
+			Path         string `json:"path"`
+			Category     string `json:"category"`
+			IgnoreReason string `json:"ignoreReason"`
+		} `json:"ignoredIssues"`
+		Warnings []struct {
+			Kind         string `json:"kind"`
+			Path         string `json:"path"`
+			Schema       string `json:"schema"`
+			SchemaSource string `json:"schemaSource"`
+			Hint         string `json:"hint"`
+		} `json:"warnings"`
+	}
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("json output invalid: %v\n%s", err, text)
+	}
+	if decoded.FormatVersion != JSONFormatVersion || decoded.Summary.DurationNanos != int64(123*time.Millisecond) || decoded.Summary.Issues.Total != 1 {
+		t.Fatalf("json summary = %+v version=%d", decoded.Summary, decoded.FormatVersion)
+	}
+	if len(decoded.Files) != 1 || decoded.Files[0].Path != "config.json" || decoded.Files[0].Schema != "schema.json" || decoded.Files[0].SchemaSource != "$schema" || decoded.Files[0].Issues != 1 || decoded.Files[0].Ignored != 1 {
+		t.Fatalf("json files = %+v", decoded.Files)
+	}
+	if len(decoded.Issues) != 1 || decoded.Issues[0].Path != "config.json" || decoded.Issues[0].Schema != "schema.json" || decoded.Issues[0].Category != "validation" || decoded.Issues[0].SchemaSource != "$schema" || decoded.Issues[0].Line != 2 || decoded.Issues[0].Column != 11 {
+		t.Fatalf("json issues = %+v", decoded.Issues)
+	}
+	if len(decoded.IgnoredIssues) != 1 || decoded.IgnoredIssues[0].Category != "validation" || decoded.IgnoredIssues[0].IgnoreReason != "known extra" {
+		t.Fatalf("json ignored issues = %+v", decoded.IgnoredIssues)
+	}
+	if len(decoded.Warnings) != 1 || decoded.Warnings[0].Path != "config.json" || decoded.Warnings[0].Schema == "" || decoded.Warnings[0].SchemaSource == "" || decoded.Warnings[0].Hint == "" {
+		t.Fatalf("json warnings = %+v", decoded.Warnings)
+	}
+
+	data, err = FormatJSON(Result{})
+	if err != nil {
+		t.Fatalf("FormatJSON empty: %v", err)
+	}
+	text = string(data)
+	for _, expected := range []string{`"files": []`, `"issues": []`, `"ignoredIssues": []`, `"warnings": []`} {
+		if !strings.Contains(text, expected) {
+			t.Fatalf("empty json missing %q:\n%s", expected, text)
+		}
+	}
 }
 
 func TestTextHelpers(t *testing.T) {

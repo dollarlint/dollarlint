@@ -5,6 +5,7 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
 const catalogConfig = `[schemas.catalogs]
 enabled = true
 failure = "warn"
+match = "auto"
 
 [[schemas.catalogs.sources]]
 name = "company"
@@ -43,6 +44,12 @@ enabled = true`;
       > when you want catalog matching off. Explicit in-file schemas, config associations,
       and DollarLint's built-in <code>.dollarlint.toml</code>
       association still take precedence.
+    </p>
+    <p>
+      The default <code>schemas.catalogs.match = "auto"</code> skips low-confidence
+      generic bare filename matches such as <code>tasks.json</code>. Use <code
+        >"all"</code
+      > when you intentionally want every catalog filename match applied.
     </p>
 
     <h2>Use a custom catalog</h2>

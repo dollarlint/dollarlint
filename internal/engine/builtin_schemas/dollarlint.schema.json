@@ -157,6 +157,10 @@
           "type": "string",
           "enum": ["warn", "error", "skip"]
         },
+        "match": {
+          "type": "string",
+          "enum": ["auto", "all"]
+        },
         "sources": {
           "type": "array",
           "items": {

@@ -96,9 +96,12 @@ func validationForSchemaFailure(document *Document, cfg Config, phase string, er
 	default:
 		return documentValidation{
 			warnings: []Warning{{
-				Kind:    "schemaCatalogSchemaUnavailable",
-				Source:  document.SchemaSource,
-				Message: catalogMessage + "; skipped catalog-inferred validation",
+				Kind:         "schemaCatalogSchemaUnavailable",
+				Source:       document.SchemaSource,
+				Path:         document.RelativePath,
+				Schema:       document.Schema,
+				SchemaSource: document.SchemaSource,
+				Message:      catalogMessage + "; skipped catalog-inferred validation",
 			}},
 			skipped: true,
 			message: fmt.Sprintf("catalog schema %s failed; skipped catalog-inferred validation", phase),

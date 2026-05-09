@@ -56,10 +56,18 @@ func TestServeMCPValidateTool(t *testing.T) {
 		t.Fatalf("structured content = %+v", structured)
 	}
 	result := structured["result"].(map[string]any)
+	if result["formatVersion"] != float64(1) {
+		t.Fatalf("result format version = %+v", result)
+	}
 	summary := result["summary"].(map[string]any)
 	issues := summary["issues"].(map[string]any)
 	if issues["total"] != float64(1) {
 		t.Fatalf("summary = %+v", summary)
+	}
+	resultIssues := result["issues"].([]any)
+	firstIssue := resultIssues[0].(map[string]any)
+	if firstIssue["path"] != "bad.json" || firstIssue["category"] != "validation" || firstIssue["line"] == nil {
+		t.Fatalf("result issues = %+v", resultIssues)
 	}
 	content := callResult["content"].([]any)
 	text := content[0].(map[string]any)["text"].(string)

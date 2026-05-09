@@ -45,6 +45,7 @@ timeout = "30s"
 [schemas.catalogs]
 enabled = true
 failure = "warn"
+match = "auto"
 
 [[schemas.catalogs.sources]]
 name = "schemastore"
@@ -426,6 +427,13 @@ extends = "../../.dollarlint.toml"</code></pre>
           ></tr
         >
         <tr
+          ><td><code>schemas.catalogs.match</code></td><td
+            >Choose <code>auto</code> to skip low-confidence generic bare filenames
+            like <code>tasks.json</code>, or <code>all</code> to apply every catalog
+            filename match.</td
+          ></tr
+        >
+        <tr
           ><td><code>schemas.catalogs.sources</code></td><td
             >List SchemaStore-format catalog sources.</td
           ></tr
@@ -500,7 +508,8 @@ extends = "../../.dollarlint.toml"</code></pre>
         >
         <tr
           ><td><code>output.locations</code></td><td
-            >Include line and column positions in text and JSON output.</td
+            >Include line and column positions in text output. JSON and SARIF
+            request source locations automatically.</td
           ></tr
         >
         <tr

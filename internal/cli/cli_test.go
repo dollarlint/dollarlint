@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/dollarlint/dollarlint"
 )
 
 func TestExecuteExitCodes(t *testing.T) {
@@ -31,6 +33,22 @@ func TestExecuteExitCodes(t *testing.T) {
 	}
 	if !strings.Contains(stdout.String(), `"total": 1`) {
 		t.Fatalf("validate command json output missing issue count: %s", stdout.String())
+	}
+	var jsonRun struct {
+		FormatVersion int `json:"formatVersion"`
+		Issues        []struct {
+			Path     string `json:"path"`
+			Category string `json:"category"`
+			Line     int    `json:"line"`
+		} `json:"issues"`
+		IgnoredIssues []any `json:"ignoredIssues"`
+		Warnings      []any `json:"warnings"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &jsonRun); err != nil {
+		t.Fatalf("decode validate json output: %v\n%s", err, stdout.String())
+	}
+	if jsonRun.FormatVersion != dollarlint.JSONFormatVersion || len(jsonRun.Issues) != 1 || jsonRun.Issues[0].Path != "bad.json" || jsonRun.Issues[0].Category != "validation" || jsonRun.Issues[0].Line == 0 {
+		t.Fatalf("validate json contract = %+v", jsonRun)
 	}
 	stdout.Reset()
 	stderr.Reset()
@@ -290,7 +308,7 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 		t.Fatalf("read generated config: %v", err)
 	}
 	text := string(data)
-	if !strings.Contains(text, "[schemas.catalogs]") || !strings.Contains(text, "[[schemas.catalogs.sources]]") || !strings.Contains(text, "enabled = true") || !strings.Contains(text, `failure = "warn"`) || !strings.Contains(text, `retryMinWait = "250ms"`) {
+	if !strings.Contains(text, "[schemas.catalogs]") || !strings.Contains(text, "[[schemas.catalogs.sources]]") || !strings.Contains(text, "enabled = true") || !strings.Contains(text, `failure = "warn"`) || !strings.Contains(text, `match = "auto"`) || !strings.Contains(text, `retryMinWait = "250ms"`) {
 		t.Fatalf("generated toml = %s", text)
 	}
 	stdout.Reset()
@@ -394,6 +412,7 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 		"[schemas.compile]",
 		`timeout = "30s"`,
 		`failure = "warn"`,
+		`match = "auto"`,
 		`branchErrors = "best"`,
 	} {
 		if !strings.Contains(config, expected) {

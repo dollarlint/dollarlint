@@ -12,10 +12,17 @@ const (
 	StatusError     = engine.StatusError
 )
 
+const JSONFormatVersion = engine.JSONFormatVersion
+
 const (
 	CatalogFailureWarn  = engine.CatalogFailureWarn
 	CatalogFailureError = engine.CatalogFailureError
 	CatalogFailureSkip  = engine.CatalogFailureSkip
+)
+
+const (
+	CatalogMatchAuto = engine.CatalogMatchAuto
+	CatalogMatchAll  = engine.CatalogMatchAll
 )
 
 const (

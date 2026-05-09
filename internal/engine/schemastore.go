@@ -166,11 +166,11 @@ func resolveCatalogURI(raw string) (string, error) {
 	return file.String(), nil
 }
 
-func applySchemaStoreAssociation(document *Document, catalog *schemaStoreCatalog) {
+func applySchemaStoreAssociation(document *Document, catalog *schemaStoreCatalog, matchMode string) {
 	if document.Schema != "" || catalog == nil {
 		return
 	}
-	entry, ok := catalog.match(document.RelativePath)
+	entry, ok := catalog.match(document.RelativePath, matchMode)
 	if !ok {
 		return
 	}
@@ -204,16 +204,20 @@ func (catalog *schemaStoreCatalog) buildIndex() {
 	}
 }
 
-func (catalog *schemaStoreCatalog) match(rel string) (schemaStoreEntry, bool) {
+func (catalog *schemaStoreCatalog) match(rel, matchMode string) (schemaStoreEntry, bool) {
 	if catalog == nil {
 		return schemaStoreEntry{}, false
+	}
+	if matchMode == "" {
+		matchMode = CatalogMatchAuto
 	}
 	catalog.buildIndex()
 	rel = cleanGlob(rel)
 	if entry, ok := catalog.exactPaths[rel]; ok {
 		return entry, true
 	}
-	if entry, ok := catalog.exactBasenames[path.Base(rel)]; ok {
+	base := path.Base(rel)
+	if entry, ok := catalog.exactBasenames[base]; ok && (matchMode == CatalogMatchAll || !lowConfidenceSchemaStoreBasename(base)) {
 		return entry, true
 	}
 	for _, candidate := range catalog.globs {
@@ -229,6 +233,23 @@ func addSchemaStoreExact(entries map[string]schemaStoreEntry, key string, entry 
 		return
 	}
 	entries[key] = entry
+}
+
+func lowConfidenceSchemaStoreBasename(base string) bool {
+	switch strings.ToLower(base) {
+	case "config.json",
+		"configuration.json",
+		"extensions.json",
+		"launch.json",
+		"manifest.json",
+		"schema.json",
+		"settings.json",
+		"task.json",
+		"tasks.json":
+		return true
+	default:
+		return false
+	}
 }
 
 func hasGlobMeta(pattern string) bool {

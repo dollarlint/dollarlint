@@ -335,6 +335,7 @@ timeout = "30s"
 [schemas.catalogs]
 enabled = {{ .SchemaStoreEnabled }}
 failure = "{{ .CatalogFailure }}"
+match = "auto"
 
 [[schemas.catalogs.sources]]
 name = "schemastore"

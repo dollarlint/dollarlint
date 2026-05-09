@@ -49,9 +49,10 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <h2>3. Pinpoint issues with locations</h2>
     <pre><code>dollarlint validate ./config --locations</code></pre>
     <p>
-      Line and column positions are available for text and JSON output. SARIF
-      always requests source mapping so code scanning tools can point at the
-      closest source location.
+      Line and column positions are available for text output with <code
+        >--locations</code
+      >. JSON and SARIF request source mapping automatically so scripts and code
+      scanning tools can point at the closest source location.
     </p>
 
     <h2>4. Cash out machine-readable output</h2>

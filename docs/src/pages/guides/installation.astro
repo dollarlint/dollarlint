@@ -8,9 +8,9 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
       <span class="eyebrow">Guide</span>
       <h1>Installation</h1>
       <p class="lead">
-        Install the DollarLint CLI from npm, Go, or a release archive, then
-        point it at any project with JSON, YAML, or TOML config files. It's a
-        small investment that pays dividends.
+        Install the DollarLint CLI from Homebrew, npm, Go, or a release archive,
+        then point it at any project with JSON-family, YAML, or TOML config
+        files. It's a small investment that pays dividends.
       </p>
     </header>
 
@@ -26,7 +26,9 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <p>
       The npm package uses a <code>postinstall</code> script to fetch the matching
       release binary for your platform. npm lifecycle scripts need to be allowed;
-      installs run with <code>--ignore-scripts</code> or <code>ignore-scripts=true</code>
+      installs run with <code>--ignore-scripts</code> or <code
+        >ignore-scripts=true</code
+      >
       will not install the <code>dollarlint</code> binary.
     </p>
     <p>

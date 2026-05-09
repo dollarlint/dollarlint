@@ -63,6 +63,11 @@ const mcpConfig = `{
         </tr>
       </tbody>
     </table>
+    <p>
+      DollarLint does not treat a bare path as a validation shortcut. Use <code
+        >dollarlint validate [path]</code
+      > for every validation run.
+    </p>
 
     <h2>Global flags</h2>
     <table>
@@ -168,7 +173,9 @@ const mcpConfig = `{
         >
         <tr
           ><td><code>--schema-store</code></td><td
-            >Match conventional filenames using the SchemaStore catalog.</td
+            >Enable catalog matching for conventional filenames using the
+            SchemaStore catalog. Pass <code>--schema-store=false</code> to disable
+            catalog matching for one run.</td
           ></tr
         >
         <tr
@@ -190,9 +197,8 @@ const mcpConfig = `{
         >
         <tr
           ><td><code>--fetch-remote</code></td><td
-            >Allow fetching HTTP schemas. Defaults to enabled; pass <code
-              >--fetch-remote=false</code
-            > to disable.</td
+            >Allow fetching HTTP(S) schemas and catalogs. Defaults to enabled;
+            pass <code>--fetch-remote=false</code> to disable.</td
           ></tr
         >
         <tr
@@ -204,6 +210,20 @@ const mcpConfig = `{
           ><td><code>--fetch-retries</code></td><td
             >Set retries for transient remote schema fetch failures. Defaults to <code
               >2</code
+            >.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--fetch-retry-min-wait</code></td><td
+            >Set the minimum wait between remote schema fetch retries, such as <code
+              >250ms</code
+            >.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--fetch-retry-max-wait</code></td><td
+            >Set the maximum wait between remote schema fetch retries, such as <code
+              >2s</code
             >.</td
           ></tr
         >
@@ -248,7 +268,9 @@ const mcpConfig = `{
       <tbody>
         <tr
           ><td><code>--output</code>, <code>-o</code></td><td
-            >Path to the <code>.dollarlint.toml</code> file to create.</td
+            >Path to the <code>.dollarlint.toml</code> file to create. Relative paths
+            are resolved under the target directory, and the file must be named exactly
+            <code>.dollarlint.toml</code>.</td
           ></tr
         >
         <tr
@@ -263,9 +285,8 @@ const mcpConfig = `{
         >
         <tr
           ><td><code>--fetch-remote</code></td><td
-            >Allow fetching HTTP schemas in the generated config. Pass <code
-              >--fetch-remote=false</code
-            > to disable.</td
+            >Allow fetching HTTP(S) schemas and catalogs in the generated
+            config. Pass <code>--fetch-remote=false</code> to disable.</td
           ></tr
         >
         <tr
@@ -278,7 +299,8 @@ const mcpConfig = `{
         <tr
           ><td><code>--schema-store</code></td><td
             >Enable the built-in SchemaStore catalog in the generated config.
-            Defaults to enabled.</td
+            Defaults to enabled; pass <code>--schema-store=false</code> to write catalog
+            matching disabled.</td
           ></tr
         >
         <tr

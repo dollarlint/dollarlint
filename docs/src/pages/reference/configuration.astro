@@ -2,7 +2,8 @@
 import CodeBlock from "../../components/CodeBlock.astro";
 import DocsLayout from "../../layouts/DocsLayout.astro";
 
-const starterConfig = `version = 1
+const starterConfig = `# dollarlint configuration
+version = 1
 
 [discovery]
 extendExclude = []
@@ -48,9 +49,9 @@ format = "schemastore"
 url = "https://www.schemastore.org/api/json/catalog.json"
 enabled = true
 
-[[schemas.associations]]
-file = "settings/*.toml"
-schema = "./schemas/settings.schema.json"
+# [[schemas.associations]]
+# file = "settings/*.toml"
+# schema = "./schemas/settings.schema.json"
 
 [output]
 showSkipped = false
@@ -59,11 +60,11 @@ quiet = false
 locations = false
 branchErrors = "best"
 
-[[ignore]]
-file = "fixtures/*.json"
-keyword = "required"
-property = "legacyName"
-reason = "legacy fixture kept for compatibility"`;
+# [[ignore]]
+# file = "fixtures/*.json"
+# keyword = "required"
+# property = "legacyName"
+# reason = "legacy fixture kept for compatibility"`;
 
 const associationConfig = `[[schemas.associations]]
 file = "settings/*.toml"
@@ -170,9 +171,13 @@ reason = "legacy fixture kept for compatibility"`;
       JSON parsing defaults to <code>auto</code>: ordinary <code>.json</code>
       files stay strict, while known JSONC-by-convention files such as <code
         >tsconfig*.json</code
-      >, <code>jsconfig*.json</code>, <code>.vscode/settings.json</code>, and
-      <code>devcontainer.json</code> allow comments and trailing commas. Files ending
-      in <code>.jsonc</code> always use JSONC parsing.
+      >, <code>jsconfig*.json</code>, <code>deno.json</code>, <code
+        >devcontainer.json</code
+      >, <code>.devcontainer/devcontainer.json</code>, and common <code
+        >.vscode</code
+      > JSON files allow comments and trailing commas. Files ending in <code
+        >.jsonc</code
+      > always use JSONC parsing.
     </p>
     <table>
       <thead>
@@ -344,6 +349,13 @@ reason = "legacy fixture kept for compatibility"`;
       catalog failure policy only applies to catalog loading and catalog-inferred
       schemas.
     </p>
+    <p>
+      The default config includes the SchemaStore source but keeps catalog
+      matching disabled until you enable <code>schemas.catalogs.enabled</code> or
+      pass <code>--schema-store</code>. The generated config from <code
+        >dollarlint init</code
+      > enables SchemaStore by default.
+    </p>
     <table>
       <thead>
         <tr>
@@ -432,7 +444,9 @@ reason = "legacy fixture kept for compatibility"`;
           ></tr
         >
         <tr
-          ><td><code>output.quiet</code></td><td>Use terse success output.</td
+          ><td><code>output.quiet</code></td><td
+            >Use terse success output and omit warnings, skipped-file listings,
+            and summary details from failing text output.</td
           ></tr
         >
         <tr

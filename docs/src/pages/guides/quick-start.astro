@@ -16,18 +16,22 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
     <h2>1. Create a config</h2>
     <pre><code>dollarlint init</code></pre>
     <p>
-      The interactive setup writes a starter <code>.dollarlint.toml</code>. It
-      asks before overwriting an existing config, and <code>--defaults</code> skips
-      prompts for automation.
+      In a terminal, the interactive setup writes a starter <code
+        >.dollarlint.toml</code
+      >. It asks before overwriting an existing config, and <code
+        >--defaults</code
+      >
+      skips prompts for automation. In non-interactive runs, DollarLint uses the same
+      defaults and prints a notice unless <code>--defaults</code> is set.
     </p>
 
     <h2>2. Validate a directory</h2>
     <pre><code>dollarlint validate .</code></pre>
     <p>
       DollarLint discovers JSON, JSONC, JSON5, JSON Lines, YAML, and TOML files,
-      skips common dependency and cache directories, respects the root <code
+      skips common dependency and cache directories, respects <code
         >.gitignore</code
-      >, loads declared schemas, and groups results by file.
+      > files as it descends, loads declared schemas, and groups results by file.
     </p>
 
     <div class="note">

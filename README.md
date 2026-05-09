@@ -6,14 +6,22 @@
 
 ## Install
 
+With Homebrew:
+
 ```sh
-go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest
+brew install dollarlint/tap/dollarlint
 ```
 
-After the first npm-backed release is published, you can also install with npm:
+With npm:
 
 ```sh
 npm install -g dollarlint
+```
+
+With Go:
+
+```sh
+go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest
 ```
 
 To build from a local checkout:

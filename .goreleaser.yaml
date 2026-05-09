@@ -107,6 +107,24 @@ npms:
     bugs: https://github.com/dollarlint/dollarlint/issues
     access: public
 
+brews:
+  - name: dollarlint
+    ids:
+      - dollarlint
+    repository:
+      owner: dollarlint
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: https://github.com/dollarlint/dollarlint
+    description: Validate JSON-family, YAML, and TOML files against their declared JSON Schemas.
+    license: MIT
+    install: |
+      bin.install "dollarlint"
+    test: |
+      system "#{bin}/dollarlint", "--version"
+
 release:
   github:
     owner: dollarlint

@@ -35,7 +35,7 @@ Use `dollarlint validate <path>` for validation runs. Bare paths are not accepte
 Homebrew:
 
 ```sh
-brew install dollarlint/tap/dollarlint
+brew install --cask dollarlint/tap/dollarlint
 ```
 
 Go:

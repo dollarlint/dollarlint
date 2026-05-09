@@ -9,7 +9,7 @@ DollarLint validates JSON (including JSONC, JSON5, JSON Lines), YAML, and TOML f
 With Homebrew:
 
 ```sh
-brew install dollarlint/tap/dollarlint
+brew install --cask dollarlint/tap/dollarlint
 ```
 
 With npm:

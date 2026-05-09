@@ -2,6 +2,8 @@
 
 version: 2
 
+pro: true
+
 project_name: dollarlint
 
 metadata:
@@ -111,23 +113,27 @@ npms:
       - glob: LICENSE
     access: public
 
-brews:
+homebrew_casks:
   - name: dollarlint
     ids:
+      - dollarlint
+    binaries:
       - dollarlint
     repository:
       owner: dollarlint
       name: homebrew-tap
       branch: main
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    directory: Formula
-    homepage: https://github.com/dollarlint/dollarlint
-    description: Validate JSON-family, YAML, and TOML files against their declared JSON Schemas.
-    license: MIT
-    install: |
-      bin.install "dollarlint"
-    test: |
-      system "#{bin}/dollarlint", "--version"
+    directory: Casks
+    url:
+      verified: github.com/dollarlint/dollarlint/
+    homepage: https://dollarlint.dev/
+    description: Validate JSON-family, YAML, and TOML files against their declared JSON Schemas
+    commit_msg_template: "Brew cask update for {{ .ProjectName }} version {{ .Tag }}"
+    hooks:
+      post:
+        install: |
+          system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/dollarlint"] if OS.mac?
 
 winget:
   - name: DollarLint

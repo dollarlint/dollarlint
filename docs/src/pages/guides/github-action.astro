@@ -65,25 +65,25 @@ const argsWorkflow = `- uses: dollarlint/dollarlint@vX.Y.Z
     <h2>Basic workflow</h2>
     <CodeBlock code={basicWorkflow} language="yaml" />
     <p>
-      Pin <code>dollarlint/dollarlint</code> to a specific release tag. When the
-      action ref is a <code>vX.Y.Z</code> tag, the action downloads that version,
-      verifies it against <code>checksums.txt</code>, and runs
+      Pin <code>dollarlint/dollarlint</code> to a specific release tag. When the action
+      ref is a <code>vX.Y.Z</code> tag, the action downloads that version, verifies
+      it against <code>checksums.txt</code>, and runs
       <code>dollarlint validate</code>.
     </p>
 
     <h2>Upload SARIF</h2>
     <CodeBlock code={sarifWorkflow} language="yaml" />
     <p>
-      Set <code>upload-sarif: true</code> to generate SARIF output and upload it
-      to GitHub code scanning. Results are uploaded before the job fails, so any
-      findings still appear in the security tab.
+      Set <code>upload-sarif: true</code> to generate SARIF output and upload it to
+      GitHub code scanning. Results are uploaded before the job fails, so any findings
+      still appear in the security tab.
     </p>
 
     <h2>Pass validate flags</h2>
     <CodeBlock code={argsWorkflow} language="yaml" />
     <p>
-      Additional <code>dollarlint validate</code> flags go in <code>args</code
-      >, one per line. This avoids shell parsing issues with globs and schema
+      Additional <code>dollarlint validate</code> flags go in <code>args</code>,
+      one per line. This avoids shell parsing issues with globs and schema
       associations.
     </p>
 

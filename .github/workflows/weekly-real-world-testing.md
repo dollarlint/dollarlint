@@ -72,11 +72,12 @@ mcp-servers:
     entrypoint: /bin/sh
     entrypointArgs:
       - -lc
-      - cd $GITHUB_WORKSPACE && go run ./tools/repo-mcp
+      - export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; cd $GITHUB_WORKSPACE && go run ./tools/repo-mcp
     mounts:
       - "${GITHUB_WORKSPACE}:${GITHUB_WORKSPACE}:rw"
     env:
       GITHUB_WORKSPACE: "${GITHUB_WORKSPACE}"
+      PATH: /usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       GOCACHE: /tmp/go-cache
       GOMODCACHE: /tmp/go-mod-cache
     allowed:

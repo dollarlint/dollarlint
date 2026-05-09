@@ -37,8 +37,12 @@ enabled = true`;
     <p>
       Catalog matching is optional at runtime unless it is enabled in <code
         >.dollarlint.toml</code
-      >. Explicit in-file schemas, config associations, and DollarLint's
-      built-in <code>.dollarlint.toml</code> association still take precedence.
+      >. The starter config from <code>dollarlint init</code> enables SchemaStore
+      by default; pass <code>--schema-store=false</code> or set <code
+        >schemas.catalogs.enabled = false</code
+      > when you want catalog matching off. Explicit in-file schemas, config associations,
+      and DollarLint's built-in <code>.dollarlint.toml</code>
+      association still take precedence.
     </p>
 
     <h2>Use a custom catalog</h2>

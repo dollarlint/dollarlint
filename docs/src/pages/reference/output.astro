@@ -34,6 +34,13 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues in 180ms</code></pre>
       location instead of a line and column.
     </p>
 
+    <h2>Quiet text</h2>
+    <p>
+      <code>--quiet</code> keeps successful text output to a single pass line. On
+      failing runs, it still prints the headline and issue rows, but omits warnings,
+      skipped files, and the summary block.
+    </p>
+
     <h2>JSON</h2>
     <pre><code>dollarlint validate . --format json</code></pre>
     <p>

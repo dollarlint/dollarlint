@@ -39,9 +39,6 @@ network:
     - php
     - dart
     - terraform
-    - linux-distros
-    - "openapi.vercel.sh"
-    - "changie.dev"
 
 tools:
   startup-timeout: 300
@@ -99,7 +96,11 @@ pre-agent-steps:
       bin/dollarlint --version
 
 safe-outputs:
-  mentions: false
+  mentions:
+    allow-team-members: false
+    allow-context: false
+    allowed: [agorischek]
+    max: 2
   allowed-github-references: []
   create-discussion:
     title-prefix: "Agentic Product Testing: "
@@ -113,6 +114,8 @@ safe-outputs:
     max: 1
     labels: [agentic-workflows]
     if-no-changes: error
+    allowed-files:
+      - reports/agentic-product-testing/**
     protected-files: fallback-to-issue
     draft: false
   jobs:
@@ -276,11 +279,13 @@ Manual dispatch inputs for this run:
 
 Before calling `real_world_start_testing`, derive the repository plan from those literal inputs. Treat a missing or empty `max_repos` as `10`. If `candidate_repos` is a non-empty JSON array, parse it and pass at most `max_repos` entries exactly to `real_world_start_testing.repositories`; do not substitute different repositories unless MCP history reports duplicates and `allowPreviouslyTested` is false. If `candidate_repos` is empty, choose up to `max_repos` diverse, well-known public repositories with conventional config files, skipping repositories already in MCP history unless the manual input explicitly asks for reruns.
 
-The workflow pre-builds `bin/dollarlint`; when the MCP flow asks for validation arguments, use `build: false` so validation uses the prebuilt CLI. Keep long-running prep or validation MCP calls open for progress notifications, and do not poll with shell sleep loops. Never run dependency lifecycle scripts, postinstall hooks, package-manager plugins, or repository install scripts.
+The workflow pre-builds `bin/dollarlint`; when the MCP flow asks for validation arguments, use `build: false` so validation uses the prebuilt CLI. Keep long-running prep or validation MCP calls open for progress notifications, and do not poll with shell sleep loops.
+
+Dependency prep is controlled structurally, not by judgment alone: this workflow does not expose package-manager commands through `tools.bash`, the agent job has read-only GitHub permissions, and `create_pull_request` is restricted to `reports/agentic-product-testing/**`. Use only the `real_world_*` MCP tools for cloning, inspection, validation, and result recording. Treat MCP `suggestedCommands` as audit guidance for dependency-prep notes; do not execute package-manager install/fetch commands from the agent shell. If schema fidelity would require dependency materialization that the MCP server cannot perform safely, record dependency prep as skipped or needs-review with the reason.
 
 Durable repository memory must be written through `real_world_record_result` and the structured JSON run directory it manages under `reports/agentic-product-testing/<run-id>/`. Do not create Markdown report files or a shared summary index. Product recommendations are mandatory: include a `high`, `med`, or `low` strength with rationale, or record an explicit no-change recommendation when DollarLint behaved reasonably. If `real_world_record_result` changes repository files, `create_pull_request` is mandatory because merging that PR is how the repo remembers tested repositories. The PR body must say that it should be merged in order to retain the results in Agentic Product Testing memory.
 
-After recording, create exactly one GitHub Discussion through the configured safe output in the `Agentic Product Testing` category. Keep it concise: result counts, tested repositories, notable findings, product recommendations with strength labels, persisted artifact path, DollarLint commit, and workflow run URL. Put verbose examples or raw warnings inside `<details>` blocks. The Discussion body must include a "Durable memory PR" section saying that a companion PR will be opened and that the PR should be merged in order to retain the results for future sweeps. If the Discussion falls back to an issue, say that the intended destination was a Discussion.
+After recording, create exactly one GitHub Discussion through the configured safe output in the `Agentic Product Testing` category. Keep it concise: result counts, tested repositories, notable findings, product recommendations with strength labels, persisted artifact path, DollarLint commit, and workflow run URL. Include `@agorischek` near the top of the Discussion body so the owner is notified. Put verbose examples or raw warnings inside `<details>` blocks. The Discussion body must include a "Durable memory PR" section saying that a companion PR will be opened and that the PR should be merged in order to retain the results for future sweeps. If the Discussion falls back to an issue, say that the intended destination was a Discussion.
 
 The workflow may expose safe outputs either as direct tools or through a `safeoutputs` CLI wrapper. Use the available safe-output interface, but do not stop after committing locally. If using the CLI wrapper, send inline JSON on stdin with `printf '%s' '<json>' | safeoutputs create_pull_request .` and `printf '%s' '<json>' | safeoutputs create_discussion .`; do not rely on temporary payload files.
 

@@ -468,7 +468,87 @@ func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
 			Recommendation: `Set create-discussion.category to "agentic-product-testing" and regenerate the lock file.`,
 		})
 	}
+	if !strings.Contains(source, "@agorischek") || !strings.Contains(source, "allowed: [agorischek]") || !strings.Contains(lock, `"allowed":["agorischek"]`) {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "Agentic Product Testing workflow does not require and allow the owner Discussion mention",
+			Recommendation: "Ask the agent to include @agorischek in the Discussion body, allow that mention in safe-outputs.mentions, and regenerate the lock file.",
+		})
+	}
+	if !strings.Contains(source, "allowed-files:") || !strings.Contains(source, "reports/agentic-product-testing/**") || !strings.Contains(lock, `"allowed_files":["reports/agentic-product-testing/**"]`) {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "Agentic Product Testing workflow does not restrict durable-memory PRs to the managed report directory",
+			Recommendation: `Set create-pull-request.allowed-files to ["reports/agentic-product-testing/**"] and regenerate the lock file.`,
+		})
+	}
+	if exposesPackageManagerShell(source, lock) {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "Agentic Product Testing workflow exposes package-manager shell commands",
+			Recommendation: "Remove package-manager commands from tools.bash; dependency prep should stay behind the real_world_* MCP flow and be recorded as skipped or needs-review when unsafe.",
+		})
+	}
 	return issues
+}
+
+func exposesPackageManagerShell(source, lock string) bool {
+	commands := []string{"npm", "pnpm", "yarn", "bun", "composer", "cargo", "pip", "pipenv", "poetry", "bundle", "gradle", "mvn", "dotnet", "terraform"}
+	for _, shellCommand := range workflowSourceBashCommands(source) {
+		fields := strings.Fields(shellCommand)
+		if len(fields) == 0 {
+			continue
+		}
+		first := strings.Trim(fields[0], `"'`)
+		for _, command := range commands {
+			if first == command || strings.HasPrefix(first, command+":") {
+				return true
+			}
+		}
+	}
+	for _, command := range commands {
+		if strings.Contains(lock, `"shell(`+command) || strings.Contains(lock, `'shell(`+command) {
+			return true
+		}
+	}
+	return false
+}
+
+func workflowSourceBashCommands(source string) []string {
+	var commands []string
+	inTools := false
+	inBash := false
+	for _, line := range strings.Split(source, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		if !inTools {
+			if trimmed == "tools:" {
+				inTools = true
+			}
+			continue
+		}
+		if line == trimmed {
+			inTools = false
+			inBash = false
+			if trimmed == "tools:" {
+				inTools = true
+			}
+			continue
+		}
+		if strings.HasPrefix(line, "  ") && !strings.HasPrefix(line, "    ") {
+			inBash = trimmed == "bash:"
+			continue
+		}
+		if !inBash {
+			continue
+		}
+		if strings.HasPrefix(trimmed, "- ") {
+			commands = append(commands, strings.TrimSpace(strings.TrimPrefix(trimmed, "- ")))
+		}
+	}
+	return commands
 }
 
 func hasReadinessErrors(issues []readinessIssue) bool {

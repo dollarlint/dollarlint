@@ -1,6 +1,6 @@
 {
-  "$schema": "../real-world-result-entry.schema.json",
-  "schemaVersion": 3,
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
   "id": "2026-05-09-10-real-world-validation-tests",
   "date": "2026-05-09",
   "title": "10 real-world validation tests",
@@ -10,7 +10,7 @@
   "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3505474527",
   "command": "real_world_start_validation corpusDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086\" cacheDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3505474527\" outputArtifact=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-10-real-world-validation-tests-3202203494.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
   "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-10-real-world-validation-tests-3202203494.json",
-  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-10-real-world-validation-tests.dollarlint.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-09-10-real-world-validation-tests/dollarlint.json",
   "dependencyPrep": [
     {
       "repository": "caddy",
@@ -26,7 +26,7 @@
       "repository": "next.js",
       "command": "npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts OR cargo fetch --locked OR npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 2 local $schema refs, including test/e2e/app-dir/nx-handling/apps/next-nx-test/project.json:3 -\u003e ../../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 2 local $schema refs, including test/e2e/app-dir/nx-handling/apps/next-nx-test/project.json:3 -> ../../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "poetry",

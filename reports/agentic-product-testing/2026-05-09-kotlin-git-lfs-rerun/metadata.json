@@ -1,6 +1,6 @@
 {
-  "$schema": "../real-world-result-entry.schema.json",
-  "schemaVersion": 3,
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
   "id": "2026-05-09-kotlin-git-lfs-rerun",
   "date": "2026-05-09",
   "title": "Kotlin git-lfs rerun",
@@ -10,7 +10,7 @@
   "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.733719202",
   "command": "real_world_start_validation corpusDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822\" cacheDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.733719202\" outputArtifact=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-kotlin-git-lfs-rerun-1861873454.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
   "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-kotlin-git-lfs-rerun-1861873454.json",
-  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-kotlin-git-lfs-rerun.dollarlint.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-09-kotlin-git-lfs-rerun/dollarlint.json",
   "dependencyPrep": [
     {
       "repository": "kotlin",

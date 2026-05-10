@@ -1,6 +1,6 @@
 {
-  "$schema": "../real-world-result-entry.schema.json",
-  "schemaVersion": 3,
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
   "id": "2026-05-09-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09",
   "date": "2026-05-09",
   "title": "gpt-5.5 managed MCP 10 repo smoke 2026-05-09",
@@ -10,7 +10,7 @@
   "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.2246338081",
   "command": "real_world_start_validation corpusDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315\" cacheDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.2246338081\" outputArtifact=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09-917741328.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
   "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09-917741328.json",
-  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09.dollarlint.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-09-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09/dollarlint.json",
   "dependencyPrep": [
     {
       "repository": "cors",

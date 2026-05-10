@@ -1,6 +1,6 @@
 {
-  "$schema": "../real-world-result-entry.schema.json",
-  "schemaVersion": 3,
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
   "id": "2026-05-09-fresh-5-repo-config-sweep",
   "date": "2026-05-09",
   "title": "Fresh 5-Repo Config Sweep",
@@ -96,7 +96,7 @@
   ],
   "followUp": [
     "No product code changes were made during this sweep.",
-    "Structured result recorded in split reports/real-world-results storage.",
+    "Structured result recorded in Agentic Product Testing run directory storage.",
     "Updated the real-world testing skill after this sweep to require context-sensitive dependency prep before validation when dependencies affect schema/config fidelity."
   ]
 }

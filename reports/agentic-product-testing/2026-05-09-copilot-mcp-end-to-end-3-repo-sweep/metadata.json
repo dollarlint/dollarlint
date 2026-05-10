@@ -1,6 +1,6 @@
 {
-  "$schema": "../real-world-result-entry.schema.json",
-  "schemaVersion": 3,
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
   "id": "2026-05-09-copilot-mcp-end-to-end-3-repo-sweep",
   "date": "2026-05-09",
   "title": "Copilot MCP end-to-end 3-repo sweep",

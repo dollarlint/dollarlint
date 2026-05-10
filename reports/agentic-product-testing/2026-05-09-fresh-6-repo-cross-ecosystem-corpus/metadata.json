@@ -1,6 +1,6 @@
 {
-  "$schema": "../real-world-result-entry.schema.json",
-  "schemaVersion": 3,
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
   "id": "2026-05-09-fresh-6-repo-cross-ecosystem-corpus",
   "date": "2026-05-09",
   "title": "Fresh 6-Repo Cross-Ecosystem Corpus",

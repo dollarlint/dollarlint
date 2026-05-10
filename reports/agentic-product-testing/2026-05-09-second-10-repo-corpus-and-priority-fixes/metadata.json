@@ -1,6 +1,6 @@
 {
-  "$schema": "../real-world-result-entry.schema.json",
-  "schemaVersion": 3,
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
   "id": "2026-05-09-second-10-repo-corpus-and-priority-fixes",
   "date": "2026-05-09",
   "title": "Second 10-Repo Corpus And Priority Fixes",

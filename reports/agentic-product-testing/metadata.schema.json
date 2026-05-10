@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/dollarlint/dollarlint/reports/real-world-result-entry.schema.json",
-  "title": "DollarLint real-world test result entry",
-  "description": "A single DollarLint real-world repository sweep result.",
+  "$id": "https://github.com/dollarlint/dollarlint/reports/agentic-product-testing/metadata.schema.json",
+  "title": "DollarLint Agentic Product Testing run metadata",
+  "description": "Metadata for a single DollarLint Agentic Product Testing run directory.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -20,11 +20,11 @@
   "properties": {
     "$schema": {
       "type": "string",
-      "const": "../real-world-result-entry.schema.json"
+      "const": "../metadata.schema.json"
     },
     "schemaVersion": {
       "type": "integer",
-      "const": 3
+      "const": 4
     },
     "id": {
       "type": "string",
@@ -62,7 +62,7 @@
     },
     "persistedOutputArtifact": {
       "type": "string",
-      "pattern": "^reports/real-world-artifacts/[^/]+\\.dollarlint\\.json$"
+      "pattern": "^reports/agentic-product-testing/[^/]+/dollarlint\\.json$"
     },
     "repositories": {
       "type": "array",

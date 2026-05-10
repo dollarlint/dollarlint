@@ -17,13 +17,12 @@ import (
 )
 
 const (
-	realWorldResultsRelPath       = "reports/real-world-results.json"
-	realWorldResultsDirRelPath    = "reports/real-world-results"
-	realWorldArtifactsDirRelPath  = "reports/real-world-artifacts"
-	realWorldResultsSchema        = "./real-world-results.schema.json"
-	realWorldEntrySchema          = "../real-world-result-entry.schema.json"
-	realWorldHistorySchemaVersion = 3
-	realWorldMCPContractVersion   = 7
+	realWorldRunsDirRelPath       = "reports/agentic-product-testing"
+	realWorldRunMetadataFileName  = "metadata.json"
+	realWorldRunArtifactFileName  = "dollarlint.json"
+	realWorldEntrySchema          = "../metadata.schema.json"
+	realWorldHistorySchemaVersion = 4
+	realWorldMCPContractVersion   = 8
 	realWorldManifestName         = "real-world-manifest.json"
 	realWorldCorpusTempPrefix     = "dollarlint-corpus."
 	realWorldCacheTempPrefix      = "dollarlint-cache."
@@ -92,20 +91,6 @@ type realWorldHistory struct {
 	Schema        string           `json:"$schema,omitempty"`
 	SchemaVersion int              `json:"schemaVersion"`
 	Entries       []realWorldEntry `json:"entries"`
-}
-
-type realWorldHistoryIndex struct {
-	Schema        string              `json:"$schema,omitempty"`
-	SchemaVersion int                 `json:"schemaVersion"`
-	Entries       []realWorldEntryRef `json:"entries"`
-}
-
-type realWorldEntryRef struct {
-	ID        string `json:"id"`
-	Date      string `json:"date"`
-	Title     string `json:"title"`
-	Path      string `json:"path"`
-	RepoCount int    `json:"repoCount,omitempty"`
 }
 
 type realWorldEntryFile struct {
@@ -356,12 +341,13 @@ func (s *repoServer) handleRealWorldHistory(ctx context.Context, request mcp.Cal
 		})
 	}
 	out := map[string]any{
-		"schema":        history.Schema,
-		"schemaVersion": history.SchemaVersion,
-		"entryCount":    len(history.Entries),
-		"repoCount":     len(tested),
-		"testedRepos":   tested,
-		"queries":       queryResults,
+		"metadataSchema": realWorldEntrySchema,
+		"schemaVersion":  history.SchemaVersion,
+		"layout":         realWorldRunsDirRelPath + "/<run-id>/" + realWorldRunMetadataFileName,
+		"entryCount":     len(history.Entries),
+		"repoCount":      len(tested),
+		"testedRepos":    tested,
+		"queries":        queryResults,
 	}
 	if args.IncludeEntries {
 		out["entries"] = history.Entries
@@ -1194,7 +1180,7 @@ func realWorldRecordResultContract() map[string]any {
 		"productRecommendations":  "Use objects with strength high|med|low, recommendation, and rationale. If there is no genuine product change to consider, record an explicit no-change recommendation and use the productBehavedReasonably final-response outcome.",
 		"productDecisions":        "Use for product changes or decisions made after triage. If none were made, include an explicit no-change decision.",
 		"result":                  "Read automatically from outputArtifact when outputArtifact is provided.",
-		"persistedOutputArtifact": "Written automatically from outputArtifact into reports/real-world-artifacts/.",
+		"persistedOutputArtifact": "Written automatically from outputArtifact into the run directory as " + realWorldRunArtifactFileName + ".",
 		"cleanup":                 "After recording succeeds, managed temp corpus/cache dirs are removed automatically. Non-temp paths are skipped.",
 		"repositories":            "Read automatically from manifestPath when repositories is omitted and a manifest is available.",
 		"finalResponseContract":   realWorldFinalResponseContract(),
@@ -1360,7 +1346,7 @@ func realWorldNextRecordTriagedResult(suggestedArgs map[string]any, missingArgs 
 			"Keep validationFeedback from the managed validation run intact; it is the durable ledger for compaction-safe final recommendations.",
 			"Account for dependencyPrep when interpreting missing local schemas or skipped validation.",
 			"Keep productRecommendations limited to concrete product changes worth considering, or use an explicit no-change recommendation.",
-			"real_world_record_result will persist the outputArtifact bundle into reports/real-world-artifacts/ for later per-file and CLI-output triage.",
+			"real_world_record_result will persist the outputArtifact bundle into the run directory for later per-file and CLI-output triage.",
 			"real_world_record_result will clean managed temp corpus/cache dirs after the structured result is saved.",
 			"Do not create or update Markdown report files.",
 		},
@@ -1396,44 +1382,35 @@ func inGitHubAgenticWorkflow() bool {
 }
 
 func loadRealWorldHistory(root string) (realWorldHistory, error) {
-	path := filepath.Join(root, realWorldResultsRelPath)
-	data, err := os.ReadFile(path)
+	dir := filepath.Join(root, realWorldRunsDirRelPath)
+	items, err := os.ReadDir(dir)
 	if errors.Is(err, os.ErrNotExist) {
-		return realWorldHistory{Schema: realWorldResultsSchema, SchemaVersion: realWorldHistorySchemaVersion}, nil
+		return realWorldHistory{Schema: realWorldEntrySchema, SchemaVersion: realWorldHistorySchemaVersion}, nil
 	}
 	if err != nil {
 		return realWorldHistory{}, err
 	}
-	return loadSplitRealWorldHistory(root, path, data)
-}
-
-func loadSplitRealWorldHistory(root, path string, data []byte) (realWorldHistory, error) {
-	var index realWorldHistoryIndex
-	if err := json.Unmarshal(data, &index); err != nil {
-		return realWorldHistory{}, fmt.Errorf("parse %s: %w", path, err)
-	}
-	if index.Schema != realWorldResultsSchema {
-		return realWorldHistory{}, fmt.Errorf("parse %s: unsupported schema %q", path, index.Schema)
-	}
-	if index.SchemaVersion != realWorldHistorySchemaVersion {
-		return realWorldHistory{}, fmt.Errorf("parse %s: unsupported schemaVersion %d", path, index.SchemaVersion)
-	}
-	history := realWorldHistory{Schema: index.Schema, SchemaVersion: index.SchemaVersion}
-	for _, ref := range index.Entries {
-		entry, err := readRealWorldEntryFile(root, ref)
+	history := realWorldHistory{Schema: realWorldEntrySchema, SchemaVersion: realWorldHistorySchemaVersion}
+	for _, item := range items {
+		if !item.IsDir() {
+			continue
+		}
+		relPath := filepath.ToSlash(filepath.Join(realWorldRunsDirRelPath, item.Name(), realWorldRunMetadataFileName))
+		entry, err := readRealWorldEntryFile(root, relPath)
 		if err != nil {
 			return realWorldHistory{}, err
 		}
 		history.Entries = append(history.Entries, entry)
 	}
+	sort.Slice(history.Entries, func(i, j int) bool {
+		left := history.Entries[i].Date + "\x00" + history.Entries[i].ID
+		right := history.Entries[j].Date + "\x00" + history.Entries[j].ID
+		return left < right
+	})
 	return history, nil
 }
 
-func readRealWorldEntryFile(root string, ref realWorldEntryRef) (realWorldEntry, error) {
-	relPath := ref.Path
-	if relPath == "" {
-		return realWorldEntry{}, fmt.Errorf("real-world history entry %q is missing path", ref.ID)
-	}
+func readRealWorldEntryFile(root, relPath string) (realWorldEntry, error) {
 	clean, err := cleanRelativePath(relPath)
 	if err != nil {
 		return realWorldEntry{}, fmt.Errorf("invalid real-world result path %q: %w", relPath, err)
@@ -1457,26 +1434,15 @@ func readRealWorldEntryFile(root string, ref realWorldEntryRef) (realWorldEntry,
 	if entry.ID == "" || entry.Date == "" || entry.Title == "" {
 		return realWorldEntry{}, fmt.Errorf("parse %s: entry is missing id, date, or title", path)
 	}
-	if entry.ID != ref.ID {
-		return realWorldEntry{}, fmt.Errorf("parse %s: entry id %q does not match index id %q", path, entry.ID, ref.ID)
-	}
-	if entry.Date != ref.Date || entry.Title != ref.Title {
-		return realWorldEntry{}, fmt.Errorf("parse %s: entry metadata does not match index metadata", path)
-	}
 	return entry, nil
 }
 
 func saveRealWorldHistory(root string, history realWorldHistory) error {
 	if history.Schema == "" {
-		history.Schema = realWorldResultsSchema
+		history.Schema = realWorldEntrySchema
 	}
 	history.SchemaVersion = realWorldHistorySchemaVersion
 	usedPaths := map[string]string{}
-	index := realWorldHistoryIndex{
-		Schema:        realWorldResultsSchema,
-		SchemaVersion: realWorldHistorySchemaVersion,
-		Entries:       make([]realWorldEntryRef, 0, len(history.Entries)),
-	}
 	for _, entry := range history.Entries {
 		if entry.ID == "" {
 			return fmt.Errorf("real-world history entry is missing id")
@@ -1494,15 +1460,8 @@ func saveRealWorldHistory(root string, history realWorldHistory) error {
 		if err := writeJSONFile(filepath.Join(root, relPath), file); err != nil {
 			return err
 		}
-		index.Entries = append(index.Entries, realWorldEntryRef{
-			ID:        entry.ID,
-			Date:      entry.Date,
-			Title:     entry.Title,
-			Path:      relPath,
-			RepoCount: len(entry.Repositories),
-		})
 	}
-	return writeJSONFile(filepath.Join(root, realWorldResultsRelPath), index)
+	return nil
 }
 
 func realWorldEntryRelPath(entry realWorldEntry) string {
@@ -1513,7 +1472,7 @@ func realWorldEntryRelPath(entry realWorldEntry) string {
 	if name == "" {
 		name = "entry"
 	}
-	return filepath.ToSlash(filepath.Join(realWorldResultsDirRelPath, name+".json"))
+	return filepath.ToSlash(filepath.Join(realWorldRunsDirRelPath, name, realWorldRunMetadataFileName))
 }
 
 func realWorldArtifactRelPath(entry realWorldEntry) string {
@@ -1524,7 +1483,7 @@ func realWorldArtifactRelPath(entry realWorldEntry) string {
 	if name == "" {
 		name = "entry"
 	}
-	return filepath.ToSlash(filepath.Join(realWorldArtifactsDirRelPath, name+".dollarlint.json"))
+	return filepath.ToSlash(filepath.Join(realWorldRunsDirRelPath, name, realWorldRunArtifactFileName))
 }
 
 func persistRealWorldOutputArtifact(root string, entry realWorldEntry) (string, error) {

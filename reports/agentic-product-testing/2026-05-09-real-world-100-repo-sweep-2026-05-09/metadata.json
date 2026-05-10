@@ -1,6 +1,6 @@
 {
-  "$schema": "../real-world-result-entry.schema.json",
-  "schemaVersion": 3,
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
   "id": "2026-05-09-real-world-100-repo-sweep-2026-05-09",
   "date": "2026-05-09",
   "title": "real-world-100-repo-sweep-2026-05-09",
@@ -10,7 +10,7 @@
   "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3609768014",
   "command": "XDG_CACHE_HOME=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3609768014\" bin/dollarlint validate \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331\" --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-real-world-100-repo-sweep-2026-05-09-377468270.json\"",
   "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-real-world-100-repo-sweep-2026-05-09-377468270.json",
-  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-real-world-100-repo-sweep-2026-05-09.dollarlint.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-09-real-world-100-repo-sweep-2026-05-09/dollarlint.json",
   "dependencyPrep": [
     {
       "status": "not-needed",
@@ -1540,7 +1540,7 @@
   },
   "findings": [
     "Validated 100 repositories; 53 had issues, 21 included parsing failures, and 21 had failed files.",
-    "Coverage gaps were common: 8 repositories had zero discovered files and 21 had \u003e=70% skipped files.",
+    "Coverage gaps were common: 8 repositories had zero discovered files and 21 had >=70% skipped files.",
     "Several repositories produced very high repeated validation issue counts (e.g., 100s to 1000s), increasing triage noise."
   ],
   "productRecommendations": [
@@ -1552,12 +1552,12 @@
     {
       "strength": "high",
       "recommendation": "Improve skipped-coverage reporting with explicit per-repo reason aggregation and a concise coverage confidence signal.",
-      "rationale": "8 repos had zero discovered files and 21 repos had \u003e=70% skipped files, often leaving unclear what DollarLint actually checked."
+      "rationale": "8 repos had zero discovered files and 21 repos had >=70% skipped files, often leaving unclear what DollarLint actually checked."
     },
     {
       "strength": "med",
       "recommendation": "Provide grouped/compacted issue summaries by schema/file/root cause alongside full details.",
-      "rationale": "Some repos generated large volumes of repetitive findings (for example \u003e100 to thousands), making next actions harder to identify quickly."
+      "rationale": "Some repos generated large volumes of repetitive findings (for example >100 to thousands), making next actions harder to identify quickly."
     }
   ],
   "productDecisions": [

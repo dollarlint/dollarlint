@@ -1,6 +1,6 @@
 {
-  "$schema": "../real-world-result-entry.schema.json",
-  "schemaVersion": 3,
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
   "id": "2026-05-09-three-real-world-tests",
   "date": "2026-05-09",
   "title": "three-real-world-tests",
@@ -10,7 +10,7 @@
   "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.4080451971",
   "command": "XDG_CACHE_HOME=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.4080451971\" bin/dollarlint \"validate\" \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2004350901\" \"--schema-store\" \"--schema-store-failure\" \"warn\" \"--fetch-retries\" \"1\" \"--fetch-retry-min-wait\" \"1ms\" \"--fetch-retry-max-wait\" \"1ms\" \"--format\" \"json\" \"--output\" \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-three-real-world-tests-168901610.json\"",
   "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-three-real-world-tests-168901610.json",
-  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-three-real-world-tests.dollarlint.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-09-three-real-world-tests/dollarlint.json",
   "dependencyPrep": [
     {
       "repository": "pytest",

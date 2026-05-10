@@ -1,6 +1,6 @@
 {
-  "$schema": "../real-world-result-entry.schema.json",
-  "schemaVersion": 3,
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
   "id": "2026-05-09-initial-10-repo-corpus",
   "date": "2026-05-09",
   "title": "Initial 10-Repo Corpus",

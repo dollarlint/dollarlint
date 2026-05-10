@@ -308,7 +308,7 @@ func TestRealWorldArtifactQueryReturnsRecordedCollateral(t *testing.T) {
 	if err := os.WriteFile(watchPath, []byte("{\"summary\":\"WATCH command\"}\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	artifactRel := "reports/real-world-artifacts/sample.dollarlint.json"
+	artifactRel := "reports/agentic-product-testing/sample/dollarlint.json"
 	artifactPath := filepath.Join(root, artifactRel)
 	if err := os.MkdirAll(filepath.Dir(artifactPath), 0o755); err != nil {
 		t.Fatal(err)
@@ -718,7 +718,7 @@ func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
 			Corpus:                  "/tmp/corpus",
 			Command:                 "bin/dollarlint validate /tmp/corpus",
 			OutputArtifact:          "/tmp/out.json",
-			PersistedOutputArtifact: "reports/real-world-artifacts/sample.dollarlint.json",
+			PersistedOutputArtifact: "reports/agentic-product-testing/sample/dollarlint.json",
 			DependencyPrep: []realWorldDependencyPrep{{
 				Repository: "example",
 				Command:    "npm ci --ignore-scripts",
@@ -744,21 +744,11 @@ func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
 	if err := saveRealWorldHistory(root, history); err != nil {
 		t.Fatal(err)
 	}
-	indexData, err := os.ReadFile(filepath.Join(root, realWorldResultsRelPath))
-	if err != nil {
-		t.Fatal(err)
+	entryRelPath := realWorldEntryRelPath(history.Entries[0])
+	if entryRelPath != "reports/agentic-product-testing/sample/metadata.json" {
+		t.Fatalf("entry path = %q", entryRelPath)
 	}
-	var index realWorldHistoryIndex
-	if err := json.Unmarshal(indexData, &index); err != nil {
-		t.Fatal(err)
-	}
-	if index.Schema != realWorldResultsSchema || index.SchemaVersion != realWorldHistorySchemaVersion || len(index.Entries) != 1 {
-		t.Fatalf("index = %+v", index)
-	}
-	if index.Entries[0].Path == "" || filepath.Dir(index.Entries[0].Path) != realWorldResultsDirRelPath {
-		t.Fatalf("index entry = %+v", index.Entries[0])
-	}
-	entryData, err := os.ReadFile(filepath.Join(root, index.Entries[0].Path))
+	entryData, err := os.ReadFile(filepath.Join(root, entryRelPath))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -769,7 +759,7 @@ func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
 	if entryFile.Schema != realWorldEntrySchema || entryFile.SchemaVersion != realWorldHistorySchemaVersion || entryFile.ID != "sample" {
 		t.Fatalf("entry file = %+v", entryFile)
 	}
-	if entryFile.PersistedOutputArtifact != "reports/real-world-artifacts/sample.dollarlint.json" {
+	if entryFile.PersistedOutputArtifact != "reports/agentic-product-testing/sample/dollarlint.json" {
 		t.Fatalf("persisted output artifact = %q", entryFile.PersistedOutputArtifact)
 	}
 	if len(entryFile.DependencyPrep) != 1 || entryFile.DependencyPrep[0].Status != "skipped" {
@@ -785,7 +775,7 @@ func TestSaveRealWorldHistoryAddsSchema(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if loaded.Schema != realWorldResultsSchema || loaded.SchemaVersion != realWorldHistorySchemaVersion {
+	if loaded.Schema != realWorldEntrySchema || loaded.SchemaVersion != realWorldHistorySchemaVersion {
 		t.Fatalf("loaded history = %+v", loaded)
 	}
 	if len(loaded.Entries) != 1 || loaded.Entries[0].Repositories[0].Name != "example" {
@@ -1044,7 +1034,7 @@ func TestPersistRealWorldOutputArtifactCopiesRawJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("persist output artifact: %v", err)
 	}
-	expectedRel := "reports/real-world-artifacts/2026-05-09-sample-sweep.dollarlint.json"
+	expectedRel := "reports/agentic-product-testing/2026-05-09-sample-sweep/dollarlint.json"
 	if rel != expectedRel {
 		t.Fatalf("rel path = %q, want %q", rel, expectedRel)
 	}

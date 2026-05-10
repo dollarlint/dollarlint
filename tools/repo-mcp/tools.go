@@ -117,7 +117,7 @@ func (s *repoServer) addTools() {
 		"productDecisions":       arrayStringSchema("Optional product changes or decisions to use instead of the triage draft."),
 		"followUp":               arrayStringSchema("Optional follow-up notes to use instead of the triage draft."),
 	}), s.handleRealWorldTriageOutput, true)
-	s.addTool("real_world_record_result", "Persist a real-world sweep result, copy the DollarLint bundle/JSON output into reports/real-world-artifacts, and clean managed temp corpus/cache dirs.", schemaObject(map[string]any{
+	s.addTool("real_world_record_result", "Persist a real-world sweep result, copy the DollarLint bundle/JSON output into its Agentic Product Testing run directory, and clean managed temp corpus/cache dirs.", schemaObject(map[string]any{
 		"runID":                  map[string]any{"type": "string", "description": "Managed validation run id. Prefer this in the guided flow; path arguments are for manual recording."},
 		"id":                     map[string]any{"type": "string", "description": "Stable entry id. Defaults to a slug from date and title."},
 		"date":                   map[string]any{"type": "string", "description": "Entry date in YYYY-MM-DD. Defaults to today."},

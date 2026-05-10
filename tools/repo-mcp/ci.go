@@ -270,18 +270,12 @@ func requiredAgenticRealWorldTools() []string {
 
 func missingWorkflowTools(source, lock string, required []string) []string {
 	var missing []string
-	sourceWildcard := hasRealWorldToolWildcard(source)
-	lockWildcard := hasRealWorldToolWildcard(lock)
 	for _, tool := range required {
-		if (!sourceWildcard && !strings.Contains(source, tool)) || (!lockWildcard && !strings.Contains(lock, tool)) {
+		if !strings.Contains(source, tool) || !strings.Contains(lock, tool) {
 			missing = append(missing, tool)
 		}
 	}
 	return missing
-}
-
-func hasRealWorldToolWildcard(text string) bool {
-	return strings.Contains(text, "real_world_*")
 }
 
 func hasReadinessErrors(issues []readinessIssue) bool {

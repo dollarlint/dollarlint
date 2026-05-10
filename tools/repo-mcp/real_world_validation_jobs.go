@@ -942,25 +942,6 @@ func realWorldNextValidationResultWithFeedback(runID, repository string) map[str
 	}
 }
 
-func realWorldNextRecordValidationFeedback(runID, repository string) map[string]any {
-	return map[string]any{
-		"tool":             "real_world_record_validation_feedback",
-		"why":              "Record structured feedback for a delivered repository result without waiting for another result.",
-		"feedbackContract": realWorldValidationFeedbackContract(),
-		"suggestedArgs": map[string]any{
-			"runID": runID,
-		},
-		"feedbackTemplate": map[string]any{
-			"repository": repository,
-			"outcome":    "choose behaved-reasonably, product-signal, or blocked",
-			"findings": []string{
-				"Summarize concrete qualitative evidence from this repository result before deciding.",
-			},
-			"notes": "Explain the developer experience, including why any findings are or are not actionable product feedback.",
-		},
-	}
-}
-
 func realWorldNextFinishValidation(runID string) map[string]any {
 	return map[string]any{
 		"tool": "real_world_finish_validation",

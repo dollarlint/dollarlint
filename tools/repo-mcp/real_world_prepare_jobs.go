@@ -471,14 +471,6 @@ func (run *realWorldPrepareRun) inspectionLocked() []realWorldDependencyPrepScan
 	return inspection
 }
 
-func (run *realWorldPrepareRun) cloneCommands() []string {
-	commands := make([]string, 0, len(run.Repositories))
-	for _, repo := range run.Repositories {
-		commands = append(commands, fmt.Sprintf("git clone --depth 1 --quiet %s %s", shellQuote(repo.CloneURL), shellQuote(repo.Path)))
-	}
-	return commands
-}
-
 func (s *repoServer) realWorldWaitForPreparedRepo(ctx context.Context, request mcp.CallToolRequest, run *realWorldPrepareRun) (map[string]any, error) {
 	p := newProgress(ctx, s.mcp, request, len(run.Repositories))
 	snapshot := run.snapshot()

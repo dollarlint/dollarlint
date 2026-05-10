@@ -534,136 +534,6 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 	return s.realWorldStructured(ctx, out)
 }
 
-func (s *repoServer) handleRealWorldRunCorpus(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	var args struct {
-		CorpusDir          string                    `json:"corpusDir"`
-		CacheDir           string                    `json:"cacheDir"`
-		OutputArtifact     string                    `json:"outputArtifact"`
-		ManifestPath       string                    `json:"manifestPath"`
-		Repositories       []realWorldRepository     `json:"repositories"`
-		DependencyPrep     []realWorldDependencyPrep `json:"dependencyPrep"`
-		Build              *bool                     `json:"build"`
-		SchemaStore        *bool                     `json:"schemaStore"`
-		SchemaStoreFailure string                    `json:"schemaStoreFailure"`
-		FetchRetries       *int                      `json:"fetchRetries"`
-		FetchRetryMinWait  string                    `json:"fetchRetryMinWait"`
-		FetchRetryMaxWait  string                    `json:"fetchRetryMaxWait"`
-		ExtraArgs          []string                  `json:"extraArgs"`
-	}
-	_ = request.BindArguments(&args)
-	if args.CorpusDir == "" {
-		return mcp.NewToolResultError("corpusDir is required; call real_world_prepare_corpus first"), nil
-	}
-	if args.CacheDir == "" {
-		cacheDir, err := os.MkdirTemp("", realWorldCacheTempPrefix)
-		if err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
-		}
-		args.CacheDir = cacheDir
-	}
-	if args.OutputArtifact == "" {
-		outputArtifact, err := createRealWorldOutputPath("", "")
-		if err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
-		}
-		args.OutputArtifact = outputArtifact
-	}
-	build := true
-	if args.Build != nil {
-		build = *args.Build
-	}
-	schemaStore := true
-	if args.SchemaStore != nil {
-		schemaStore = *args.SchemaStore
-	}
-	if args.SchemaStoreFailure == "" {
-		args.SchemaStoreFailure = "warn"
-	}
-	if args.FetchRetries == nil {
-		defaultRetries := 1
-		args.FetchRetries = &defaultRetries
-	}
-	if args.FetchRetryMinWait == "" {
-		args.FetchRetryMinWait = "1ms"
-	}
-	if args.FetchRetryMaxWait == "" {
-		args.FetchRetryMaxWait = "1ms"
-	}
-	manifestPath := args.ManifestPath
-	if manifestPath == "" {
-		manifestPath = filepath.Join(args.CorpusDir, realWorldManifestName)
-	}
-	repositories := append([]realWorldRepository{}, args.Repositories...)
-	dependencyPrep := append([]realWorldDependencyPrep{}, args.DependencyPrep...)
-	var dependencyInspection *realWorldCorpusInspection
-	if len(dependencyPrep) == 0 {
-		inspection, err := realWorldInspectCorpus(realWorldInspectArgs{
-			CorpusDir:      args.CorpusDir,
-			CacheDir:       args.CacheDir,
-			OutputArtifact: args.OutputArtifact,
-			ManifestPath:   manifestPath,
-			Repositories:   repositories,
-		})
-		if err == nil {
-			dependencyInspection = &inspection
-			dependencyPrep = inspection.DraftDependencyPrep
-			if len(repositories) == 0 {
-				manifest, manifestErr := readRealWorldManifest(manifestPath)
-				if manifestErr == nil {
-					repositories = manifest.Repositories
-				}
-			}
-		}
-	}
-
-	p := newProgress(ctx, s.mcp, request, 2)
-	var buildResult *commandResult
-	if build {
-		p.step("Building dollarlint CLI")
-		result := s.run(ctx, namedCommand{Name: "go build", Cmd: "go build -o bin/dollarlint ./cmd/dollarlint"})
-		buildResult = &result
-		if !result.Succeeded {
-			return s.realWorldStructured(ctx, map[string]any{
-				"ok":       false,
-				"build":    result,
-				"nextStep": realWorldNextFixBuild(),
-			})
-		}
-	}
-	p.step("Running real-world corpus validation")
-	validationArgs := realWorldValidationArgs(args.CorpusDir, schemaStore, args.SchemaStoreFailure, *args.FetchRetries, args.FetchRetryMinWait, args.FetchRetryMaxWait, args.OutputArtifact, args.ExtraArgs)
-	validationCommand := realWorldValidationCommand(args.CorpusDir, args.CacheDir, args.OutputArtifact, schemaStore, args.SchemaStoreFailure, *args.FetchRetries, args.FetchRetryMinWait, args.FetchRetryMaxWait, args.ExtraArgs)
-	validation := runProcess(ctx, s.root, []string{"XDG_CACHE_HOME=" + args.CacheDir}, filepath.Join(s.root, "bin/dollarlint"), validationArgs...)
-	summary, warnings, outputErr := readRealWorldOutputSummary(args.OutputArtifact)
-	out := map[string]any{
-		"ok":                 validation.Succeeded || (validation.ExitCode == 1 && outputErr == nil),
-		"build":              buildResult,
-		"validation":         validation,
-		"summary":            summary,
-		"warnings":           warnings,
-		"outputReadError":    errorString(outputErr),
-		"corpusDir":          args.CorpusDir,
-		"cacheDir":           args.CacheDir,
-		"outputArtifact":     args.OutputArtifact,
-		"manifestPath":       manifestPath,
-		"repositories":       repositories,
-		"dependencyPrep":     dependencyPrep,
-		"prepSecurityPolicy": realWorldDependencyPrepSecurityPolicy(),
-		"validationCommand":  validationCommand,
-		"nextStep":           realWorldNextTriageOutput(args.CorpusDir, args.CacheDir, args.OutputArtifact, manifestPath, validationCommand, repositories, dependencyPrep, nil),
-	}
-	if dependencyInspection != nil {
-		out["dependencyPrepInspection"] = dependencyInspection.Repositories
-		out["prepSecurityPolicy"] = dependencyInspection.PrepSecurityPolicy
-		out["dependencyPrepSummary"] = dependencyInspection.Summary
-		out["dependencyPrepNeedsReview"] = dependencyInspection.NeedsReview
-	}
-	if summary != nil {
-		out["hasIssues"] = summary.Issues.Total > 0
-	}
-	return s.realWorldStructured(ctx, out)
-}
-
 func (s *repoServer) handleRealWorldRecordResult(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	var args realWorldRecordArgs
 	_ = request.BindArguments(&args)
@@ -1466,23 +1336,6 @@ func realWorldNextFixBuild() map[string]any {
 	}
 }
 
-func realWorldNextTriageOutput(corpusDir, cacheDir, outputArtifact, manifestPath, command string, repositories []realWorldRepository, dependencyPrep []realWorldDependencyPrep, validationFeedback []realWorldValidationFeedback) map[string]any {
-	return map[string]any{
-		"tool": "real_world_triage_output",
-		"why":  "Sanity-check the JSON output, group issues/warnings by repository and signal, and draft the structured record fields before persisting.",
-		"suggestedArgs": map[string]any{
-			"corpusDir":          corpusDir,
-			"cacheDir":           cacheDir,
-			"outputArtifact":     outputArtifact,
-			"manifestPath":       manifestPath,
-			"command":            command,
-			"repositories":       repositories,
-			"dependencyPrep":     dependencyPrep,
-			"validationFeedback": validationFeedback,
-		},
-	}
-}
-
 func realWorldNextTriageRun(runID string) map[string]any {
 	return map[string]any{
 		"tool": "real_world_triage_output",
@@ -2022,11 +1875,4 @@ func nonEmpty(values ...string) string {
 		}
 	}
 	return ""
-}
-
-func errorString(err error) string {
-	if err == nil {
-		return ""
-	}
-	return err.Error()
 }

@@ -329,9 +329,11 @@ settings.json
 Use `--verbose` to show schema URI and keyword metadata under each issue. Use `--quiet` for terse success output.
 Set `output.branchErrors = "all"` when you need every failed `oneOf`/`anyOf` branch leaf for schema debugging; the default `"best"` reports the closest matching branch.
 
-JSON output (`--format json`) includes a top-level `$schema` declaration, `formatVersion`, relative `path` fields, root-relative local schemas, active findings in `issues`, ignored findings in `ignoredIssues`, always-present arrays, per-issue `category`, structured warnings, and numeric `summary.durationNanos`. The output schema is published in `schemas/dollarlint-result.schema.json`.
+JSON output (`--format json`) includes a top-level `$schema` declaration, `formatVersion`, relative `path` fields, root-relative local schemas, active findings in `issues`, ignored findings in `ignoredIssues`, always-present arrays, per-issue `category`, structured warnings, skip classification fields on skipped files, and numeric `summary.durationNanos`. The output schema is published in `schemas/dollarlint-result.schema.json`.
 
-Text output uses subtle terminal styling when color is available and stays plain for machine-readable formats such as `--format json` and `--format sarif`.
+Use `--format bundle` when you need one artifact that captures every renderer from the same validation run. Bundle output is JSON with `json`, `sarif`, and `styled` keys; `styled` includes the normal terminal text as both ANSI and plain strings, plus the text-output options used to render it.
+
+Text output uses subtle terminal styling when color is available and stays plain for machine-readable formats such as `--format json`, `--format sarif`, and `--format bundle`.
 
 ## SARIF
 

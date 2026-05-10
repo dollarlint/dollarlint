@@ -13,6 +13,7 @@ import (
 )
 
 type realWorldTriageArgs struct {
+	RunID                  string                           `json:"runID"`
 	Title                  string                           `json:"title"`
 	CorpusDir              string                           `json:"corpusDir"`
 	CacheDir               string                           `json:"cacheDir"`
@@ -28,10 +29,12 @@ type realWorldTriageArgs struct {
 }
 
 type realWorldOutputDetails struct {
+	Root     string                 `json:"root,omitempty"`
 	Summary  *realWorldResult       `json:"summary,omitempty"`
 	Issues   []realWorldOutputIssue `json:"issues,omitempty"`
 	Warnings []map[string]any       `json:"warnings,omitempty"`
 	Files    []realWorldOutputFile  `json:"files,omitempty"`
+	Styled   *realWorldStyledOutput `json:"styled,omitempty"`
 }
 
 type realWorldOutputIssue struct {
@@ -50,14 +53,18 @@ type realWorldOutputIssue struct {
 }
 
 type realWorldOutputFile struct {
-	Path         string `json:"path"`
-	Format       string `json:"format,omitempty"`
-	Schema       string `json:"schema,omitempty"`
-	SchemaSource string `json:"schemaSource,omitempty"`
-	Status       string `json:"status"`
-	Issues       int    `json:"issues,omitempty"`
-	Ignored      int    `json:"ignored,omitempty"`
-	Message      string `json:"message,omitempty"`
+	Path           string `json:"path"`
+	Format         string `json:"format,omitempty"`
+	Schema         string `json:"schema,omitempty"`
+	SchemaSource   string `json:"schemaSource,omitempty"`
+	Status         string `json:"status"`
+	Issues         int    `json:"issues,omitempty"`
+	Ignored        int    `json:"ignored,omitempty"`
+	Message        string `json:"message,omitempty"`
+	SkipReason     string `json:"skipReason,omitempty"`
+	SkipClass      string `json:"skipClass,omitempty"`
+	SkipImportance string `json:"skipImportance,omitempty"`
+	SkipDetail     string `json:"skipDetail,omitempty"`
 }
 
 type realWorldTriage struct {
@@ -72,6 +79,7 @@ type realWorldTriage struct {
 	ProductRecommendations    []realWorldProductRecommendation `json:"productRecommendations"`
 	ProductDecisions          []string                         `json:"productDecisions"`
 	FollowUp                  []string                         `json:"followUp"`
+	DiscussionPacket          map[string]any                   `json:"discussionPacket,omitempty"`
 	FinalResponseContract     map[string]any                   `json:"finalResponseContract"`
 }
 
@@ -113,15 +121,115 @@ type realWorldWarningGroup struct {
 	Messages     []string `json:"messages,omitempty"`
 }
 
+type realWorldStyledOutput struct {
+	Plain     string         `json:"plain,omitempty"`
+	ANSI      string         `json:"ansi,omitempty"`
+	Options   map[string]any `json:"options,omitempty"`
+	Truncated bool           `json:"truncated,omitempty"`
+}
+
+type realWorldIssueExample struct {
+	Path             string                  `json:"path"`
+	Category         string                  `json:"category"`
+	Keyword          string                  `json:"keyword,omitempty"`
+	Schema           string                  `json:"schema,omitempty"`
+	SchemaSource     string                  `json:"schemaSource,omitempty"`
+	InstanceLocation string                  `json:"instanceLocation,omitempty"`
+	KeywordLocation  string                  `json:"keywordLocation,omitempty"`
+	Property         string                  `json:"property,omitempty"`
+	Line             int                     `json:"line,omitempty"`
+	Column           int                     `json:"column,omitempty"`
+	MessagePreview   string                  `json:"messagePreview"`
+	MessageLength    int                     `json:"messageLength"`
+	MessageTruncated bool                    `json:"messageTruncated"`
+	ProductSignal    bool                    `json:"productSignal"`
+	UXSignals        []string                `json:"uxSignals,omitempty"`
+	SourceExcerpt    *realWorldSourceExcerpt `json:"sourceExcerpt,omitempty"`
+}
+
+type realWorldSourceExcerpt struct {
+	Path      string                `json:"path"`
+	StartLine int                   `json:"startLine"`
+	Lines     []realWorldSourceLine `json:"lines"`
+}
+
+type realWorldSourceLine struct {
+	Number int    `json:"number"`
+	Text   string `json:"text"`
+}
+
+type realWorldSkippedFileSignal struct {
+	Path          string `json:"path"`
+	Format        string `json:"format,omitempty"`
+	Class         string `json:"class"`
+	Reason        string `json:"reason"`
+	ProductSignal bool   `json:"productSignal"`
+}
+
+type realWorldSkippedFileGroup struct {
+	Class         string   `json:"class"`
+	Count         int      `json:"count"`
+	ProductSignal bool     `json:"productSignal"`
+	Reasons       []string `json:"reasons,omitempty"`
+	Examples      []string `json:"examples,omitempty"`
+}
+
 type realWorldRepoIdentity struct {
 	Name     string
 	Path     string
 	CloneURL string
 }
 
-func (s *repoServer) handleRealWorldTriageOutput(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *repoServer) handleRealWorldTriageOutput(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	var args realWorldTriageArgs
 	_ = request.BindArguments(&args)
+	if err := realWorldRejectManualPathArgsWithRunID(args.RunID, map[string]string{
+		"corpusDir":      args.CorpusDir,
+		"cacheDir":       args.CacheDir,
+		"command":        args.Command,
+		"outputArtifact": args.OutputArtifact,
+		"manifestPath":   args.ManifestPath,
+	}); err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	if args.RunID != "" {
+		if s.realWorldRuns == nil {
+			return mcp.NewToolResultError(fmt.Sprintf("validation run %q was not found", args.RunID)), nil
+		}
+		run, ok := s.realWorldRuns.get(args.RunID)
+		if !ok {
+			return mcp.NewToolResultError(fmt.Sprintf("validation run %q was not found", args.RunID)), nil
+		}
+		run.refreshFromManifest()
+		if args.Title == "" {
+			args.Title = run.Title
+		}
+		if args.CorpusDir == "" {
+			args.CorpusDir = run.CorpusDir
+		}
+		if args.CacheDir == "" {
+			args.CacheDir = run.CacheDir
+		}
+		if args.OutputArtifact == "" {
+			args.OutputArtifact = run.OutputArtifact
+		}
+		if args.ManifestPath == "" {
+			args.ManifestPath = run.ManifestPath
+		}
+		if args.Command == "" {
+			args.Command = nonEmpty(run.Command, realWorldManagedValidationCommand(run))
+		}
+		if len(args.Repositories) == 0 {
+			args.Repositories = append([]realWorldRepository{}, run.Repositories...)
+		}
+		if len(args.DependencyPrep) == 0 {
+			args.DependencyPrep = append([]realWorldDependencyPrep{}, run.DependencyPrep...)
+		}
+		if len(args.ValidationFeedback) == 0 {
+			args.ValidationFeedback = run.validationFeedback()
+		}
+	}
 
 	manifestPath := args.ManifestPath
 	if manifestPath == "" && args.CorpusDir != "" {
@@ -177,15 +285,15 @@ func (s *repoServer) handleRealWorldTriageOutput(_ context.Context, request mcp.
 	if len(args.FollowUp) > 0 {
 		triage.FollowUp = args.FollowUp
 	}
+	if triage.DiscussionPacket != nil {
+		triage.DiscussionPacket["productRecommendations"] = triage.ProductRecommendations
+		if triage.ValidationFeedbackSummary != nil {
+			triage.DiscussionPacket["validationFeedbackSummary"] = triage.ValidationFeedbackSummary
+		}
+	}
 
 	draftRecord := map[string]any{
 		"title":                  args.Title,
-		"corpus":                 args.CorpusDir,
-		"cacheDir":               args.CacheDir,
-		"command":                args.Command,
-		"outputArtifact":         args.OutputArtifact,
-		"manifestPath":           manifestPath,
-		"repositories":           repositories,
 		"dependencyPrep":         args.DependencyPrep,
 		"validationFeedback":     args.ValidationFeedback,
 		"findings":               triage.Findings,
@@ -193,22 +301,36 @@ func (s *repoServer) handleRealWorldTriageOutput(_ context.Context, request mcp.
 		"productDecisions":       triage.ProductDecisions,
 		"followUp":               triage.FollowUp,
 	}
+	if args.RunID != "" {
+		draftRecord["runID"] = args.RunID
+	} else {
+		draftRecord["corpus"] = args.CorpusDir
+		draftRecord["cacheDir"] = args.CacheDir
+		draftRecord["command"] = args.Command
+		draftRecord["outputArtifact"] = args.OutputArtifact
+		draftRecord["manifestPath"] = manifestPath
+		draftRecord["repositories"] = repositories
+	}
 	missingArgs := realWorldTriageDraftRecordMissing(args, repositories)
-	return structured(map[string]any{
+	out := map[string]any{
 		"ok":                        true,
-		"outputArtifact":            args.OutputArtifact,
-		"manifestPath":              manifestPath,
 		"summary":                   triage.Summary,
-		"perRepository":             triage.PerRepository,
+		"perRepository":             realWorldPublicRepositoryTriage(triage.PerRepository),
 		"issueGroups":               triage.IssueGroups,
 		"warningGroups":             triage.WarningGroups,
+		"discussionPacket":          triage.DiscussionPacket,
 		"validationFeedback":        triage.ValidationFeedback,
 		"validationFeedbackSummary": triage.ValidationFeedbackSummary,
 		"draftRecord":               draftRecord,
 		"draftRecordMissing":        missingArgs,
 		"finalResponseContract":     triage.FinalResponseContract,
 		"nextStep":                  realWorldNextRecordTriagedResult(draftRecord, missingArgs),
-	})
+	}
+	if args.RunID == "" {
+		out["outputArtifact"] = args.OutputArtifact
+		out["manifestPath"] = manifestPath
+	}
+	return s.realWorldStructured(ctx, out)
 }
 
 func triageRealWorldOutput(outputArtifact string, repositories []realWorldRepository) (realWorldTriage, error) {
@@ -227,6 +349,7 @@ func triageRealWorldOutput(outputArtifact string, repositories []realWorldReposi
 	productRecommendations := realWorldDraftProductRecommendations(details, issueGroups, warningGroups)
 	productDecisions := []string{"No product changes were made during this sweep; record the triage and decide follow-up from the structured result."}
 	followUp := realWorldDraftFollowUp(details, productRecommendations)
+	discussionPacket := realWorldDiscussionPacket(details, perRepo, issueGroups, warningGroups, productRecommendations)
 	return realWorldTriage{
 		OutputArtifact:         outputArtifact,
 		Summary:                details.Summary,
@@ -237,6 +360,7 @@ func triageRealWorldOutput(outputArtifact string, repositories []realWorldReposi
 		ProductRecommendations: productRecommendations,
 		ProductDecisions:       productDecisions,
 		FollowUp:               followUp,
+		DiscussionPacket:       discussionPacket,
 		FinalResponseContract:  realWorldFinalResponseContract(),
 	}, nil
 }
@@ -273,6 +397,56 @@ func realWorldValidationFeedbackFinding(feedback []realWorldValidationFeedback) 
 		summary["behavedReasonably"], summary["productSignals"], summary["blocked"])
 }
 
+func realWorldDiscussionPacket(details realWorldOutputDetails, perRepo []realWorldRepositoryTriage, issueGroups []realWorldIssueGroup, warningGroups []realWorldWarningGroup, recommendations []realWorldProductRecommendation) map[string]any {
+	skippedSignals := realWorldSkippedFileSignals(details.Files)
+	skippedGroups := realWorldSkippedFileGroups(skippedSignals)
+	issueExamples := realWorldIssueExamples(details, 5)
+	return map[string]any{
+		"purpose":                "Team-facing product discussion brief generated from the real-world validation artifact.",
+		"summary":                details.Summary,
+		"productRecommendations": recommendations,
+		"exampleIssues":          issueExamples,
+		"skippedGroups":          skippedGroups,
+		"topIssueGroups":         firstIssueGroups(issueGroups, 5),
+		"topWarningGroups":       firstWarningGroups(warningGroups, 5),
+		"cliPreview":             realWorldCLIPreview(details.Styled),
+		"uxSignals":              realWorldUXSignals(details, issueExamples, skippedGroups),
+		"positiveEvidence":       realWorldPositiveEvidence(perRepo),
+	}
+}
+
+func firstIssueGroups(groups []realWorldIssueGroup, limit int) []realWorldIssueGroup {
+	if len(groups) <= limit {
+		return groups
+	}
+	return groups[:limit]
+}
+
+func firstWarningGroups(groups []realWorldWarningGroup, limit int) []realWorldWarningGroup {
+	if len(groups) <= limit {
+		return groups
+	}
+	return groups[:limit]
+}
+
+func realWorldPositiveEvidence(perRepo []realWorldRepositoryTriage) []string {
+	var out []string
+	for _, repo := range perRepo {
+		if repo.Discovered == 0 || repo.IssueCount > 0 || repo.WarningCount > 0 || repo.Failed > 0 {
+			continue
+		}
+		note := fmt.Sprintf("%s validated %d/%d discovered file(s) without issues or warnings", repo.Repository, repo.Validated, repo.Discovered)
+		if repo.Skipped > 0 {
+			note += fmt.Sprintf(" (%d skipped)", repo.Skipped)
+		}
+		out = append(out, note)
+		if len(out) >= 6 {
+			break
+		}
+	}
+	return out
+}
+
 func appendNonNoChangeRecommendations(existing, additional []realWorldProductRecommendation) []realWorldProductRecommendation {
 	out := make([]realWorldProductRecommendation, 0, len(existing)+len(additional))
 	for _, recommendation := range existing {
@@ -294,7 +468,12 @@ func readRealWorldOutputDetails(path string) (realWorldOutputDetails, error) {
 	if err != nil {
 		return realWorldOutputDetails{}, err
 	}
+	data, styled, _, err := realWorldUnwrapBundle(data)
+	if err != nil {
+		return realWorldOutputDetails{}, fmt.Errorf("parse %s: %w", path, err)
+	}
 	var payload struct {
+		Root    string `json:"root"`
 		Summary *struct {
 			Discovered    int                   `json:"discovered"`
 			Validated     int                   `json:"validated"`
@@ -328,11 +507,27 @@ func readRealWorldOutputDetails(path string) (realWorldOutputDetails, error) {
 		summary.Duration = &realWorldDurationInfo{Nanos: payload.Summary.DurationNanos}
 	}
 	return realWorldOutputDetails{
+		Root:     payload.Root,
 		Summary:  summary,
 		Issues:   payload.Issues,
 		Warnings: payload.Warnings,
 		Files:    payload.Files,
+		Styled:   styled,
 	}, nil
+}
+
+func realWorldUnwrapBundle(data []byte) ([]byte, *realWorldStyledOutput, bool, error) {
+	var probe struct {
+		JSON   json.RawMessage        `json:"json"`
+		Styled *realWorldStyledOutput `json:"styled"`
+	}
+	if err := json.Unmarshal(data, &probe); err != nil {
+		return nil, nil, false, err
+	}
+	if len(probe.JSON) == 0 {
+		return data, nil, false, nil
+	}
+	return probe.JSON, probe.Styled, true, nil
 }
 
 func validateRealWorldOutputDetails(path string, details realWorldOutputDetails) error {
@@ -480,6 +675,371 @@ func realWorldGroupWarnings(warnings []map[string]any) []realWorldWarningGroup {
 	return out
 }
 
+func realWorldValidationEvidence(repository, outputArtifact string) (map[string]any, error) {
+	details, err := readRealWorldOutputDetails(outputArtifact)
+	if err != nil {
+		return nil, err
+	}
+	if err := validateRealWorldOutputDetails(outputArtifact, details); err != nil {
+		return nil, err
+	}
+	statusCounts := map[string]int{}
+	var skippedExamples []realWorldOutputFile
+	var failedExamples []realWorldOutputFile
+	for _, file := range details.Files {
+		statusCounts[file.Status]++
+		switch file.Status {
+		case "skipped":
+			if len(skippedExamples) < 8 {
+				skippedExamples = append(skippedExamples, file)
+			}
+		case "failed", "error":
+			if len(failedExamples) < 8 {
+				failedExamples = append(failedExamples, file)
+			}
+		}
+	}
+	issueGroups := realWorldGroupRepositoryIssues(repository, details.Issues)
+	warningGroups := realWorldGroupWarnings(details.Warnings)
+	issueExamples := realWorldIssueExamples(details, 6)
+	skippedSignals := realWorldSkippedFileSignals(details.Files)
+	skippedGroups := realWorldSkippedFileGroups(skippedSignals)
+	if len(issueGroups) > 6 {
+		issueGroups = issueGroups[:6]
+	}
+	if len(warningGroups) > 6 {
+		warningGroups = warningGroups[:6]
+	}
+	cliPreview := realWorldCLIPreview(details.Styled)
+	return map[string]any{
+		"summary":              details.Summary,
+		"statusCounts":         statusCounts,
+		"skippedCoverageRatio": realWorldSkippedCoverageRatio(details.Summary),
+		"skippedExamples":      skippedExamples,
+		"skippedSignals":       skippedSignals,
+		"skippedGroups":        skippedGroups,
+		"failedExamples":       failedExamples,
+		"topIssueGroups":       issueGroups,
+		"exampleIssues":        issueExamples,
+		"topWarningGroups":     warningGroups,
+		"cliPreview":           cliPreview,
+		"uxSignals":            realWorldUXSignals(details, issueExamples, skippedGroups),
+		"outcomeHint":          realWorldEvidenceOutcomeHint(details.Summary, issueGroups, warningGroups, skippedGroups, issueExamples),
+		"assessmentChecklist": []string{
+			"Did DollarLint parse and classify files in a way a developer would understand?",
+			"Does cliPreview.plain look like a useful terminal experience for a real user?",
+			"Are skipped files and warnings clear enough to judge coverage?",
+			"Are repeated issues grouped enough to reveal the next action?",
+			"Are failures expected fixtures, repository-specific unsupported syntax, or product behavior worth improving?",
+		},
+	}, nil
+}
+
+func realWorldSkippedCoverageRatio(summary *realWorldResult) float64 {
+	if summary == nil || summary.Discovered == 0 {
+		return 0
+	}
+	return float64(summary.Skipped) / float64(summary.Discovered)
+}
+
+func realWorldIssueExamples(details realWorldOutputDetails, limit int) []realWorldIssueExample {
+	if limit <= 0 {
+		return nil
+	}
+	out := make([]realWorldIssueExample, 0, min(len(details.Issues), limit))
+	for _, issue := range details.Issues {
+		if len(out) >= limit {
+			break
+		}
+		preview := truncate(issue.Message, 700)
+		example := realWorldIssueExample{
+			Path:             issue.Path,
+			Category:         issue.Category,
+			Keyword:          issue.Keyword,
+			Schema:           issue.Schema,
+			SchemaSource:     issue.SchemaSource,
+			InstanceLocation: issue.InstanceLocation,
+			KeywordLocation:  issue.KeywordLocation,
+			Property:         issue.Property,
+			Line:             issue.Line,
+			Column:           issue.Column,
+			MessagePreview:   preview,
+			MessageLength:    len(issue.Message),
+			MessageTruncated: len(strings.TrimSpace(issue.Message)) > len(preview),
+			ProductSignal:    realWorldIssueIsProductSignal(issue),
+			UXSignals:        realWorldIssueUXSignals(issue),
+			SourceExcerpt:    realWorldSourceExcerptForIssue(details.Root, issue),
+		}
+		out = append(out, example)
+	}
+	return out
+}
+
+func realWorldIssueUXSignals(issue realWorldOutputIssue) []string {
+	var signals []string
+	if len(issue.Message) > 2000 {
+		signals = append(signals, "message-over-2000-chars")
+	}
+	if strings.Contains(strings.ToLower(issue.Message), "value must be one of") && strings.Count(issue.Message, "'") > 20 {
+		signals = append(signals, "large-enum-message")
+	}
+	if strings.HasPrefix(issue.SchemaSource, "catalog:") {
+		signals = append(signals, "catalog-backed-schema")
+	}
+	if issue.InstanceLocation != "" {
+		signals = append(signals, "has-instance-location")
+	}
+	return signals
+}
+
+func realWorldSourceExcerptForIssue(root string, issue realWorldOutputIssue) *realWorldSourceExcerpt {
+	if root == "" || issue.Path == "" || issue.Line <= 0 || filepath.IsAbs(issue.Path) {
+		return nil
+	}
+	cleanRoot := filepath.Clean(root)
+	candidate := filepath.Clean(filepath.Join(cleanRoot, filepath.FromSlash(issue.Path)))
+	rel, err := filepath.Rel(cleanRoot, candidate)
+	if err != nil || rel == "." || filepath.IsAbs(rel) || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return nil
+	}
+	data, err := os.ReadFile(candidate)
+	if err != nil || len(data) > 2*1024*1024 {
+		return nil
+	}
+	lines := strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n")
+	if issue.Line > len(lines) {
+		return nil
+	}
+	start := max(1, issue.Line-1)
+	end := min(len(lines), issue.Line+1)
+	excerpt := realWorldSourceExcerpt{
+		Path:      issue.Path,
+		StartLine: start,
+		Lines:     make([]realWorldSourceLine, 0, end-start+1),
+	}
+	for line := start; line <= end; line++ {
+		excerpt.Lines = append(excerpt.Lines, realWorldSourceLine{Number: line, Text: truncate(lines[line-1], 240)})
+	}
+	return &excerpt
+}
+
+func realWorldSkippedFileSignals(files []realWorldOutputFile) []realWorldSkippedFileSignal {
+	var out []realWorldSkippedFileSignal
+	for _, file := range files {
+		if file.Status != "skipped" {
+			continue
+		}
+		class, reason, productSignal := realWorldClassifySkippedFile(file)
+		out = append(out, realWorldSkippedFileSignal{
+			Path:          file.Path,
+			Format:        file.Format,
+			Class:         class,
+			Reason:        reason,
+			ProductSignal: productSignal,
+		})
+	}
+	return out
+}
+
+func realWorldClassifySkippedFile(file realWorldOutputFile) (string, string, bool) {
+	if file.SkipClass != "" {
+		productSignal := file.SkipImportance == "high" ||
+			file.SkipClass == "unsupported-config" ||
+			file.SkipClass == "repo-management-config" ||
+			file.SkipClass == "external-catalog"
+		reason := nonEmpty(file.SkipDetail, file.SkipReason, "DollarLint classified this skipped file.")
+		return file.SkipClass, reason, productSignal
+	}
+	path := strings.ToLower(filepath.ToSlash(file.Path))
+	base := filepath.Base(path)
+	switch {
+	case strings.HasSuffix(base, "-lock.json") || base == "package-lock.json" || base == "composer.lock" || base == "cargo.lock" || strings.Contains(base, "lock"):
+		return "lockfile", "Generated or dependency lockfile; often reasonable to skip unless lockfile validation is a product goal.", false
+	case strings.Contains(path, "/.cargo/") || base == ".clippy.toml" || base == "deny.toml" || base == "release.toml":
+		return "tooling-config", "Common hand-authored tooling configuration without a matched schema.", true
+	case base == ".rubocop.yml" || base == ".rubocop_todo.yml" || base == ".coveralls.yml":
+		return "tooling-config", "Common Ruby tooling/service configuration without a matched schema.", true
+	case base == "atmos.yaml" || base == "atmos.yml":
+		return "infrastructure-config", "Common infrastructure/project configuration without a matched schema.", true
+	case strings.Contains(path, "/.github/settings.yml") || strings.Contains(path, "/.github/settings.yaml") || base == "readme.yaml":
+		return "repo-management-config", "Repository-management configuration without a matched schema.", true
+	case strings.Contains(path, "/locale/") || strings.Contains(path, "/locales/") || strings.Contains(path, "/i18n/"):
+		return "locale-data", "Locale or translation data; usually lower priority than project configuration.", false
+	case strings.Contains(path, "/test") || strings.Contains(path, "/spec") || strings.Contains(path, "/fixture") || strings.Contains(path, "/benchmark"):
+		return "test-or-fixture-data", "Test, fixture, or benchmark data; often reasonable to skip unless users expect general data validation.", false
+	case strings.Contains(path, "/data/"):
+		return "application-data", "Application data without a matched schema; may be reasonable to skip for a config-focused linter.", false
+	default:
+		return "unknown-schema-less", "No matched schema; review whether this is user-authored configuration or arbitrary data.", false
+	}
+}
+
+func realWorldSkippedFileGroups(signals []realWorldSkippedFileSignal) []realWorldSkippedFileGroup {
+	groups := map[string]*realWorldSkippedFileGroup{}
+	for _, signal := range signals {
+		group := groups[signal.Class]
+		if group == nil {
+			group = &realWorldSkippedFileGroup{Class: signal.Class}
+			groups[signal.Class] = group
+		}
+		group.Count++
+		group.ProductSignal = group.ProductSignal || signal.ProductSignal
+		group.Reasons = appendUniqueLimit(group.Reasons, signal.Reason, 3)
+		group.Examples = appendUniqueLimit(group.Examples, signal.Path, 8)
+	}
+	out := make([]realWorldSkippedFileGroup, 0, len(groups))
+	for _, group := range groups {
+		out = append(out, *group)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].ProductSignal != out[j].ProductSignal {
+			return out[i].ProductSignal
+		}
+		if out[i].Count != out[j].Count {
+			return out[i].Count > out[j].Count
+		}
+		return out[i].Class < out[j].Class
+	})
+	return out
+}
+
+func realWorldCLIPreview(styled *realWorldStyledOutput) map[string]any {
+	if styled == nil {
+		return nil
+	}
+	plain := truncate(styled.Plain, 6000)
+	ansi := truncate(styled.ANSI, 6000)
+	return map[string]any{
+		"plain":          plain,
+		"ansi":           ansi,
+		"plainTruncated": len(strings.TrimSpace(styled.Plain)) > len(plain),
+		"ansiTruncated":  len(strings.TrimSpace(styled.ANSI)) > len(ansi),
+		"options":        styled.Options,
+	}
+}
+
+func realWorldUXSignals(details realWorldOutputDetails, issueExamples []realWorldIssueExample, skippedGroups []realWorldSkippedFileGroup) []string {
+	var signals []string
+	for _, issue := range issueExamples {
+		for _, signal := range issue.UXSignals {
+			signals = appendUniqueLimit(signals, signal, 12)
+		}
+	}
+	for _, group := range skippedGroups {
+		if group.ProductSignal {
+			signals = appendUniqueLimit(signals, "product-relevant-skipped-"+group.Class, 12)
+		}
+	}
+	if details.Styled != nil && strings.Contains(details.Styled.Plain, "... truncated ...") {
+		signals = appendUniqueLimit(signals, "cli-preview-was-truncated", 12)
+	}
+	if details.Summary != nil && details.Summary.Discovered > 0 && realWorldSkippedCoverageRatio(details.Summary) >= 0.25 {
+		signals = appendUniqueLimit(signals, "notable-skipped-coverage", 12)
+	}
+	return signals
+}
+
+func realWorldEvidenceOutcomeHint(summary *realWorldResult, issueGroups []realWorldIssueGroup, warningGroups []realWorldWarningGroup, skippedGroups []realWorldSkippedFileGroup, issueExamples []realWorldIssueExample) map[string]any {
+	hint := "behaved-reasonably"
+	var reasons []string
+	if summary == nil {
+		return map[string]any{"outcome": "blocked", "reasons": []string{"No JSON summary was available."}}
+	}
+	if summary.Discovered == 0 {
+		hint = realWorldFeedbackBlocked
+		reasons = append(reasons, "DollarLint discovered zero files, so the repository result has no usable coverage.")
+	}
+	if summary.Failed > 0 || summary.Issues.Parsing > 0 {
+		hint = "product-signal-or-blocked"
+		reasons = append(reasons, "Parsing failures or failed files need qualitative review before the result is trusted.")
+	}
+	if summary.Discovered > 0 && realWorldSkippedCoverageRatio(summary) >= 0.7 {
+		if hint == "behaved-reasonably" {
+			hint = realWorldFeedbackProductSignal
+		}
+		reasons = append(reasons, "At least 70% of discovered files were skipped, so coverage confidence may be unclear.")
+	}
+	if summary.Issues.Total >= 50 {
+		if hint == "behaved-reasonably" {
+			hint = realWorldFeedbackProductSignal
+		}
+		reasons = append(reasons, "The repository produced many issues, so grouping/actionability needs review.")
+	}
+	if len(warningGroups) > 0 {
+		if hint == "behaved-reasonably" {
+			hint = realWorldFeedbackProductSignal
+		}
+		reasons = append(reasons, "Warnings were emitted and may affect developer confidence.")
+	}
+	for _, group := range skippedGroups {
+		if group.ProductSignal {
+			if hint == "behaved-reasonably" {
+				hint = realWorldFeedbackProductSignal
+			}
+			reasons = append(reasons, "Skipped files include common hand-authored "+group.Class+" files, which may be a coverage product signal.")
+			break
+		}
+	}
+	for _, issue := range issueExamples {
+		if containsString(issue.UXSignals, "large-enum-message") {
+			if hint == "behaved-reasonably" {
+				hint = realWorldFeedbackProductSignal
+			}
+			reasons = append(reasons, "At least one issue has a very large enum message; review CLI actionability, not just correctness.")
+			break
+		}
+	}
+	for _, group := range issueGroups {
+		if group.ProductSignal {
+			if hint == "behaved-reasonably" {
+				hint = realWorldFeedbackProductSignal
+			}
+			reasons = append(reasons, "At least one top issue group is classified as a product signal.")
+			break
+		}
+	}
+	if len(reasons) == 0 {
+		reasons = append(reasons, "No obvious parser, coverage, warning, or high-volume issue signal was detected.")
+	}
+	return map[string]any{"outcome": hint, "reasons": reasons}
+}
+
+func realWorldGroupRepositoryIssues(repository string, issues []realWorldOutputIssue) []realWorldIssueGroup {
+	groups := map[string]*realWorldIssueGroup{}
+	for _, issue := range issues {
+		signal := realWorldIssueSignal(issue)
+		key := strings.Join([]string{issue.Category, signal, issue.SchemaSource, issue.Keyword}, "\x00")
+		group := groups[key]
+		if group == nil {
+			group = &realWorldIssueGroup{
+				Repository:    repository,
+				Category:      issue.Category,
+				Signal:        signal,
+				SchemaSource:  issue.SchemaSource,
+				Keyword:       issue.Keyword,
+				ProductSignal: realWorldIssueIsProductSignal(issue),
+				FixtureSignal: realWorldIsFixturePath(issue.Path),
+			}
+			groups[key] = group
+		}
+		group.Count++
+		group.Paths = appendUniqueLimit(group.Paths, issue.Path, 8)
+		group.Messages = appendUniqueLimit(group.Messages, issue.Message, 4)
+	}
+	out := make([]realWorldIssueGroup, 0, len(groups))
+	for _, group := range groups {
+		out = append(out, *group)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Count != out[j].Count {
+			return out[i].Count > out[j].Count
+		}
+		return strings.Join([]string{out[i].Signal, out[i].Category, out[i].SchemaSource, out[i].Keyword}, "\x00") <
+			strings.Join([]string{out[j].Signal, out[j].Category, out[j].SchemaSource, out[j].Keyword}, "\x00")
+	})
+	return out
+}
+
 func realWorldDraftFindings(details realWorldOutputDetails, perRepo []realWorldRepositoryTriage, issueGroups []realWorldIssueGroup, warningGroups []realWorldWarningGroup) []string {
 	summary := details.Summary
 	findings := []string{
@@ -582,11 +1142,13 @@ func realWorldDraftFollowUp(details realWorldOutputDetails, recommendations []re
 
 func realWorldFinalResponseContract() map[string]any {
 	return map[string]any{
+		"assessmentPerspective":    realWorldDeveloperExperienceGuidance(),
 		"required":                 "The agent's final message to the user must choose exactly one of these outcomes: productChangesToConsider or productBehavedReasonably.",
-		"productChangesToConsider": "Use this when the sweep found concrete product changes worth considering; list each recommendation with strength and rationale grounded in the MCP triage/record result.",
-		"productBehavedReasonably": "Use this when no genuine product change is recommended; say the product behaved reasonably and briefly explain the observed evidence.",
+		"productChangesToConsider": "Use this when the sweep found concrete correctness or ergonomics changes worth considering; list each recommendation with strength and rationale grounded in the MCP triage/record result.",
+		"productBehavedReasonably": "Use this only when no genuine product change is recommended after assessing the developer experience; say the product behaved reasonably and briefly explain the observed evidence and caveats.",
 		"doNot": []string{
 			"Do not end with only raw counts or a generic run summary.",
+			"Do not say the product behaved reasonably just because the command produced structured JSON.",
 			"Do not create or update Markdown report files for repository memory.",
 			"Do not publish a GitHub Discussion unless the run is inside a GitHub Agentic Workflow.",
 		},
@@ -715,6 +1277,35 @@ func realWorldMapString(value map[string]any, key string) string {
 	default:
 		return fmt.Sprint(typed)
 	}
+}
+
+func realWorldMapInt(value map[string]any, key string) int {
+	raw, ok := value[key]
+	if !ok || raw == nil {
+		return 0
+	}
+	switch typed := raw.(type) {
+	case int:
+		return typed
+	case int64:
+		return int(typed)
+	case float64:
+		return int(typed)
+	case json.Number:
+		n, _ := typed.Int64()
+		return int(n)
+	default:
+		return 0
+	}
+}
+
+func containsString(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
 }
 
 func appendUniqueLimit(values []string, value string, limit int) []string {

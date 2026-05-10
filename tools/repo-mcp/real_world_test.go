@@ -79,6 +79,117 @@ func TestReadRealWorldOutputSummary(t *testing.T) {
 	if len(warnings) != 1 || warnings[0]["kind"] != "schemaCatalogSchemaUnavailable" {
 		t.Fatalf("warnings = %+v", warnings)
 	}
+
+	bundlePath := filepath.Join(dir, "bundle.json")
+	bundle := `{
+  "formatVersion": 1,
+  "json": {
+    "summary": {
+      "discovered": 1,
+      "validated": 1,
+      "skipped": 0,
+      "failed": 0,
+      "issues": {"total": 0, "parsing": 0, "validation": 0, "schema": 0, "coverage": 0},
+      "ignored": 0,
+      "warnings": 0,
+      "durationNanos": 12
+    },
+    "files": [{"path": "ok.json", "format": "json", "status": "validated"}],
+    "issues": [],
+    "warnings": []
+  },
+  "sarif": {"version": "2.1.0", "runs": []},
+  "styled": {"plain": "dollarlint passed", "ansi": "\u001b[32mdollarlint passed\u001b[0m", "options": {"locations": true, "showSkipped": true}}
+}`
+	if err := os.WriteFile(bundlePath, []byte(bundle), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	summary, warnings, err = readRealWorldOutputSummary(bundlePath)
+	if err != nil {
+		t.Fatalf("read bundle summary: %v", err)
+	}
+	if summary.Discovered != 1 || summary.Duration.Nanos != 12 || len(warnings) != 0 {
+		t.Fatalf("bundle summary = %+v warnings=%+v", summary, warnings)
+	}
+	details, err := readRealWorldOutputDetails(bundlePath)
+	if err != nil {
+		t.Fatalf("read bundle details: %v", err)
+	}
+	if details.Styled == nil || !strings.Contains(details.Styled.Plain, "passed") {
+		t.Fatalf("bundle styled output = %+v", details.Styled)
+	}
+}
+
+func TestRealWorldValidationEvidenceIncludesBundleUXCollateral(t *testing.T) {
+	dir := t.TempDir()
+	repo := filepath.Join(dir, "repo")
+	if err := os.MkdirAll(repo, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(repo, "pyproject.toml"), []byte("[tool.ruff.lint]\nignore = [\n    \"UP038\",\n]\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(dir, "bundle.json")
+	longMessage := "value must be one of '" + strings.Repeat("A', '", 600) + "Z'"
+	bundle := map[string]any{
+		"formatVersion": 1,
+		"json": map[string]any{
+			"root": repo,
+			"summary": map[string]any{
+				"discovered": 2,
+				"validated":  1,
+				"skipped":    1,
+				"failed":     0,
+				"issues":     map[string]any{"total": 1, "parsing": 0, "validation": 1, "schema": 0, "coverage": 0},
+				"ignored":    0,
+				"warnings":   0,
+			},
+			"files": []map[string]any{
+				{"path": "pyproject.toml", "format": "toml", "status": "validated", "issues": 1},
+				{"path": ".rubocop.yml", "format": "yaml", "status": "skipped"},
+			},
+			"issues": []map[string]any{{
+				"path":             "pyproject.toml",
+				"category":         "validation",
+				"keyword":          "enum",
+				"schemaSource":     "catalog:schemastore:PyProject",
+				"instanceLocation": "/tool/ruff/lint/ignore/0",
+				"line":             3,
+				"column":           5,
+				"message":          longMessage,
+			}},
+			"warnings": []map[string]any{},
+		},
+		"sarif":  map[string]any{"version": "2.1.0", "runs": []any{}},
+		"styled": map[string]any{"plain": "dollarlint found 1 validation issue\npyproject.toml\n", "ansi": "\u001b[31mdollarlint found 1 validation issue\u001b[0m\n", "options": map[string]any{"locations": true, "showSkipped": true}},
+	}
+	data, err := json.Marshal(bundle)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	evidence, err := realWorldValidationEvidence("repo", path)
+	if err != nil {
+		t.Fatalf("validation evidence: %v", err)
+	}
+	examples := evidence["exampleIssues"].([]realWorldIssueExample)
+	if len(examples) != 1 || !examples[0].MessageTruncated || examples[0].SourceExcerpt == nil {
+		t.Fatalf("issue examples = %+v", examples)
+	}
+	groups := evidence["skippedGroups"].([]realWorldSkippedFileGroup)
+	if len(groups) == 0 || groups[0].Class != "tooling-config" || !groups[0].ProductSignal {
+		t.Fatalf("skipped groups = %+v", groups)
+	}
+	preview := evidence["cliPreview"].(map[string]any)
+	if !strings.Contains(preview["plain"].(string), "validation issue") {
+		t.Fatalf("cli preview = %+v", preview)
+	}
+	signals := evidence["uxSignals"].([]string)
+	if !containsString(signals, "large-enum-message") {
+		t.Fatalf("ux signals = %+v", signals)
+	}
 }
 
 func TestTriageRealWorldOutputGroupsIssuesAndWarnings(t *testing.T) {
@@ -552,7 +663,8 @@ func TestValidateRealWorldEntryForRecordAcceptsCompleteEntry(t *testing.T) {
 		ValidationFeedback: []realWorldValidationFeedback{{
 			Repository: "example",
 			Outcome:    realWorldFeedbackBehavedReasonably,
-			Notes:      "DollarLint handled the repo reasonably.",
+			Findings:   []string{"The repo produced no issues or warnings and skipped files were expected fixtures."},
+			Notes:      "DollarLint handled the repo reasonably from a developer-experience perspective.",
 		}},
 		Findings: []string{"No crashes or output contract issues."},
 		ProductRecommendations: []realWorldProductRecommendation{{
@@ -565,6 +677,96 @@ func TestValidateRealWorldEntryForRecordAcceptsCompleteEntry(t *testing.T) {
 	}
 	if err := validateRealWorldEntryForRecord(entry); err != nil {
 		t.Fatalf("validate complete entry: %v", err)
+	}
+}
+
+func TestValidateRealWorldFeedbackRequiresEvidenceForBehavedReasonably(t *testing.T) {
+	err := validateRealWorldValidationFeedback(realWorldValidationFeedback{
+		Repository: "example",
+		Outcome:    realWorldFeedbackBehavedReasonably,
+		Notes:      "Accepted; see merged artifact for details.",
+	})
+	if err == nil {
+		t.Fatal("expected behaved-reasonably feedback without evidence to be rejected")
+	}
+	if !strings.Contains(err.Error(), "behaved-reasonably feedback") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestRealWorldFeedbackContractFramesDeveloperExperience(t *testing.T) {
+	contract := realWorldValidationFeedbackContract()
+	if _, ok := contract["assessmentPerspective"]; !ok {
+		t.Fatalf("contract missing developer-experience guidance: %+v", contract)
+	}
+	evidence, ok := contract["evidence"].(string)
+	if !ok || !strings.Contains(evidence, "notes-only boilerplate is rejected") {
+		t.Fatalf("contract evidence guidance = %+v", contract["evidence"])
+	}
+
+	next := realWorldNextValidationResultWithFeedback("run", "example")
+	if _, ok := next["feedbackTemplate"]; !ok {
+		t.Fatalf("next step should provide a feedback template instead of a copyable default: %+v", next)
+	}
+	suggested := next["suggestedArgs"].(map[string]any)
+	if _, ok := suggested["feedback"]; ok {
+		t.Fatalf("suggested args should not default feedback to behaved-reasonably: %+v", suggested)
+	}
+}
+
+func TestRealWorldManagedNextStepHidesPaths(t *testing.T) {
+	run := &realWorldPrepareRun{
+		ID:             "prepare-run",
+		CorpusDir:      "/tmp/dollarlint-corpus.secret",
+		CacheDir:       "/tmp/dollarlint-cache.secret",
+		OutputArtifact: "/tmp/dollarlint-output.secret.json",
+		ManifestPath:   "/tmp/dollarlint-corpus.secret/real-world-manifest.json",
+		Repositories:   []realWorldRepository{{Name: "example", CloneURL: "https://github.com/example/example.git", Path: "/tmp/dollarlint-corpus.secret/example"}},
+		prepByID:       map[string]realWorldDependencyPrep{},
+	}
+	step := realWorldNextRunCorpusDuringPrepare(run)
+	suggested := step["suggestedArgs"].(map[string]any)
+	if suggested["runID"] != "prepare-run" {
+		t.Fatalf("managed next step should carry runID: %+v", suggested)
+	}
+	for _, key := range []string{"corpusDir", "cacheDir", "outputArtifact", "manifestPath"} {
+		if _, ok := suggested[key]; ok {
+			t.Fatalf("managed next step leaked %s: %+v", key, suggested)
+		}
+	}
+}
+
+func TestRealWorldPublicResultsHideManagedPaths(t *testing.T) {
+	prep := realWorldPublicPrepareResult(realWorldRepoPrepareResult{
+		Repository: "example",
+		Path:       "/tmp/dollarlint-corpus.secret/example",
+		Command:    "git clone https://github.com/example/example.git /tmp/dollarlint-corpus.secret/example",
+		RepositoryRecord: realWorldRepository{
+			Name:     "example",
+			CloneURL: "https://github.com/example/example.git",
+			Path:     "/tmp/dollarlint-corpus.secret/example",
+		},
+		DependencyPrepInspection: &realWorldDependencyPrepScan{
+			Repository: "example",
+			Path:       "/tmp/dollarlint-corpus.secret/example",
+		},
+	})
+	validation := realWorldPublicValidationResult(nil, realWorldRepoValidationResult{
+		Repository:     "example",
+		Path:           "/tmp/dollarlint-corpus.secret/example",
+		CacheDir:       "/tmp/dollarlint-cache.secret/repo-example",
+		OutputArtifact: "/tmp/dollarlint-validation.secret/example.json",
+		Command:        "XDG_CACHE_HOME=/tmp/dollarlint-cache.secret/repo-example bin/dollarlint validate /tmp/dollarlint-corpus.secret/example",
+	})
+	data, err := json.Marshal(map[string]any{"prep": prep, "validation": validation})
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(data)
+	for _, leaked := range []string{"dollarlint-corpus.secret", "dollarlint-cache.secret", "dollarlint-validation.secret", "git clone"} {
+		if strings.Contains(text, leaked) {
+			t.Fatalf("public result leaked %q in %s", leaked, text)
+		}
 	}
 }
 

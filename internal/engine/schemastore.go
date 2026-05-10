@@ -259,7 +259,19 @@ func lowConfidenceSchemaStoreGlob(pattern string) bool {
 	if strings.Contains(pattern, "/") {
 		return false
 	}
+	if highConfidenceSchemaStoreBasenameGlob(pattern) {
+		return false
+	}
 	return strings.HasPrefix(pattern, "*")
+}
+
+func highConfidenceSchemaStoreBasenameGlob(pattern string) bool {
+	switch strings.ToLower(pattern) {
+	case "*.rubocop.yml", "*.rubocop.yaml":
+		return true
+	default:
+		return false
+	}
 }
 
 func hasGlobMeta(pattern string) bool {

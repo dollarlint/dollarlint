@@ -68,6 +68,47 @@ func TestExecuteExitCodes(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
+	if code := Execute([]string{"validate", dir, "--format", "bundle", "--locations", "--show-skipped"}, &stdout, &stderr); code != 1 {
+		t.Fatalf("bundle run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	var bundle struct {
+		FormatVersion int `json:"formatVersion"`
+		JSON          struct {
+			FormatVersion int `json:"formatVersion"`
+			Summary       struct {
+				Discovered int `json:"discovered"`
+			} `json:"summary"`
+			Issues []struct {
+				Path string `json:"path"`
+				Line int    `json:"line"`
+			} `json:"issues"`
+		} `json:"json"`
+		SARIF struct {
+			Version string `json:"version"`
+		} `json:"sarif"`
+		Styled struct {
+			Plain   string `json:"plain"`
+			ANSI    string `json:"ansi"`
+			Options struct {
+				ShowSkipped bool `json:"showSkipped"`
+				Locations   bool `json:"locations"`
+			} `json:"options"`
+		} `json:"styled"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &bundle); err != nil {
+		t.Fatalf("decode bundle output: %v\n%s", err, stdout.String())
+	}
+	if bundle.FormatVersion != dollarlint.BundleFormatVersion || bundle.JSON.FormatVersion != dollarlint.JSONFormatVersion || bundle.SARIF.Version != "2.1.0" {
+		t.Fatalf("bundle format versions = %+v", bundle)
+	}
+	if len(bundle.JSON.Issues) != 1 || bundle.JSON.Issues[0].Path != "bad.json" || bundle.JSON.Issues[0].Line == 0 {
+		t.Fatalf("bundle json issue = %+v", bundle.JSON.Issues)
+	}
+	if !bundle.Styled.Options.ShowSkipped || !bundle.Styled.Options.Locations || !strings.Contains(bundle.Styled.Plain, "dollarlint found 1 validation issue") || !strings.Contains(bundle.Styled.Plain, "bad.json") {
+		t.Fatalf("bundle styled output = %+v", bundle.Styled)
+	}
+	stdout.Reset()
+	stderr.Reset()
 	outputPath := filepath.Join(dir, "dollarlint.sarif")
 	if code := Execute([]string{"validate", dir, "--format", "sarif", "--output", outputPath}, &stdout, &stderr); code != 1 {
 		t.Fatalf("sarif file run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
@@ -132,7 +173,7 @@ func TestExecuteSuccessAndHelpers(t *testing.T) {
 	if code := Execute([]string{"validate", dir, "--show-skipped"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("success exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
-	if !strings.Contains(stdout.String(), "skipped: plain.json") {
+	if !strings.Contains(stdout.String(), "plain.json") {
 		t.Fatalf("text output = %s", stdout.String())
 	}
 	if _, err := parseAssociation("nope"); err == nil {

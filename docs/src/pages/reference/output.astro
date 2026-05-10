@@ -68,6 +68,22 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues (2 parsing, 6 validation
       >, and <code>coverage</code> counts, and <code>durationNanos</code> is the stable
       numeric duration field.
     </p>
+    <p>
+      Skipped file entries include <code>skipReason</code>, <code>skipClass</code>,
+      <code>skipImportance</code>, and <code>skipDetail</code> when DollarLint can
+      classify why a file was not validated. This separates low-value data or
+      lockfile skips from higher-signal unsupported project configuration.
+    </p>
+
+    <h2>Bundle</h2>
+    <pre><code>dollarlint validate . --format bundle --locations --show-skipped --output dollarlint.bundle.json</code></pre>
+    <p>
+      Bundle output captures the JSON result, SARIF result, and styled text output
+      from one validation run. The top-level object has <code>json</code>, <code
+        >sarif</code
+      >, and <code>styled</code> keys; <code>styled</code> includes both ANSI and
+      plain text so tools can inspect the same terminal experience a user would see.
+    </p>
 
     <h2>Branch errors</h2>
     <pre><code>[output]

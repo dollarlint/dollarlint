@@ -2,6 +2,7 @@ package engine
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
@@ -118,7 +119,21 @@ func applyValidationIssueHint(document *Document, issue *Issue) {
 	}
 	if isMkDocsInheritedRequiredIssue(document, *issue) {
 		issue.Hint = "This MkDocs config declares top-level INHERIT; MkDocs merges inherited settings before use, so validate the rendered config or add a narrow ignore rule for the inherited required property."
+		return
 	}
+	if hint := catalogValidationIssueHint(document, *issue); hint != "" {
+		issue.Hint = hint
+	}
+}
+
+func catalogValidationIssueHint(document *Document, issue Issue) string {
+	if document == nil || !isCatalogSchemaSource(document.SchemaSource) {
+		return ""
+	}
+	if issue.Keyword == "enum" {
+		return fmt.Sprintf("This issue came from %s; if this value is valid for the repo's tool version, the external catalog schema may be stale, version-mismatched, or incomplete.", document.SchemaSource)
+	}
+	return fmt.Sprintf("This issue came from %s; confirm the external catalog schema matches this repo's tool version and conventions before treating it as a config bug.", document.SchemaSource)
 }
 
 func isMkDocsInheritedRequiredIssue(document *Document, issue Issue) bool {
@@ -334,8 +349,65 @@ func validationMessage(err *jsonschema.ValidationError) string {
 		return fmt.Sprintf("must be < %s", ratString(typed.Want))
 	case *kind.MultipleOf:
 		return fmt.Sprintf("must be a multiple of %s", ratString(typed.Want))
+	case *kind.Enum:
+		return enumValidationMessage(typed)
 	}
 	return err.BasicOutput().Error.String()
+}
+
+func enumValidationMessage(typed *kind.Enum) string {
+	if typed == nil {
+		return "value does not match any allowed enum value"
+	}
+	got := displayValidationValue(typed.Got)
+	switch len(typed.Want) {
+	case 0:
+		return fmt.Sprintf("value %s does not match any allowed enum value", got)
+	case 1:
+		return fmt.Sprintf("value %s must be %s", got, displayValidationValue(typed.Want[0]))
+	}
+	if len(typed.Want) <= 10 {
+		return fmt.Sprintf("value %s must be one of %s", got, joinedValidationValues(typed.Want))
+	}
+	return fmt.Sprintf("value %s is not one of %d allowed values (examples: %s)", got, len(typed.Want), summarizedValidationValues(typed.Want))
+}
+
+func joinedValidationValues(values []any) string {
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		out = append(out, displayValidationValue(value))
+	}
+	return strings.Join(out, ", ")
+}
+
+func summarizedValidationValues(values []any) string {
+	const head = 5
+	const tail = 2
+	if len(values) <= head+tail {
+		return joinedValidationValues(values)
+	}
+	parts := make([]string, 0, head+tail+1)
+	for _, value := range values[:head] {
+		parts = append(parts, displayValidationValue(value))
+	}
+	parts = append(parts, "...")
+	for _, value := range values[len(values)-tail:] {
+		parts = append(parts, displayValidationValue(value))
+	}
+	return strings.Join(parts, ", ")
+}
+
+func displayValidationValue(value any) string {
+	switch typed := value.(type) {
+	case string:
+		return fmt.Sprintf("%q", typed)
+	case nil, bool, float64, float32, int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+		data, err := json.Marshal(typed)
+		if err == nil {
+			return string(data)
+		}
+	}
+	return fmt.Sprintf("%v", value)
 }
 
 func countNoun(count int, singular, plural string) string {

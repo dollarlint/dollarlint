@@ -21,6 +21,7 @@ const (
 var realWorldSchemaRefPattern = regexp.MustCompile(`(?i)["']?\$schema["']?\s*[:=]\s*["']?([^"',\s#}]+)`)
 
 type realWorldInspectArgs struct {
+	RunID          string                `json:"runID"`
 	CorpusDir      string                `json:"corpusDir"`
 	CacheDir       string                `json:"cacheDir"`
 	OutputArtifact string                `json:"outputArtifact"`
@@ -70,23 +71,53 @@ type realWorldTextSignal struct {
 	Pattern string `json:"pattern"`
 }
 
-func (s *repoServer) handleRealWorldInspectCorpus(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *repoServer) handleRealWorldInspectCorpus(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	var args realWorldInspectArgs
 	_ = request.BindArguments(&args)
+	if err := realWorldRejectManualPathArgsWithRunID(args.RunID, map[string]string{
+		"corpusDir":      args.CorpusDir,
+		"cacheDir":       args.CacheDir,
+		"outputArtifact": args.OutputArtifact,
+		"manifestPath":   args.ManifestPath,
+	}); err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	if args.RunID != "" {
+		if s.realWorldPrepareRuns == nil {
+			return mcp.NewToolResultError(fmt.Sprintf("corpus preparation run %q was not found", args.RunID)), nil
+		}
+		run, ok := s.realWorldPrepareRuns.get(args.RunID)
+		if !ok {
+			return mcp.NewToolResultError(fmt.Sprintf("corpus preparation run %q was not found", args.RunID)), nil
+		}
+		if args.CorpusDir == "" {
+			args.CorpusDir = run.CorpusDir
+		}
+		if args.CacheDir == "" {
+			args.CacheDir = run.CacheDir
+		}
+		if args.OutputArtifact == "" {
+			args.OutputArtifact = run.OutputArtifact
+		}
+		if args.ManifestPath == "" {
+			args.ManifestPath = run.ManifestPath
+		}
+		if len(args.Repositories) == 0 {
+			args.Repositories = run.repositories()
+		}
+	}
 	inspection, err := realWorldInspectCorpus(args)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
-	return structured(map[string]any{
+	return s.realWorldStructured(ctx, map[string]any{
 		"ok":                 true,
-		"corpusDir":          inspection.CorpusDir,
-		"manifestPath":       inspection.ManifestPath,
-		"repositories":       inspection.Repositories,
+		"repositories":       realWorldPublicInspection(inspection.Repositories),
 		"dependencyPrep":     inspection.DraftDependencyPrep,
 		"prepSecurityPolicy": inspection.PrepSecurityPolicy,
 		"summary":            inspection.Summary,
 		"needsReview":        inspection.NeedsReview,
-		"nextStep":           realWorldNextRunCorpus(inspection.CorpusDir, inspection.CacheDir, inspection.OutputArtifact, inspection.ManifestPath, inspection.DraftDependencyPrep),
+		"nextStep":           realWorldNextRunCorpus(args.RunID, inspection.CorpusDir, inspection.CacheDir, inspection.OutputArtifact, inspection.ManifestPath, inspection.DraftDependencyPrep),
 	})
 }
 

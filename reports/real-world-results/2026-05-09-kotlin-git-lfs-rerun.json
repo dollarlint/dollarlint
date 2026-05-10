@@ -1,0 +1,80 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-kotlin-git-lfs-rerun",
+  "date": "2026-05-09",
+  "title": "Kotlin git-lfs rerun",
+  "dollarlintRevision": "aefdd149644dc7849c1268a8df16a757c2c83652",
+  "workingTreeNote": "dirty working tree: M reports/real-world-results.json; ?? reports/real-world-artifacts/2026-05-09-100-fresh-public-repo-corpus.dollarlint.json; ?? reports/real-world-results/2026-05-09-100-fresh-public-repo-corpus.json",
+  "corpus": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822",
+  "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.733719202",
+  "command": "real_world_start_validation corpusDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822\" cacheDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.733719202\" outputArtifact=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-kotlin-git-lfs-rerun-1861873454.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-kotlin-git-lfs-rerun-1861873454.json",
+  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-kotlin-git-lfs-rerun.dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "kotlin",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: js/js.translator/testData/package-lock.json, kotlin-js-store/yarn.lock, libraries/kotlin.test/js/it/package-lock.json, and 5 more. Remote schema refs: 3."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "kotlin",
+      "ecosystem": "JVM/Kotlin",
+      "cloneURL": "https://github.com/JetBrains/kotlin.git",
+      "commit": "69f494f1e59dc3501b1d1c9c86d380bc56f3113a",
+      "notes": "Focused rerun after installing git-lfs to replace prior blocked checkout result.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822/kotlin",
+      "status": "cloned",
+      "alreadyTested": true,
+      "previousEntries": [
+        "2026-05-09-100-fresh-public-repo-corpus"
+      ]
+    }
+  ],
+  "result": {
+    "discovered": 287,
+    "validated": 64,
+    "skipped": 219,
+    "failed": 4,
+    "issues": {
+      "total": 8,
+      "parsing": 4,
+      "validation": 4,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 9269013417
+    }
+  },
+  "findings": [
+    "DollarLint discovered 287 files, validated 64, skipped 219, failed 4, reported 8 issues, and emitted 0 warnings.",
+    "Repository concentration: kotlin: 8 issues, 0 warnings, 219 skipped.",
+    "Issue groups: kotlin catalog-schema-validation/format: 3; kotlin fixture-data/parse: 3; kotlin parser-compatibility/parse: 1; kotlin product-behavior/format: 1.",
+    "Skipped coverage: 219 of 287 discovered files were skipped (76.3%).",
+    "Manual spot-check: the empty .ai/mcp/mcp.json parse error and fixture-data parse errors look expected; domains.yaml is validated against Kotlin's own schema, which marks its relative $schema value invalid via format: uri."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "The Kotlin rerun skipped 219 of 287 discovered files (76.3%), which is important context when judging how much real-world coverage a run actually exercised."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider making the triage distinction between DollarLint product failures, expected invalid files, and schema-authored validation findings clearer in per-repository feedback.",
+      "rationale": "The Kotlin rerun produced several product-signal labels, but manual review suggests some are expected invalid/empty files or validations imposed by the repository's own schema rather than clear DollarLint defects."
+    }
+  ],
+  "productDecisions": [
+    "Installed git-lfs 3.7.1 and initialized Git LFS so the JetBrains/kotlin checkout can complete.",
+    "No DollarLint code change was made during this focused rerun; the result is recorded to replace the prior blocked interpretation with an interpretable Kotlin signal."
+  ],
+  "followUp": [
+    "Revisit the 100-repo sweep conclusion: the raw artifact supports product changes to consider, especially around non-fixture parser compatibility, catalog warning summarization, and skipped-file coverage visibility.",
+    "Continue future sweeps with git-lfs available so LFS-backed repositories are not misclassified as blocked."
+  ]
+}

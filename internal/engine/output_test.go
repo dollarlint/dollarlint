@@ -35,10 +35,14 @@ func TestFormatTextLocationsVerboseSkippedAndQuiet(t *testing.T) {
 	assertContains(t, text, "3:10      minimum")
 	assertContains(t, text, "location: /name")
 	assertContains(t, text, "schema: file:///schema.json")
+	assertContains(t, text, "schemaSource: catalog:schemastore:Example")
 	assertContains(t, text, "warnings")
 	assertContains(t, text, "catalog unavailable")
 	assertContains(t, text, "1 warning")
-	assertContains(t, text, "skipped: skipped.json (no schema)")
+	assertContains(t, text, "skipped files")
+	assertContains(t, text, "medium signal:")
+	assertContains(t, text, "unknown/custom file")
+	assertContains(t, text, "skipped.json")
 	locationOnly := FormatText(result, OutputConfig{Locations: true})
 	assertContains(t, locationOnly, "2:7       type")
 	assertContains(t, locationOnly, "expected string, received number  /name")
@@ -95,16 +99,28 @@ func TestFormatJSONContract(t *testing.T) {
 			Duration:      NewDuration(123 * time.Millisecond),
 			DurationNanos: int64(123 * time.Millisecond),
 		},
-		Files: []FileResult{{
-			Path:         "/tmp/repo/config.json",
-			RelativePath: "config.json",
-			Format:       DocumentFormatJSON,
-			Schema:       "file:///tmp/repo/schema.json",
-			SchemaSource: "$schema",
-			Status:       StatusError,
-			Issues:       1,
-			Ignored:      1,
-		}},
+		Files: []FileResult{
+			{
+				Path:         "/tmp/repo/config.json",
+				RelativePath: "config.json",
+				Format:       DocumentFormatJSON,
+				Schema:       "file:///tmp/repo/schema.json",
+				SchemaSource: "$schema",
+				Status:       StatusError,
+				Issues:       1,
+				Ignored:      1,
+			},
+			{
+				Path:           "/tmp/repo/package-lock.json",
+				RelativePath:   "package-lock.json",
+				Format:         DocumentFormatJSON,
+				Status:         StatusSkipped,
+				SkipReason:     SkipReasonNoSchema,
+				SkipClass:      SkipClassLockfile,
+				SkipImportance: SkipImportanceLow,
+				SkipDetail:     "dependency lockfile without schema coverage",
+			},
+		},
 		Issues: []Issue{
 			{
 				File:             "/tmp/repo/config.json",
@@ -157,11 +173,15 @@ func TestFormatJSONContract(t *testing.T) {
 			Issues        IssueSummary `json:"issues"`
 		} `json:"summary"`
 		Files []struct {
-			Path         string `json:"path"`
-			Schema       string `json:"schema"`
-			SchemaSource string `json:"schemaSource"`
-			Issues       int    `json:"issues"`
-			Ignored      int    `json:"ignored"`
+			Path           string `json:"path"`
+			Schema         string `json:"schema"`
+			SchemaSource   string `json:"schemaSource"`
+			Issues         int    `json:"issues"`
+			Ignored        int    `json:"ignored"`
+			SkipReason     string `json:"skipReason"`
+			SkipClass      string `json:"skipClass"`
+			SkipImportance string `json:"skipImportance"`
+			SkipDetail     string `json:"skipDetail"`
 		} `json:"files"`
 		Issues []struct {
 			Path         string `json:"path"`
@@ -190,8 +210,11 @@ func TestFormatJSONContract(t *testing.T) {
 	if decoded.Schema != JSONResultSchema || decoded.FormatVersion != JSONFormatVersion || decoded.Summary.DurationNanos != int64(123*time.Millisecond) || decoded.Summary.Issues.Total != 1 {
 		t.Fatalf("json summary = %+v version=%d", decoded.Summary, decoded.FormatVersion)
 	}
-	if len(decoded.Files) != 1 || decoded.Files[0].Path != "config.json" || decoded.Files[0].Schema != "schema.json" || decoded.Files[0].SchemaSource != "$schema" || decoded.Files[0].Issues != 1 || decoded.Files[0].Ignored != 1 {
+	if len(decoded.Files) != 2 || decoded.Files[0].Path != "config.json" || decoded.Files[0].Schema != "schema.json" || decoded.Files[0].SchemaSource != "$schema" || decoded.Files[0].Issues != 1 || decoded.Files[0].Ignored != 1 {
 		t.Fatalf("json files = %+v", decoded.Files)
+	}
+	if decoded.Files[1].Path != "package-lock.json" || decoded.Files[1].SkipReason != SkipReasonNoSchema || decoded.Files[1].SkipClass != SkipClassLockfile || decoded.Files[1].SkipImportance != SkipImportanceLow || decoded.Files[1].SkipDetail == "" {
+		t.Fatalf("json skipped file = %+v", decoded.Files[1])
 	}
 	if len(decoded.Issues) != 1 || decoded.Issues[0].Path != "config.json" || decoded.Issues[0].Schema != "schema.json" || decoded.Issues[0].Category != "validation" || decoded.Issues[0].SchemaSource != "$schema" || decoded.Issues[0].Line != 2 || decoded.Issues[0].Column != 11 {
 		t.Fatalf("json issues = %+v", decoded.Issues)
@@ -274,12 +297,20 @@ func textFixtureResult() Result {
 	return Result{
 		Summary: Summary{Discovered: 4, Validated: 3, Skipped: 1, Issues: IssueSummary{Total: 5, Validation: 5}, Duration: NewDuration(123 * time.Millisecond), DurationNanos: int64(123 * time.Millisecond)},
 		Files: []FileResult{
-			{RelativePath: "skipped.json", Status: StatusSkipped},
+			{
+				RelativePath:   "skipped.json",
+				Status:         StatusSkipped,
+				SkipReason:     SkipReasonNoSchema,
+				SkipClass:      SkipClassUnknown,
+				SkipImportance: SkipImportanceMedium,
+				SkipDetail:     "schema-less JSON/YAML/TOML file",
+			},
 		},
 		Issues: []Issue{
 			{
 				RelativePath:     "a.json",
 				Schema:           "file:///schema.json",
+				SchemaSource:     "catalog:schemastore:Example",
 				Keyword:          "minimum",
 				KeywordLocation:  "/minimum",
 				Property:         "count",

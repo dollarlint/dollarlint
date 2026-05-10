@@ -1,0 +1,1571 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-real-world-100-repo-sweep-2026-05-09",
+  "date": "2026-05-09",
+  "title": "real-world-100-repo-sweep-2026-05-09",
+  "dollarlintRevision": "aefdd149644dc7849c1268a8df16a757c2c83652",
+  "workingTreeNote": "dirty working tree during sweep; no source edits were made by this run",
+  "corpus": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331",
+  "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3609768014",
+  "command": "XDG_CACHE_HOME=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3609768014\" bin/dollarlint validate \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331\" --schema-store --schema-store-failure warn --fetch-retries 1 --fetch-retry-min-wait 1ms --fetch-retry-max-wait 1ms --format json --output \"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-real-world-100-repo-sweep-2026-05-09-377468270.json\"",
+  "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-real-world-100-repo-sweep-2026-05-09-377468270.json",
+  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-real-world-100-repo-sweep-2026-05-09.dollarlint.json",
+  "dependencyPrep": [
+    {
+      "status": "not-needed",
+      "notes": "No dependency-prep commands were required or run for this sweep; validation executed directly against cloned repositories."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "agency-agents",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=5 v=2 s=3 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "andrej-karpathy-skills",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=2 v=2 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "animate.css",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=6 v=4 s=2 f=0 i=1 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "ant-design",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=55 v=47 s=8 f=0 i=1 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "app-ideas",
+      "outcome": "blocked",
+      "findings": [
+        "d=0 v=0 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "autoresearch",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=1 v=1 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "axios",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=26 v=19 s=7 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "bitcoin",
+      "outcome": "blocked",
+      "findings": [
+        "d=122 v=21 s=65 f=36 i=42 p=36 w=0"
+      ]
+    },
+    {
+      "repository": "bootstrap",
+      "outcome": "product-signal",
+      "findings": [
+        "d=46 v=25 s=21 f=0 i=8 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "browser-use",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=19 v=13 s=6 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "clash-verge-rev",
+      "outcome": "product-signal",
+      "findings": [
+        "d=195 v=54 s=141 f=0 i=59 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "claude-code",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=44 v=27 s=17 f=0 i=3 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "claw-code",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=54 v=15 s=39 f=0 i=4 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "clean-code-javascript",
+      "outcome": "blocked",
+      "findings": [
+        "d=0 v=0 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "codex",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=457 v=418 s=39 f=0 i=7 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "ComfyUI",
+      "outcome": "product-signal",
+      "findings": [
+        "d=124 v=27 s=97 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "create-react-app",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=50 v=37 s=13 f=0 i=1 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "d3",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=7 v=5 s=2 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "Deep-Live-Cam",
+      "outcome": "product-signal",
+      "findings": [
+        "d=11 v=0 s=11 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "DeepSeek-R1",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=1 v=1 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "DeepSeek-V3",
+      "outcome": "product-signal",
+      "findings": [
+        "d=5 v=1 s=4 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "dify",
+      "outcome": "product-signal",
+      "findings": [
+        "d=1315 v=108 s=1207 f=0 i=14 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "electron",
+      "outcome": "blocked",
+      "findings": [
+        "d=186 v=133 s=52 f=1 i=10 p=1 w=0"
+      ]
+    },
+    {
+      "repository": "every-programmer-should-know",
+      "outcome": "product-signal",
+      "findings": [
+        "d=1 v=1 s=0 f=0 i=12 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "everything-claude-code",
+      "outcome": "product-signal",
+      "findings": [
+        "d=107 v=33 s=74 f=0 i=56 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "excalidraw",
+      "outcome": "product-signal",
+      "findings": [
+        "d=107 v=42 s=65 f=0 i=51 p=0 w=4"
+      ]
+    },
+    {
+      "repository": "FiraCode",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=2 v=2 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "firecrawl",
+      "outcome": "blocked",
+      "findings": [
+        "d=120 v=70 s=34 f=16 i=17 p=16 w=0"
+      ]
+    },
+    {
+      "repository": "flutter",
+      "outcome": "blocked",
+      "findings": [
+        "d=537 v=175 s=360 f=2 i=25 p=2 w=0"
+      ]
+    },
+    {
+      "repository": "FreeDomain",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=1 v=1 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "frp",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=26 v=18 s=8 f=0 i=3 p=0 w=1"
+      ]
+    },
+    {
+      "repository": "fucking-algorithm",
+      "outcome": "blocked",
+      "findings": [
+        "d=0 v=0 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "fzf",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=14 v=12 s=2 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "gemini-cli",
+      "outcome": "blocked",
+      "findings": [
+        "d=149 v=84 s=55 f=10 i=22 p=10 w=0"
+      ]
+    },
+    {
+      "repository": "gin",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=11 v=9 s=2 f=0 i=4 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "GitHub-Chinese-Top-Charts",
+      "outcome": "blocked",
+      "findings": [
+        "d=0 v=0 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "github-readme-stats",
+      "outcome": "blocked",
+      "findings": [
+        "d=31 v=23 s=7 f=1 i=11 p=1 w=1"
+      ]
+    },
+    {
+      "repository": "go",
+      "outcome": "blocked",
+      "findings": [
+        "d=71 v=1 s=51 f=19 i=19 p=19 w=0"
+      ]
+    },
+    {
+      "repository": "gstack",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=24 v=12 s=12 f=0 i=1 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "hello-algo",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=47 v=36 s=11 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "HelloGitHub",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=4 v=2 s=2 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "hermes-agent",
+      "outcome": "product-signal",
+      "findings": [
+        "d=133 v=29 s=104 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "hoppscotch",
+      "outcome": "blocked",
+      "findings": [
+        "d=225 v=98 s=126 f=1 i=36 p=1 w=0"
+      ]
+    },
+    {
+      "repository": "HowToCook",
+      "outcome": "blocked",
+      "findings": [
+        "d=7 v=4 s=2 f=1 i=1 p=1 w=0"
+      ]
+    },
+    {
+      "repository": "immich",
+      "outcome": "product-signal",
+      "findings": [
+        "d=220 v=78 s=142 f=0 i=69 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "java-design-patterns",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=11 v=7 s=4 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "JavaGuide",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=3 v=2 s=1 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "javascript",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=8 v=8 s=0 f=0 i=2 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "laravel",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=7 v=6 s=1 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "llama.cpp",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=75 v=62 s=13 f=0 i=3 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "LLMs-from-scratch",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=26 v=14 s=12 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "localsend",
+      "outcome": "product-signal",
+      "findings": [
+        "d=151 v=24 s=127 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "mall",
+      "outcome": "product-signal",
+      "findings": [
+        "d=14 v=0 s=14 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "manim",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=6 v=4 s=2 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "markitdown",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=10 v=9 s=1 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "mermaid",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=77 v=62 s=15 f=0 i=1 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "Microsoft-Activation-Scripts",
+      "outcome": "blocked",
+      "findings": [
+        "d=0 v=0 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "neovim",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=48 v=35 s=13 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "netdata",
+      "outcome": "blocked",
+      "findings": [
+        "d=1399 v=290 s=1106 f=3 i=681 p=3 w=0"
+      ]
+    },
+    {
+      "repository": "NextChat",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=24 v=16 s=8 f=0 i=1 p=0 w=1"
+      ]
+    },
+    {
+      "repository": "nvm",
+      "outcome": "blocked",
+      "findings": [
+        "d=24 v=20 s=0 f=4 i=22 p=4 w=0"
+      ]
+    },
+    {
+      "repository": "ollama",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=52 v=14 s=38 f=0 i=1 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "open-webui",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=99 v=21 s=78 f=0 i=1 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "opencode",
+      "outcome": "product-signal",
+      "findings": [
+        "d=310 v=162 s=148 f=0 i=198 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "papers-we-love",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=1 v=1 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "playwright",
+      "outcome": "blocked",
+      "findings": [
+        "d=147 v=77 s=69 f=1 i=4 p=1 w=0"
+      ]
+    },
+    {
+      "repository": "PowerToys",
+      "outcome": "blocked",
+      "findings": [
+        "d=185 v=37 s=142 f=6 i=33 p=6 w=0"
+      ]
+    },
+    {
+      "repository": "Python-100-Days",
+      "outcome": "blocked",
+      "findings": [
+        "d=0 v=0 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "ragflow",
+      "outcome": "blocked",
+      "findings": [
+        "d=139 v=17 s=108 f=14 i=15 p=14 w=0"
+      ]
+    },
+    {
+      "repository": "realworld",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=15 v=8 s=7 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "rustdesk",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=41 v=33 s=8 f=0 i=4 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "scrcpy",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=2 v=2 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "servers",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=20 v=18 s=2 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "sherlock",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=17 v=9 s=8 f=0 i=1 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "skills",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=1 v=1 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "spec-kit",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=41 v=13 s=28 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "spring-boot",
+      "outcome": "blocked",
+      "findings": [
+        "d=320 v=33 s=283 f=4 i=11 p=4 w=0"
+      ]
+    },
+    {
+      "repository": "stable-diffusion-webui",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=17 v=7 s=10 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "superpowers",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=13 v=6 s=7 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "syncthing",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=80 v=17 s=63 f=0 i=1 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "system-prompts-and-models-of-ai-tools",
+      "outcome": "blocked",
+      "findings": [
+        "d=20 v=1 s=14 f=5 i=5 p=5 w=0"
+      ]
+    },
+    {
+      "repository": "tailwindcss",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=63 v=60 s=3 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "tauri",
+      "outcome": "blocked",
+      "findings": [
+        "d=181 v=116 s=59 f=6 i=24 p=6 w=0"
+      ]
+    },
+    {
+      "repository": "terminal",
+      "outcome": "product-signal",
+      "findings": [
+        "d=28 v=15 s=13 f=0 i=12 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "the-art-of-command-line",
+      "outcome": "product-signal",
+      "findings": [
+        "d=1 v=0 s=1 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "thefuck",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=3 v=3 s=0 f=0 i=4 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "transformers",
+      "outcome": "blocked",
+      "findings": [
+        "d=123 v=58 s=57 f=8 i=10 p=8 w=1"
+      ]
+    },
+    {
+      "repository": "ui",
+      "outcome": "product-signal",
+      "findings": [
+        "d=4369 v=4260 s=109 f=0 i=2850 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "uptime-kuma",
+      "outcome": "product-signal",
+      "findings": [
+        "d=116 v=31 s=85 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "uv",
+      "outcome": "product-signal",
+      "findings": [
+        "d=168 v=156 s=12 f=0 i=21 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "v2rayN",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=13 v=11 s=2 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "vllm",
+      "outcome": "blocked",
+      "findings": [
+        "d=805 v=20 s=776 f=9 i=10 p=9 w=0"
+      ]
+    },
+    {
+      "repository": "vue-element-admin",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=5 v=4 s=1 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "vue",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=23 v=21 s=2 f=0 i=2 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "weekly",
+      "outcome": "blocked",
+      "findings": [
+        "d=0 v=0 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "whisper",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=7 v=5 s=2 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "You-Dont-Know-JS",
+      "outcome": "blocked",
+      "findings": [
+        "d=0 v=0 s=0 f=0 i=0 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "youtube-dl",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "d=4 v=2 s=2 f=0 i=2 p=0 w=0"
+      ]
+    },
+    {
+      "repository": "yt-dlp",
+      "outcome": "blocked",
+      "findings": [
+        "d=35 v=19 s=10 f=6 i=16 p=6 w=0"
+      ]
+    },
+    {
+      "repository": "zed",
+      "outcome": "blocked",
+      "findings": [
+        "d=714 v=312 s=96 f=306 i=308 p=306 w=0"
+      ]
+    }
+  ],
+  "repositories": [
+    {
+      "name": "vue",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/vuejs/vue.git",
+      "commit": "9e88707940088cb1f4cd7dd210c9168a50dc347c",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/vue",
+      "status": "cloned"
+    },
+    {
+      "name": "claw-code",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/ultraworkers/claw-code.git",
+      "commit": "b98b9a712e9aaa1a4f23bbec99a2182f14d89fd4",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/claw-code",
+      "status": "cloned"
+    },
+    {
+      "name": "You-Dont-Know-JS",
+      "ecosystem": "Mixed",
+      "cloneURL": "https://github.com/getify/You-Dont-Know-JS.git",
+      "commit": "044120ef55564939cd35f5ddaf3f6c0a45d7b02c",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/you-dont-know-js",
+      "status": "cloned"
+    },
+    {
+      "name": "superpowers",
+      "ecosystem": "Shell",
+      "cloneURL": "https://github.com/obra/superpowers.git",
+      "commit": "f2cbfbefebbfef77321e4c9abc9e949826bea9d7",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/superpowers",
+      "status": "cloned"
+    },
+    {
+      "name": "Python-100-Days",
+      "ecosystem": "Jupyter Notebook",
+      "cloneURL": "https://github.com/jackfrued/Python-100-Days.git",
+      "commit": "462bfc3308d86cb319e5000ca779d069fd24bf1b",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/python-100-days",
+      "status": "cloned"
+    },
+    {
+      "name": "everything-claude-code",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/affaan-m/everything-claude-code.git",
+      "commit": "841beea45cb25ba51f29fa45b7e272938d19b80a",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/everything-claude-code",
+      "status": "cloned"
+    },
+    {
+      "name": "flutter",
+      "ecosystem": "Dart",
+      "cloneURL": "https://github.com/flutter/flutter.git",
+      "commit": "1887a104cc6ebd8314487886215d853aab556889",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/flutter",
+      "status": "cloned"
+    },
+    {
+      "name": "Microsoft-Activation-Scripts",
+      "ecosystem": "Batchfile",
+      "cloneURL": "https://github.com/massgravel/Microsoft-Activation-Scripts.git",
+      "commit": "166814e52d10204aaa5c3c7db03a3dae9d866509",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/microsoft-activation-scripts",
+      "status": "cloned"
+    },
+    {
+      "name": "bootstrap",
+      "ecosystem": "MDX",
+      "cloneURL": "https://github.com/twbs/bootstrap.git",
+      "commit": "a583d9a8f3a1027566f3d82f0538d61f6d17f0d3",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/bootstrap",
+      "status": "cloned"
+    },
+    {
+      "name": "ollama",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/ollama/ollama.git",
+      "commit": "c2f2d90a679317e443b0c35aa6d6d747cdd6c57b",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/ollama",
+      "status": "cloned"
+    },
+    {
+      "name": "stable-diffusion-webui",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/AUTOMATIC1111/stable-diffusion-webui.git",
+      "commit": "82a973c04367123ae98bd9abdf80d9eda9b910e2",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/stable-diffusion-webui",
+      "status": "cloned"
+    },
+    {
+      "name": "yt-dlp",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/yt-dlp/yt-dlp.git",
+      "commit": "c8695f52a91f0d2aabbba7b7200c1099bfa9a3e5",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/yt-dlp",
+      "status": "cloned"
+    },
+    {
+      "name": "FreeDomain",
+      "ecosystem": "HTML",
+      "cloneURL": "https://github.com/DigitalPlatDev/FreeDomain.git",
+      "commit": "f7c1e25cc3006ead946c809a71731fc4b46fb700",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/freedomain",
+      "status": "cloned"
+    },
+    {
+      "name": "the-art-of-command-line",
+      "ecosystem": "Mixed",
+      "cloneURL": "https://github.com/jlevy/the-art-of-command-line.git",
+      "commit": "6b50745d2e788add2e8f1ed29010e72659a9a074",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/the-art-of-command-line",
+      "status": "cloned"
+    },
+    {
+      "name": "transformers",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/huggingface/transformers.git",
+      "commit": "c9de1097eed992fe205f876415e7a7cfaa06be50",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/transformers",
+      "status": "cloned"
+    },
+    {
+      "name": "opencode",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/anomalyco/opencode.git",
+      "commit": "b8ca71d309349147c160105d9c171b850b138f2e",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/opencode",
+      "status": "cloned"
+    },
+    {
+      "name": "HelloGitHub",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/521xueweihan/HelloGitHub.git",
+      "commit": "abf73dbc7c1a925b384c3dfdb22926ce4cec18d4",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/hellogithub",
+      "status": "cloned"
+    },
+    {
+      "name": "JavaGuide",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/Snailclimb/JavaGuide.git",
+      "commit": "dff8aa7afa231fa011a0e4c0c404e2073ce85bf7",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/javaguide",
+      "status": "cloned"
+    },
+    {
+      "name": "javascript",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/airbnb/javascript.git",
+      "commit": "8ed19247bef145e3cc41b24a02dd1fe6d9b5e681",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/javascript",
+      "status": "cloned"
+    },
+    {
+      "name": "hermes-agent",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/NousResearch/hermes-agent.git",
+      "commit": "fef1a41248a9a584f7b945d0a46d57de46d15358",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/hermes-agent",
+      "status": "cloned"
+    },
+    {
+      "name": "dify",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/langgenius/dify.git",
+      "commit": "e48d7bb097159629923730bc5da7496d4d438ca7",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/dify",
+      "status": "cloned"
+    },
+    {
+      "name": "youtube-dl",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/ytdl-org/youtube-dl.git",
+      "commit": "956b8c585591b401a543e409accb163eeaaa1193",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/youtube-dl",
+      "status": "cloned"
+    },
+    {
+      "name": "scrcpy",
+      "ecosystem": "C",
+      "cloneURL": "https://github.com/Genymobile/scrcpy.git",
+      "commit": "693ee7aa367587d7f0557b741b91723dfe5a210c",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/scrcpy",
+      "status": "cloned"
+    },
+    {
+      "name": "system-prompts-and-models-of-ai-tools",
+      "ecosystem": "Mixed",
+      "cloneURL": "https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools.git",
+      "commit": "e674816d710e68c4f440c51b0b4ecb2a0928ea48",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/system-prompts-and-models-of-ai-tools",
+      "status": "cloned"
+    },
+    {
+      "name": "open-webui",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/open-webui/open-webui.git",
+      "commit": "f51d2b026f1b0e7283b15f093412be8b67d24770",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/open-webui",
+      "status": "cloned"
+    },
+    {
+      "name": "go",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/golang/go.git",
+      "commit": "ce4fc9417ccf0d58af947ec358a0e650a645b835",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/go",
+      "status": "cloned"
+    },
+    {
+      "name": "fucking-algorithm",
+      "ecosystem": "Markdown",
+      "cloneURL": "https://github.com/labuladong/fucking-algorithm.git",
+      "commit": "b1f23cb9605f6146ff78bafad71e795176439b99",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/fucking-algorithm",
+      "status": "cloned"
+    },
+    {
+      "name": "PowerToys",
+      "ecosystem": "C#",
+      "cloneURL": "https://github.com/microsoft/PowerToys.git",
+      "commit": "a650504640027c52fa7ece1a1ecc9996407b7453",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/powertoys",
+      "status": "cloned"
+    },
+    {
+      "name": "skills",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/anthropics/skills.git",
+      "commit": "f458cee31a7577a47ba0c9a101976fa599385174",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/skills",
+      "status": "cloned"
+    },
+    {
+      "name": "hello-algo",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/krahets/hello-algo.git",
+      "commit": "4935d2d3877a6205008d89def8d2ba43f7e06275",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/hello-algo",
+      "status": "cloned"
+    },
+    {
+      "name": "excalidraw",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/excalidraw/excalidraw.git",
+      "commit": "b2b2815954f6561f0980bef8997750dabec16e87",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/excalidraw",
+      "status": "cloned"
+    },
+    {
+      "name": "andrej-karpathy-skills",
+      "ecosystem": "Mixed",
+      "cloneURL": "https://github.com/forrestchang/andrej-karpathy-skills.git",
+      "commit": "2c606141936f1eeef17fa3043a72095b4765b9c2",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/andrej-karpathy-skills",
+      "status": "cloned"
+    },
+    {
+      "name": "markitdown",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/microsoft/markitdown.git",
+      "commit": "a51f725d7ff4cdfe3bb6ad2ce2c04d98bf5f1f00",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/markitdown",
+      "status": "cloned"
+    },
+    {
+      "name": "claude-code",
+      "ecosystem": "Shell",
+      "cloneURL": "https://github.com/anthropics/claude-code.git",
+      "commit": "831608a360511febd4b10c77d4d03b47afda2f5b",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/claude-code",
+      "status": "cloned"
+    },
+    {
+      "name": "electron",
+      "ecosystem": "C++",
+      "cloneURL": "https://github.com/electron/electron.git",
+      "commit": "0e354e87c6f6554ce736a6975dad0caf855ddee8",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/electron",
+      "status": "cloned"
+    },
+    {
+      "name": "firecrawl",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/firecrawl/firecrawl.git",
+      "commit": "3afe6df1f48f4485b8a018069ad8bbf54ae99cb2",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/firecrawl",
+      "status": "cloned"
+    },
+    {
+      "name": "clash-verge-rev",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/clash-verge-rev/clash-verge-rev.git",
+      "commit": "3956b0d03436534440a9365a0bf644c9eddf897d",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/clash-verge-rev",
+      "status": "cloned"
+    },
+    {
+      "name": "ui",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/shadcn-ui/ui.git",
+      "commit": "b8608d0976b32e26136e182445f69e6eb8e6cb74",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/ui",
+      "status": "cloned"
+    },
+    {
+      "name": "rustdesk",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/rustdesk/rustdesk.git",
+      "commit": "9df486a689dbee26ba9868c68131d6a627018fba",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/rustdesk",
+      "status": "cloned"
+    },
+    {
+      "name": "d3",
+      "ecosystem": "Shell",
+      "cloneURL": "https://github.com/d3/d3.git",
+      "commit": "42ccb63d8f4a4262f78b48aa1431e1f645bcc844",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/d3",
+      "status": "cloned"
+    },
+    {
+      "name": "ComfyUI",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/Comfy-Org/ComfyUI.git",
+      "commit": "20f5e474da28bd4225ab61b3d5d791e1b32ba069",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/comfyui",
+      "status": "cloned"
+    },
+    {
+      "name": "llama.cpp",
+      "ecosystem": "C++",
+      "cloneURL": "https://github.com/ggml-org/llama.cpp.git",
+      "commit": "1e5ad35d560b90a8ac447d149c8f8447ae1fcaa0",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/llama-cpp",
+      "status": "cloned"
+    },
+    {
+      "name": "axios",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/axios/axios.git",
+      "commit": "847d89b43654405d9a231e0b669832c2092b621f",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/axios",
+      "status": "cloned"
+    },
+    {
+      "name": "GitHub-Chinese-Top-Charts",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/GrowingGit/GitHub-Chinese-Top-Charts.git",
+      "commit": "0403f534a33853d75a053fbe085a4d144bb56bf3",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/github-chinese-top-charts",
+      "status": "cloned"
+    },
+    {
+      "name": "tauri",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/tauri-apps/tauri.git",
+      "commit": "0e8e25f001d5c6eae32a5f47c7e4365a318f2c59",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/tauri",
+      "status": "cloned"
+    },
+    {
+      "name": "frp",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/fatedier/frp.git",
+      "commit": "8666e3643f4e8cc3ec65780c48e20c8904b17856",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/frp",
+      "status": "cloned"
+    },
+    {
+      "name": "papers-we-love",
+      "ecosystem": "Shell",
+      "cloneURL": "https://github.com/papers-we-love/papers-we-love.git",
+      "commit": "4ea0c01fdedbedaebd78acab7446a0a67a2befc4",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/papers-we-love",
+      "status": "cloned"
+    },
+    {
+      "name": "v2rayN",
+      "ecosystem": "C#",
+      "cloneURL": "https://github.com/2dust/v2rayN.git",
+      "commit": "e7973840ce13c6fd61e64d23f9e10eaf50b19cbf",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/v2rayn",
+      "status": "cloned"
+    },
+    {
+      "name": "gemini-cli",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/google-gemini/gemini-cli.git",
+      "commit": "1a894c18eaaa7229159a5433c4350a1594b25bac",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/gemini-cli",
+      "status": "cloned"
+    },
+    {
+      "name": "DeepSeek-V3",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/deepseek-ai/DeepSeek-V3.git",
+      "commit": "9b4e9788e4a3a731f7567338ed15d3ec549ce03b",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/deepseek-v3",
+      "status": "cloned"
+    },
+    {
+      "name": "create-react-app",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/facebook/create-react-app.git",
+      "commit": "6254386531d263688ccfa542d0e628fbc0de0b28",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/create-react-app",
+      "status": "cloned"
+    },
+    {
+      "name": "terminal",
+      "ecosystem": "C++",
+      "cloneURL": "https://github.com/microsoft/terminal.git",
+      "commit": "d3f76e7acf88436497850ce36ca4fa5c8bb61be0",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/terminal",
+      "status": "cloned"
+    },
+    {
+      "name": "immich",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/immich-app/immich.git",
+      "commit": "8c8dc9d32fb37f516f1689a0687befd7fdbe0ebe",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/immich",
+      "status": "cloned"
+    },
+    {
+      "name": "HowToCook",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/Anduin2017/HowToCook.git",
+      "commit": "9e129906478c83c3fd4fbc354522d9f93894a9b5",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/howtocook",
+      "status": "cloned"
+    },
+    {
+      "name": "neovim",
+      "ecosystem": "Vim Script",
+      "cloneURL": "https://github.com/neovim/neovim.git",
+      "commit": "b44c2bdd16226f6caa5324d91f1ae9781ffdc12b",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/neovim",
+      "status": "cloned"
+    },
+    {
+      "name": "whisper",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/openai/whisper.git",
+      "commit": "04f449b8a437f1bbd3dba5c9f826aca972e7709a",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/whisper",
+      "status": "cloned"
+    },
+    {
+      "name": "every-programmer-should-know",
+      "ecosystem": "Mixed",
+      "cloneURL": "https://github.com/mtdvio/every-programmer-should-know.git",
+      "commit": "e47b7c483b27475f48a01c3a176b724dbfb6d2de",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/every-programmer-should-know",
+      "status": "cloned"
+    },
+    {
+      "name": "ant-design",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/ant-design/ant-design.git",
+      "commit": "476767f1900be9cef5afe6fe2ce5fc9c17213015",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/ant-design",
+      "status": "cloned"
+    },
+    {
+      "name": "thefuck",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/nvbn/thefuck.git",
+      "commit": "c7e7e1d884d3bb241ea6448f72a989434c2a35ec",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/thefuck",
+      "status": "cloned"
+    },
+    {
+      "name": "agency-agents",
+      "ecosystem": "Shell",
+      "cloneURL": "https://github.com/msitarzewski/agency-agents.git",
+      "commit": "783f6a72bfd7f3135700ac273c619d92821b419a",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/agency-agents",
+      "status": "cloned"
+    },
+    {
+      "name": "tailwindcss",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/tailwindlabs/tailwindcss.git",
+      "commit": "f9216b2b8c296150500a660d9e3b8a8ecbaa1ed9",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/tailwindcss",
+      "status": "cloned"
+    },
+    {
+      "name": "spec-kit",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/github/spec-kit.git",
+      "commit": "688ca1b3c51046498274de80752db2dce11ec1c7",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/spec-kit",
+      "status": "cloned"
+    },
+    {
+      "name": "clean-code-javascript",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/ryanmcdermott/clean-code-javascript.git",
+      "commit": "5311f64b03fc0c2450ab17a45ee9818669c8b9b5",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/clean-code-javascript",
+      "status": "cloned"
+    },
+    {
+      "name": "java-design-patterns",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/iluwatar/java-design-patterns.git",
+      "commit": "d24dd22bb9d3d2a442fab8ffaa746b78072ba211",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/java-design-patterns",
+      "status": "cloned"
+    },
+    {
+      "name": "app-ideas",
+      "ecosystem": "Mixed",
+      "cloneURL": "https://github.com/florinpop17/app-ideas.git",
+      "commit": "9e8dd00f10b881babc273d66949b7ffa0e310097",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/app-ideas",
+      "status": "cloned"
+    },
+    {
+      "name": "nvm",
+      "ecosystem": "Shell",
+      "cloneURL": "https://github.com/nvm-sh/nvm.git",
+      "commit": "f695512c80308b3b98e6b3f4da8cf70ad472ccc8",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/nvm",
+      "status": "cloned"
+    },
+    {
+      "name": "browser-use",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/browser-use/browser-use.git",
+      "commit": "9b4b8d8054a2d23f13a141aa7c871dea1e939450",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/browser-use",
+      "status": "cloned"
+    },
+    {
+      "name": "Deep-Live-Cam",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/hacksider/Deep-Live-Cam.git",
+      "commit": "e34d204c2ea4bfadc136a18ddd283db5aeef67db",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/deep-live-cam",
+      "status": "cloned"
+    },
+    {
+      "name": "gstack",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/garrytan/gstack.git",
+      "commit": "5d4fe7df070fefb45f300144e1181cf43836bdd1",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/gstack",
+      "status": "cloned"
+    },
+    {
+      "name": "LLMs-from-scratch",
+      "ecosystem": "Jupyter Notebook",
+      "cloneURL": "https://github.com/rasbt/LLMs-from-scratch.git",
+      "commit": "d12a5da5d26faf8013259ed44dc09ed180c154af",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/llms-from-scratch",
+      "status": "cloned"
+    },
+    {
+      "name": "DeepSeek-R1",
+      "ecosystem": "Mixed",
+      "cloneURL": "https://github.com/deepseek-ai/DeepSeek-R1.git",
+      "commit": "0cf78561f1d51c84a21b2190626b21116d5c68bb",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/deepseek-r1",
+      "status": "cloned"
+    },
+    {
+      "name": "weekly",
+      "ecosystem": "Mixed",
+      "cloneURL": "https://github.com/ruanyf/weekly.git",
+      "commit": "9e474a31292f196b6d03875d0899d5b9fde17402",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/weekly",
+      "status": "cloned"
+    },
+    {
+      "name": "vue-element-admin",
+      "ecosystem": "Vue",
+      "cloneURL": "https://github.com/PanJiaChen/vue-element-admin.git",
+      "commit": "6858a9ad67483025f6a9432a926beb9327037be3",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/vue-element-admin",
+      "status": "cloned"
+    },
+    {
+      "name": "bitcoin",
+      "ecosystem": "C++",
+      "cloneURL": "https://github.com/bitcoin/bitcoin.git",
+      "commit": "d406cffafdd111b34dc613b4cb82b4f0a264d225",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/bitcoin",
+      "status": "cloned"
+    },
+    {
+      "name": "gin",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/gin-gonic/gin.git",
+      "commit": "5f4f9643258dc2a65e684b63f12c8d543c936c67",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/gin",
+      "status": "cloned"
+    },
+    {
+      "name": "playwright",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/microsoft/playwright.git",
+      "commit": "b3c9a9b851a42e36f57f24ed36eaf1be9bc6d24e",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/playwright",
+      "status": "cloned"
+    },
+    {
+      "name": "NextChat",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/ChatGPTNextWeb/NextChat.git",
+      "commit": "c3b8c1587c04fff05f7b42276a43016e87771527",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/nextchat",
+      "status": "cloned"
+    },
+    {
+      "name": "mermaid",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/mermaid-js/mermaid.git",
+      "commit": "f50fb4f0facfb432b27877921af2e30a01854265",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/mermaid",
+      "status": "cloned"
+    },
+    {
+      "name": "manim",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/3b1b/manim.git",
+      "commit": "c5e23d93659d604ff495ffe300bf7d4ef890e538",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/manim",
+      "status": "cloned"
+    },
+    {
+      "name": "uptime-kuma",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/louislam/uptime-kuma.git",
+      "commit": "3fcddaf0b7879816ecc0a80fc5d391df2ce4b06a",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/uptime-kuma",
+      "status": "cloned"
+    },
+    {
+      "name": "servers",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/modelcontextprotocol/servers.git",
+      "commit": "4503e2d12b799448cd05f789dd40f9643a8d1a6c",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/servers",
+      "status": "cloned"
+    },
+    {
+      "name": "uv",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/astral-sh/uv.git",
+      "commit": "e3187b300de91e8ef64e1e95c6bad64d13abcf92",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/uv",
+      "status": "cloned"
+    },
+    {
+      "name": "laravel",
+      "ecosystem": "Blade",
+      "cloneURL": "https://github.com/laravel/laravel.git",
+      "commit": "da286607c535f91e6c76d90adba4254a1867adaf",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/laravel",
+      "status": "cloned"
+    },
+    {
+      "name": "syncthing",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/syncthing/syncthing.git",
+      "commit": "f6c551fe879baae1e1a0060d86ae500024c773b8",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/syncthing",
+      "status": "cloned"
+    },
+    {
+      "name": "mall",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/macrozheng/mall.git",
+      "commit": "d9501e97a78eb2bb0ae8eaa273eeb1cfc7c5d386",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/mall",
+      "status": "cloned"
+    },
+    {
+      "name": "realworld",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/realworld-apps/realworld.git",
+      "commit": "450bbc5410c7c1b7feca0f238e002162468e2a6c",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/realworld",
+      "status": "cloned"
+    },
+    {
+      "name": "sherlock",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/sherlock-project/sherlock.git",
+      "commit": "206068dc7842665130c87e16e1535572d3d1a907",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/sherlock",
+      "status": "cloned"
+    },
+    {
+      "name": "animate.css",
+      "ecosystem": "CSS",
+      "cloneURL": "https://github.com/animate-css/animate.css.git",
+      "commit": "3f8ab233dbbd9d2fe577528d2296382954be3d1a",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/animate-css",
+      "status": "cloned"
+    },
+    {
+      "name": "zed",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/zed-industries/zed.git",
+      "commit": "c8f09caee42ea4e27991ca55257f6f9c7d7c67d2",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/zed",
+      "status": "cloned"
+    },
+    {
+      "name": "FiraCode",
+      "ecosystem": "Clojure",
+      "cloneURL": "https://github.com/tonsky/FiraCode.git",
+      "commit": "d0cf393af83155564bd9a288151381a155449d09",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/firacode",
+      "status": "cloned"
+    },
+    {
+      "name": "codex",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/openai/codex.git",
+      "commit": "789b7e39dc4128de99796a484ff4d7a02252a9d1",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/codex",
+      "status": "cloned"
+    },
+    {
+      "name": "localsend",
+      "ecosystem": "Dart",
+      "cloneURL": "https://github.com/localsend/localsend.git",
+      "commit": "5ccc6dea192d1c697c2602bf456b2eb2ad8e9674",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/localsend",
+      "status": "cloned"
+    },
+    {
+      "name": "spring-boot",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/spring-projects/spring-boot.git",
+      "commit": "b9ee76ed715cb2f4366acd2ec0342d7f2e3a8134",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/spring-boot",
+      "status": "cloned"
+    },
+    {
+      "name": "ragflow",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/infiniflow/ragflow.git",
+      "commit": "048ec2fc5c3baa70809746b1c6bee0da5e45ab7a",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/ragflow",
+      "status": "cloned"
+    },
+    {
+      "name": "fzf",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/junegunn/fzf.git",
+      "commit": "263eb4732fc6268f9fb35cffb634903ea8e2a26b",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/fzf",
+      "status": "cloned"
+    },
+    {
+      "name": "autoresearch",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/karpathy/autoresearch.git",
+      "commit": "228791fb499afffb54b46200aca536f79142f117",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/autoresearch",
+      "status": "cloned"
+    },
+    {
+      "name": "vllm",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/vllm-project/vllm.git",
+      "commit": "ea0e501bb18c12b80acc05ff8c7f013db515ba80",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/vllm",
+      "status": "cloned"
+    },
+    {
+      "name": "github-readme-stats",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/anuraghazra/github-readme-stats.git",
+      "commit": "5df91f9bfa89c356a55cbb3c2bbc164fdbf94a86",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/github-readme-stats",
+      "status": "cloned"
+    },
+    {
+      "name": "hoppscotch",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/hoppscotch/hoppscotch.git",
+      "commit": "cbb32d1aacfc72eaa49879cd8d7de4837597f64c",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/hoppscotch",
+      "status": "cloned"
+    },
+    {
+      "name": "netdata",
+      "ecosystem": "C",
+      "cloneURL": "https://github.com/netdata/netdata.git",
+      "commit": "147fae3569041c8446f62c7456296fe4b1764b96",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2049735331/netdata",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 14630,
+    "validated": 7819,
+    "skipped": 6352,
+    "failed": 459,
+    "issues": {
+      "total": 4720,
+      "parsing": 459,
+      "validation": 4200,
+      "schema": 61,
+      "coverage": 0
+    },
+    "warnings": 8,
+    "duration": {
+      "nanos": 154707787667
+    }
+  },
+  "findings": [
+    "Validated 100 repositories; 53 had issues, 21 included parsing failures, and 21 had failed files.",
+    "Coverage gaps were common: 8 repositories had zero discovered files and 21 had \u003e=70% skipped files.",
+    "Several repositories produced very high repeated validation issue counts (e.g., 100s to 1000s), increasing triage noise."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "high",
+      "recommendation": "Add robust parser/error classification for known non-standard or templated files to reduce hard failed-file counts and confusing parse output.",
+      "rationale": "21/100 repos had parsing failures and 21/100 had failed files; this blocked developer interpretation in a large slice of the corpus."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Improve skipped-coverage reporting with explicit per-repo reason aggregation and a concise coverage confidence signal.",
+      "rationale": "8 repos had zero discovered files and 21 repos had \u003e=70% skipped files, often leaving unclear what DollarLint actually checked."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Provide grouped/compacted issue summaries by schema/file/root cause alongside full details.",
+      "rationale": "Some repos generated large volumes of repetitive findings (for example \u003e100 to thousands), making next actions harder to identify quickly."
+    }
+  ],
+  "productDecisions": [
+    "No source changes were made in this sweep run; recommendations are recorded for follow-up prioritization."
+  ],
+  "followUp": [
+    "Run a targeted second 100-repo sweep biased toward actively maintained application/server repositories (fewer docs-only projects) to reduce zero-discovery noise.",
+    "Prototype parser classification and skipped-coverage summarization improvements, then rerun a representative 20-repo subset for before/after UX comparison.",
+    "Prioritize triage of high-volume outliers (ui, netdata, zed, opencode, immich) to distinguish true repo invalidity from reportability noise."
+  ]
+}

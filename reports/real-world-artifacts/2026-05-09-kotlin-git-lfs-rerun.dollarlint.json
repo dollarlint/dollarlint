@@ -1,0 +1,2246 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json",
+  "formatVersion": 1,
+  "root": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822",
+  "summary": {
+    "discovered": 287,
+    "validated": 64,
+    "skipped": 219,
+    "failed": 4,
+    "issues": {
+      "total": 8,
+      "parsing": 4,
+      "validation": 4,
+      "schema": 0,
+      "coverage": 0
+    },
+    "ignored": 0,
+    "warnings": 0,
+    "durationNanos": 9269013417
+  },
+  "files": [
+    {
+      "format": "jsonc",
+      "ignored": 0,
+      "issues": 0,
+      "message": "parse /var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822/kotlin/.ai/mcp/mcp.json: hujson: line 1, column 1: parsing value: unexpected EOF",
+      "path": "kotlin/.ai/mcp/mcp.json",
+      "status": "error"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/.claude/settings.json",
+      "schema": "https://www.schemastore.org/claude-code-settings.json",
+      "schemaSource": "catalog:schemastore:Claude Code Settings",
+      "status": "validated"
+    },
+    {
+      "format": "yaml",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/.space/fleet.devfile.yaml",
+      "status": "skipped"
+    },
+    {
+      "format": "yaml",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/.space/idea.devfile.yaml",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/.space/safe-merge-coordinator.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/.space/safe-merge.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/arguments/resources/kotlin-compiler-arguments.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/incremental-compilation-impl/testData/org/jetbrains/kotlin/incremental/classpathDiff/ClasspathSnapshotterTest/java/testSimpleClass/expected-snapshot/com/example/SimpleClass.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/incremental-compilation-impl/testData/org/jetbrains/kotlin/incremental/classpathDiff/ClasspathSnapshotterTest/java/testSimpleClass/expected-snapshot-CLASS_LEVEL/com/example/SimpleClass.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/incremental-compilation-impl/testData/org/jetbrains/kotlin/incremental/classpathDiff/ClasspathSnapshotterTest/kotlin/testSimpleClass/expected-snapshot/com/example/SimpleClass.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/incremental-compilation-impl/testData/org/jetbrains/kotlin/incremental/classpathDiff/ClasspathSnapshotterTest/kotlin/testSimpleClass/expected-snapshot-CLASS_LEVEL/com/example/SimpleClass.json",
+      "status": "skipped"
+    },
+    {
+      "format": "toml",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/psi/psi-api/review-rules/parser-testdata-update.toml",
+      "status": "skipped"
+    },
+    {
+      "format": "toml",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/psi/psi-api/review-rules/stub-version-update.toml",
+      "status": "skipped"
+    },
+    {
+      "format": "jsonc",
+      "ignored": 0,
+      "issues": 0,
+      "message": "parse /var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822/kotlin/compiler/testData/cli/js/reportPerfJson.perf.json: hujson: line 3, column 18: invalid character '$' at start of value",
+      "path": "kotlin/compiler/testData/cli/js/reportPerfJson.perf.json",
+      "status": "error"
+    },
+    {
+      "format": "jsonc",
+      "ignored": 0,
+      "issues": 0,
+      "message": "parse /var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822/kotlin/compiler/testData/cli/jvm/reportPerfJson.perf.json: hujson: line 3, column 18: invalid character '$' at start of value",
+      "path": "kotlin/compiler/testData/cli/jvm/reportPerfJson.perf.json",
+      "status": "error"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/exceptions/catching-exceptions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/additive-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/built-in-types-and-their-semantics/kotlin.nothing-1/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/built-in-types-and-their-semantics/kotlin.unit/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/cast-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/comparison-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/conditional-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/constant-literals/boolean-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/constant-literals/character-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/constant-literals/integer-literals/binary-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/constant-literals/integer-literals/decimal-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/constant-literals/integer-literals/hexadecimal-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/constant-literals/real-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/constant-literals/the-types-for-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/elvis-operator-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/equality-expressions/reference-equality-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/equality-expressions/value-equality-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/indexing-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/jump-expressions/break-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/jump-expressions/continue-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/jump-expressions/return-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/logical-conjunction-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/logical-disjunction-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/multiplicative-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/not-null-assertion-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/postfix-operator-expressions/postfix-decrement-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/postfix-operator-expressions/postfix-increment-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/prefix-expressions/logical-not-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/prefix-expressions/prefix-decrement-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/prefix-expressions/prefix-increment-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/prefix-expressions/unary-minus-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/prefix-expressions/unary-plus-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/range-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/try-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/type-checking-and-containment-checking-expressions/containment-checking-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/type-checking-and-containment-checking-expressions/type-checking-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/expressions/when-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/operator-call/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/overload-resolution/building-the-overload-candidate-set-ocs/call-with-an-explicit-receiver/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/overload-resolution/building-the-overload-candidate-set-ocs/infix-function-call/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/overload-resolution/building-the-overload-candidate-set-ocs/operator-call/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/overload-resolution/callables-and-invoke-convention/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/overload-resolution/choosing-the-most-specific-candidate-from-the-overload-candidate-set/algorithm-of-msc-selection/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/overload-resolution/receivers/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/overloadable-operators/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/sectionsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/statements/assignments/operator-assignments/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/statements/assignments/simple-assignments/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/statements/assignments/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/statements/loop-statements/do-while-loop-statement/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/statements/loop-statements/while-loop-statement/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/type-system/introduction-1/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/codegen/box/linked/type-system/type-kinds/built-in-types/kotlin.nothing/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/annotations/annotation-targets/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/built-in-types-and-their-semantics/built-in-integer-types-1/integer-type-widening/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/control--and-data-flow-analysis/control-flow-graph/expressions-1/conditional-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/control--and-data-flow-analysis/performing-analysis-on-the-control-flow-graph/variable-initialization-analysis/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/control--and-data-flow-analysis.control-flow-graph.expressions-1.conditional-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/declarations/classifier-declaration/class-declaration/abstract-classes/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/declarations/classifier-declaration/class-declaration/constructor-declaration/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/declarations/classifier-declaration/class-declaration/nested-and-inner-classifiers/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/declarations/classifier-declaration/class-declaration/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/declarations/classifier-declaration/classifier-initialization/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/declarations/classifier-declaration/data-class-declaration/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/declarations/function-declaration/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/declarations/property-declaration/local-property-declaration/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/declarations/property-declaration/property-initialization/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/declarations/type-alias/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/additive-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/built-in-types-and-their-semantics/kotlin.nothing-1/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/built-in-types-and-their-semantics/kotlin.unit/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/call-and-property-access-expressions/callable-references/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/call-and-property-access-expressions/navigation-operators/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/comparison-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/conditional-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/constant-literals/boolean-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/constant-literals/character-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/constant-literals/integer-literals/binary-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/constant-literals/integer-literals/decimal-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/constant-literals/integer-literals/hexadecimal-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/constant-literals/real-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/constant-literals/the-types-for-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/elvis-operator-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/equality-expressions/value-equality-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/function-literals/lambda-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/jump-expressions/break-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/jump-expressions/continue-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/jump-expressions/return-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/jump-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/logical-conjunction-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/logical-disjunction-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/multiplicative-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/not-null-assertion-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/prefix-expressions/logical-not-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/prefix-expressions/prefix-decrement-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/prefix-expressions/prefix-increment-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/prefix-expressions/unary-minus-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/prefix-expressions/unary-plus-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/range-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/try-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/type-checking-and-containment-checking-expressions/containment-checking-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/type-checking-and-containment-checking-expressions/type-checking-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/when-expression/exhaustive-when-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/expressions/when-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/inheritance/overriding/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/building-the-overload-candidate-set-ocs/call-with-an-explicit-receiver/call-with-an-explicit-type-receiver/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/building-the-overload-candidate-set-ocs/call-with-an-explicit-receiver/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/building-the-overload-candidate-set-ocs/call-with-named-parameters/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/building-the-overload-candidate-set-ocs/call-with-specified-type-parameters/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/building-the-overload-candidate-set-ocs/call-with-trailing-lambda-expressions/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/building-the-overload-candidate-set-ocs/call-without-an-explicit-receiver/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/building-the-overload-candidate-set-ocs/infix-function-call/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/building-the-overload-candidate-set-ocs/operator-call/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/c-level-partition/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/callables-and-invoke-convention/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/choosing-the-most-specific-candidate-from-the-overload-candidate-set/algorithm-of-msc-selection/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/choosing-the-most-specific-candidate-from-the-overload-candidate-set/rationale-1/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/determining-function-applicability-for-a-specific-call/description/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/determining-function-applicability-for-a-specific-call/rationale/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/receivers/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/resolving-callable-references/bidirectional-resolution-for-callable-calls/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/resolving-callable-references/resolving-callable-references-not-used-as-arguments-to-a-call/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overload-resolution/resolving-callable-references/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/overloadable-operators/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/sectionsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/statements/assignments/operator-assignments/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/statements/assignments/simple-assignments/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/statements/assignments/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/statements/loop-statements/do-while-loop-statement/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/statements/loop-statements/while-loop-statement/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-inference/local-type-inference/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-inference/smart-casts/smart-cast-sink-stability/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-inference/smart-casts/smart-cast-types/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-system/introduction-1/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-system/subtyping/subtyping-for-intersection-types/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-system/subtyping/subtyping-for-nullable-types/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-system/subtyping/subtyping-rules/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-system/subtyping/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-system/type-contexts-and-scopes/inner-and-nested-type-contexts/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-system/type-kinds/built-in-types/kotlin.any/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-system/type-kinds/built-in-types/kotlin.nothing/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/diagnostics/linked/type-system/type-kinds/type-parameters/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/psi/linked/expressions/constant-literals/integer-literals/binary-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/psi/linked/expressions/constant-literals/integer-literals/decimal-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/psi/linked/expressions/constant-literals/integer-literals/hexadecimal-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/psi/linked/expressions/constant-literals/real-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/psi/linked/expressions/constant-literals/the-types-for-integer-literals/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/psi/linked/expressions/when-expression/testsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/compiler/tests-spec/testData/psi/linked/sectionsMap.json",
+      "status": "skipped"
+    },
+    {
+      "format": "toml",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/gradle/libs.versions.toml",
+      "status": "skipped"
+    },
+    {
+      "format": "yaml",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/intellij.yaml",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/package-lock.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/package.json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/common.tsconfig.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/abstract-classes/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "jsonc",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/annotations/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "jsonc",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/collections/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/common.tsconfig.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/constructors/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/data-classes/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/deprecated/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "jsonc",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/documentation/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/enum-classes/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/escaped-declarations/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/excluded-exported-declarations/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/functions/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/implementable-interfaces/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/implicit-export/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/inheritance/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/inner-classes/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/inner-classes-generic/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/interfaces/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/js-name/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/js-symbol/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "jsonc",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/js_export_default/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "jsonc",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/js_static/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/long-type/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/member-properties/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/methods/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "jsonc",
+      "ignored": 0,
+      "issues": 0,
+      "message": "parse /var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822/kotlin/js/js.translator/testData/typescript-export/js/module-systems/tsconfig.json: hujson: line 1, column 1: parsing value: unexpected EOF",
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/module-systems/tsconfig.json",
+      "status": "error"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/namespaces/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/not-exported-declarations/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/objects/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/primitives/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/private-primary-constructor/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/properties/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/regular-classes/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/sealed-classes/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/selective-export/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/star-projection/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/strict-implicit-export/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/suspend-functions/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/tuples/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/value-classes/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/variance-annotations/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/version-overloads/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/visibility/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/wasm/common.tsconfig.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/wasm/default/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/wasm/externalDeclarations/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/wasm/generics/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/wasm/jsPrimitives/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/wasm/nullableJsPrimitives/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/wasm/nullablePrimitives/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/wasm/nullableUnsigned/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/wasm/primitives/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/wasm/unsigned/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/js.translator/testData/typescript-export/wasm/variance-annotations/tsconfig.json",
+      "schema": "https://www.schemastore.org/tsconfig.json",
+      "schemaSource": "catalog:schemastore:tsconfig.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/js/npm/gradle/project-schema.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 1,
+      "path": "kotlin/js/npm/templates/kotlin/package.json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 1,
+      "path": "kotlin/js/npm/templates/kotlin-compiler/package.json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 1,
+      "path": "kotlin/js/npm/templates/kotlin-test/package.json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated"
+    },
+    {
+      "format": "yaml",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/kotlin-native/backend.native/tests/samples/uikit/project.yml",
+      "status": "skipped"
+    },
+    {
+      "format": "yaml",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/kotlin-native/backend.native/tests/samples/watchos/project.yml",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/kotlin.test/js/it/package-lock.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/kotlin.test/js/it/package.json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/kotlin.test/kotlin-project-structure-metadata.beforePatch.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/kotlin.test/kotlin-project-structure-metadata.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/stdlib/kotlin-project-structure-metadata.beforePatch.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/stdlib/kotlin-project-structure-metadata.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin/kotlin-npm-tooling/package-lock.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin/kotlin-npm-tooling/package.json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin/src/functionalTest/resources/coroutines-kotlin-project-structure-metadata.0_3_1.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin/src/functionalTest/resources/testData/SerializationToolsTest/hierarchyJson.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin/src/functionalTest/resources/testData/SerializationToolsTest/nestedJson.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin/src/functionalTest/resources/testData/SerializationToolsTest/simpleJson.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin/src/functionalTest/resources/testData/SerializationToolsTest/simpleWindowsJson.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/emptyxcode/iosApp/iosApp/Assets.xcassets/AccentColor.colorset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/emptyxcode/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/emptyxcode/iosApp/iosApp/Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/emptyxcode/iosApp/iosApp/Preview Content/Preview Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/emptyxcode-no-embedandsign/iosApp/iosApp/Assets.xcassets/AccentColor.colorset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/emptyxcode-no-embedandsign/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/emptyxcode-no-embedandsign/iosApp/iosApp/Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/emptyxcode-no-embedandsign/iosApp/iosApp/Preview Content/Preview Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/kotlin-js-nodejs-custom-node-module/custom/package.json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/kotlin-wasm-package-lock-project/package-lock.json",
+      "status": "skipped"
+    },
+    {
+      "format": "toml",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/mpp-compile-only-dep/gradle/libs.versions.toml",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/mpp-wasm-js-browser-nodejs/src/wasmJsMain/resources/data.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/mpp-wasm-js-browser-nodejs/src/wasmJsTest/resources/data-test.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/native-cocoapods-outdated-repo/ios-app/ios-app/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/native-cocoapods-outdated-repo/ios-app/ios-app/Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/native-cocoapods-single/ios-app/ios-app/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/native-cocoapods-single/ios-app/ios-app/Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/native-cocoapods-template/ios-app/ios-app/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/native-cocoapods-template/ios-app/ios-app/Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/npm-dependencies/file-dependency/package.json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/npm-dependencies/file-dependency-2/package.json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppBuildPhase/iosApp/Assets.xcassets/AccentColor.colorset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppBuildPhase/iosApp/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppBuildPhase/iosApp/Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppBuildPhase/iosApp/Preview Content/Preview Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppSchemePreAction/iosApp/Assets.xcassets/AccentColor.colorset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppSchemePreAction/iosApp/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppSchemePreAction/iosApp/Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppSchemePreAction/iosApp/Preview Content/Preview Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppSchemePreActionSpm/iosApp/Assets.xcassets/AccentColor.colorset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppSchemePreActionSpm/iosApp/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppSchemePreActionSpm/iosApp/Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/xcodeDirectIntegration/iosAppSchemePreActionSpm/iosApp/Preview Content/Preview Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/native/executors/src/main/resources/xcode-project/test-ios-launch/test-ios-launch/Assets.xcassets/AccentColor.colorset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/native/executors/src/main/resources/xcode-project/test-ios-launch/test-ios-launch/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/native/executors/src/main/resources/xcode-project/test-ios-launch/test-ios-launch/Assets.xcassets/Contents.json",
+      "status": "skipped"
+    },
+    {
+      "format": "toml",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/plugins/compose/compose-runtime-snapshot-versions.toml",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/repo/domains.schema.json",
+      "schema": "https://json-schema.org/draft/2020-12/schema",
+      "schemaSource": "$schema",
+      "status": "validated"
+    },
+    {
+      "format": "yaml",
+      "ignored": 0,
+      "issues": 1,
+      "path": "kotlin/repo/domains.yaml",
+      "schema": "repo/domains.schema.json",
+      "schemaSource": "$schema",
+      "status": "validated"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/repo/gradle-settings-conventions/internal-gradle-setup/src/test/resources/properties-with-consent-details.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/repo/gradle-settings-conventions/internal-gradle-setup/src/test/resources/properties-with-obfuscation-salt.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/repo/gradle-settings-conventions/internal-gradle-setup/src/test/resources/properties-with-unknown-fields.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/repo/gradle-settings-conventions/internal-gradle-setup/src/test/resources/properties.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/wasm/wasm.debug.browsers/package-lock.json",
+      "status": "skipped"
+    },
+    {
+      "format": "json",
+      "ignored": 0,
+      "issues": 0,
+      "path": "kotlin/wasm/wasm.debug.browsers/package.json",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json",
+      "status": "validated"
+    }
+  ],
+  "issues": [
+    {
+      "category": "parsing",
+      "hint": "Empty JSON files are not valid documents; add a value such as {} or exclude placeholder fixtures.",
+      "keyword": "parse",
+      "message": "parse /var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822/kotlin/.ai/mcp/mcp.json: hujson: line 1, column 1: parsing value: unexpected EOF",
+      "path": "kotlin/.ai/mcp/mcp.json"
+    },
+    {
+      "category": "parsing",
+      "keyword": "parse",
+      "message": "parse /var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822/kotlin/compiler/testData/cli/js/reportPerfJson.perf.json: hujson: line 3, column 18: invalid character '$' at start of value",
+      "path": "kotlin/compiler/testData/cli/js/reportPerfJson.perf.json"
+    },
+    {
+      "category": "parsing",
+      "keyword": "parse",
+      "message": "parse /var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822/kotlin/compiler/testData/cli/jvm/reportPerfJson.perf.json: hujson: line 3, column 18: invalid character '$' at start of value",
+      "path": "kotlin/compiler/testData/cli/jvm/reportPerfJson.perf.json"
+    },
+    {
+      "category": "parsing",
+      "hint": "Empty JSON files are not valid documents; add a value such as {} or exclude placeholder fixtures.",
+      "keyword": "parse",
+      "message": "parse /var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2210516822/kotlin/js/js.translator/testData/typescript-export/js/module-systems/tsconfig.json: hujson: line 1, column 1: parsing value: unexpected EOF",
+      "path": "kotlin/js/js.translator/testData/typescript-export/js/module-systems/tsconfig.json"
+    },
+    {
+      "category": "validation",
+      "column": 12,
+      "instanceLocation": "/bugs/url",
+      "keyword": "format",
+      "keywordLocation": "/format",
+      "line": 20,
+      "message": "'kotl.in/issue' is not valid uri: relative url",
+      "path": "kotlin/js/npm/templates/kotlin/package.json",
+      "property": "url",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json"
+    },
+    {
+      "category": "validation",
+      "column": 12,
+      "instanceLocation": "/bugs/url",
+      "keyword": "format",
+      "keywordLocation": "/format",
+      "line": 19,
+      "message": "'kotl.in/issue' is not valid uri: relative url",
+      "path": "kotlin/js/npm/templates/kotlin-compiler/package.json",
+      "property": "url",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json"
+    },
+    {
+      "category": "validation",
+      "column": 12,
+      "instanceLocation": "/bugs/url",
+      "keyword": "format",
+      "keywordLocation": "/format",
+      "line": 20,
+      "message": "'kotl.in/issue' is not valid uri: relative url",
+      "path": "kotlin/js/npm/templates/kotlin-test/package.json",
+      "property": "url",
+      "schema": "https://www.schemastore.org/package.json",
+      "schemaSource": "catalog:schemastore:package.json"
+    },
+    {
+      "category": "validation",
+      "column": 10,
+      "instanceLocation": "/$schema",
+      "keyword": "format",
+      "keywordLocation": "/format",
+      "line": 1,
+      "message": "'domains.schema.json' is not valid uri: relative url",
+      "path": "kotlin/repo/domains.yaml",
+      "property": "$schema",
+      "schema": "repo/domains.schema.json",
+      "schemaSource": "$schema"
+    }
+  ],
+  "ignoredIssues": [],
+  "warnings": []
+}

@@ -9,6 +9,28 @@ const (
 )
 
 const (
+	SkipReasonNoSchema                 = "noSchema"
+	SkipReasonCatalogSchemaUnavailable = "catalogSchemaUnavailable"
+)
+
+const (
+	SkipClassApplicationData   = "application-data"
+	SkipClassExternalCatalog   = "external-catalog"
+	SkipClassLocaleData        = "locale-data"
+	SkipClassLockfile          = "lockfile"
+	SkipClassRepoManagement    = "repo-management-config"
+	SkipClassTestData          = "test-data"
+	SkipClassUnknown           = "unknown"
+	SkipClassUnsupportedConfig = "unsupported-config"
+)
+
+const (
+	SkipImportanceHigh   = "high"
+	SkipImportanceMedium = "medium"
+	SkipImportanceLow    = "low"
+)
+
+const (
 	JSONFormatVersion = 1
 	JSONResultSchema  = "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json"
 )
@@ -189,15 +211,19 @@ type IssueSummary struct {
 }
 
 type FileResult struct {
-	Path         string `json:"path"`
-	RelativePath string `json:"relativePath"`
-	Format       string `json:"format"`
-	Schema       string `json:"schema,omitempty"`
-	SchemaSource string `json:"schemaSource,omitempty"`
-	Status       string `json:"status"`
-	Issues       int    `json:"issues"`
-	Ignored      int    `json:"ignored"`
-	Message      string `json:"message,omitempty"`
+	Path           string `json:"path"`
+	RelativePath   string `json:"relativePath"`
+	Format         string `json:"format"`
+	Schema         string `json:"schema,omitempty"`
+	SchemaSource   string `json:"schemaSource,omitempty"`
+	Status         string `json:"status"`
+	Issues         int    `json:"issues"`
+	Ignored        int    `json:"ignored"`
+	Message        string `json:"message,omitempty"`
+	SkipReason     string `json:"skipReason,omitempty"`
+	SkipClass      string `json:"skipClass,omitempty"`
+	SkipImportance string `json:"skipImportance,omitempty"`
+	SkipDetail     string `json:"skipDetail,omitempty"`
 }
 
 type Issue struct {

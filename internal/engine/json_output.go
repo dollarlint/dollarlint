@@ -30,14 +30,18 @@ type jsonSummary struct {
 }
 
 type jsonFileResult struct {
-	Path         string `json:"path"`
-	Format       string `json:"format"`
-	Schema       string `json:"schema,omitempty"`
-	SchemaSource string `json:"schemaSource,omitempty"`
-	Status       string `json:"status"`
-	Issues       int    `json:"issues"`
-	Ignored      int    `json:"ignored"`
-	Message      string `json:"message,omitempty"`
+	Path           string `json:"path"`
+	Format         string `json:"format"`
+	Schema         string `json:"schema,omitempty"`
+	SchemaSource   string `json:"schemaSource,omitempty"`
+	Status         string `json:"status"`
+	Issues         int    `json:"issues"`
+	Ignored        int    `json:"ignored"`
+	Message        string `json:"message,omitempty"`
+	SkipReason     string `json:"skipReason,omitempty"`
+	SkipClass      string `json:"skipClass,omitempty"`
+	SkipImportance string `json:"skipImportance,omitempty"`
+	SkipDetail     string `json:"skipDetail,omitempty"`
 }
 
 type jsonIssue struct {
@@ -80,14 +84,18 @@ func newJSONResult(result Result) jsonResult {
 			schemaSources[path] = file.SchemaSource
 		}
 		files = append(files, jsonFileResult{
-			Path:         path,
-			Format:       file.Format,
-			Schema:       displaySchema(file.Schema, root),
-			SchemaSource: file.SchemaSource,
-			Status:       file.Status,
-			Issues:       file.Issues,
-			Ignored:      file.Ignored,
-			Message:      file.Message,
+			Path:           path,
+			Format:         file.Format,
+			Schema:         displaySchema(file.Schema, root),
+			SchemaSource:   file.SchemaSource,
+			Status:         file.Status,
+			Issues:         file.Issues,
+			Ignored:        file.Ignored,
+			Message:        file.Message,
+			SkipReason:     file.SkipReason,
+			SkipClass:      file.SkipClass,
+			SkipImportance: file.SkipImportance,
+			SkipDetail:     file.SkipDetail,
 		})
 	}
 

@@ -12,7 +12,32 @@ const (
 	StatusError     = engine.StatusError
 )
 
-const JSONFormatVersion = engine.JSONFormatVersion
+const (
+	SkipReasonNoSchema                 = engine.SkipReasonNoSchema
+	SkipReasonCatalogSchemaUnavailable = engine.SkipReasonCatalogSchemaUnavailable
+)
+
+const (
+	SkipClassApplicationData   = engine.SkipClassApplicationData
+	SkipClassExternalCatalog   = engine.SkipClassExternalCatalog
+	SkipClassLocaleData        = engine.SkipClassLocaleData
+	SkipClassLockfile          = engine.SkipClassLockfile
+	SkipClassRepoManagement    = engine.SkipClassRepoManagement
+	SkipClassTestData          = engine.SkipClassTestData
+	SkipClassUnknown           = engine.SkipClassUnknown
+	SkipClassUnsupportedConfig = engine.SkipClassUnsupportedConfig
+)
+
+const (
+	SkipImportanceHigh   = engine.SkipImportanceHigh
+	SkipImportanceMedium = engine.SkipImportanceMedium
+	SkipImportanceLow    = engine.SkipImportanceLow
+)
+
+const (
+	JSONFormatVersion   = engine.JSONFormatVersion
+	BundleFormatVersion = engine.BundleFormatVersion
+)
 
 const (
 	CatalogFailureWarn  = engine.CatalogFailureWarn
@@ -52,9 +77,12 @@ type Options = engine.Options
 type ConfigOverlay = engine.ConfigOverlay
 type Result = engine.Result
 type Summary = engine.Summary
+type IssueSummary = engine.IssueSummary
 type FileResult = engine.FileResult
 type Issue = engine.Issue
 type Warning = engine.Warning
+type BundleOutput = engine.BundleOutput
+type BundleStyledOutput = engine.BundleStyledOutput
 type Duration = engine.Duration
 
 func NewDuration(d time.Duration) Duration {

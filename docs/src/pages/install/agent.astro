@@ -44,30 +44,13 @@ Work from the repository root.
 
 Do not run interactive dollarlint init.
 
-If .dollarlint.toml already exists, read it and preserve intentional settings. If none exists, write this starter and then edit it for the repo:
+If .dollarlint.toml already exists, read it and preserve intentional settings.
 
-    version = 1
+If no config exists, generate a fully default config non-interactively:
 
-    [configs]
-    mode = "single"
+    dollarlint init --defaults
 
-    [discovery]
-    exclude = []
-    useDefaultExcludes = true
-    respectGitIgnore = true
-
-    [schemas]
-    requireCoverage = false
-
-    [schemas.catalogs]
-    enabled = true
-    failure = "warn"
-    match = "auto"
-
-    [output]
-    branchErrors = "best"
-
-You may use dollarlint init --defaults to generate the full starter, but direct config edits are usually clearer.
+Use that generated config as the starting point, then edit it for this repository.
 
 ## 3. Test and iterate
 
@@ -82,6 +65,8 @@ You may use dollarlint init --defaults to generate the full starter, but direct 
 4. Use [[ignore]] only for known accepted validation issues. Do not hide unknown failures with broad excludes or ignores.
 
 5. Re-run until discovered, validated, skipped, warning, and issue counts look reasonable for this repository. A nonzero skipped count is acceptable when the skipped files do not need schema coverage.
+
+6. Once the config is working, delete default values that are not useful to keep. Keep project-specific settings, intentional policy choices, and defaults that help future maintainers understand or tune validation.
 
 ## 4. Report to the user
 

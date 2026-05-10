@@ -121,13 +121,16 @@ func TestSchemaStoreAutoSkipsLeadingWildcardBasenameGlobs(t *testing.T) {
 	writeFile(t, catalogPath, `{
   "schemas": [
     {"name": "Broad app", "fileMatch": ["*.app.json"], "url": "./broad.schema.json"},
-    {"name": "TypeScript", "fileMatch": ["tsconfig*.json"], "url": "./tsconfig.schema.json"}
+    {"name": "TypeScript", "fileMatch": ["tsconfig*.json"], "url": "./tsconfig.schema.json"},
+    {"name": "Rubocop", "fileMatch": ["*.rubocop.yml"], "url": "./rubocop.schema.json"}
   ]
 }`)
 	writeFile(t, filepath.Join(dir, "broad.schema.json"), `{"type":"object","required":["protocol"]}`)
 	writeFile(t, filepath.Join(dir, "tsconfig.schema.json"), `{"type":"object","properties":{"compilerOptions":{"type":"object"}}}`)
+	writeFile(t, filepath.Join(dir, "rubocop.schema.json"), `{"type":"object"}`)
 	writeFile(t, filepath.Join(dir, "tsconfig.app.json"), `{"compilerOptions":{}}`)
 	writeFile(t, filepath.Join(dir, "custom.app.json"), `{}`)
+	writeFile(t, filepath.Join(dir, ".rubocop.yml"), `{}`)
 
 	cfg := DefaultConfig()
 	cfg.Schemas.Catalogs.Enabled = true
@@ -148,6 +151,10 @@ func TestSchemaStoreAutoSkipsLeadingWildcardBasenameGlobs(t *testing.T) {
 		case "custom.app.json":
 			if file.SchemaSource != "" || file.Status != StatusSkipped {
 				t.Fatalf("leading wildcard glob should be skipped in auto mode: %+v", file)
+			}
+		case ".rubocop.yml":
+			if file.SchemaSource != "catalog:test:Rubocop" {
+				t.Fatalf("distinctive leading wildcard glob should be applied: %+v", file)
 			}
 		}
 	}

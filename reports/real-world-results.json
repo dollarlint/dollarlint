@@ -50,6 +50,27 @@
       "title": "fresh-3-repo-real-world-tests",
       "path": "reports/real-world-results/2026-05-09-fresh-3-repo-real-world-tests.json",
       "repoCount": 3
+    },
+    {
+      "id": "2026-05-09-kotlin-git-lfs-rerun",
+      "date": "2026-05-09",
+      "title": "Kotlin git-lfs rerun",
+      "path": "reports/real-world-results/2026-05-09-kotlin-git-lfs-rerun.json",
+      "repoCount": 1
+    },
+    {
+      "id": "2026-05-09-real-world-100-repo-sweep-2026-05-09",
+      "date": "2026-05-09",
+      "title": "real-world-100-repo-sweep-2026-05-09",
+      "path": "reports/real-world-results/2026-05-09-real-world-100-repo-sweep-2026-05-09.json",
+      "repoCount": 100
+    },
+    {
+      "id": "2026-05-09-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09",
+      "date": "2026-05-09",
+      "title": "gpt-5.5 managed MCP 10 repo smoke 2026-05-09",
+      "path": "reports/real-world-results/2026-05-09-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09.json",
+      "repoCount": 10
     }
   ]
 }

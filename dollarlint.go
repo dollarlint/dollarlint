@@ -29,3 +29,7 @@ func FormatText(result Result, output OutputConfig) string {
 func FormatSARIF(result Result) ([]byte, error) {
 	return engine.FormatSARIF(result)
 }
+
+func FormatBundle(result Result, output OutputConfig) ([]byte, error) {
+	return engine.FormatBundle(result, output)
+}

@@ -3,6 +3,7 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -18,10 +19,50 @@ var (
 	textStyleMuted   = lipgloss.NewStyle().Foreground(lipgloss.ANSIColor(8))
 	textStylePointer = lipgloss.NewStyle().Foreground(lipgloss.ANSIColor(7))
 	textStyleSummary = lipgloss.NewStyle().Foreground(lipgloss.ANSIColor(8))
+	ansiEscapeRE     = regexp.MustCompile(`\x1b\[[0-?]*[ -/]*[@-~]`)
 )
 
 func FormatJSON(result Result) ([]byte, error) {
 	return json.MarshalIndent(result, "", "  ")
+}
+
+const BundleFormatVersion = 1
+
+type BundleOutput struct {
+	FormatVersion int                `json:"formatVersion"`
+	JSON          Result             `json:"json"`
+	SARIF         json.RawMessage    `json:"sarif"`
+	Styled        BundleStyledOutput `json:"styled"`
+}
+
+type BundleStyledOutput struct {
+	Plain     string       `json:"plain"`
+	ANSI      string       `json:"ansi"`
+	Options   OutputConfig `json:"options"`
+	Truncated bool         `json:"truncated"`
+}
+
+func FormatBundle(result Result, output OutputConfig) ([]byte, error) {
+	sarif, err := FormatSARIF(result)
+	if err != nil {
+		return nil, err
+	}
+	styled := FormatText(result, output)
+	bundle := BundleOutput{
+		FormatVersion: BundleFormatVersion,
+		JSON:          result,
+		SARIF:         json.RawMessage(sarif),
+		Styled: BundleStyledOutput{
+			Plain:   StripANSI(styled),
+			ANSI:    styled,
+			Options: output,
+		},
+	}
+	return json.MarshalIndent(bundle, "", "  ")
+}
+
+func StripANSI(text string) string {
+	return ansiEscapeRE.ReplaceAllString(text, "")
 }
 
 func FormatText(result Result, output OutputConfig) string {
@@ -130,6 +171,9 @@ func writeVerboseIssueDetails(builder *strings.Builder, issue Issue) {
 	if issue.KeywordLocation != "" {
 		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("keywordLocation:"), textStylePointer.Render(issue.KeywordLocation))
 	}
+	if issue.SchemaSource != "" {
+		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("schemaSource:"), issue.SchemaSource)
+	}
 	if issue.Schema != "" {
 		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("schema:"), issue.Schema)
 	}
@@ -139,10 +183,154 @@ func writeSkipped(builder *strings.Builder, result Result, showSkipped bool) {
 	if !showSkipped {
 		return
 	}
-	for _, file := range result.Files {
-		if file.Status == StatusSkipped {
-			fmt.Fprintf(builder, "\n%s %s %s\n", textStyleMuted.Render("skipped:"), file.RelativePath, textStyleMuted.Render("(no schema)"))
+	groups := skippedFileGroups(result.Files)
+	if len(groups) == 0 {
+		return
+	}
+	builder.WriteString("\n")
+	builder.WriteString(textStyleMuted.Render("skipped files"))
+	builder.WriteString("\n")
+	for _, group := range groups {
+		fmt.Fprintf(builder, "  %s %s %s\n",
+			textStyleMuted.Render(skipImportanceLabel(group.Importance)+":"),
+			skipClassLabel(group.Class),
+			textStyleMuted.Render("("+skipReasonLabel(group.Reason)+")"),
+		)
+		if group.Detail != "" {
+			fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("why:"), group.Detail)
 		}
+		for _, file := range group.Files {
+			fmt.Fprintf(builder, "    %s\n", file)
+		}
+	}
+}
+
+type skippedFileGroup struct {
+	Importance string
+	Class      string
+	Reason     string
+	Detail     string
+	Files      []string
+}
+
+func skippedFileGroups(files []FileResult) []skippedFileGroup {
+	indexes := map[string]int{}
+	var groups []skippedFileGroup
+	for _, file := range files {
+		if file.Status == StatusSkipped {
+			info := normalizedSkipInfo(file)
+			key := strings.Join([]string{info.Importance, info.Class, info.Reason, info.Detail}, "\x00")
+			index, ok := indexes[key]
+			if !ok {
+				index = len(groups)
+				indexes[key] = index
+				groups = append(groups, skippedFileGroup{
+					Importance: info.Importance,
+					Class:      info.Class,
+					Reason:     info.Reason,
+					Detail:     info.Detail,
+				})
+			}
+			groups[index].Files = append(groups[index].Files, resultPath(file.RelativePath, file.Path))
+		}
+	}
+	sort.SliceStable(groups, func(i, j int) bool {
+		left := groups[i]
+		right := groups[j]
+		if skipImportanceRank(left.Importance) != skipImportanceRank(right.Importance) {
+			return skipImportanceRank(left.Importance) < skipImportanceRank(right.Importance)
+		}
+		if left.Class != right.Class {
+			return left.Class < right.Class
+		}
+		if left.Reason != right.Reason {
+			return left.Reason < right.Reason
+		}
+		return left.Detail < right.Detail
+	})
+	for i := range groups {
+		sort.Strings(groups[i].Files)
+	}
+	return groups
+}
+
+func normalizedSkipInfo(file FileResult) skipClassification {
+	info := skipClassification{
+		Reason:     file.SkipReason,
+		Class:      file.SkipClass,
+		Importance: file.SkipImportance,
+		Detail:     file.SkipDetail,
+	}
+	if info.Reason == "" {
+		info.Reason = SkipReasonNoSchema
+	}
+	if info.Class == "" {
+		info.Class = SkipClassUnknown
+	}
+	if info.Importance == "" {
+		info.Importance = SkipImportanceMedium
+	}
+	if info.Detail == "" {
+		info.Detail = "schema-less JSON/YAML/TOML file"
+	}
+	return info
+}
+
+func skipImportanceRank(value string) int {
+	switch value {
+	case SkipImportanceHigh:
+		return 0
+	case SkipImportanceMedium:
+		return 1
+	case SkipImportanceLow:
+		return 2
+	default:
+		return 3
+	}
+}
+
+func skipImportanceLabel(value string) string {
+	switch value {
+	case SkipImportanceHigh:
+		return "high signal"
+	case SkipImportanceMedium:
+		return "medium signal"
+	case SkipImportanceLow:
+		return "low signal"
+	default:
+		return "unknown signal"
+	}
+}
+
+func skipClassLabel(value string) string {
+	switch value {
+	case SkipClassApplicationData:
+		return "application data"
+	case SkipClassExternalCatalog:
+		return "external catalog"
+	case SkipClassLocaleData:
+		return "locale data"
+	case SkipClassLockfile:
+		return "dependency lockfile"
+	case SkipClassRepoManagement:
+		return "repo-management config"
+	case SkipClassTestData:
+		return "test or fixture data"
+	case SkipClassUnsupportedConfig:
+		return "unsupported config"
+	default:
+		return "unknown/custom file"
+	}
+}
+
+func skipReasonLabel(value string) string {
+	switch value {
+	case SkipReasonCatalogSchemaUnavailable:
+		return "catalog schema unavailable"
+	case SkipReasonNoSchema:
+		return "no schema"
+	default:
+		return fallback(value, "unknown reason")
 	}
 }
 

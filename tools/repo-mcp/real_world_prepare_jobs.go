@@ -83,20 +83,16 @@ type realWorldRepoPrepareResult struct {
 }
 
 type realWorldPrepareSnapshot struct {
-	RunID          string `json:"runID"`
-	CorpusDir      string `json:"corpusDir"`
-	CacheDir       string `json:"cacheDir"`
-	OutputArtifact string `json:"outputArtifact"`
-	ManifestPath   string `json:"manifestPath"`
-	Total          int    `json:"total"`
-	Completed      int    `json:"completed"`
-	Delivered      int    `json:"delivered"`
-	Failed         int    `json:"failed"`
-	Running        int    `json:"running"`
-	Ready          int    `json:"ready"`
-	Complete       bool   `json:"complete"`
-	StartedAt      string `json:"startedAt"`
-	CompletedAt    string `json:"completedAt,omitempty"`
+	RunID       string `json:"runID"`
+	Total       int    `json:"total"`
+	Completed   int    `json:"completed"`
+	Delivered   int    `json:"delivered"`
+	Failed      int    `json:"failed"`
+	Running     int    `json:"running"`
+	Ready       int    `json:"ready"`
+	Complete    bool   `json:"complete"`
+	StartedAt   string `json:"startedAt"`
+	CompletedAt string `json:"completedAt,omitempty"`
 }
 
 func newRealWorldPrepareRegistry() *realWorldPrepareRegistry {
@@ -134,10 +130,10 @@ func (s *repoServer) handleRealWorldNextPreparedRepo(ctx context.Context, reques
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 	out["ok"] = true
-	return structured(out)
+	return s.realWorldStructured(ctx, out)
 }
 
-func (s *repoServer) handleRealWorldPrepareStatus(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *repoServer) handleRealWorldPrepareStatus(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	var args realWorldNextPreparedRepoArgs
 	_ = request.BindArguments(&args)
 	if args.RunID == "" {
@@ -150,18 +146,18 @@ func (s *repoServer) handleRealWorldPrepareStatus(_ context.Context, request mcp
 	if !ok {
 		return mcp.NewToolResultError(fmt.Sprintf("corpus preparation run %q was not found", args.RunID)), nil
 	}
-	return structured(map[string]any{
+	return s.realWorldStructured(ctx, map[string]any{
 		"ok":                 true,
 		"run":                run.snapshot(),
 		"dependencyPrep":     run.dependencyPrep(),
-		"inspection":         run.inspection(),
+		"inspection":         realWorldPublicInspection(run.inspection()),
 		"nextStep":           realWorldPrepareNextStep(run),
 		"validationStep":     realWorldNextRunCorpusDuringPrepare(run),
 		"prepSecurityPolicy": realWorldDependencyPrepSecurityPolicy(),
 	})
 }
 
-func (s *repoServer) handleRealWorldCancelPrepare(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *repoServer) handleRealWorldCancelPrepare(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	var args realWorldNextPreparedRepoArgs
 	_ = request.BindArguments(&args)
 	if args.RunID == "" {
@@ -175,7 +171,7 @@ func (s *repoServer) handleRealWorldCancelPrepare(_ context.Context, request mcp
 		return mcp.NewToolResultError(fmt.Sprintf("corpus preparation run %q was not found", args.RunID)), nil
 	}
 	run.cancel()
-	return structured(map[string]any{
+	return s.realWorldStructured(ctx, map[string]any{
 		"ok":      true,
 		"message": "corpus preparation cancellation requested",
 		"run":     run.snapshot(),
@@ -388,20 +384,16 @@ func (run *realWorldPrepareRun) snapshot() realWorldPrepareSnapshot {
 	}
 	total := len(run.Repositories)
 	return realWorldPrepareSnapshot{
-		RunID:          run.ID,
-		CorpusDir:      run.CorpusDir,
-		CacheDir:       run.CacheDir,
-		OutputArtifact: run.OutputArtifact,
-		ManifestPath:   run.ManifestPath,
-		Total:          total,
-		Completed:      run.completed,
-		Delivered:      run.delivered,
-		Failed:         run.failed,
-		Running:        total - run.completed,
-		Ready:          len(run.results),
-		Complete:       run.completed == total,
-		StartedAt:      run.StartedAt.UTC().Format(time.RFC3339),
-		CompletedAt:    completedAt,
+		RunID:       run.ID,
+		Total:       total,
+		Completed:   run.completed,
+		Delivered:   run.delivered,
+		Failed:      run.failed,
+		Running:     total - run.completed,
+		Ready:       len(run.results),
+		Complete:    run.completed == total,
+		StartedAt:   run.StartedAt.UTC().Format(time.RFC3339),
+		CompletedAt: completedAt,
 	}
 }
 
@@ -443,6 +435,12 @@ func (run *realWorldPrepareRun) dependencyPrep() []realWorldDependencyPrep {
 	run.mu.Lock()
 	defer run.mu.Unlock()
 	return run.dependencyPrepLocked()
+}
+
+func (run *realWorldPrepareRun) repositories() []realWorldRepository {
+	run.mu.Lock()
+	defer run.mu.Unlock()
+	return append([]realWorldRepository{}, run.Repositories...)
 }
 
 func (run *realWorldPrepareRun) dependencyPrepLocked() []realWorldDependencyPrep {
@@ -500,7 +498,7 @@ func (s *repoServer) realWorldWaitForPreparedRepo(ctx context.Context, request m
 					"resultOK":           false,
 					"delivered":          snapshot.Delivered,
 					"dependencyPrep":     run.dependencyPrep(),
-					"inspection":         run.inspection(),
+					"inspection":         realWorldPublicInspection(run.inspection()),
 					"nextStep":           realWorldPrepareNextStep(run),
 					"validationStep":     realWorldNextRunCorpusDuringPrepare(run),
 					"prepSecurityPolicy": realWorldDependencyPrepSecurityPolicy(),
@@ -511,11 +509,11 @@ func (s *repoServer) realWorldWaitForPreparedRepo(ctx context.Context, request m
 			return map[string]any{
 				"run":                snapshot,
 				"complete":           snapshot.Complete && snapshot.Ready == 0,
-				"result":             result,
+				"result":             realWorldPublicPrepareResult(result),
 				"resultOK":           result.Succeeded,
 				"delivered":          snapshot.Delivered,
 				"dependencyPrep":     run.dependencyPrep(),
-				"inspection":         run.inspection(),
+				"inspection":         realWorldPublicInspection(run.inspection()),
 				"nextStep":           realWorldPrepareNextStep(run),
 				"validationStep":     realWorldNextRunCorpusDuringPrepare(run),
 				"prepSecurityPolicy": realWorldDependencyPrepSecurityPolicy(),
@@ -557,12 +555,12 @@ func realWorldNextPreparedRepo(runID string) map[string]any {
 }
 
 func realWorldNextRunCorpusDuringPrepare(run *realWorldPrepareRun) map[string]any {
-	step := realWorldNextRunCorpus(run.CorpusDir, run.CacheDir, run.OutputArtifact, run.ManifestPath, run.dependencyPrep())
+	step := realWorldNextRunCorpus(run.ID, run.CorpusDir, run.CacheDir, run.OutputArtifact, run.ManifestPath, run.dependencyPrep())
 	step["why"] = "Start managed validation now; validation will wait inside the tool for repositories that are still being cloned and will read final dependency-prep notes from the manifest before finishing."
 	step["duringPreparation"] = true
 	step["beforeCalling"] = []string{
 		"You do not need to wait for every clone before starting validation.",
-		"Pass manifestPath and omit repositories/dependencyPrep unless you intentionally want to narrow the corpus.",
+		"Pass the managed runID and omit repositories/dependencyPrep unless you intentionally want to narrow the corpus.",
 		"Do not poll corpus setup with shell sleep loops; validation and prep tools send progress notifications.",
 	}
 	return step

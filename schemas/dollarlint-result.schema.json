@@ -148,6 +148,30 @@
         },
         "message": {
           "type": "string"
+        },
+        "skipReason": {
+          "type": "string",
+          "enum": ["noSchema", "catalogSchemaUnavailable"]
+        },
+        "skipClass": {
+          "type": "string",
+          "enum": [
+            "application-data",
+            "external-catalog",
+            "locale-data",
+            "lockfile",
+            "repo-management-config",
+            "test-data",
+            "unknown",
+            "unsupported-config"
+          ]
+        },
+        "skipImportance": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "skipDetail": {
+          "type": "string"
         }
       }
     },

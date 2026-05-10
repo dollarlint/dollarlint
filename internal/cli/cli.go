@@ -19,9 +19,10 @@ var version = "dev"
 const defaultFetchRetries = 2
 
 const (
-	outputFormatText  = "text"
-	outputFormatJSON  = "json"
-	outputFormatSARIF = "sarif"
+	outputFormatText   = "text"
+	outputFormatJSON   = "json"
+	outputFormatSARIF  = "sarif"
+	outputFormatBundle = "bundle"
 )
 
 type validateOptions struct {
@@ -125,9 +126,9 @@ func newVersionCommand(stdout io.Writer) *cobra.Command {
 }
 
 func addValidateFlags(cmd *cobra.Command, opts *validateOptions) {
-	cmd.Flags().StringVar(&opts.format, "format", outputFormatText, "Output format: text, json, or sarif")
+	cmd.Flags().StringVar(&opts.format, "format", outputFormatText, "Output format: text, json, sarif, or bundle")
 	cmd.Flags().StringVarP(&opts.outputPath, "output", "o", "", "Write output to a file instead of stdout")
-	cmd.Flags().BoolVar(&opts.showSkipped, "show-skipped", false, "Show files skipped because they do not declare a schema")
+	cmd.Flags().BoolVar(&opts.showSkipped, "show-skipped", false, "Show skipped files grouped by reason, class, and coverage signal")
 	cmd.Flags().BoolVar(&opts.verbose, "verbose", false, "Show expanded issue metadata in text output")
 	cmd.Flags().BoolVar(&opts.quiet, "quiet", false, "Use terse text output")
 	cmd.Flags().BoolVar(&opts.locations, "locations", false, "Include line and column locations in text output")
@@ -182,7 +183,7 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 		ConfigPath:      configPath,
 		ExplicitConfig:  *opts.configPath != "",
 		ConfigOverlay:   overlay,
-		SourceLocations: format == outputFormatJSON || format == outputFormatSARIF,
+		SourceLocations: format == outputFormatJSON || format == outputFormatSARIF || format == outputFormatBundle || cfg.Output.Locations,
 		StartedAt:       startedAt,
 	})
 	if err != nil {
@@ -290,8 +291,10 @@ func validateOutputFormat(format string) (string, error) {
 		return outputFormatJSON, nil
 	case outputFormatSARIF:
 		return outputFormatSARIF, nil
+	case outputFormatBundle:
+		return outputFormatBundle, nil
 	default:
-		return "", fmt.Errorf("unknown output format %q (expected text, json, or sarif)", format)
+		return "", fmt.Errorf("unknown output format %q (expected text, json, sarif, or bundle)", format)
 	}
 }
 
@@ -346,6 +349,8 @@ func formatValidateResult(result dollarlint.Result, output dollarlint.OutputConf
 		return dollarlint.FormatJSON(result)
 	case outputFormatSARIF:
 		return dollarlint.FormatSARIF(result)
+	case outputFormatBundle:
+		return dollarlint.FormatBundle(result, output)
 	default:
 		return []byte(dollarlint.FormatText(result, output)), nil
 	}

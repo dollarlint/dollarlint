@@ -122,6 +122,7 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 				result.Files[index].Message = "file is not covered by an inline schema, config association, built-in association, or catalog match"
 				addIssue(&result, issueForMissingSchemaCoverage(document))
 			} else if len(parseIssues) == 0 {
+				applySkippedFileClassification(&result.Files[index], document, SkipReasonNoSchema, "")
 				result.Summary.Skipped++
 			}
 			continue
@@ -158,6 +159,7 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 			if result.Files[index].Status != StatusError {
 				result.Files[index].Status = StatusSkipped
 				result.Files[index].Message = validation.message
+				applySkippedFileClassification(&result.Files[index], document, SkipReasonCatalogSchemaUnavailable, validation.message)
 				result.Summary.Skipped++
 			}
 			continue

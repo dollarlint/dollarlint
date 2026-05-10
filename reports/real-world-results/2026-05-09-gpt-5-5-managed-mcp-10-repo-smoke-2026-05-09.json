@@ -1,0 +1,384 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09",
+  "date": "2026-05-09",
+  "title": "gpt-5.5 managed MCP 10 repo smoke 2026-05-09",
+  "dollarlintRevision": "aefdd149644dc7849c1268a8df16a757c2c83652",
+  "workingTreeNote": "dirty working tree: M docs/src/pages/install/agent.astro;  M reports/real-world-results.json;  M tools/repo-mcp/real_world.go;  M tools/repo-mcp/real_world_inspect.go;  M tools/repo-mcp/real_world_prepare_jobs.go;  M tools/repo-mcp/real_world_test.go;  M tools/repo-mcp/real_world_triage.go;  M tools/repo-mcp/real_world_validation_jobs.go;  M tools/repo-mcp/tools.go; ?? reports/real-world-artifacts/2026-05-09-kotlin-git-lfs-rerun.dollarlint.json; ?? reports/real-world-artifacts/2026-05-09-real-world-100-repo-sweep-2026-05-09.dollarlint.json; ?? reports/real-world-results/2026-05-09-kotlin-git-lfs-rerun.json; ?? reports/real-world-results/2026-05-09-real-world-100-repo-sweep-2026-05-09.json",
+  "corpus": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315",
+  "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.2246338081",
+  "command": "real_world_start_validation corpusDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315\" cacheDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.2246338081\" outputArtifact=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09-917741328.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09-917741328.json",
+  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09.dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "cors",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "flysystem",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: src/AwsS3V3/composer.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "grape",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "husky",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: docs/package-lock.json, package-lock.json. Remote schema refs: 0."
+    },
+    {
+      "repository": "itsdangerous",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: uv.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "junit4",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "plug",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: mix.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "predicates-rs",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "spectre.console",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 4."
+    },
+    {
+      "repository": "terraform-null-label",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: test/src/go.sum. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "cors",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated the only discovered target-format file in this Go repository without parse, schema, validation, or warning output.",
+        "There were no skipped files, repeated messages, or confusing classifications, so the result would be straightforward for a developer to interpret.",
+        "The repository offered a very small JSON/YAML/TOML surface, so this result is mainly evidence that DollarLint stays quiet on a small Go project rather than evidence of broad Go ecosystem coverage."
+      ],
+      "caveats": [
+        "Small validation surface: only one relevant file was discovered."
+      ],
+      "notes": "No DollarLint product change suggested from this repo alone; the main limitation is that the selected repository did not expose much relevant config surface."
+    },
+    {
+      "repository": "flysystem",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint covered a broad PHP repository surface and validated many JSON/YAML files without parse errors, schema errors, validation findings, or warning noise.",
+        "The few skipped files looked like custom project automation or test fixture data rather than mainstream package manifests, so the skipped coverage did not undermine the result for a developer trying the tool.",
+        "The output would be actionable and quiet: there were no repeated schema warnings, false-looking failures, or high-volume issue groups to triage."
+      ],
+      "caveats": [
+        "A few custom JSON/YAML files were skipped, so exact coverage depends on whether those project-specific formats matter to the user."
+      ],
+      "notes": "DollarLint behaved reasonably here. This repo gives good evidence that common PHP/composer and workflow-style configuration can validate quietly without noisy false positives."
+    },
+    {
+      "repository": "grape",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint validated the files it selected without parse failures, validation failures, schema errors, or warning noise.",
+        "A substantial share of the Ruby repo's discovered YAML/JSON surface was skipped, including .rubocop.yml, .rubocop_todo.yml, .coveralls.yml, lib/grape/locale/en.yml, and a benchmark JSON fixture.",
+        "From a developer perspective, skipping common hand-authored Ruby tooling/service config such as RuboCop and Coveralls creates uncertainty about whether useful configuration coverage is missing, even though the run itself was otherwise quiet."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Consider adding schema/catalog coverage or explicit unsupported classifications for common Ruby YAML configs such as RuboCop and Coveralls.",
+          "rationale": "The repo skipped recognizable hand-authored configuration files that Ruby developers would expect a config linter to either validate or clearly explain as unsupported."
+        },
+        {
+          "strength": "low",
+          "recommendation": "Make skipped data/locale/fixture files easy to distinguish from skipped project configuration.",
+          "rationale": "The skipped list mixed likely lower-value locale/benchmark data with higher-value tooling config, which makes it harder to assess whether skipped coverage matters."
+        }
+      ],
+      "notes": "The result was correct and quiet for files validated, but skipped coverage was visible enough to be product feedback rather than just a caveat."
+    },
+    {
+      "repository": "husky",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated the JavaScript package/config files it considered in scope without parse, schema, validation, or warning noise.",
+        "The only skipped files were package-lock.json files, including one under docs; for a developer, skipping generated npm lockfiles is understandable and avoids low-value churn.",
+        "There were no confusing issue groups or repeated messages, so the result was actionable: the repo had no DollarLint-relevant problems in the files validated."
+      ],
+      "caveats": [
+        "Lockfiles were skipped; that is reasonable if intentional, but users still need skip reasons to remain easy to see in normal output."
+      ],
+      "notes": "No product change suggested from this repo alone. The JavaScript package manifest path behaved quietly, and the skipped files were generated lockfiles rather than hand-authored configuration."
+    },
+    {
+      "repository": "itsdangerous",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint parsed and classified every discovered target file in the Python repo and produced no skipped-file or warning noise.",
+        "The lone reported issue was in pyproject.toml at /tool/ruff/lint/ignore/0 for the Ruff ignore value UP038; that looks like a catalog-schema freshness problem because the project is using a plausible Ruff rule code that the SchemaStore PyProject enum did not include.",
+        "The developer-facing message was very hard to act on because it expanded the entire Ruff enum list instead of saying the actual value was UP038 and giving a concise expected-value summary or schema provenance."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Condense large enum validation messages so the output highlights the offending value and truncates or summarizes long allowed-value lists.",
+          "rationale": "The current message for one Ruff rule code expands hundreds of enum options, which obscures the concrete action a developer would need to take."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Consider surfacing catalog schema provenance/freshness or a stale-schema hint when a catalog enum rejects a common tool rule code.",
+          "rationale": "The PyProject/Ruff failure appears driven by external catalog lag rather than repository breakage; developers need to distinguish repo problems from schema-catalog limitations."
+        }
+      ],
+      "notes": "This result is useful product evidence even though the underlying schema comes from SchemaStore: DollarLint surfaced a likely stale external schema as a hard validation failure and made the message noisy enough that the actionable detail was buried."
+    },
+    {
+      "repository": "junit4",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint discovered a small target-format surface in this Java repository and validated all discovered files without parse, schema, or validation issues.",
+        "There were no skipped files, warnings, or repeated messages, so the output would be easy for a developer to trust for the files DollarLint considered in scope.",
+        "Because the repo exposed only a couple of JSON/YAML/TOML-style targets, this result is useful as a quiet smoke check but not broad evidence for Java ecosystem coverage."
+      ],
+      "caveats": [
+        "Very small DollarLint-relevant surface in this repository; Maven/Gradle/XML project metadata is outside the observed validation surface."
+      ],
+      "notes": "No product change suggested from this repo alone: the run was quiet, complete for discovered target files, and clearly limited by repository content rather than DollarLint behavior."
+    },
+    {
+      "repository": "plug",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated the only discovered target-format file in this Elixir repository without parse, schema, validation, or warning output.",
+        "There were no skipped files or repeated warnings, so the developer-facing result was simple and trustworthy for the file DollarLint considered in scope.",
+        "The small discovered surface means this is a basic smoke check, not evidence that DollarLint covers Elixir-specific project metadata."
+      ],
+      "caveats": [
+        "Very small DollarLint-relevant surface; Elixir mix metadata itself was outside the observed JSON/YAML/TOML validation surface."
+      ],
+      "notes": "No product recommendation from this repo alone. The result was clean and understandable, with limited scope due to repository content."
+    },
+    {
+      "repository": "predicates-rs",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint validated the Rust package manifests without parse errors, warnings, or reported issues, so the core Cargo.toml path looked quiet and understandable.",
+        "The result skipped several common Rust/tooling TOML files such as .cargo/config.toml, .clippy.toml, deny.toml, and release.toml; as a developer, that leaves a coverage question even though the run was otherwise clean.",
+        "No noisy false positives or confusing validation failures were present, so the main actionability concern is skipped support rather than correctness."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "Consider adding or explicitly classifying support gaps for common Rust tooling TOML files such as Cargo config, clippy, cargo-deny, and release metadata.",
+          "rationale": "The repo produced no validation noise, but a meaningful share of recognizable Rust configuration was skipped, which can make users unsure whether DollarLint checked the files they care about."
+        }
+      ],
+      "notes": "Developer experience was mostly clean, but the skipped Rust tool configuration files are concrete places where DollarLint could either validate more or explain unsupported coverage more directly."
+    },
+    {
+      "repository": "spectre.console",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated the .NET repository's selected JSON/YAML configuration surface without parse errors, schema errors, validation issues, or warning noise.",
+        "The skipped JSON files were application/test data assets such as emoji, spinner, color, and example data rather than obvious package manifests or operational configuration.",
+        "For a developer trying DollarLint, this was an understandable result: clean where schema-backed configuration was found, and skipped data files did not create an immediate product correctness concern."
+      ],
+      "caveats": [
+        "Skipped JSON data assets mean DollarLint did not act as a general JSON data validator here; the result is best interpreted as config/schema coverage, not arbitrary project data coverage."
+      ],
+      "notes": "No product change suggested from this repo alone. The skip pattern looked aligned with avoiding schema-less application data rather than missing a mainstream .NET config manifest."
+    },
+    {
+      "repository": "terraform-null-label",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint validated the files it selected in the Terraform module without parse errors, validation errors, schema failures, or warning noise.",
+        "The skipped files included hand-authored ecosystem/project configuration such as atmos.yaml, .github/settings.yml, and README.yaml rather than only generated artifacts.",
+        "For a developer trying DollarLint on infrastructure repos, skipping Atmos and repository settings config leaves an understandable coverage gap even though the validated files were clean."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "Consider schema support or explicit unsupported classifications for common infrastructure/repo-management YAML such as atmos.yaml and .github/settings.yml.",
+          "rationale": "Terraform/Cloud Posse-style repos often keep operational configuration in these files; skipping them without a stronger classification makes coverage harder to judge."
+        }
+      ],
+      "notes": "This repo did not expose correctness problems, but it did show that infrastructure-oriented YAML configs can be skipped silently enough to merit product consideration."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "itsdangerous",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/pallets/itsdangerous.git",
+      "commit": "672971d66a2ef9f85151e53283113f33d642dabd",
+      "notes": "Python package with pyproject.toml plus YAML config/workflows.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315/itsdangerous",
+      "status": "cloned"
+    },
+    {
+      "name": "predicates-rs",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/assert-rs/predicates-rs.git",
+      "commit": "ec2eeab7e0e25aa680653d5cd3a9f75f7a7e7876",
+      "notes": "Rust library with Cargo.toml workspace/package metadata and CI YAML.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315/predicates-rs",
+      "status": "cloned"
+    },
+    {
+      "name": "cors",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/go-chi/cors.git",
+      "commit": "3a5381283113550282a3dcfba669a48ba4691d84",
+      "notes": "Small Go middleware with go.mod and GitHub YAML.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315/cors",
+      "status": "cloned"
+    },
+    {
+      "name": "husky",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/typicode/husky.git",
+      "commit": "3f0023dc10d7003d70f2e31aa56300eab80e76d6",
+      "notes": "JavaScript package manifest coverage via package.json and npm-oriented configs.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315/husky",
+      "status": "cloned"
+    },
+    {
+      "name": "grape",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/ruby-grape/grape.git",
+      "commit": "037476e62a89e6786f036769d8ca96952f1f18e3",
+      "notes": "Ruby gem project with Gemfile/gemspec and YAML CI/config files.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315/grape",
+      "status": "cloned"
+    },
+    {
+      "name": "junit4",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/junit-team/junit4.git",
+      "commit": "300468b1efd48d76fac2f7bd6d576846dcbbf5ed",
+      "notes": "Java project with Maven/Gradle metadata and CI YAML.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315/junit4",
+      "status": "cloned"
+    },
+    {
+      "name": "plug",
+      "ecosystem": "Elixir",
+      "cloneURL": "https://github.com/elixir-plug/plug.git",
+      "commit": "a447199b337dea7e1c056bb36181eb92a6663fbb",
+      "notes": "Elixir library with mix project metadata and YAML workflows.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315/plug",
+      "status": "cloned"
+    },
+    {
+      "name": "spectre.console",
+      "ecosystem": ".NET",
+      "cloneURL": "https://github.com/spectreconsole/spectre.console.git",
+      "commit": "367838d85161ff296b617f2b557e3e44bb437a0e",
+      "notes": "C#/.NET project with solution/project metadata and YAML workflows.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315/spectre-console",
+      "status": "cloned"
+    },
+    {
+      "name": "flysystem",
+      "ecosystem": "PHP",
+      "cloneURL": "https://github.com/thephpleague/flysystem.git",
+      "commit": "1b07c8b639e8d88891db0f683ac96e99f1f9a683",
+      "notes": "PHP Composer package with composer.json and YAML workflows.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315/flysystem",
+      "status": "cloned"
+    },
+    {
+      "name": "terraform-null-label",
+      "ecosystem": "Terraform",
+      "cloneURL": "https://github.com/cloudposse/terraform-null-label.git",
+      "commit": "38364d79c1082de13373666252e1276975919543",
+      "notes": "Terraform module for HCL-heavy repo plus YAML automation/config coverage.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.1174651315/terraform-null-label",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 114,
+    "validated": 89,
+    "skipped": 25,
+    "failed": 0,
+    "issues": {
+      "total": 1,
+      "parsing": 0,
+      "validation": 1,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 913064918
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 6 repo(s) behaved reasonably, 4 repo(s) produced product signals, and 0 repo(s) were blocked or uninterpretable.",
+    "DollarLint discovered 114 files, validated 89, skipped 25, failed 0, reported 1 issue, and emitted 0 warnings.",
+    "Repository concentration: itsdangerous had 1 issue, 0 warnings, and 0 skipped files.",
+    "Issue groups: itsdangerous catalog-schema-validation/enum: 1.",
+    "Skipped coverage: 25 of 114 discovered files were skipped (21.9%)."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "This sweep skipped 25 of 114 discovered files (21.9%), which is useful context when judging corpus coverage."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Consider adding schema/catalog coverage or explicit unsupported classifications for common Ruby YAML configs such as RuboCop and Coveralls.",
+      "rationale": "The repo skipped recognizable hand-authored configuration files that Ruby developers would expect a config linter to either validate or clearly explain as unsupported."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Make skipped data/locale/fixture files easy to distinguish from skipped project configuration.",
+      "rationale": "The skipped list mixed likely lower-value locale/benchmark data with higher-value tooling config, which makes it harder to assess whether skipped coverage matters."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Condense large enum validation messages so the output highlights the offending value and truncates or summarizes long allowed-value lists.",
+      "rationale": "The current message for one Ruff rule code expands hundreds of enum options, which obscures the concrete action a developer would need to take."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Consider surfacing catalog schema provenance/freshness or a stale-schema hint when a catalog enum rejects a common tool rule code.",
+      "rationale": "The PyProject/Ruff failure appears driven by external catalog lag rather than repository breakage; developers need to distinguish repo problems from schema-catalog limitations."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider adding or explicitly classifying support gaps for common Rust tooling TOML files such as Cargo config, clippy, cargo-deny, and release metadata.",
+      "rationale": "The repo produced no validation noise, but a meaningful share of recognizable Rust configuration was skipped, which can make users unsure whether DollarLint checked the files they care about."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider schema support or explicit unsupported classifications for common infrastructure/repo-management YAML such as atmos.yaml and .github/settings.yml.",
+      "rationale": "Terraform/Cloud Posse-style repos often keep operational configuration in these files; skipping them without a stronger classification makes coverage harder to judge."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; record the triage and decide follow-up from the structured result."
+  ],
+  "followUp": [
+    "Review the structured productRecommendations and decide whether to open implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting the same corpus by default."
+  ]
+}

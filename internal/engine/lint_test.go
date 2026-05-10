@@ -65,8 +65,23 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 		t.Fatalf("missing expected issues: %+v", result.Issues)
 	}
 	text := FormatText(result, OutputConfig{ShowSkipped: true})
-	if !strings.Contains(text, "dollarlint found 3 validation issues in 2 files") || !strings.Contains(text, "skipped: skip.yaml") {
+	if !strings.Contains(text, "dollarlint found 3 validation issues in 2 files") ||
+		!strings.Contains(text, "skipped files") ||
+		!strings.Contains(text, "skip.yaml") {
 		t.Fatalf("text output = %s", text)
+	}
+	var sawSkippedClassification bool
+	for _, file := range result.Files {
+		if file.RelativePath == "skip.yaml" {
+			if file.SkipReason != SkipReasonNoSchema || file.SkipClass == "" || file.SkipImportance == "" || file.SkipDetail == "" {
+				t.Fatalf("skipped file classification = %+v", file)
+			}
+			sawSkippedClassification = true
+			break
+		}
+	}
+	if !sawSkippedClassification {
+		t.Fatalf("missing skipped file classification: %+v", result.Files)
 	}
 	data, err := FormatJSON(result)
 	if err != nil {
@@ -665,6 +680,47 @@ func TestValidationIssuesDedupeRepeatedLeaves(t *testing.T) {
 	}
 }
 
+func TestValidationEnumMessageCondensesLargeEnums(t *testing.T) {
+	var allowed []any
+	for _, value := range []string{"A", "A0", "A00", "A001", "A002", "B001", "C001", "UP037", "UP039", "YTT302", "YTT303"} {
+		allowed = append(allowed, value)
+	}
+	message := validationMessage(&jsonschema.ValidationError{
+		ErrorKind: &kind.Enum{
+			Got:  "UP038",
+			Want: allowed,
+		},
+	})
+	if !strings.Contains(message, `value "UP038" is not one of 11 allowed values`) ||
+		!strings.Contains(message, `"A", "A0", "A00", "A001", "A002", ..., "YTT302", "YTT303"`) ||
+		strings.Contains(message, "UP037") {
+		t.Fatalf("enum message was not condensed: %s", message)
+	}
+}
+
+func TestSkipClassification(t *testing.T) {
+	cases := []struct {
+		path       string
+		class      string
+		importance string
+	}{
+		{"package-lock.json", SkipClassLockfile, SkipImportanceLow},
+		{"grape/.coveralls.yml", SkipClassUnsupportedConfig, SkipImportanceHigh},
+		{"predicates-rs/.cargo/config.toml", SkipClassUnsupportedConfig, SkipImportanceHigh},
+		{"terraform-null-label/.github/settings.yml", SkipClassRepoManagement, SkipImportanceHigh},
+		{"grape/lib/grape/locale/en.yml", SkipClassLocaleData, SkipImportanceLow},
+		{"spectre-console/src/Spectre.Console.Tests/Data/example.json", SkipClassTestData, SkipImportanceLow},
+		{"spectre-console/src/Spectre.Console/Data/emoji.json", SkipClassApplicationData, SkipImportanceLow},
+		{"custom/thing.yaml", SkipClassUnknown, SkipImportanceMedium},
+	}
+	for _, tc := range cases {
+		classification := classifySkippedFile(tc.path, SkipReasonNoSchema, "")
+		if classification.Class != tc.class || classification.Importance != tc.importance || classification.Detail == "" {
+			t.Fatalf("classifySkippedFile(%q) = %+v", tc.path, classification)
+		}
+	}
+}
+
 func TestLintBranchErrorsOutputMode(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "schema.json"), `{
@@ -789,6 +845,9 @@ func TestLintAppliesSchemaStoreAssociationsWhenEnabled(t *testing.T) {
 	}
 	if result.Files[0].SchemaSource != "catalog:schemastore" || !strings.HasSuffix(result.Files[0].Schema, "/schema.json") {
 		t.Fatalf("file schema = %+v", result.Files[0])
+	}
+	if !strings.Contains(result.Issues[0].Hint, "catalog:schemastore") || !strings.Contains(result.Issues[0].Hint, "tool version") {
+		t.Fatalf("catalog issue hint = %+v", result.Issues[0])
 	}
 }
 

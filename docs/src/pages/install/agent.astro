@@ -76,7 +76,21 @@ Use that generated config as the starting point, then edit it for this repositor
 
 7. Re-run inspect and validate until discovered, associated, validated, skipped, warning, and issue counts look reasonable for this repository. A nonzero skipped count is acceptable when the skipped files do not need schema coverage.
 
-8. Once the config is working, delete default values that are not useful to keep. Keep project-specific settings, intentional policy choices, and defaults that help future maintainers understand or tune validation.
+8. Before reporting that setup is complete, minimize .dollarlint.toml. Treat the generated default config as temporary scaffolding, not the desired final file.
+
+   Remove every unchanged default key and every generated section that contains only unchanged defaults. Do not keep defaults just because dollarlint init wrote them.
+
+   The final config should contain project-specific choices only, such as:
+
+   - discovery.exclude entries for this repository
+   - [[schemas.associations]] entries for important first-party files
+   - [[schemas.catalogs.ignore]] entries for catalog matches that should stay skipped
+   - [[ignore]] rules for known accepted validation issues
+   - non-default policy choices, such as enabling catalog matching, requiring schema coverage, changing nested config behavior, or opting into output locations
+
+   Remove unchanged generated values such as configs.mode = "single", parsing.json.mode = "auto", default schema depth/concurrency, default fetch/cache settings, default catalog source definitions, and default output settings unless you intentionally changed or need to document that policy for this repo.
+
+   A good final config is usually much shorter than the generated starter. If a value matches DollarLint's normal behavior and does not explain a repo-specific decision, delete it.
 
 ## 4. Report to the user
 

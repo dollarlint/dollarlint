@@ -78,6 +78,13 @@
       "title": "10 real-world validation tests",
       "path": "reports/real-world-results/2026-05-09-10-real-world-validation-tests.json",
       "repoCount": 10
+    },
+    {
+      "id": "2026-05-09-managed-100-real-world-validation-sweep",
+      "date": "2026-05-09",
+      "title": "Managed 100 real-world validation sweep",
+      "path": "reports/real-world-results/2026-05-09-managed-100-real-world-validation-sweep.json",
+      "repoCount": 100
     }
   ]
 }

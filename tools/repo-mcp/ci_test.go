@@ -123,6 +123,55 @@ func TestRealWorldSafeOutputPolicyIssuesRequirePrintfForSafeoutputsCLI(t *testin
 	}
 }
 
+func TestRealWorldPRCredentialIssuesRequireWritableOutputPath(t *testing.T) {
+	issues, check := realWorldPRCredentialIssues(
+		true,
+		`[{"name":"COPILOT_GITHUB_TOKEN"}]`,
+		true,
+		`{"default_workflow_permissions":"read","can_approve_pull_request_reviews":false}`,
+		commandResult{},
+		commandResult{},
+	)
+	if len(issues) != 1 || !strings.Contains(issues[0].Message, "durable-memory PR") {
+		t.Fatalf("issues = %+v, want missing PR credential issue", issues)
+	}
+	if ok, _ := check["ok"].(bool); ok {
+		t.Fatalf("check = %+v, want not ok", check)
+	}
+}
+
+func TestRealWorldPRCredentialIssuesAcceptWritableSecretOrRepoSetting(t *testing.T) {
+	issues, check := realWorldPRCredentialIssues(
+		true,
+		`[{"name":"GH_AW_GITHUB_TOKEN"}]`,
+		true,
+		`{"default_workflow_permissions":"read","can_approve_pull_request_reviews":false}`,
+		commandResult{},
+		commandResult{},
+	)
+	if len(issues) != 0 {
+		t.Fatalf("issues = %+v, want none with GH_AW_GITHUB_TOKEN", issues)
+	}
+	if ok, _ := check["ok"].(bool); !ok {
+		t.Fatalf("check = %+v, want ok", check)
+	}
+
+	issues, check = realWorldPRCredentialIssues(
+		true,
+		`[{"name":"COPILOT_GITHUB_TOKEN"}]`,
+		true,
+		`{"default_workflow_permissions":"read","can_approve_pull_request_reviews":true}`,
+		commandResult{},
+		commandResult{},
+	)
+	if len(issues) != 0 {
+		t.Fatalf("issues = %+v, want none with GitHub Actions PR setting enabled", issues)
+	}
+	if ok, _ := check["ok"].(bool); !ok {
+		t.Fatalf("check = %+v, want ok", check)
+	}
+}
+
 func hasMapping(mappings []failureMapping, tool, command string) bool {
 	for _, mapping := range mappings {
 		if mapping.LocalTool == tool && mapping.LocalCommand == command {

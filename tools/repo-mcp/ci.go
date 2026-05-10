@@ -183,7 +183,7 @@ type readinessIssue struct {
 }
 
 func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	p := newProgress(ctx, s.mcp, request, 6)
+	p := newProgress(ctx, s.mcp, request, 7)
 	sourceRel := ".github/workflows/real-world-testing.md"
 	lockRel := ".github/workflows/real-world-testing.lock.yml"
 	sourcePath := filepath.Join(s.root, sourceRel)
@@ -214,6 +214,11 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	safeOutputIssues := realWorldSafeOutputPolicyIssues(string(source), string(lock))
 	issues = append(issues, safeOutputIssues...)
 	checks = append(checks, map[string]any{"name": "real-world safe outputs", "ok": len(safeOutputIssues) == 0})
+
+	p.step("Checking PR creation credentials")
+	credentialIssues, credentialCheck := s.agenticWorkflowPRCredentialReadiness(ctx)
+	issues = append(issues, credentialIssues...)
+	checks = append(checks, credentialCheck)
 
 	p.step("Checking generated lock freshness")
 	fresh := true
@@ -251,6 +256,97 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 		"recentFailureSignal": "A recent real-world workflow run failed when COPILOT_MODEL was gpt-5.5; this tool flags that value because it was not accessible via Copilot chat completions.",
 		"nextStep":            "Fix error-severity issues before running the real-world workflow. Warnings should be reviewed before push.",
 	})
+}
+
+func (s *repoServer) agenticWorkflowPRCredentialReadiness(ctx context.Context) ([]readinessIssue, map[string]any) {
+	secretResult := s.run(ctx, namedCommand{Name: "read gh-aw secrets", Cmd: "gh secret list --repo dollarlint/dollarlint --json name"})
+	permissionResult := s.run(ctx, namedCommand{Name: "read github actions workflow permissions", Cmd: "gh api repos/dollarlint/dollarlint/actions/permissions/workflow --jq ."})
+	return realWorldPRCredentialIssues(secretResult.Succeeded, secretResult.Output, permissionResult.Succeeded, permissionResult.Output, secretResult, permissionResult)
+}
+
+type ghSecretName struct {
+	Name string `json:"name"`
+}
+
+type githubWorkflowPermissions struct {
+	CanApprovePullRequestReviews bool   `json:"can_approve_pull_request_reviews"`
+	DefaultWorkflowPermissions   string `json:"default_workflow_permissions"`
+}
+
+func realWorldPRCredentialIssues(secretOK bool, secretOutput string, permissionOK bool, permissionOutput string, secretResult, permissionResult commandResult) ([]readinessIssue, map[string]any) {
+	check := map[string]any{"name": "PR creation credentials"}
+	var issues []readinessIssue
+	hasWriteSecret := false
+	if secretOK {
+		secrets, err := parseGHSecretNames(secretOutput)
+		if err != nil {
+			check["secretWarning"] = "Could not parse gh secret list output: " + err.Error()
+		} else {
+			for _, secret := range secrets {
+				if secret == "GH_AW_GITHUB_TOKEN" {
+					hasWriteSecret = true
+					break
+				}
+			}
+		}
+	} else {
+		check["secretWarning"] = "Could not read repository secrets; skipping GH_AW_GITHUB_TOKEN presence check."
+		check["secretResult"] = secretResult
+	}
+
+	defaultTokenCanCreatePR := false
+	var permissions githubWorkflowPermissions
+	if permissionOK {
+		parsed, err := parseGitHubWorkflowPermissions(permissionOutput)
+		if err != nil {
+			check["permissionWarning"] = "Could not parse GitHub Actions workflow permissions: " + err.Error()
+		} else {
+			permissions = parsed
+			defaultTokenCanCreatePR = permissions.CanApprovePullRequestReviews
+		}
+	} else {
+		check["permissionWarning"] = "Could not read GitHub Actions workflow permissions; skipping GITHUB_TOKEN PR creation check."
+		check["permissionResult"] = permissionResult
+	}
+
+	check["hasGH_AW_GITHUB_TOKEN"] = hasWriteSecret
+	check["defaultTokenCanCreatePullRequests"] = defaultTokenCanCreatePR
+	if permissions.DefaultWorkflowPermissions != "" {
+		check["defaultWorkflowPermissions"] = permissions.DefaultWorkflowPermissions
+	}
+	if permissionOK {
+		check["canApprovePullRequestReviews"] = permissions.CanApprovePullRequestReviews
+	}
+
+	if secretOK && permissionOK && !hasWriteSecret && !defaultTokenCanCreatePR {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "real-world workflow cannot create the required durable-memory PR with current credentials",
+			Recommendation: "Set GH_AW_GITHUB_TOKEN with a fine-grained PAT that has Contents, Pull requests, Issues, and Discussions read/write, or enable the repository Actions setting that allows GitHub Actions to create and approve pull requests.",
+		})
+	}
+	check["ok"] = len(issues) == 0
+	return issues, check
+}
+
+func parseGHSecretNames(output string) ([]string, error) {
+	var secrets []ghSecretName
+	if err := json.Unmarshal([]byte(output), &secrets); err != nil {
+		return nil, err
+	}
+	names := make([]string, 0, len(secrets))
+	for _, secret := range secrets {
+		names = append(names, secret.Name)
+	}
+	return names, nil
+}
+
+func parseGitHubWorkflowPermissions(output string) (githubWorkflowPermissions, error) {
+	var permissions githubWorkflowPermissions
+	if err := json.Unmarshal([]byte(output), &permissions); err != nil {
+		return githubWorkflowPermissions{}, err
+	}
+	return permissions, nil
 }
 
 func requiredAgenticRealWorldTools() []string {

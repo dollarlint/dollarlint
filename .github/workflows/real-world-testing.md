@@ -69,7 +69,7 @@ mcp-servers:
     entrypoint: /bin/sh
     entrypointArgs:
       - -lc
-      - export PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; export DOLLARLINT_REPO_ROOT=$GITHUB_WORKSPACE; git config --global --add safe.directory $GITHUB_WORKSPACE || true; cd $GITHUB_WORKSPACE && go run ./tools/repo-mcp
+      - exec ${GITHUB_WORKSPACE}/tools/repo-mcp/start-gh-aw.sh
     mounts:
       - "${GITHUB_WORKSPACE}:${GITHUB_WORKSPACE}:rw"
     env:

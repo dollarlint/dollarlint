@@ -444,6 +444,13 @@ func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
 			Recommendation: `Ask the agent to include a "Durable memory PR" Discussion section saying that the PR should be merged in order to retain the results, then regenerate the lock file.`,
 		})
 	}
+	if !strings.Contains(source, "category: agentic-product-testing") || !strings.Contains(lock, `"category":"agentic-product-testing"`) {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "real-world workflow Discussions are not configured for the Agentic Product Testing category",
+			Recommendation: `Set create-discussion.category to "agentic-product-testing" and regenerate the lock file.`,
+		})
+	}
 	return issues
 }
 

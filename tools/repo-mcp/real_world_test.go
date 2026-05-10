@@ -1009,7 +1009,7 @@ func TestRealWorldNextAfterRecordOnlyMentionsDiscussionInAgenticWorkflow(t *test
 		t.Fatalf("generic GitHub Actions run should not include discussion guidance: %+v", next)
 	}
 
-	t.Setenv("GH_AW_WORKFLOW_ID", "weekly-real-world-testing")
+	t.Setenv("GH_AW_WORKFLOW_ID", "real-world-testing")
 	next = realWorldNextAfterRecord(realWorldEntry{ID: "sample"})
 	if _, ok := next["discussion"]; !ok {
 		t.Fatalf("GitHub Agentic Workflow run should include discussion guidance: %+v", next)

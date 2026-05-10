@@ -14,7 +14,7 @@ func (s *repoServer) addTools() {
 	s.addTool("ci_readiness", "Run local CI-shaped readiness checks grouped by GitHub Actions job and return failed steps with fix guidance.", schemaObject(map[string]any{
 		"job": enumSchema([]string{"all", "test", "quality", "build", "docs", "goreleaser-check"}, "CI job to run locally. Defaults to all."),
 	}), s.handleCIReadiness, false)
-	s.addTool("agentic_workflow_readiness", "Validate the weekly agentic real-world workflow before pushing, including actionlint, MCP allowlist, generated lock freshness, and known-bad model settings.", schemaObject(nil), s.handleAgenticWorkflowReadiness, true)
+	s.addTool("agentic_workflow_readiness", "Validate the real-world agentic workflow before pushing, including actionlint, MCP allowlist, generated lock freshness, and known-bad model settings.", schemaObject(nil), s.handleAgenticWorkflowReadiness, true)
 	s.addTool("ci_failure_diagnose", "Inspect recent or specified GitHub Actions failures and map them to the local MCP readiness checks that should have caught them.", schemaObject(map[string]any{
 		"runID": map[string]any{"type": "string", "description": "Optional numeric GitHub Actions run id to diagnose. Defaults to recent failed runs."},
 		"limit": map[string]any{"type": "integer", "description": "Recent run list limit when runID is omitted. Defaults to 12; capped at 30."},

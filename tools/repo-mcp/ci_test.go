@@ -60,6 +60,24 @@ func TestInaccessibleCopilotModelIssueFlagsGPT55(t *testing.T) {
 	}
 }
 
+func TestMissingWorkflowToolsAcceptsRealWorldWildcard(t *testing.T) {
+	required := []string{"real_world_start_testing", "real_world_record_result"}
+	source := "allowed:\n  - real_world_*\n"
+	lock := "--allow-tool 'dollarlint-repo(real_world_*)'"
+	if missing := missingWorkflowTools(source, lock, required); len(missing) != 0 {
+		t.Fatalf("missing = %v, want none", missing)
+	}
+}
+
+func TestMissingWorkflowToolsRequiresWildcardInSourceAndLock(t *testing.T) {
+	required := []string{"real_world_start_testing"}
+	source := "allowed:\n  - real_world_*\n"
+	lock := "--allow-tool 'dollarlint-repo(real_world_history)'"
+	if missing := missingWorkflowTools(source, lock, required); len(missing) != 1 || missing[0] != "real_world_start_testing" {
+		t.Fatalf("missing = %v, want real_world_start_testing", missing)
+	}
+}
+
 func hasMapping(mappings []failureMapping, tool, command string) bool {
 	for _, mapping := range mappings {
 		if mapping.LocalTool == tool && mapping.LocalCommand == command {

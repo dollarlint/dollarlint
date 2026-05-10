@@ -182,8 +182,8 @@ type readinessIssue struct {
 
 func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	p := newProgress(ctx, s.mcp, request, 5)
-	sourceRel := ".github/workflows/weekly-real-world-testing.md"
-	lockRel := ".github/workflows/weekly-real-world-testing.lock.yml"
+	sourceRel := ".github/workflows/real-world-testing.md"
+	lockRel := ".github/workflows/real-world-testing.lock.yml"
 	sourcePath := filepath.Join(s.root, sourceRel)
 	lockPath := filepath.Join(s.root, lockRel)
 	var issues []readinessIssue
@@ -204,7 +204,7 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	requiredTools := requiredAgenticRealWorldTools()
 	missing := missingWorkflowTools(string(source), string(lock), requiredTools)
 	if len(missing) > 0 {
-		issues = append(issues, readinessIssue{Severity: "error", Message: "weekly workflow is missing real-world MCP tools: " + strings.Join(missing, ", "), Recommendation: "Add the missing tools to the workflow MCP server allowlist and regenerate the lock file."})
+		issues = append(issues, readinessIssue{Severity: "error", Message: "real-world workflow is missing real-world MCP tools: " + strings.Join(missing, ", "), Recommendation: "Add the missing tools to the workflow MCP server allowlist and regenerate the lock file."})
 	}
 	checks = append(checks, map[string]any{"name": "real-world MCP allowlist", "ok": len(missing) == 0, "requiredTools": requiredTools, "missing": missing})
 
@@ -221,7 +221,7 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	p.step("Running actionlint on agentic workflow")
 	actionlint := s.run(ctx, namedCommand{
 		Job:         "agentic-workflow",
-		Name:        "actionlint weekly workflow",
+		Name:        "actionlint real-world workflow",
 		Cmd:         actionlintCommand + " " + lockRel,
 		FailureHint: "Fix actionlint or shellcheck diagnostics in " + lockRel + ".",
 	})
@@ -241,8 +241,8 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 		"generatedWorkflow":   lockRel,
 		"checks":              checks,
 		"issues":              issues,
-		"recentFailureSignal": "The recent weekly run failed when COPILOT_MODEL was gpt-5.5; this tool flags that value because it was not accessible via Copilot chat completions.",
-		"nextStep":            "Fix error-severity issues before running the weekly real-world workflow. Warnings should be reviewed before push.",
+		"recentFailureSignal": "A recent real-world workflow run failed when COPILOT_MODEL was gpt-5.5; this tool flags that value because it was not accessible via Copilot chat completions.",
+		"nextStep":            "Fix error-severity issues before running the real-world workflow. Warnings should be reviewed before push.",
 	})
 }
 
@@ -270,12 +270,18 @@ func requiredAgenticRealWorldTools() []string {
 
 func missingWorkflowTools(source, lock string, required []string) []string {
 	var missing []string
+	sourceWildcard := hasRealWorldToolWildcard(source)
+	lockWildcard := hasRealWorldToolWildcard(lock)
 	for _, tool := range required {
-		if !strings.Contains(source, tool) || !strings.Contains(lock, tool) {
+		if (!sourceWildcard && !strings.Contains(source, tool)) || (!lockWildcard && !strings.Contains(lock, tool)) {
 			missing = append(missing, tool)
 		}
 	}
 	return missing
+}
+
+func hasRealWorldToolWildcard(text string) bool {
+	return strings.Contains(text, "real_world_*")
 }
 
 func hasReadinessErrors(issues []readinessIssue) bool {

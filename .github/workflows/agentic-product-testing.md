@@ -13,8 +13,8 @@ on:
         type: string
   schedule: weekly on monday
 
-description: Run DollarLint against a real-world corpus and publish a GitHub Discussion summary.
-labels: [automation, real-world-testing]
+description: Run DollarLint Agentic Product Testing against a real-world corpus and publish a GitHub Discussion summary.
+labels: [automation, agentic-product-testing]
 
 permissions:
   contents: read
@@ -59,14 +59,16 @@ tools:
     - head
     - tail
     - wc
+    # The repo MCP CLI wrapper is broad here, but the server exposes only
+    # real_world_* tools via DOLLARLINT_MCP_TOOLS below.
     - dollarlint-repo:*
   github:
     toolsets: [repos]
 
 mcp-servers:
   dollarlint-repo:
-    type: stdio
-    container: golang:1.26.3
+    container: golang
+    version: "1.26.3@sha256:2981696eed011d747340d7252620932677929cce7d2d539602f56a8d7e9b660b"
     entrypoint: /bin/sh
     entrypointArgs:
       - -lc
@@ -81,6 +83,8 @@ mcp-servers:
       GOCACHE: /tmp/go-cache
       GOMODCACHE: /tmp/go-mod-cache
     allowed:
+      # The gateway allowlist stays broad so the repo MCP can evolve without
+      # editing this workflow; DOLLARLINT_MCP_TOOLS is the server-side filter.
       - "*"
 
 env:
@@ -98,14 +102,14 @@ safe-outputs:
   mentions: false
   allowed-github-references: []
   create-discussion:
-    title-prefix: "Real-world testing: "
+    title-prefix: "Agentic Product Testing: "
     category: agentic-product-testing
     max: 1
     fallback-to-issue: true
     close-older-discussions: true
-    expires: 30
+    expires: 30d
   create-pull-request:
-    title-prefix: "Update real-world test results: "
+    title-prefix: "Update Agentic Product Testing results: "
     max: 1
     labels: [agentic-workflows]
     if-no-changes: error
@@ -113,10 +117,10 @@ safe-outputs:
     draft: false
   jobs:
     link-real-world-outputs:
-      description: Cross-link the real-world testing Discussion and durable-memory PR after the built-in safe outputs run. Call this whenever a real-world result PR is requested.
+      description: Cross-link the Agentic Product Testing Discussion and durable-memory PR after the built-in safe outputs run. Call this whenever a real-world result PR is requested.
       runs-on: ubuntu-latest
       needs: safe_outputs
-      output: Linked the real-world testing Discussion and PR.
+      output: Linked the Agentic Product Testing Discussion and PR.
       permissions:
         contents: read
         discussions: write
@@ -148,10 +152,6 @@ safe-outputs:
               const owner = context.repo.owner;
               const repo = context.repo.repo;
 
-              if (!prNumber || !prUrl) {
-                core.setFailed('No pull request was created. Real-world result files are durable memory; request create_pull_request whenever real_world_record_result changes repository files.');
-                return;
-              }
               if (!outputPath || !fs.existsSync(outputPath)) {
                 core.setFailed('GH_AW_AGENT_OUTPUT was not available to link real-world outputs.');
                 return;
@@ -166,30 +166,45 @@ safe-outputs:
               }
 
               const discussionItem = items.find((item) => item.type === 'create_discussion');
+              const pullRequestItem = items.find((item) => item.type === 'create_pull_request');
+              if (!prNumber || !prUrl) {
+                if (!pullRequestItem) {
+                  core.warning('link_real_world_outputs was called, but no create_pull_request output was requested; skipping cross-link.');
+                  return;
+                }
+                core.setFailed('create_pull_request was requested, but safe outputs did not expose a created PR URL/number.');
+                return;
+              }
+              if (!discussionItem) {
+                core.setFailed('link_real_world_outputs requires a matching create_discussion output.');
+                return;
+              }
               const requestedTitle = linkItem.discussion_title || discussionItem?.title || '';
               if (!requestedTitle) {
                 core.setFailed('link_real_world_outputs requires discussion_title.');
                 return;
               }
-              const expectedTitle = requestedTitle.startsWith('Real-world testing: ')
+              const expectedTitle = requestedTitle.startsWith('Agentic Product Testing: ')
                 ? requestedTitle
-                : `Real-world testing: ${requestedTitle}`;
+                : `Agentic Product Testing: ${requestedTitle}`;
 
               const discussionData = await github.graphql(
                 `query($owner: String!, $repo: String!) {
                   repository(owner: $owner, name: $repo) {
-                    discussions(first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {
-                      nodes { id number title url body }
+                    discussions(first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+                      nodes { id number title url body updatedAt }
                     }
                   }
                 }`,
                 { owner, repo },
               );
               const discussions = discussionData.repository.discussions.nodes;
-              const discussion = discussions.find((item) => item.title === expectedTitle)
+              const exactTitleMatches = discussions.filter((item) => item.title === expectedTitle);
+              const discussion = exactTitleMatches.find((item) => item.body && item.body.includes(runUrl))
+                || exactTitleMatches[0]
                 || discussions.find((item) => item.body && item.body.includes(runUrl));
               if (!discussion) {
-                core.setFailed(`Could not find the real-world testing Discussion titled ${expectedTitle}.`);
+                core.setFailed(`Could not find the Agentic Product Testing Discussion titled ${expectedTitle} or containing ${runUrl}.`);
                 return;
               }
 
@@ -206,7 +221,7 @@ safe-outputs:
               const entryLine = linkItem.entry_id ? [`- Real-world entry: \`${linkItem.entry_id}\``] : [];
               const prBlock = [
                 '<!-- real-world-output-links:start -->',
-                '### Real-world testing links',
+                '### Agentic Product Testing links',
                 '',
                 `- Discussion: ${discussion.url}`,
                 ...entryLine,
@@ -222,7 +237,7 @@ safe-outputs:
                 `- Pull request: ${prUrl}`,
                 ...entryLine,
                 `- Workflow run: ${runUrl}`,
-                '- This PR should be merged in order to retain these results in repo memory for future real-world testing.',
+                '- This PR should be merged in order to retain these results in repo memory for future Agentic Product Testing sweeps.',
                 '<!-- real-world-output-links:end -->',
               ].join('\n');
 
@@ -249,9 +264,9 @@ safe-outputs:
 timeout-minutes: 90
 ---
 
-# Real-World Testing
+# Agentic Product Testing
 
-Run a real-world DollarLint sweep, record the structured result, and open one GitHub Discussion with the results.
+Run an Agentic Product Testing sweep for DollarLint, record the structured result, and open one GitHub Discussion with the results.
 
 Use the `dollarlint-repo` MCP server as the workflow source of truth. Start with `real_world_start_testing`, then follow the `nextStep` guidance returned by the `real_world_*` tools until the run is recorded. Prefer the MCP wizard over shell commands and hand-written reports. If the MCP capabilities are missing or stale, stop and publish a blocker summary instead of improvising.
 
@@ -263,7 +278,7 @@ Before calling `real_world_start_testing`, derive the repository plan from those
 
 The workflow pre-builds `bin/dollarlint`; when the MCP flow asks for validation arguments, use `build: false` so validation uses the prebuilt CLI. Keep long-running prep or validation MCP calls open for progress notifications, and do not poll with shell sleep loops. Never run dependency lifecycle scripts, postinstall hooks, package-manager plugins, or repository install scripts.
 
-Durable repository memory must be written through `real_world_record_result` and the structured JSON files it manages. Do not create Markdown report files. Product recommendations are mandatory: include a `high`, `med`, or `low` strength with rationale, or record an explicit no-change recommendation when DollarLint behaved reasonably. If `real_world_record_result` changes repository files, `create_pull_request` is mandatory because merging that PR is how the repo remembers tested repositories. The PR body must say that it should be merged in order to retain the results in real-world testing memory.
+Durable repository memory must be written through `real_world_record_result` and the structured JSON files it manages. Do not create Markdown report files. Product recommendations are mandatory: include a `high`, `med`, or `low` strength with rationale, or record an explicit no-change recommendation when DollarLint behaved reasonably. If `real_world_record_result` changes repository files, `create_pull_request` is mandatory because merging that PR is how the repo remembers tested repositories. The PR body must say that it should be merged in order to retain the results in Agentic Product Testing memory.
 
 After recording, create exactly one GitHub Discussion through the configured safe output in the `Agentic Product Testing` category. Keep it concise: result counts, tested repositories, notable findings, product recommendations with strength labels, persisted artifact path, DollarLint commit, and workflow run URL. Put verbose examples or raw warnings inside `<details>` blocks. The Discussion body must include a "Durable memory PR" section saying that a companion PR will be opened and that the PR should be merged in order to retain the results for future sweeps. If the Discussion falls back to an issue, say that the intended destination was a Discussion.
 

@@ -73,11 +73,11 @@ func TestAgenticWorkflowReadinessToolDescriptionIsCurrent(t *testing.T) {
 	}
 	description := tool.Tool.Description
 	staleScheduleWord := "week" + "ly"
-	staleWorkflowName := staleScheduleWord + "-real-world-testing"
+	staleWorkflowName := "real-world" + "-testing"
 	if strings.Contains(description, staleScheduleWord) || strings.Contains(description, staleWorkflowName) {
 		t.Fatalf("stale scheduled description: %q", description)
 	}
-	if !strings.Contains(description, "real-world agentic workflow") {
-		t.Fatalf("description = %q, want real-world agentic workflow", description)
+	if !strings.Contains(description, "Agentic Product Testing workflow") {
+		t.Fatalf("description = %q, want Agentic Product Testing workflow", description)
 	}
 }

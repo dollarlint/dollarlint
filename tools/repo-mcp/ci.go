@@ -45,9 +45,9 @@ var ciJobOrder = []string{"test", "quality", "build", "docs", "goreleaser-check"
 var workflowAllMCPToolsPattern = regexp.MustCompile(`"tools"\s*:\s*\[\s*"\*"\s*\]`)
 
 const (
-	agenticWorkflowSourceRel            = ".github/workflows/real-world-testing.md"
-	agenticWorkflowLockRel              = ".github/workflows/real-world-testing.lock.yml"
-	agenticWorkflowReadinessDescription = "Validate the real-world agentic workflow before pushing, including actionlint, MCP allowlist, generated lock freshness, PR publishing credentials, and known-bad model settings."
+	agenticWorkflowSourceRel            = ".github/workflows/agentic-product-testing.md"
+	agenticWorkflowLockRel              = ".github/workflows/agentic-product-testing.lock.yml"
+	agenticWorkflowReadinessDescription = "Validate the Agentic Product Testing workflow before pushing, including actionlint, MCP allowlist, generated lock freshness, PR publishing credentials, and known-bad model settings."
 )
 
 func ciReadinessCommands(job string) ([]namedCommand, error) {
@@ -229,7 +229,7 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	requiredTools := requiredAgenticRealWorldTools()
 	missing := missingWorkflowTools(string(source), string(lock), requiredTools)
 	if len(missing) > 0 {
-		issues = append(issues, readinessIssue{Severity: "error", Message: "real-world workflow is missing real-world MCP tools: " + strings.Join(missing, ", "), Recommendation: "Add the missing tools to the workflow MCP server allowlist, or set " + toolFilterEnv + `: "real_world_*"` + ` and allow "*" for the filtered server, then regenerate the lock file.`})
+		issues = append(issues, readinessIssue{Severity: "error", Message: "Agentic Product Testing workflow is missing real-world MCP tools: " + strings.Join(missing, ", "), Recommendation: "Add the missing tools to the workflow MCP server allowlist, or set " + toolFilterEnv + `: "real_world_*"` + ` and allow "*" for the filtered server, then regenerate the lock file.`})
 	}
 	checks = append(checks, map[string]any{"name": "real-world MCP allowlist", "ok": len(missing) == 0, "requiredTools": requiredTools, "missing": missing})
 
@@ -256,7 +256,7 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	p.step("Running actionlint on agentic workflow")
 	actionlint := s.run(ctx, namedCommand{
 		Job:         "agentic-workflow",
-		Name:        "actionlint real-world workflow",
+		Name:        "actionlint Agentic Product Testing workflow",
 		Cmd:         actionlintCommand + " -shellcheck= " + lockRel,
 		FailureHint: "Fix actionlint diagnostics in " + lockRel + " or regenerate the lock file.",
 	})
@@ -276,8 +276,8 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 		"generatedWorkflow":   lockRel,
 		"checks":              checks,
 		"issues":              issues,
-		"recentFailureSignal": "A recent real-world workflow run failed when COPILOT_MODEL was gpt-5.5; this tool flags that value because it was not accessible via Copilot chat completions.",
-		"nextStep":            "Fix error-severity issues before running the real-world workflow. Warnings should be reviewed before push.",
+		"recentFailureSignal": "A recent Agentic Product Testing workflow run failed when COPILOT_MODEL was gpt-5.5; this tool flags that value because it was not accessible via Copilot chat completions.",
+		"nextStep":            "Fix error-severity issues before running the Agentic Product Testing workflow. Warnings should be reviewed before push.",
 	})
 }
 
@@ -344,7 +344,7 @@ func realWorldPRCredentialIssues(secretOK bool, secretOutput string, permissionO
 	if secretOK && permissionOK && !hasWriteSecret && !defaultTokenCanCreatePR {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
-			Message:        "real-world workflow cannot create the required durable-memory PR with current credentials",
+			Message:        "Agentic Product Testing workflow cannot create the required durable-memory PR with current credentials",
 			Recommendation: "Set GH_AW_GITHUB_TOKEN with a fine-grained PAT that has Contents, Pull requests, Issues, and Discussions read/write, or enable the repository Actions setting that allows GitHub Actions to create and approve pull requests.",
 		})
 	}
@@ -429,7 +429,7 @@ func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
 	if !strings.Contains(source, "link-real-world-outputs") || !strings.Contains(lock, "link_real_world_outputs") {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
-			Message:        "real-world workflow is missing the post-safe-output PR/Discussion linker",
+			Message:        "Agentic Product Testing workflow is missing the post-safe-output PR/Discussion linker",
 			Recommendation: "Configure safe-outputs.jobs.link-real-world-outputs and regenerate the lock file.",
 		})
 	}
@@ -443,28 +443,28 @@ func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
 	if strings.Contains(lock, "shell(safeoutputs:*") && (!strings.Contains(source, "\n    - printf") || !strings.Contains(lock, "shell(printf)")) {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
-			Message:        "real-world workflow exposes the safeoutputs CLI but printf is not allowed",
+			Message:        "Agentic Product Testing workflow exposes the safeoutputs CLI but printf is not allowed",
 			Recommendation: "Add printf to tools.bash so the agent can pipe inline JSON payloads to safeoutputs, then regenerate the lock file.",
 		})
 	}
 	if !strings.Contains(source, "github.event.inputs.max_repos") || !strings.Contains(source, "github.event.inputs.candidate_repos") {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
-			Message:        "real-world workflow prompt does not include rendered manual dispatch inputs",
+			Message:        "Agentic Product Testing workflow prompt does not include rendered manual dispatch inputs",
 			Recommendation: "Mention github.event.inputs.max_repos and github.event.inputs.candidate_repos in the markdown prompt so manual dispatch controls the MCP repository plan.",
 		})
 	}
 	if !strings.Contains(source, "should be merged in order to retain") || !strings.Contains(lock, "should be merged in order to retain") {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
-			Message:        "real-world workflow does not require the Discussion to explain that the PR retains the results",
+			Message:        "Agentic Product Testing workflow does not require the Discussion to explain that the PR retains the results",
 			Recommendation: `Ask the agent to include a "Durable memory PR" Discussion section saying that the PR should be merged in order to retain the results, then regenerate the lock file.`,
 		})
 	}
 	if !strings.Contains(source, "category: agentic-product-testing") || !strings.Contains(lock, `"category":"agentic-product-testing"`) {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
-			Message:        "real-world workflow Discussions are not configured for the Agentic Product Testing category",
+			Message:        "Agentic Product Testing workflow Discussions are not configured for the Agentic Product Testing category",
 			Recommendation: `Set create-discussion.category to "agentic-product-testing" and regenerate the lock file.`,
 		})
 	}

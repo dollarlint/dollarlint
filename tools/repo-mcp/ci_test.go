@@ -65,7 +65,7 @@ func TestInaccessibleCopilotModelIssueFlagsGPT55(t *testing.T) {
 
 func TestAgenticWorkflowReadinessUsesCurrentWorkflowNames(t *testing.T) {
 	staleScheduleWord := "week" + "ly"
-	staleWorkflowName := staleScheduleWord + "-real-world-testing"
+	staleWorkflowName := "real-world" + "-testing"
 	for _, value := range []string{
 		agenticWorkflowSourceRel,
 		agenticWorkflowLockRel,
@@ -75,11 +75,11 @@ func TestAgenticWorkflowReadinessUsesCurrentWorkflowNames(t *testing.T) {
 			t.Fatalf("stale scheduled workflow reference in %q", value)
 		}
 	}
-	if agenticWorkflowSourceRel != ".github/workflows/real-world-testing.md" {
-		t.Fatalf("source workflow = %q, want real-world-testing.md", agenticWorkflowSourceRel)
+	if agenticWorkflowSourceRel != ".github/workflows/agentic-product-testing.md" {
+		t.Fatalf("source workflow = %q, want agentic-product-testing.md", agenticWorkflowSourceRel)
 	}
-	if agenticWorkflowLockRel != ".github/workflows/real-world-testing.lock.yml" {
-		t.Fatalf("lock workflow = %q, want real-world-testing.lock.yml", agenticWorkflowLockRel)
+	if agenticWorkflowLockRel != ".github/workflows/agentic-product-testing.lock.yml" {
+		t.Fatalf("lock workflow = %q, want agentic-product-testing.lock.yml", agenticWorkflowLockRel)
 	}
 }
 

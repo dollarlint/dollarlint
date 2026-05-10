@@ -117,4 +117,4 @@ gh aw secrets set "$secret_name" \
 
 unset token "$secret_name"
 
-echo "Done. You can now run: gh aw run real-world-testing"
+echo "Done. You can now run: gh aw run agentic-product-testing"

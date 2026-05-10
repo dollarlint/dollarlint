@@ -1379,7 +1379,9 @@ func realWorldNextAfterRecord(entry realWorldEntry) map[string]any {
 	}
 	if inGitHubAgenticWorkflow() {
 		next["githubAgenticWorkflow"] = true
-		next["discussion"] = "If this run is a GitHub Agentic Workflow, publish a GitHub Discussion summary from the recorded MCP entry."
+		next["discussion"] = "Publish a GitHub Discussion summary from the recorded MCP entry."
+		next["pullRequest"] = "Request create_pull_request when recorded result files changed; merging that PR is how future real-world sweeps remember tested repositories."
+		next["linkOutputs"] = "After requesting create_pull_request and create_discussion, call link_real_world_outputs with the Discussion title and entryID so the final PR and Discussion cross-link each other."
 	}
 	return next
 }

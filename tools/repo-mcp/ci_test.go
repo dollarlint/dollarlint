@@ -100,6 +100,20 @@ func TestMissingWorkflowToolsRequiresToolInSourceAndLock(t *testing.T) {
 	}
 }
 
+func TestRealWorldSafeOutputPolicyIssuesRequirePRAndLinker(t *testing.T) {
+	source := "create-pull-request:\n  if-no-changes: error\njobs:\n  link-real-world-outputs:\n"
+	lock := `{"create_pull_request":{"if_no_changes":"error"},"link_real_world_outputs":true,"created_pr_url":"${{ steps.outputs.url }}"}`
+	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 0 {
+		t.Fatalf("issues = %+v, want none", issues)
+	}
+
+	source = "create-pull-request:\n"
+	lock = `{"create_pull_request":{}}`
+	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 2 {
+		t.Fatalf("issues = %+v, want missing PR policy and linker", issues)
+	}
+}
+
 func hasMapping(mappings []failureMapping, tool, command string) bool {
 	for _, mapping := range mappings {
 		if mapping.LocalTool == tool && mapping.LocalCommand == command {

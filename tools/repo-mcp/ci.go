@@ -183,7 +183,7 @@ type readinessIssue struct {
 }
 
 func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	p := newProgress(ctx, s.mcp, request, 5)
+	p := newProgress(ctx, s.mcp, request, 6)
 	sourceRel := ".github/workflows/real-world-testing.md"
 	lockRel := ".github/workflows/real-world-testing.lock.yml"
 	sourcePath := filepath.Join(s.root, sourceRel)
@@ -209,6 +209,11 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 		issues = append(issues, readinessIssue{Severity: "error", Message: "real-world workflow is missing real-world MCP tools: " + strings.Join(missing, ", "), Recommendation: "Add the missing tools to the workflow MCP server allowlist, or set " + toolFilterEnv + `: "real_world_*"` + ` and allow "*" for the filtered server, then regenerate the lock file.`})
 	}
 	checks = append(checks, map[string]any{"name": "real-world MCP allowlist", "ok": len(missing) == 0, "requiredTools": requiredTools, "missing": missing})
+
+	p.step("Checking real-world safe outputs")
+	safeOutputIssues := realWorldSafeOutputPolicyIssues(string(source), string(lock))
+	issues = append(issues, safeOutputIssues...)
+	checks = append(checks, map[string]any{"name": "real-world safe outputs", "ok": len(safeOutputIssues) == 0})
 
 	p.step("Checking generated lock freshness")
 	fresh := true
@@ -291,6 +296,32 @@ func hasServerSideRealWorldToolFilter(source, lock string) bool {
 		strings.Contains(lock, "dollarlint-repo(*)") ||
 		strings.Contains(lock, "--allow-tool dollarlint-repo --")
 	return sourceHasFilter && lockHasFilter && sourceAllowsAll && lockAllowsAll
+}
+
+func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
+	var issues []readinessIssue
+	if !strings.Contains(source, "if-no-changes: error") || !strings.Contains(lock, `"if_no_changes":"error"`) {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "real-world create_pull_request safe output is not configured to fail on missing patch changes",
+			Recommendation: "Set create-pull-request.if-no-changes: error and regenerate the lock file.",
+		})
+	}
+	if !strings.Contains(source, "link-real-world-outputs") || !strings.Contains(lock, "link_real_world_outputs") {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "real-world workflow is missing the post-safe-output PR/Discussion linker",
+			Recommendation: "Configure safe-outputs.jobs.link-real-world-outputs and regenerate the lock file.",
+		})
+	}
+	if strings.Contains(source, "link-real-world-outputs") && !strings.Contains(lock, "created_pr_url") {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "real-world linker cannot see the created PR URL in the generated workflow",
+			Recommendation: "Regenerate the lock file and confirm safe_outputs exposes created_pr_url.",
+		})
+	}
+	return issues
 }
 
 func hasReadinessErrors(issues []readinessIssue) bool {

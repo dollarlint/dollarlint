@@ -37,7 +37,8 @@ param(
     [string]$PackageIdentifier = "DollarLint.DollarLint",
     [string]$PackageVersion,
     [switch]$UninstallAfter,
-    [switch]$SkipCommandCheck
+    [switch]$SkipCommandCheck,
+    [switch]$AllowManualFallback
 )
 
 $ErrorActionPreference = "Stop"
@@ -198,7 +199,10 @@ function Invoke-Checked {
                     Write-Host "Last WinGet log line: $lastLogLine"
 
                     if ($lastLogLine -like "*IAttachmentExecute*") {
-                        Write-Host "Hint: WinGet failed while applying Mark-of-the-Web with IAttachmentExecute after the installer hash was verified. This points to a Desktop App Installer/SmartScreen failure before archive extraction, not a manifest validation failure." -ForegroundColor Yellow
+                        Write-Host "Hint: WinGet failed while applying Mark-of-the-Web with IAttachmentExecute after the installer hash was verified." -ForegroundColor Yellow
+                        Write-Host "      This is the upstream WinGet MOTW bug (microsoft/winget-cli#4046)," -ForegroundColor Yellow
+                        Write-Host "      not a DollarLint manifest, archive, or binary issue." -ForegroundColor Yellow
+                        Write-Host "      Re-run with -AllowManualFallback to skip WinGet's install and verify the portable layout manually." -ForegroundColor Yellow
                     }
                 }
             }
@@ -250,6 +254,146 @@ function Get-ManifestPathFromBranch {
     }
 }
 
+function Get-NativeArchitecture {
+    $arch = $env:PROCESSOR_ARCHITECTURE
+    if ($env:PROCESSOR_ARCHITEW6432) { $arch = $env:PROCESSOR_ARCHITEW6432 }
+    switch ($arch.ToUpperInvariant()) {
+        "ARM64" { return "arm64" }
+        "AMD64" { return "x64" }
+        "X86"   { return "x86" }
+        default { return $arch.ToLowerInvariant() }
+    }
+}
+
+function Get-InstallerEntryForCurrentArch {
+    param([Parameter(Mandatory = $true)][string]$ManifestPath)
+
+    $installerYaml = Get-ChildItem -Path $ManifestPath -Filter "*.installer.yaml" -File |
+        Select-Object -First 1 -ExpandProperty FullName
+    if (-not $installerYaml) {
+        throw "Could not locate *.installer.yaml under $ManifestPath."
+    }
+
+    $lines = Get-Content -Path $installerYaml
+    $entries = @()
+    $current = $null
+    foreach ($line in $lines) {
+        if ($line -match "^\s*-\s*Architecture:\s*(?<arch>\S+)") {
+            if ($current) { $entries += [pscustomobject]$current }
+            $current = @{ Architecture = $Matches.arch; InstallerUrl = $null; InstallerSha256 = $null; NestedRelativeFilePath = $null }
+        }
+        elseif ($current) {
+            if ($line -match "^\s*InstallerUrl:\s*(?<url>\S+)")              { $current.InstallerUrl = $Matches.url }
+            elseif ($line -match "^\s*InstallerSha256:\s*(?<sha>\S+)")       { $current.InstallerSha256 = $Matches.sha.ToLowerInvariant() }
+            elseif ($line -match "^\s*-\s*RelativeFilePath:\s*(?<path>\S+)") { $current.NestedRelativeFilePath = $Matches.path }
+        }
+    }
+    if ($current) { $entries += [pscustomobject]$current }
+
+    $arch = Get-NativeArchitecture
+    $entry = $entries | Where-Object { $_.Architecture -ieq $arch } | Select-Object -First 1
+    if (-not $entry) {
+        throw "Manifest does not declare an installer for architecture '$arch'."
+    }
+    return $entry
+}
+
+function Invoke-ManualPortableFallback {
+    param(
+        [Parameter(Mandatory = $true)][string]$ManifestPath,
+        [Parameter(Mandatory = $true)][string]$PackageIdentifier,
+        [Parameter(Mandatory = $true)][string]$PackageVersion
+    )
+
+    $entry = Get-InstallerEntryForCurrentArch -ManifestPath $ManifestPath
+    if (-not $entry.NestedRelativeFilePath) {
+        throw "Manual fallback currently supports nested portable ZIP manifests only (missing RelativeFilePath)."
+    }
+
+    $sourceIdentifier = "Microsoft.Winget.Source_8wekyb3d8bbwe"
+    $productCode = "$($PackageIdentifier)_$sourceIdentifier"
+    $pkgRoot = Join-Path $env:LOCALAPPDATA "Microsoft\WinGet\Packages\$productCode"
+    $linksDir = Join-Path $env:LOCALAPPDATA "Microsoft\WinGet\Links"
+    $work = Join-Path ([System.IO.Path]::GetTempPath()) ("dollarlint-manual-" + [guid]::NewGuid())
+    New-Item -ItemType Directory -Path $pkgRoot, $linksDir, $work -Force | Out-Null
+
+    $archive = Join-Path $work ([System.IO.Path]::GetFileName($entry.InstallerUrl))
+    Write-Host "Downloading $($entry.InstallerUrl)"
+    $savedProgressPref = $ProgressPreference
+    $ProgressPreference = "SilentlyContinue"
+    try { Invoke-WebRequest -Uri $entry.InstallerUrl -OutFile $archive }
+    finally { $ProgressPreference = $savedProgressPref }
+
+    $actualHash = (Get-FileHash -Path $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($actualHash -ne $entry.InstallerSha256) {
+        throw "Installer hash mismatch. Expected $($entry.InstallerSha256) Actual $actualHash"
+    }
+
+    Expand-Archive -Path $archive -DestinationPath $work -Force
+    $extracted = Join-Path $work $entry.NestedRelativeFilePath
+    if (-not (Test-Path $extracted)) {
+        throw "Nested installer file not found after extraction: $extracted"
+    }
+
+    $exeName = [System.IO.Path]::GetFileName($extracted)
+    $target = Join-Path $pkgRoot $exeName
+    Copy-Item -Path $extracted -Destination $target -Force
+    Unblock-File -Path $target -ErrorAction SilentlyContinue
+
+    $link = Join-Path $linksDir $exeName
+    Remove-Item -Path $link -Force -ErrorAction SilentlyContinue
+    try { New-Item -ItemType HardLink -Path $link -Target $target -ErrorAction Stop | Out-Null }
+    catch { Copy-Item -Path $target -Destination $link -Force }
+    Unblock-File -Path $link -ErrorAction SilentlyContinue
+
+    $shaHex = (Get-FileHash -Path $target -Algorithm SHA256).Hash
+    $shaBytes = for ($i = 0; $i -lt $shaHex.Length; $i += 2) { [Convert]::ToByte($shaHex.Substring($i, 2), 16) }
+
+    $key = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\$productCode"
+    New-Item -Path $key -Force | Out-Null
+    Set-ItemProperty -Path $key -Name WinGetPackageIdentifier     -Type String -Value $PackageIdentifier
+    Set-ItemProperty -Path $key -Name WinGetSourceIdentifier      -Type String -Value $sourceIdentifier
+    Set-ItemProperty -Path $key -Name UninstallString             -Type String -Value "winget uninstall --product-code $productCode"
+    Set-ItemProperty -Path $key -Name WinGetInstallerType         -Type String -Value "portable"
+    Set-ItemProperty -Path $key -Name DisplayName                 -Type String -Value $PackageIdentifier.Split(".")[-1]
+    Set-ItemProperty -Path $key -Name DisplayVersion              -Type String -Value $PackageVersion
+    Set-ItemProperty -Path $key -Name Publisher                   -Type String -Value $PackageIdentifier.Split(".")[0]
+    Set-ItemProperty -Path $key -Name InstallDate                 -Type String -Value (Get-Date -Format "yyyyMMdd")
+    Set-ItemProperty -Path $key -Name InstallDirectoryCreated     -Type DWord  -Value 1
+    Set-ItemProperty -Path $key -Name InstallLocation             -Type String -Value $pkgRoot
+    Set-ItemProperty -Path $key -Name InstallDirectoryAddedToPath -Type DWord  -Value 1
+    Set-ItemProperty -Path $key -Name PortableTargetFullPath      -Type String -Value $target
+    Set-ItemProperty -Path $key -Name PortableSymlinkFullPath     -Type String -Value $link
+    Set-ItemProperty -Path $key -Name SHA256                      -Type Binary -Value ([byte[]]$shaBytes)
+
+    Write-Host "Installed $target"
+    Write-Host "Registered ARP key $key"
+
+    if ($env:Path -notlike "*$linksDir*") {
+        $env:Path = "$linksDir;$env:Path"
+    }
+}
+
+function Remove-ManualPortableInstall {
+    param([Parameter(Mandatory = $true)][string]$PackageIdentifier)
+
+    $productCode = "$($PackageIdentifier)_Microsoft.Winget.Source_8wekyb3d8bbwe"
+    $pkgRoot = Join-Path $env:LOCALAPPDATA "Microsoft\WinGet\Packages\$productCode"
+    $linksDir = Join-Path $env:LOCALAPPDATA "Microsoft\WinGet\Links"
+    $key = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\$productCode"
+
+    $link = $null
+    if (Test-Path $key) {
+        $props = Get-ItemProperty -Path $key
+        $link = $props.PortableSymlinkFullPath
+        Remove-Item -Path $key -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    if ($link -and (Test-Path $link)) { Remove-Item -Path $link -Force -ErrorAction SilentlyContinue }
+    if (Test-Path $pkgRoot) { Remove-Item -Path $pkgRoot -Recurse -Force -ErrorAction SilentlyContinue }
+    Write-Host "Removed manual portable install for $PackageIdentifier"
+}
+
 try {
 Write-Step "Checking winget availability"
 $winget = Get-Command winget -ErrorAction Stop
@@ -287,11 +431,19 @@ Write-Step "Validating manifest"
 Invoke-Checked winget validate --manifest $ManifestPath
 
 Write-Step "Enabling admin settings for local manifest installs"
-if (-not (Test-IsAdministrator)) {
-    throw "This script requires an elevated (Administrator) PowerShell prompt."
+$settingsJson = winget settings export 2>$null | Out-String
+$localManifestEnabled = $settingsJson -match '"LocalManifestFiles"\s*:\s*true'
+$archiveOverrideEnabled = $settingsJson -match '"LocalArchiveMalwareScanOverride"\s*:\s*true'
+if ($localManifestEnabled -and $archiveOverrideEnabled) {
+    Write-Host "LocalManifestFiles and LocalArchiveMalwareScanOverride already enabled; skipping elevation."
 }
-Invoke-Checked winget settings --enable LocalManifestFiles
-Invoke-Checked winget settings --enable LocalArchiveMalwareScanOverride
+else {
+    if (-not (Test-IsAdministrator)) {
+        throw "This script requires an elevated (Administrator) PowerShell prompt to enable LocalManifestFiles / LocalArchiveMalwareScanOverride."
+    }
+    Invoke-Checked winget settings --enable LocalManifestFiles
+    Invoke-Checked winget settings --enable LocalArchiveMalwareScanOverride
+}
 
 Write-Step "Installing DollarLint from local manifest"
 $wingetCache = Join-Path $env:TEMP "WinGet"
@@ -299,13 +451,33 @@ if (Test-Path $wingetCache) {
     Write-Host "Clearing winget download cache"
     Remove-Item $wingetCache -Recurse -Force
 }
-Invoke-Checked winget install `
-    --manifest $ManifestPath `
-    --accept-source-agreements `
-    --accept-package-agreements `
-    --ignore-local-archive-malware-scan `
-    --verbose-logs `
-    --disable-interactivity
+
+$script:UsedManualFallback = $false
+try {
+    Invoke-Checked winget install `
+        --manifest $ManifestPath `
+        --accept-source-agreements `
+        --accept-package-agreements `
+        --ignore-local-archive-malware-scan `
+        --verbose-logs `
+        --disable-interactivity
+}
+catch {
+    if (-not $AllowManualFallback) {
+        throw
+    }
+
+    $latestLog = Get-LatestWinGetLog
+    $lastLogLine = Get-LastLogLine $latestLog
+    if ($lastLogLine -notlike "*IAttachmentExecute*") {
+        throw
+    }
+
+    Write-Host ""
+    Write-Step "Falling back to manual portable install (WinGet MOTW bug, microsoft/winget-cli#4046)"
+    Invoke-ManualPortableFallback -ManifestPath $ManifestPath -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
+    $script:UsedManualFallback = $true
+}
 
 Write-Step "Checking installed package"
 Invoke-Checked winget list --id $PackageIdentifier
@@ -324,11 +496,21 @@ if (-not $SkipCommandCheck) {
 
 if ($UninstallAfter) {
     Write-Step "Uninstalling DollarLint"
-    Invoke-Checked winget uninstall --id $PackageIdentifier --disable-interactivity
+    if ($script:UsedManualFallback) {
+        Remove-ManualPortableInstall -PackageIdentifier $PackageIdentifier
+    }
+    else {
+        Invoke-Checked winget uninstall --id $PackageIdentifier --disable-interactivity
+    }
 }
 
 Write-Step "Done"
-Write-Host "WinGet validation and install test completed successfully." -ForegroundColor Green
+if ($script:UsedManualFallback) {
+    Write-Host "WinGet validation succeeded; install verified via manual portable fallback (MOTW bug workaround)." -ForegroundColor Yellow
+}
+else {
+    Write-Host "WinGet validation and install test completed successfully." -ForegroundColor Green
+}
 }
 catch {
     if (-not $script:FailureReported) {

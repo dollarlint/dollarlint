@@ -2,9 +2,11 @@
 
 ## Summary
 
-The WinGet manifest for DollarLint `0.1.3` validates successfully, but the full local-manifest install test does not currently complete on this Windows ARM64 environment.
+The WinGet manifest for DollarLint validates and `dollarlint` runs correctly once installed, but `winget install` itself fails on this Windows ARM64 environment with `0x8A150001` because of an upstream Desktop App Installer bug. The same `Started applying motw using IAttachmentExecute` failure was first observed against `0.1.3` and reproduced against `0.1.5` and `0.1.6` without any DollarLint-side changes able to influence the outcome.
 
-The failure occurs after WinGet downloads the selected ARM64 ZIP and verifies its SHA256 hash. The latest WinGet logs stop at the Desktop App Installer `IAttachmentExecute` Mark-of-the-Web (MOTW) step, before archive extraction or `dollarlint.exe` execution. Based on the evidence, this looks more like a WinGet/Desktop App Installer or SmartScreen/MOTW failure than a DollarLint binary, archive, or manifest validation issue.
+Root cause: [microsoft/winget-cli#4046](https://github.com/microsoft/winget-cli/issues/4046). The crash happens inside WinGet's `IAttachmentExecute` Mark-of-the-Web step, after the installer hash is verified and before WinGet extracts the ZIP. It is not specific to the DollarLint manifest, archive, or binary.
+
+To keep the validation script useful in the meantime, `scripts/test-winget-manifest.ps1` now supports a `-AllowManualFallback` switch that reproduces WinGet's portable layout (Packages directory + Links alias + ARP registry entry) when WinGet aborts at the MOTW step. After the fallback runs, `winget list --id DollarLint.DollarLint` reports the package and `dollarlint --version` runs through the WinGet command alias.
 
 ## Environment
 
@@ -12,112 +14,79 @@ The failure occurs after WinGet downloads the selected ARM64 ZIP and verifies it
 - Architecture: ARM64
 - WinGet: `v1.28.240`
 - Desktop App Installer package: `Microsoft.DesktopAppInstaller v1.28.240.0`
-- Manifest branch tested: `dollarlint/winget-pkgs@dollarlint-0.1.3`
+- Manifest branches tested: `dollarlint/winget-pkgs@dollarlint-0.1.3`, `…@dollarlint-0.1.5`, `…@dollarlint-0.1.6`
 - Package identifier: `DollarLint.DollarLint`
-- Package version: `0.1.3`
-- Selected installer URL: `https://github.com/dollarlint/dollarlint/releases/download/v0.1.3/dollarlint_0.1.3_windows_arm64.zip`
 
-## Script fixes made during testing
+## Failure signature
 
-The `scripts/test-winget-manifest.ps1` script had several issues that made diagnosis harder or caused unrelated failures before the actual install test:
-
-1. It downloaded the entire `dollarlint/winget-pkgs` branch ZIP and recursively searched it for the manifest. This was very slow for a `winget-pkgs` fork and appeared to hang. The script now uses the GitHub Contents API to download only the three manifest YAML files.
-2. It passed `--id DollarLint.DollarLint` together with `winget install --manifest`. WinGet rejects that combination with "Both local manifest and search query arguments are provided." The install command now relies on `--manifest` only.
-3. It enabled only `LocalManifestFiles`. The script now also enables `LocalArchiveMalwareScanOverride` so `--ignore-local-archive-malware-scan` can be used for local archive manifests.
-4. Its error handling surfaced only decimal exit codes and PowerShell exception locations. The script now reports hex WinGet codes, known error descriptions, the failed command, the latest WinGet log path, and the last WinGet log line. It also exits cleanly with status `1` instead of printing a duplicate PowerShell exception block.
-
-## Successful checks
-
-The following parts of the test completed successfully:
-
-- WinGet was available and reported version `v1.28.240`.
-- The manifest files were downloaded from the `dollarlint-0.1.3` branch:
-  - `DollarLint.DollarLint.installer.yaml`
-  - `DollarLint.DollarLint.locale.en-US.yaml`
-  - `DollarLint.DollarLint.yaml`
-- `winget validate --manifest <manifest path>` completed with:
-
-  ```text
-  Manifest validation succeeded.
-  ```
-
-- The required admin settings were enabled:
-
-  ```text
-  Enabled admin setting 'LocalManifestFiles'.
-  Enabled admin setting 'LocalArchiveMalwareScanOverride'.
-  ```
-
-- WinGet selected the expected ARM64 installer.
-- The ARM64 ZIP downloaded successfully.
-- The installer hash verification succeeded.
-
-## Failure details
-
-The install command fails after hash verification:
+The `winget install --manifest …` invocation always fails after the hash check:
 
 ```text
 Command failed: WinGet internal error (0x8A150001)
-Command: winget install --manifest <temp manifest path> --accept-source-agreements --accept-package-agreements --ignore-local-archive-malware-scan --verbose-logs --disable-interactivity
 ```
 
-The final line in the referenced WinGet log is consistently:
+The final entry in the referenced WinGet log is consistently:
 
 ```text
 [CORE] Started applying motw using IAttachmentExecute to <temp WinGet download path>
 ```
 
-No later extraction, portable registration, or command-alias setup appears in the log. This means the failure happens before WinGet attempts to extract the ZIP or run/check `dollarlint.exe`.
+No extraction, portable registration, or command-alias step ever appears. The earlier `applying motw to … with zone: 3 / Finished applying motw` step succeeds; the crash is the *second* MOTW step, which calls `IAttachmentExecute`.
 
-## Archive sanity check
+## Workarounds tried and ruled out
 
-The selected ARM64 ZIP was manually downloaded and extracted successfully. The archive contains `dollarlint.exe` at the ZIP root:
+None of the following changed the outcome:
 
-```text
-dollarlint.exe
-LICENSE
-README.md
-examples\
-schemas\
-```
+- Disabling SmartScreen via `HKCU\…\Policies\Attachments\SaveZoneInformation=1` (with elevation).
+- Adding the installer host to Trusted Sites and forcing the HTTPS protocol default zone to Trusted.
+- Mapping LAN-range IPs into the Intranet zone; WinGet still logged `zone: 3`.
+- Serving the installer from `file://`, plain TCP loopback, `HttpListener` loopback, and a LAN IP HTTP server. WinGet's manifest schema rejects `file://` URLs across all schema versions; reachable HTTP variants still crashed in `IAttachmentExecute`.
+- Rewriting the manifest to a non-nested portable EXE installer.
+- Upgrading WinGet / Desktop App Installer (already on the latest released `1.28.240`).
+- Running with and without `--ignore-local-archive-malware-scan` and `--disable-interactivity`.
 
-That matches the manifest's nested portable entry:
+All point to a Desktop App Installer crash inside `IAttachmentExecute` that the calling app cannot influence — i.e., the upstream bug.
 
-```yaml
-NestedInstallerType: portable
-NestedInstallerFiles:
-  - RelativeFilePath: dollarlint.exe
-    PortableCommandAlias: dollarlint
-```
+## Manual portable fallback (what `-AllowManualFallback` does)
 
-This reduces the likelihood that the failure is caused by a bad archive shape or an incorrect `RelativeFilePath`.
+When `scripts/test-winget-manifest.ps1 -AllowManualFallback` detects the `IAttachmentExecute` signature in the latest WinGet log, it reproduces WinGet's portable install by hand:
 
-## Assessment
+1. Parses `*.installer.yaml`, selects the entry matching the current architecture, downloads the ZIP, and verifies SHA256.
+2. Expands the archive and copies the nested portable EXE to `%LOCALAPPDATA%\Microsoft\WinGet\Packages\<PackageIdentifier>_Microsoft.Winget.Source_8wekyb3d8bbwe\`.
+3. Creates a hardlink (or plain copy when symlinks aren't permitted) at `%LOCALAPPDATA%\Microsoft\WinGet\Links\<command alias>.exe`.
+4. Writes an ARP key at `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\<PackageIdentifier>_Microsoft.Winget.Source_8wekyb3d8bbwe` with the same fields WinGet would write (`WinGetPackageIdentifier`, `WinGetSourceIdentifier`, `WinGetInstallerType=portable`, `DisplayName`, `DisplayVersion`, `Publisher`, `InstallDate`, `InstallLocation`, `InstallDirectoryAddedToPath`, `PortableTargetFullPath`, `PortableSymlinkFullPath`, `SHA256`).
+5. Prepends the Links directory to `$env:Path` for the current process so the next `Get-Command dollarlint` succeeds.
 
-This should not be considered a full WinGet distribution success yet. It is a successful manifest validation and successful download/hash verification, but the local-manifest install test fails before installation completes.
+After the fallback, the script verifies that:
 
-The current evidence points away from a DollarLint-specific issue:
+- `winget list --id DollarLint.DollarLint` reports the installed version (read from the ARP entry).
+- `dollarlint --version` runs from the Links alias.
 
-- The manifest validates.
-- WinGet selects the correct architecture.
-- The ZIP downloads.
-- The SHA256 hash verifies.
-- The ZIP can be manually extracted.
-- `dollarlint.exe` exists at the expected root-relative path.
-- The failure occurs inside Desktop App Installer's MOTW/`IAttachmentExecute` handling.
+When `-UninstallAfter` is set together with `-AllowManualFallback`, the script removes the Packages directory, the Links alias, and the ARP key.
 
-The most likely cause is a WinGet/Desktop App Installer/SmartScreen issue on this environment or this WinGet version. It may still be worth testing on another Windows machine or another WinGet/Desktop App Installer version to confirm whether the issue reproduces outside this machine.
+## Verified result
+
+With `scripts/test-winget-manifest.ps1 -AllowManualFallback -UninstallAfter` against the `0.1.6` manifest:
+
+- `winget validate --manifest …` → `Manifest validation succeeded.`
+- WinGet selects the correct ARM64 ZIP and verifies its hash.
+- `winget install` fails at `IAttachmentExecute` (expected; the upstream bug).
+- Fallback installs the portable EXE, links it, and registers ARP.
+- `winget list --id DollarLint.DollarLint` reports `DollarLint 0.1.6`.
+- `dollarlint --version` prints `dollarlint version 0.1.6`.
+- Uninstall removes all three artifacts and the package no longer appears in `winget list`.
+
+## Script changes
+
+`scripts/test-winget-manifest.ps1` now:
+
+- Auto-detects whether `LocalManifestFiles` and `LocalArchiveMalwareScanOverride` are already enabled and skips the elevation check when they are. Elevation is only required to flip them on the first time.
+- Catches the `winget install` failure, surfaces the `IAttachmentExecute` hint together with the upstream issue link, and offers `-AllowManualFallback` in the message.
+- When `-AllowManualFallback` is set and the failure is the known MOTW crash, runs the manual portable install described above.
+- Distinguishes the "Done" message and `-UninstallAfter` branch depending on whether WinGet or the manual fallback performed the install.
 
 ## Recommended next steps
 
-1. Re-run `scripts/test-winget-manifest.ps1 -UninstallAfter` on another Windows machine, ideally x64 and/or a different Desktop App Installer version.
-2. If the failure reproduces, file an issue with `microsoft/winget-cli` including:
-   - WinGet version: `v1.28.240`
-   - Desktop App Installer version: `1.28.240.0`
-   - OS build: `10.0.26200.8246`
-   - Architecture: ARM64
-   - Error code: `0x8A150001`
-   - The full `winget install --manifest ... --verbose-logs` command
-   - The final log line showing `Started applying motw using IAttachmentExecute`
-   - The installer URL and the fact that hash verification succeeds
-3. Treat the manifest as syntactically valid, but do not treat the local install test as complete until the install finishes and `dollarlint --version` succeeds through the WinGet-installed command alias.
+1. Track [microsoft/winget-cli#4046](https://github.com/microsoft/winget-cli/issues/4046). Re-run `scripts/test-winget-manifest.ps1 -UninstallAfter` (without the fallback) on any future Desktop App Installer release to check whether `winget install --manifest` completes natively.
+2. Re-run the script on an x64 Windows host to confirm whether the crash is ARM64-specific or affects all architectures on `1.28.240`.
+3. Treat the manifest as syntactically valid. Until the upstream bug is fixed, use `-AllowManualFallback` to confirm the portable layout end-to-end; without that switch, the install step will continue to fail at `IAttachmentExecute`.

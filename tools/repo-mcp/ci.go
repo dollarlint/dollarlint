@@ -18,6 +18,23 @@ import (
 
 const (
 	actionlintCommand           = "go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12"
+	actionlintCIWorkflowCommand = `bash -lc '
+set -euo pipefail
+workflows=()
+while IFS= read -r workflow; do
+  workflows+=("$workflow")
+done < <(find .github/workflows -maxdepth 1 -type f \( -name "*.yml" -o -name "*.yaml" \) ! -name "*.lock.yml" | sort)
+if [ "${#workflows[@]}" -gt 0 ]; then
+  go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 "${workflows[@]}"
+fi
+lock_workflows=()
+while IFS= read -r workflow; do
+  lock_workflows+=("$workflow")
+done < <(find .github/workflows -maxdepth 1 -type f -name "*.lock.yml" | sort)
+if [ "${#lock_workflows[@]}" -gt 0 ]; then
+  go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -shellcheck= "${lock_workflows[@]}"
+fi
+'`
 	staticcheckCommand          = "go run honnef.co/go/tools/cmd/staticcheck@v0.7.0 ./..."
 	govulncheckCommand          = "go run golang.org/x/vuln/cmd/govulncheck@v1.3.0 ./..."
 	repositoryConfigLintCommand = "go run ./cmd/dollarlint validate . --exclude .goreleaser.yaml"
@@ -26,6 +43,12 @@ const (
 var ciJobOrder = []string{"test", "quality", "build", "docs", "goreleaser-check"}
 
 var workflowAllMCPToolsPattern = regexp.MustCompile(`"tools"\s*:\s*\[\s*"\*"\s*\]`)
+
+const (
+	agenticWorkflowSourceRel            = ".github/workflows/real-world-testing.md"
+	agenticWorkflowLockRel              = ".github/workflows/real-world-testing.lock.yml"
+	agenticWorkflowReadinessDescription = "Validate the real-world agentic workflow before pushing, including actionlint, MCP allowlist, generated lock freshness, PR publishing credentials, and known-bad model settings."
+)
 
 func ciReadinessCommands(job string) ([]namedCommand, error) {
 	if job == "" {
@@ -70,7 +93,7 @@ fi`
 				namedCommand{Name: "vet", Cmd: "go vet ./...", FailureHint: "Fix go vet diagnostics before pushing."},
 				namedCommand{Name: "staticcheck", Cmd: staticcheckCommand, FailureHint: "Fix staticcheck diagnostics such as unused helpers or ineffective code."},
 				namedCommand{Name: "vulnerability scan", Cmd: govulncheckCommand, FailureHint: "Update affected dependencies or document why the finding is not reachable."},
-				namedCommand{Name: "lint github actions workflows", Cmd: actionlintCommand, FailureHint: "Fix actionlint or shellcheck diagnostics in .github/workflows files."},
+				namedCommand{Name: "lint github actions workflows", Cmd: actionlintCIWorkflowCommand, FailureHint: "Fix actionlint diagnostics in hand-authored workflows; generated *.lock.yml files are linted with shellcheck disabled."},
 				namedCommand{Name: "validate repository configs", Cmd: repositoryConfigLintCommand, FailureHint: "Fix DollarLint findings in repo config files or update the repo config intentionally."},
 			)
 		case "build":
@@ -183,9 +206,9 @@ type readinessIssue struct {
 }
 
 func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	p := newProgress(ctx, s.mcp, request, 6)
-	sourceRel := ".github/workflows/real-world-testing.md"
-	lockRel := ".github/workflows/real-world-testing.lock.yml"
+	p := newProgress(ctx, s.mcp, request, 7)
+	sourceRel := agenticWorkflowSourceRel
+	lockRel := agenticWorkflowLockRel
 	sourcePath := filepath.Join(s.root, sourceRel)
 	lockPath := filepath.Join(s.root, lockRel)
 	var issues []readinessIssue
@@ -215,6 +238,11 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	issues = append(issues, safeOutputIssues...)
 	checks = append(checks, map[string]any{"name": "real-world safe outputs", "ok": len(safeOutputIssues) == 0})
 
+	p.step("Checking PR creation credentials")
+	credentialIssues, credentialCheck := s.agenticWorkflowPRCredentialReadiness(ctx)
+	issues = append(issues, credentialIssues...)
+	checks = append(checks, credentialCheck)
+
 	p.step("Checking generated lock freshness")
 	fresh := true
 	if sourceInfo, err := os.Stat(sourcePath); err == nil {
@@ -229,8 +257,8 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	actionlint := s.run(ctx, namedCommand{
 		Job:         "agentic-workflow",
 		Name:        "actionlint real-world workflow",
-		Cmd:         actionlintCommand + " " + lockRel,
-		FailureHint: "Fix actionlint or shellcheck diagnostics in " + lockRel + ".",
+		Cmd:         actionlintCommand + " -shellcheck= " + lockRel,
+		FailureHint: "Fix actionlint diagnostics in " + lockRel + " or regenerate the lock file.",
 	})
 	if !actionlint.Succeeded {
 		issues = append(issues, readinessIssue{Severity: "error", Message: "actionlint failed for " + lockRel, Recommendation: actionlint.FailureHint})
@@ -251,6 +279,97 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 		"recentFailureSignal": "A recent real-world workflow run failed when COPILOT_MODEL was gpt-5.5; this tool flags that value because it was not accessible via Copilot chat completions.",
 		"nextStep":            "Fix error-severity issues before running the real-world workflow. Warnings should be reviewed before push.",
 	})
+}
+
+func (s *repoServer) agenticWorkflowPRCredentialReadiness(ctx context.Context) ([]readinessIssue, map[string]any) {
+	secretResult := s.run(ctx, namedCommand{Name: "read gh-aw secrets", Cmd: "gh secret list --repo dollarlint/dollarlint --json name"})
+	permissionResult := s.run(ctx, namedCommand{Name: "read github actions workflow permissions", Cmd: "gh api repos/dollarlint/dollarlint/actions/permissions/workflow --jq ."})
+	return realWorldPRCredentialIssues(secretResult.Succeeded, secretResult.Output, permissionResult.Succeeded, permissionResult.Output, secretResult, permissionResult)
+}
+
+type ghSecretName struct {
+	Name string `json:"name"`
+}
+
+type githubWorkflowPermissions struct {
+	CanApprovePullRequestReviews bool   `json:"can_approve_pull_request_reviews"`
+	DefaultWorkflowPermissions   string `json:"default_workflow_permissions"`
+}
+
+func realWorldPRCredentialIssues(secretOK bool, secretOutput string, permissionOK bool, permissionOutput string, secretResult, permissionResult commandResult) ([]readinessIssue, map[string]any) {
+	check := map[string]any{"name": "PR creation credentials"}
+	var issues []readinessIssue
+	hasWriteSecret := false
+	if secretOK {
+		secrets, err := parseGHSecretNames(secretOutput)
+		if err != nil {
+			check["secretWarning"] = "Could not parse gh secret list output: " + err.Error()
+		} else {
+			for _, secret := range secrets {
+				if secret == "GH_AW_GITHUB_TOKEN" {
+					hasWriteSecret = true
+					break
+				}
+			}
+		}
+	} else {
+		check["secretWarning"] = "Could not read repository secrets; skipping GH_AW_GITHUB_TOKEN presence check."
+		check["secretResult"] = secretResult
+	}
+
+	defaultTokenCanCreatePR := false
+	var permissions githubWorkflowPermissions
+	if permissionOK {
+		parsed, err := parseGitHubWorkflowPermissions(permissionOutput)
+		if err != nil {
+			check["permissionWarning"] = "Could not parse GitHub Actions workflow permissions: " + err.Error()
+		} else {
+			permissions = parsed
+			defaultTokenCanCreatePR = permissions.CanApprovePullRequestReviews
+		}
+	} else {
+		check["permissionWarning"] = "Could not read GitHub Actions workflow permissions; skipping GITHUB_TOKEN PR creation check."
+		check["permissionResult"] = permissionResult
+	}
+
+	check["hasGH_AW_GITHUB_TOKEN"] = hasWriteSecret
+	check["defaultTokenCanCreatePullRequests"] = defaultTokenCanCreatePR
+	if permissions.DefaultWorkflowPermissions != "" {
+		check["defaultWorkflowPermissions"] = permissions.DefaultWorkflowPermissions
+	}
+	if permissionOK {
+		check["canApprovePullRequestReviews"] = permissions.CanApprovePullRequestReviews
+	}
+
+	if secretOK && permissionOK && !hasWriteSecret && !defaultTokenCanCreatePR {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "real-world workflow cannot create the required durable-memory PR with current credentials",
+			Recommendation: "Set GH_AW_GITHUB_TOKEN with a fine-grained PAT that has Contents, Pull requests, Issues, and Discussions read/write, or enable the repository Actions setting that allows GitHub Actions to create and approve pull requests.",
+		})
+	}
+	check["ok"] = len(issues) == 0
+	return issues, check
+}
+
+func parseGHSecretNames(output string) ([]string, error) {
+	var secrets []ghSecretName
+	if err := json.Unmarshal([]byte(output), &secrets); err != nil {
+		return nil, err
+	}
+	names := make([]string, 0, len(secrets))
+	for _, secret := range secrets {
+		names = append(names, secret.Name)
+	}
+	return names, nil
+}
+
+func parseGitHubWorkflowPermissions(output string) (githubWorkflowPermissions, error) {
+	var permissions githubWorkflowPermissions
+	if err := json.Unmarshal([]byte(output), &permissions); err != nil {
+		return githubWorkflowPermissions{}, err
+	}
+	return permissions, nil
 }
 
 func requiredAgenticRealWorldTools() []string {
@@ -333,6 +452,20 @@ func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
 			Severity:       "error",
 			Message:        "real-world workflow prompt does not include rendered manual dispatch inputs",
 			Recommendation: "Mention github.event.inputs.max_repos and github.event.inputs.candidate_repos in the markdown prompt so manual dispatch controls the MCP repository plan.",
+		})
+	}
+	if !strings.Contains(source, "should be merged in order to retain") || !strings.Contains(lock, "should be merged in order to retain") {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "real-world workflow does not require the Discussion to explain that the PR retains the results",
+			Recommendation: `Ask the agent to include a "Durable memory PR" Discussion section saying that the PR should be merged in order to retain the results, then regenerate the lock file.`,
+		})
+	}
+	if !strings.Contains(source, "category: agentic-product-testing") || !strings.Contains(lock, `"category":"agentic-product-testing"`) {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "real-world workflow Discussions are not configured for the Agentic Product Testing category",
+			Recommendation: `Set create-discussion.category to "agentic-product-testing" and regenerate the lock file.`,
 		})
 	}
 	return issues

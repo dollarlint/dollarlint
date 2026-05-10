@@ -1379,7 +1379,7 @@ func realWorldNextAfterRecord(entry realWorldEntry) map[string]any {
 	}
 	if inGitHubAgenticWorkflow() {
 		next["githubAgenticWorkflow"] = true
-		next["discussion"] = "Publish a GitHub Discussion summary from the recorded MCP entry."
+		next["discussion"] = "Publish a GitHub Discussion summary from the recorded MCP entry, including a Durable memory PR section that says the PR should be merged in order to retain the results."
 		next["pullRequest"] = "Request create_pull_request when recorded result files changed; merging that PR is how future real-world sweeps remember tested repositories."
 		next["safeOutputs"] = "If safe outputs are exposed through the safeoutputs CLI wrapper, pipe inline JSON with printf instead of writing temporary payload files; temp-file payload writes may be denied by the agent sandbox."
 		next["linkOutputs"] = "After requesting create_pull_request and create_discussion, call link_real_world_outputs with the Discussion title and entryID so the final PR and Discussion cross-link each other."

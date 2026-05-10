@@ -62,3 +62,22 @@ func TestRepoServerToolFilterRegistersOnlyMatchingTools(t *testing.T) {
 		t.Fatalf("repo_status should not be registered")
 	}
 }
+
+func TestAgenticWorkflowReadinessToolDescriptionIsCurrent(t *testing.T) {
+	rs := &repoServer{}
+	rs.mcp = server.NewMCPServer(serverName, "test")
+	rs.addTools()
+	tool, ok := rs.mcp.ListTools()["agentic_workflow_readiness"]
+	if !ok {
+		t.Fatalf("missing agentic_workflow_readiness tool")
+	}
+	description := tool.Tool.Description
+	staleScheduleWord := "week" + "ly"
+	staleWorkflowName := staleScheduleWord + "-real-world-testing"
+	if strings.Contains(description, staleScheduleWord) || strings.Contains(description, staleWorkflowName) {
+		t.Fatalf("stale scheduled description: %q", description)
+	}
+	if !strings.Contains(description, "real-world agentic workflow") {
+		t.Fatalf("description = %q, want real-world agentic workflow", description)
+	}
+}

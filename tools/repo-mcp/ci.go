@@ -321,6 +321,20 @@ func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
 			Recommendation: "Regenerate the lock file and confirm safe_outputs exposes created_pr_url.",
 		})
 	}
+	if strings.Contains(lock, "shell(safeoutputs:*") && (!strings.Contains(source, "\n    - printf") || !strings.Contains(lock, "shell(printf)")) {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "real-world workflow exposes the safeoutputs CLI but printf is not allowed",
+			Recommendation: "Add printf to tools.bash so the agent can pipe inline JSON payloads to safeoutputs, then regenerate the lock file.",
+		})
+	}
+	if !strings.Contains(source, "github.event.inputs.max_repos") || !strings.Contains(source, "github.event.inputs.candidate_repos") {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "real-world workflow prompt does not include rendered manual dispatch inputs",
+			Recommendation: "Mention github.event.inputs.max_repos and github.event.inputs.candidate_repos in the markdown prompt so manual dispatch controls the MCP repository plan.",
+		})
+	}
 	return issues
 }
 

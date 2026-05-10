@@ -48,4 +48,4 @@ COPILOT_GITHUB_TOKEN="$token" gh aw secrets set "$secret_name" \
 
 unset token COPILOT_GITHUB_TOKEN
 
-echo "Done. You can now run: gh aw run weekly-real-world-testing"
+echo "Done. You can now run: gh aw run real-world-testing"

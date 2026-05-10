@@ -50,6 +50,7 @@ tools:
   bash:
     - date
     - jq
+    - printf
     - git status
     - git diff
     - git diff --stat
@@ -249,17 +250,23 @@ timeout-minutes: 90
 
 # Real-World Testing
 
-Run a real-world DollarLint sweep for up to `MAX_REPOS` fresh public repositories, record the structured result, and open one GitHub Discussion with the results.
+Run a real-world DollarLint sweep, record the structured result, and open one GitHub Discussion with the results.
 
 Use the `dollarlint-repo` MCP server as the workflow source of truth. Start with `real_world_start_testing`, then follow the `nextStep` guidance returned by the `real_world_*` tools until the run is recorded. Prefer the MCP wizard over shell commands and hand-written reports. If the MCP capabilities are missing or stale, stop and publish a blocker summary instead of improvising.
 
-If `CANDIDATE_REPOS` is a non-empty JSON array, use it as the candidate pool. Otherwise choose up to `MAX_REPOS` diverse, well-known public repositories with conventional config files, skipping repositories already in MCP history unless the manual input explicitly asks for reruns.
+Manual dispatch inputs for this run:
+- max_repos: `${{ github.event.inputs.max_repos }}`
+- candidate_repos: `${{ github.event.inputs.candidate_repos }}`
+
+Before calling `real_world_start_testing`, derive the repository plan from those literal inputs. Treat a missing or empty `max_repos` as `10`. If `candidate_repos` is a non-empty JSON array, parse it and pass at most `max_repos` entries exactly to `real_world_start_testing.repositories`; do not substitute different repositories unless MCP history reports duplicates and `allowPreviouslyTested` is false. If `candidate_repos` is empty, choose up to `max_repos` diverse, well-known public repositories with conventional config files, skipping repositories already in MCP history unless the manual input explicitly asks for reruns.
 
 The workflow pre-builds `bin/dollarlint`; when the MCP flow asks for validation arguments, use `build: false` so validation uses the prebuilt CLI. Keep long-running prep or validation MCP calls open for progress notifications, and do not poll with shell sleep loops. Never run dependency lifecycle scripts, postinstall hooks, package-manager plugins, or repository install scripts.
 
 Durable repository memory must be written through `real_world_record_result` and the structured JSON files it manages. Do not create Markdown report files. Product recommendations are mandatory: include a `high`, `med`, or `low` strength with rationale, or record an explicit no-change recommendation when DollarLint behaved reasonably. If `real_world_record_result` changes repository files, `create_pull_request` is mandatory because merging that PR is how the repo remembers tested repositories. The PR body must say that merging it persists real-world testing memory.
 
 After recording, create exactly one GitHub Discussion through the configured safe output. Keep it concise: result counts, tested repositories, notable findings, product recommendations with strength labels, persisted artifact path, DollarLint commit, and workflow run URL. Put verbose examples or raw warnings inside `<details>` blocks. The Discussion body must include a "Durable memory PR" section explaining that a companion PR will be opened and must be merged for future sweeps to see this memory. If the Discussion falls back to an issue, say that the intended destination was a Discussion.
+
+The workflow may expose safe outputs either as direct tools or through a `safeoutputs` CLI wrapper. Use the available safe-output interface, but do not stop after committing locally. If using the CLI wrapper, send inline JSON on stdin with `printf '%s' '<json>' | safeoutputs create_pull_request .` and `printf '%s' '<json>' | safeoutputs create_discussion .`; do not rely on temporary payload files.
 
 After requesting both `create_pull_request` and `create_discussion`, call `link_real_world_outputs` with the exact Discussion title and the recorded entry id. This post-safe-output step cross-links the final PR and Discussion URLs and fails if no PR was created.
 

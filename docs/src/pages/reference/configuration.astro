@@ -403,17 +403,17 @@ extends = "../../.dollarlint.toml"</code></pre>
     <p>
       Catalogs map well-known filenames to schemas when a file doesn't declare <code
         >$schema</code
-      > and no explicit or built-in association matches. SchemaStore and
-      RubySchema are built-in catalog sources, and custom sources can use the same
-      catalog shape as SchemaStore. Explicit
-      in-file schemas still report schema load or compile failures as issues; the
-      catalog failure policy only applies to catalog loading and catalog-inferred
-      schemas.
+      > and no explicit or built-in association matches. SchemaStore and RubySchema
+      are built-in catalog sources, and custom sources can use the same catalog shape
+      as SchemaStore. Explicit in-file schemas still report schema load or compile
+      failures as issues; the catalog failure policy only applies to catalog loading
+      and catalog-inferred schemas.
     </p>
     <p>
-      The default config includes the SchemaStore and RubySchema sources but keeps catalog
-      matching disabled until you enable <code>schemas.catalogs.enabled</code> or
-      pass <code>--schema-store</code>. The generated config from <code
+      The default config includes the SchemaStore and RubySchema sources but
+      keeps catalog matching disabled until you enable <code
+        >schemas.catalogs.enabled</code
+      > or pass <code>--schema-store</code>. The generated config from <code
         >dollarlint init</code
       > enables both sources by default.
     </p>
@@ -424,9 +424,10 @@ extends = "../../.dollarlint.toml"</code></pre>
       and <code>release-plz.toml</code> / <code>.release-plz.toml</code>.
     </p>
     <p>
-      The built-in RubySchema source covers common Ruby and Rails project configs.
-      Ambiguous Rails and Ruby filenames require nearby project evidence, so they
-      can be reported as skipped catalog candidates instead of guessed blindly.
+      The built-in RubySchema source covers common Ruby and Rails project
+      configs. Ambiguous Rails and Ruby filenames require nearby project
+      evidence, so they can be reported as skipped catalog candidates instead of
+      guessed blindly.
     </p>
     <p>
       Catalog matches are reported with <code>schemaMatch</code> metadata in JSON
@@ -476,21 +477,20 @@ extends = "../../.dollarlint.toml"</code></pre>
         >
         <tr
           ><td><code>schemas.catalogs.sources[].format</code></td><td
-            >Catalog format. Use <code>schemastore</code> for SchemaStore-shaped
-            JSON catalogs or <code>rubyschema</code> for the built-in RubySchema
-            source.</td
+            >Catalog format. Use <code>schemastore</code> for SchemaStore-shaped JSON
+            catalogs or <code>rubyschema</code> for the built-in RubySchema source.</td
           ></tr
         >
         <tr
           ><td><code>schemas.catalogs.sources[].url</code></td><td
-            >Remote catalog URL for <code>schemastore</code> sources. Mutually
-            exclusive with <code>path</code>.</td
+            >Remote catalog URL for <code>schemastore</code> sources. Mutually exclusive
+            with <code>path</code>.</td
           ></tr
         >
         <tr
           ><td><code>schemas.catalogs.sources[].path</code></td><td
-            >Local catalog path for <code>schemastore</code> sources. Mutually
-            exclusive with <code>url</code>.</td
+            >Local catalog path for <code>schemastore</code> sources. Mutually exclusive
+            with <code>url</code>.</td
           ></tr
         >
         <tr
@@ -576,8 +576,8 @@ extends = "../../.dollarlint.toml"</code></pre>
         <tr
           ><td><code>output.issueHints</code></td><td
             >Choose <code>auto</code> for curated hints, <code>off</code> for raw
-            issues only, or <code>verbose</code> to include hint rule IDs,
-            confidence, and source links in text output.</td
+            issues only, or <code>verbose</code> to include hint rule IDs, confidence,
+            and source links in text output.</td
           ></tr
         >
       </tbody>

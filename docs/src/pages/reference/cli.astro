@@ -147,7 +147,8 @@ const mcpConfig = `{
         >
         <tr
           ><td><code>--issue-hints</code></td><td
-            >Control curated issue hints: <code>auto</code>, <code>off</code>, or
+            >Control curated issue hints: <code>auto</code>, <code>off</code>,
+            or
             <code>verbose</code>.</td
           ></tr
         >
@@ -271,19 +272,17 @@ const mcpConfig = `{
       rather than a validate flag. Use <code>output.branchErrors = "best"</code>
       for focused <code>oneOf</code>/<code>anyOf</code> diagnostics, or <code
         >"all"</code
-      > when debugging every failed schema branch.
-      Issue hints may be controlled either by <code>--issue-hints</code> or
+      > when debugging every failed schema branch. Issue hints may be controlled either
+      by <code>--issue-hints</code> or
       <code>output.issueHints</code>.
     </p>
 
     <h2>Inspect flags</h2>
     <p>
-      <code>dollarlint inspect [path]</code> accepts the same discovery,
-      association, catalog, catalog-fetch, and domain flags as <code
-        >validate</code
-      >. It does not validate file contents or compile schemas; it stops after
-      discovery, parsing enough to find in-file declarations, and schema
-      association.
+      <code>dollarlint inspect [path]</code> accepts the same discovery, association,
+      catalog, catalog-fetch, and domain flags as <code>validate</code>. It does
+      not validate file contents or compile schemas; it stops after discovery,
+      parsing enough to find in-file declarations, and schema association.
     </p>
     <table>
       <thead>

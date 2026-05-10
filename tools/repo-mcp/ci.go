@@ -18,6 +18,23 @@ import (
 
 const (
 	actionlintCommand           = "go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12"
+	actionlintCIWorkflowCommand = `bash -lc '
+set -euo pipefail
+workflows=()
+while IFS= read -r workflow; do
+  workflows+=("$workflow")
+done < <(find .github/workflows -maxdepth 1 -type f \( -name "*.yml" -o -name "*.yaml" \) ! -name "*.lock.yml" | sort)
+if [ "${#workflows[@]}" -gt 0 ]; then
+  go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 "${workflows[@]}"
+fi
+lock_workflows=()
+while IFS= read -r workflow; do
+  lock_workflows+=("$workflow")
+done < <(find .github/workflows -maxdepth 1 -type f -name "*.lock.yml" | sort)
+if [ "${#lock_workflows[@]}" -gt 0 ]; then
+  go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -shellcheck= "${lock_workflows[@]}"
+fi
+'`
 	staticcheckCommand          = "go run honnef.co/go/tools/cmd/staticcheck@v0.7.0 ./..."
 	govulncheckCommand          = "go run golang.org/x/vuln/cmd/govulncheck@v1.3.0 ./..."
 	repositoryConfigLintCommand = "go run ./cmd/dollarlint validate . --exclude .goreleaser.yaml"
@@ -76,7 +93,7 @@ fi`
 				namedCommand{Name: "vet", Cmd: "go vet ./...", FailureHint: "Fix go vet diagnostics before pushing."},
 				namedCommand{Name: "staticcheck", Cmd: staticcheckCommand, FailureHint: "Fix staticcheck diagnostics such as unused helpers or ineffective code."},
 				namedCommand{Name: "vulnerability scan", Cmd: govulncheckCommand, FailureHint: "Update affected dependencies or document why the finding is not reachable."},
-				namedCommand{Name: "lint github actions workflows", Cmd: actionlintCommand, FailureHint: "Fix actionlint or shellcheck diagnostics in .github/workflows files."},
+				namedCommand{Name: "lint github actions workflows", Cmd: actionlintCIWorkflowCommand, FailureHint: "Fix actionlint diagnostics in hand-authored workflows; generated *.lock.yml files are linted with shellcheck disabled."},
 				namedCommand{Name: "validate repository configs", Cmd: repositoryConfigLintCommand, FailureHint: "Fix DollarLint findings in repo config files or update the repo config intentionally."},
 			)
 		case "build":
@@ -240,8 +257,8 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	actionlint := s.run(ctx, namedCommand{
 		Job:         "agentic-workflow",
 		Name:        "actionlint real-world workflow",
-		Cmd:         actionlintCommand + " " + lockRel,
-		FailureHint: "Fix actionlint or shellcheck diagnostics in " + lockRel + ".",
+		Cmd:         actionlintCommand + " -shellcheck= " + lockRel,
+		FailureHint: "Fix actionlint diagnostics in " + lockRel + " or regenerate the lock file.",
 	})
 	if !actionlint.Succeeded {
 		issues = append(issues, readinessIssue{Severity: "error", Message: "actionlint failed for " + lockRel, Recommendation: actionlint.FailureHint})

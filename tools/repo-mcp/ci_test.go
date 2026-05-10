@@ -26,6 +26,7 @@ func TestCIReadinessCommandsMirrorCriticalCISteps(t *testing.T) {
 	}
 	assertCommand("quality", "check go formatting", "gofmt -l")
 	assertCommand("quality", "lint github actions workflows", "actionlint")
+	assertCommand("quality", "lint github actions workflows", "-shellcheck=")
 	assertCommand("quality", "validate repository configs", "--exclude .goreleaser.yaml")
 	assertCommand("test", "core coverage", "coverage + 0 < minimum")
 	assertCommand("docs", "install docs dependencies", "npm ci")

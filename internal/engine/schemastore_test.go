@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -256,6 +257,9 @@ func TestSchemaStoreMatchHelperEdges(t *testing.T) {
 	if match, ok := (*schemaStoreCatalog)(nil).match("anything.json", CatalogConfig{}); ok || match.action != "" {
 		t.Fatalf("nil catalog match = %+v, %v", match, ok)
 	}
+	if match, ok := (*schemaStoreCatalog)(nil).matchDocument(nil, CatalogConfig{}); ok || match.action != "" {
+		t.Fatalf("nil document catalog match = %+v, %v", match, ok)
+	}
 	(*schemaStoreCatalog)(nil).buildIndex()
 	emptyCatalog := &schemaStoreCatalog{}
 	emptyCatalog.buildIndex()
@@ -289,6 +293,14 @@ func TestSchemaStoreMatchHelperEdges(t *testing.T) {
 	if got := catalogPatternReason("file.json", "file.json", schemaStoreMatch{pattern: "*.json"}); !strings.Contains(got, `path "file.json" matched`) {
 		t.Fatalf("fallback catalog pattern reason = %q", got)
 	}
+	if ok, reason := catalogEvidenceSatisfied(catalogMatchContext{}, "custom"); !ok || reason != "" {
+		t.Fatalf("unknown catalog evidence should pass: ok=%v reason=%q", ok, reason)
+	}
+	for _, required := range []string{catalogEvidenceRubyProject, catalogEvidenceRails, catalogEvidencePackwerk, "custom"} {
+		if catalogEvidenceLabel(required) == "" || catalogMissingEvidenceHint(required) == "" {
+			t.Fatalf("empty evidence helper for %q", required)
+		}
+	}
 	if lowConfidenceSchemaStoreGlob("path/*.json") {
 		t.Fatalf("path-qualified glob should not be low confidence")
 	}
@@ -296,6 +308,15 @@ func TestSchemaStoreMatchHelperEdges(t *testing.T) {
 	addSchemaStoreExact(entries, "file.json", schemaStoreEntry{Name: "second"})
 	if entries["file.json"].Name != "first" {
 		t.Fatalf("duplicate exact entry should keep first: %+v", entries)
+	}
+	if source := normalizeCatalogSource(CatalogSource{Name: "rubyschema"}); source.Format != "rubyschema" {
+		t.Fatalf("rubyschema source normalization = %+v", source)
+	}
+	if source := normalizeCatalogSource(CatalogSource{Name: "rubyschema", URL: "./catalog.json"}); source.Format != "schemastore" {
+		t.Fatalf("url source normalization = %+v", source)
+	}
+	if catalog := loadRubySchemaCatalogSource(CatalogSource{Format: "rubyschema"}); len(catalog.Schemas) == 0 || catalog.Schemas[0].Source != "rubyschema" {
+		t.Fatalf("default rubyschema source = %+v", catalog)
 	}
 }
 
@@ -347,6 +368,7 @@ func TestSchemaStoreErrors(t *testing.T) {
 	}
 	emptyURLConfig := DefaultConfig()
 	emptyURLConfig.Schemas.Catalogs.Enabled = true
+	emptyURLConfig.Schemas.Catalogs.Sources = []CatalogSource{defaultSchemaStoreCatalogSource()}
 	disabled := false
 	emptyURLConfig.Schemas.Fetch.Enabled = &disabled
 	if catalog, warning, err := loadSchemaStoreCatalog(context.Background(), NewSchemaCache(DefaultConfig()), emptyURLConfig); err != nil || catalog != nil || warning == nil || !strings.Contains(warning.Message, "requires remote schema fetching") {
@@ -495,7 +517,7 @@ func TestSchemaStoreCatalogSourceEdges(t *testing.T) {
 	enabled := true
 	disabled := false
 	defaultSources := enabledSchemaStoreCatalogSources(SchemaConfig{})
-	if len(defaultSources) != 1 || defaultSources[0].URL != defaultSchemaStoreCatalogURL {
+	if len(defaultSources) != 2 || defaultSources[0].URL != defaultSchemaStoreCatalogURL || defaultSources[1].Format != catalogFormatRubySchema {
 		t.Fatalf("default sources = %+v", defaultSources)
 	}
 	sources := enabledSchemaStoreCatalogSources(SchemaConfig{
@@ -503,15 +525,19 @@ func TestSchemaStoreCatalogSourceEdges(t *testing.T) {
 			Sources: []CatalogSource{
 				{Name: "off", Format: "schemastore", URL: "./off.json", Enabled: &disabled},
 				{URL: "./defaulted.json", Enabled: &enabled},
+				{Format: "rubyschema", Enabled: &enabled},
 				{Name: "custom", Format: "custom", URL: "./custom.json"},
 			},
 		},
 	})
-	if len(sources) != 1 {
+	if len(sources) != 2 {
 		t.Fatalf("enabled sources = %+v", sources)
 	}
 	if sources[0].Name != "schemastore" || sources[0].Format != "schemastore" || sources[0].URL != "./defaulted.json" {
 		t.Fatalf("defaulted source = %+v", sources[0])
+	}
+	if sources[1].Name != "rubyschema" || sources[1].Format != "rubyschema" {
+		t.Fatalf("rubyschema source = %+v", sources[1])
 	}
 
 	cfg := DefaultConfig()
@@ -522,6 +548,132 @@ func TestSchemaStoreCatalogSourceEdges(t *testing.T) {
 	_, warning, err := schemaStoreCatalogError(cfg, CatalogSource{Path: "./catalog.json"}, "boom")
 	if err != nil || warning == nil || warning.Source != "catalog" {
 		t.Fatalf("catalog warning source fallback = %+v, %v", warning, err)
+	}
+}
+
+func TestRubySchemaCatalogAssociations(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Gemfile"), `gem "rails"
+gem "packwerk"
+`)
+	writeFile(t, filepath.Join(dir, "config", "application.rb"), `require "rails/all"`)
+	writeFile(t, filepath.Join(dir, ".rubocop.yml"), `AllCops: {}`)
+	writeFile(t, filepath.Join(dir, ".rubocop_todo.yml"), `AllCops: {}`)
+	writeFile(t, filepath.Join(dir, ".standard.yml"), `{}`)
+	writeFile(t, filepath.Join(dir, "config", "database.yml"), `development: {}`)
+	writeFile(t, filepath.Join(dir, "config", "locales", "en.yml"), `en: {}`)
+	writeFile(t, filepath.Join(dir, "packs", "billing", "package.yml"), `enforce_dependencies: true`)
+
+	cfg := DefaultConfig()
+	cfg.Schemas.Catalogs.Enabled = true
+	cfg.Schemas.Catalogs.Sources = []CatalogSource{{Name: "rubyschema", Format: "rubyschema"}}
+	result, err := Inspect(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Inspect RubySchema: %v", err)
+	}
+	if result.Summary.Associated != 6 || result.Summary.Unassociated != 0 {
+		t.Fatalf("RubySchema inspect summary = %+v files=%+v", result.Summary, result.Files)
+	}
+
+	rubocop := findInspectFile(result.Files, ".rubocop.yml")
+	if rubocop.Schema != "https://www.rubyschema.org/rubocop.json" || rubocop.SchemaSource != "catalog:rubyschema:RuboCop" || rubocop.SchemaMatch == nil || rubocop.SchemaMatch.Action != SchemaMatchActionMatched {
+		t.Fatalf("rubocop RubySchema association = %+v", rubocop)
+	}
+	rubocopTodo := findInspectFile(result.Files, ".rubocop_todo.yml")
+	if rubocopTodo.SchemaSource != "catalog:rubyschema:RuboCop" {
+		t.Fatalf("rubocop todo RubySchema association = %+v", rubocopTodo)
+	}
+	standard := findInspectFile(result.Files, ".standard.yml")
+	if standard.SchemaSource != "catalog:rubyschema:Standard" {
+		t.Fatalf("standard RubySchema association = %+v", standard)
+	}
+	database := findInspectFile(result.Files, "config/database.yml")
+	if database.SchemaSource != "catalog:rubyschema:Rails database.yml" || !strings.Contains(database.Reason, "Rails project evidence") {
+		t.Fatalf("database RubySchema association = %+v", database)
+	}
+	locale := findInspectFile(result.Files, "config/locales/en.yml")
+	if locale.SchemaSource != "catalog:rubyschema:Rails I18n locale" || !strings.Contains(locale.Reason, "Rails project evidence") {
+		t.Fatalf("locale RubySchema association = %+v", locale)
+	}
+	packwerk := findInspectFile(result.Files, "packs/billing/package.yml")
+	if packwerk.SchemaSource != "catalog:rubyschema:Packwerk package.yml" || !strings.Contains(packwerk.Reason, "Packwerk evidence") {
+		t.Fatalf("packwerk RubySchema association = %+v", packwerk)
+	}
+
+	dir = t.TempDir()
+	writeFile(t, filepath.Join(dir, "config", "database.yml"), `development: {}`)
+	writeFile(t, filepath.Join(dir, "packs", "billing", "package.yml"), `metadata: {}`)
+	result, err = Inspect(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Inspect RubySchema missing evidence: %v", err)
+	}
+	if result.Summary.Associated != 0 || result.Summary.Unassociated != 2 {
+		t.Fatalf("missing evidence summary = %+v files=%+v", result.Summary, result.Files)
+	}
+	database = findInspectFile(result.Files, "config/database.yml")
+	if database.Schema != "" || database.SchemaMatch == nil || database.SchemaMatch.Action != SchemaMatchActionSkippedMissingEvidence || !strings.Contains(database.Reason, "requires Rails project evidence") || database.SuggestedAssociation == "" || database.SuggestedCatalogIgnore == "" {
+		t.Fatalf("database missing evidence = %+v", database)
+	}
+	packwerk = findInspectFile(result.Files, "packs/billing/package.yml")
+	if packwerk.Schema != "" || packwerk.SchemaMatch == nil || packwerk.SchemaMatch.Action != SchemaMatchActionSkippedMissingEvidence || !strings.Contains(packwerk.Reason, "requires Packwerk evidence") {
+		t.Fatalf("packwerk missing evidence = %+v", packwerk)
+	}
+}
+
+func TestRubySchemaEvidenceHelpers(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Gemfile"), `gem "rails"`)
+	ctx := catalogMatchContext{relativePath: "config/vite.json", absolutePath: filepath.Join(dir, "config", "vite.json")}
+	if ok, reason := rubyProjectEvidence(ctx); !ok || !strings.Contains(reason, "Gemfile") {
+		t.Fatalf("ruby Gemfile evidence = %v %q", ok, reason)
+	}
+	if ok, reason := catalogEvidenceSatisfied(ctx, catalogEvidenceRubyProject); !ok || !strings.Contains(reason, "Gemfile") {
+		t.Fatalf("ruby catalog evidence = %v %q", ok, reason)
+	}
+	if ok, reason := railsProjectEvidence(ctx); !ok || !strings.Contains(reason, "Gemfile") {
+		t.Fatalf("rails Gemfile evidence = %v %q", ok, reason)
+	}
+
+	dir = t.TempDir()
+	writeFile(t, filepath.Join(dir, "demo.gemspec"), `Gem::Specification.new`)
+	ctx = catalogMatchContext{relativePath: "config/mongoid.yml", absolutePath: filepath.Join(dir, "config", "mongoid.yml")}
+	if ok, reason := rubyProjectEvidence(ctx); !ok || !strings.Contains(reason, ".gemspec") {
+		t.Fatalf("ruby gemspec evidence = %v %q", ok, reason)
+	}
+
+	dir = t.TempDir()
+	writeFile(t, filepath.Join(dir, "packwerk.yml"), `include: []`)
+	ctx = catalogMatchContext{relativePath: "packs/billing/package.yml", absolutePath: filepath.Join(dir, "packs", "billing", "package.yml")}
+	if ok, reason := packwerkEvidence(ctx); !ok || !strings.Contains(reason, "packwerk.yml") {
+		t.Fatalf("packwerk file evidence = %v %q", ok, reason)
+	}
+
+	dir = t.TempDir()
+	ctx = catalogMatchContext{relativePath: "config/vite.json", absolutePath: filepath.Join(dir, "config", "vite.json")}
+	if ok, reason := rubyProjectEvidence(ctx); ok || reason != "" {
+		t.Fatalf("unexpected ruby evidence = %v %q", ok, reason)
+	}
+	if dirs := evidenceSearchDirs(catalogMatchContext{}); dirs != nil {
+		t.Fatalf("empty evidence context dirs = %+v", dirs)
+	}
+	if dirs := evidenceSearchDirs(catalogMatchContext{absolutePath: string(os.PathSeparator)}); len(dirs) != 1 || dirs[0] != string(os.PathSeparator) {
+		t.Fatalf("root evidence dirs = %+v", dirs)
+	}
+
+	gitFileDir := t.TempDir()
+	writeFile(t, filepath.Join(gitFileDir, ".git"), "gitdir: ../.git/worktrees/demo")
+	ctx = catalogMatchContext{absolutePath: filepath.Join(gitFileDir, "config", "database.yml")}
+	if dirs := evidenceSearchDirs(ctx); len(dirs) != 2 || dirs[1] != gitFileDir {
+		t.Fatalf("git file evidence dirs = %+v", dirs)
+	}
+
+	gitDir := t.TempDir()
+	if err := os.Mkdir(filepath.Join(gitDir, ".git"), 0o755); err != nil {
+		t.Fatalf("mkdir .git: %v", err)
+	}
+	ctx = catalogMatchContext{absolutePath: filepath.Join(gitDir, "config", "database.yml")}
+	if dirs := evidenceSearchDirs(ctx); len(dirs) != 2 || dirs[1] != gitDir {
+		t.Fatalf("git dir evidence dirs = %+v", dirs)
 	}
 }
 

@@ -62,9 +62,10 @@ const (
 )
 
 const (
-	SchemaMatchActionMatched              = "matched"
-	SchemaMatchActionIgnored              = "ignored"
-	SchemaMatchActionSkippedLowConfidence = "skippedLowConfidence"
+	SchemaMatchActionMatched                = "matched"
+	SchemaMatchActionIgnored                = "ignored"
+	SchemaMatchActionSkippedLowConfidence   = "skippedLowConfidence"
+	SchemaMatchActionSkippedMissingEvidence = "skippedMissingEvidence"
 )
 
 const (

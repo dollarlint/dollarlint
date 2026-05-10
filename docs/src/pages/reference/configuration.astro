@@ -53,6 +53,11 @@ format = "schemastore"
 url = "https://www.schemastore.org/api/json/catalog.json"
 enabled = true
 
+[[schemas.catalogs.sources]]
+name = "rubyschema"
+format = "rubyschema"
+enabled = true
+
 # [[schemas.catalogs.ignore]]
 # file = "data/tasks.json"
 # reason = "application data, not a tool config"
@@ -343,7 +348,8 @@ extends = "../../.dollarlint.toml"</code></pre>
             >Restrict remote schemas to exact or wildcard hosts. For
             SchemaStore, use <code>*.schemastore.org</code> or include both <code
               >www.schemastore.org</code
-            > and <code>json.schemastore.org</code>.</td
+            > and <code>json.schemastore.org</code>. For RubySchema, include
+            <code>www.rubyschema.org</code>.</td
           ></tr
         >
         <tr
@@ -397,24 +403,30 @@ extends = "../../.dollarlint.toml"</code></pre>
     <p>
       Catalogs map well-known filenames to schemas when a file doesn't declare <code
         >$schema</code
-      > and no explicit or built-in association matches. SchemaStore is the built-in
-      catalog source, and custom sources can use the same catalog shape. Explicit
+      > and no explicit or built-in association matches. SchemaStore and
+      RubySchema are built-in catalog sources, and custom sources can use the same
+      catalog shape as SchemaStore. Explicit
       in-file schemas still report schema load or compile failures as issues; the
       catalog failure policy only applies to catalog loading and catalog-inferred
       schemas.
     </p>
     <p>
-      The default config includes the SchemaStore source but keeps catalog
+      The default config includes the SchemaStore and RubySchema sources but keeps catalog
       matching disabled until you enable <code>schemas.catalogs.enabled</code> or
       pass <code>--schema-store</code>. The generated config from <code
         >dollarlint init</code
-      > enables SchemaStore by default.
+      > enables both sources by default.
     </p>
     <p>
       When the built-in SchemaStore source is enabled, DollarLint adds a small
       curated layer for known filename gaps and drift. The current curated Rust
       associations cover <code>rustfmt.toml</code> / <code>.rustfmt.toml</code>
       and <code>release-plz.toml</code> / <code>.release-plz.toml</code>.
+    </p>
+    <p>
+      The built-in RubySchema source covers common Ruby and Rails project configs.
+      Ambiguous Rails and Ruby filenames require nearby project evidence, so they
+      can be reported as skipped catalog candidates instead of guessed blindly.
     </p>
     <p>
       Catalog matches are reported with <code>schemaMatch</code> metadata in JSON
@@ -453,7 +465,7 @@ extends = "../../.dollarlint.toml"</code></pre>
         >
         <tr
           ><td><code>schemas.catalogs.sources</code></td><td
-            >List SchemaStore-format catalog sources.</td
+            >List built-in and SchemaStore-format catalog sources.</td
           ></tr
         >
         <tr
@@ -464,17 +476,21 @@ extends = "../../.dollarlint.toml"</code></pre>
         >
         <tr
           ><td><code>schemas.catalogs.sources[].format</code></td><td
-            >Catalog format. Currently <code>schemastore</code>.</td
+            >Catalog format. Use <code>schemastore</code> for SchemaStore-shaped
+            JSON catalogs or <code>rubyschema</code> for the built-in RubySchema
+            source.</td
           ></tr
         >
         <tr
           ><td><code>schemas.catalogs.sources[].url</code></td><td
-            >Remote catalog URL. Mutually exclusive with <code>path</code>.</td
+            >Remote catalog URL for <code>schemastore</code> sources. Mutually
+            exclusive with <code>path</code>.</td
           ></tr
         >
         <tr
           ><td><code>schemas.catalogs.sources[].path</code></td><td
-            >Local catalog path. Mutually exclusive with <code>url</code>.</td
+            >Local catalog path for <code>schemastore</code> sources. Mutually
+            exclusive with <code>url</code>.</td
           ></tr
         >
         <tr

@@ -195,13 +195,67 @@
         {
           "required": ["url"],
           "not": {
-            "required": ["path"]
+            "anyOf": [
+              {
+                "required": ["path"]
+              },
+              {
+                "required": ["format"],
+                "properties": {
+                  "format": {
+                    "const": "rubyschema"
+                  }
+                }
+              }
+            ]
           }
         },
         {
           "required": ["path"],
           "not": {
-            "required": ["url"]
+            "anyOf": [
+              {
+                "required": ["url"]
+              },
+              {
+                "required": ["format"],
+                "properties": {
+                  "format": {
+                    "const": "rubyschema"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "anyOf": [
+            {
+              "required": ["format"],
+              "properties": {
+                "format": {
+                  "const": "rubyschema"
+                }
+              }
+            },
+            {
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "const": "rubyschema"
+                }
+              }
+            }
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": ["url"]
+              },
+              {
+                "required": ["path"]
+              }
+            ]
           }
         }
       ],
@@ -211,7 +265,7 @@
         },
         "format": {
           "type": "string",
-          "enum": ["schemastore"]
+          "enum": ["schemastore", "rubyschema"]
         },
         "url": {
           "type": "string"

@@ -17,6 +17,11 @@ enabled = true
 name = "schemastore"
 format = "schemastore"
 url = "https://www.schemastore.org/api/json/catalog.json"
+enabled = true
+
+[[schemas.catalogs.sources]]
+name = "rubyschema"
+format = "rubyschema"
 enabled = true`;
 
 const catalogIgnoreConfig = `[[schemas.catalogs.ignore]]
@@ -24,16 +29,16 @@ file = "data/tasks.json"
 reason = "application data, not a tool config"`;
 ---
 
-<DocsLayout title="Catalogs and SchemaStore" current="/guides/schemastore/">
+<DocsLayout title="Catalogs" current="/guides/schemastore/">
   <article class="doc">
     <header class="doc-header">
       <span class="eyebrow">Guide</span>
-      <h1>Catalogs and SchemaStore</h1>
+      <h1>Catalogs</h1>
       <p class="lead">
         Catalog matching lets DollarLint infer schemas for well-known filenames
         — think <code>package.json</code>, <code>tsconfig.json</code>, and
         friends — without anyone having to declare <code>$schema</code> by hand. SchemaStore
-        is the built-in catalog.
+        and RubySchema are the built-in catalog sources.
       </p>
     </header>
 
@@ -42,7 +47,7 @@ reason = "application data, not a tool config"`;
     <p>
       Catalog matching is optional at runtime unless it is enabled in <code
         >.dollarlint.toml</code
-      >. The starter config from <code>dollarlint init</code> enables SchemaStore
+      >. The starter config from <code>dollarlint init</code> enables the built-in catalogs
       by default; pass <code>--schema-store=false</code> or set <code
         >schemas.catalogs.enabled = false</code
       > when you want catalog matching off. Explicit in-file schemas, config associations,
@@ -62,6 +67,13 @@ reason = "application data, not a tool config"`;
         >.rustfmt.toml</code
       > and <code>release-plz.toml</code> / <code>.release-plz.toml</code>.
     </p>
+    <p>
+      The built-in RubySchema source covers Ruby and Rails project configs such
+      as RuboCop, Standard, Rails <code>config/database.yml</code>, Sidekiq,
+      Shoryuken, Packwerk, i18n, Mongoid, Kamal, and related monitoring configs.
+      Generic Ruby/Rails filenames require nearby project evidence before they
+      are associated.
+    </p>
 
     <h2>Understand and lock in matches</h2>
     <p>
@@ -75,7 +87,8 @@ reason = "application data, not a tool config"`;
     </p>
     <p>
       When a low-confidence catalog candidate is intentionally not a schema
-      match, add a catalog ignore rule so future runs make that choice explicit:
+      match, or a context-gated RubySchema candidate is not this kind of config,
+      add a catalog ignore rule so future runs make that choice explicit:
     </p>
 
     <CodeBlock code={catalogIgnoreConfig} language="toml" />
@@ -93,9 +106,10 @@ reason = "application data, not a tool config"`;
     <CodeBlock code={catalogConfig} language="toml" />
 
     <p>
-      A source must use exactly one of <code>url</code> or <code>path</code>.
-      Relative schema URLs inside a catalog are resolved relative to that
-      catalog.
+      A SchemaStore-shaped source must use exactly one of <code>url</code> or
+      <code>path</code>. Relative schema URLs inside a catalog are resolved
+      relative to that catalog. The built-in <code>rubyschema</code> format is
+      declared without a URL or path because its catalog entries are bundled.
     </p>
 
     <h2>Choose what happens when catalog validation can't run</h2>
@@ -146,7 +160,8 @@ reason = "application data, not a tool config"`;
           >*.schemastore.org</code
         > or include both <code>www.schemastore.org</code> and <code
           >json.schemastore.org</code
-        >; many SchemaStore URLs resolve through the JSON host.
+        >; many SchemaStore URLs resolve through the JSON host. If you use
+        RubySchema with an allowlist, allow <code>www.rubyschema.org</code>.
       </p>
     </div>
   </article>

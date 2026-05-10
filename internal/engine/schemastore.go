@@ -5,11 +5,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
 const defaultSchemaStoreCatalogURL = "https://www.schemastore.org/api/json/catalog.json"
+const rubySchemaBaseURL = "https://www.rubyschema.org"
+
+const (
+	catalogFormatSchemaStore = "schemastore"
+	catalogFormatRubySchema  = "rubyschema"
+)
+
+const (
+	catalogEvidenceRubyProject = "ruby-project"
+	catalogEvidenceRails       = "rails"
+	catalogEvidencePackwerk    = "packwerk"
+)
 
 var curatedDefaultSchemaStoreAssociations = []schemaStoreEntry{
 	{
@@ -24,6 +38,125 @@ var curatedDefaultSchemaStoreAssociations = []schemaStoreEntry{
 	},
 }
 
+var rubySchemaCatalogEntries = []schemaStoreEntry{
+	{
+		Name:             "Rails database.yml",
+		FileMatch:        []string{"config/database.yml", "config/database.yaml", "**/config/database.yml", "**/config/database.yaml"},
+		URL:              rubySchemaBaseURL + "/rails/database.json",
+		RequiredEvidence: catalogEvidenceRails,
+	},
+	{
+		Name:             "Rails storage.yml",
+		FileMatch:        []string{"config/storage.yml", "config/storage.yaml", "**/config/storage.yml", "**/config/storage.yaml"},
+		URL:              rubySchemaBaseURL + "/rails/storage.json",
+		RequiredEvidence: catalogEvidenceRails,
+	},
+	{
+		Name:             "Rails cable.yml",
+		FileMatch:        []string{"config/cable.yml", "config/cable.yaml", "**/config/cable.yml", "**/config/cable.yaml"},
+		URL:              rubySchemaBaseURL + "/rails/cable.json",
+		RequiredEvidence: catalogEvidenceRails,
+	},
+	{
+		Name:             "Rails cache.yml",
+		FileMatch:        []string{"config/cache.yml", "config/cache.yaml", "**/config/cache.yml", "**/config/cache.yaml"},
+		URL:              rubySchemaBaseURL + "/rails/cache.json",
+		RequiredEvidence: catalogEvidenceRails,
+	},
+	{
+		Name:             "Rails queue.yml",
+		FileMatch:        []string{"config/queue.yml", "config/queue.yaml", "**/config/queue.yml", "**/config/queue.yaml"},
+		URL:              rubySchemaBaseURL + "/rails/queue.json",
+		RequiredEvidence: catalogEvidenceRails,
+	},
+	{
+		Name:             "Rails recurring.yml",
+		FileMatch:        []string{"config/recurring.yml", "config/recurring.yaml", "**/config/recurring.yml", "**/config/recurring.yaml"},
+		URL:              rubySchemaBaseURL + "/rails/recurring.json",
+		RequiredEvidence: catalogEvidenceRails,
+	},
+	{
+		Name:             "Kamal deploy.yml",
+		FileMatch:        []string{"config/deploy.yml", "config/deploy.yaml", "config/deploy*.yml", "config/deploy*.yaml", "**/config/deploy.yml", "**/config/deploy.yaml", "**/config/deploy*.yml", "**/config/deploy*.yaml"},
+		URL:              rubySchemaBaseURL + "/kamal/deploy.json",
+		RequiredEvidence: catalogEvidenceRubyProject,
+	},
+	{
+		Name:      "Lefthook",
+		FileMatch: []string{"lefthook.yml", "lefthook.yaml", "lefthook.json", "lefthook.toml"},
+		URL:       rubySchemaBaseURL + "/lefthook.json",
+	},
+	{
+		Name:      "RuboCop",
+		FileMatch: []string{".rubocop.yml", ".rubocop.yaml", ".rubocop_todo.yml", ".rubocop_todo.yaml", "*.rubocop.yml", "*.rubocop.yaml", "*.rubocop_todo.yml", "*.rubocop_todo.yaml"},
+		URL:       rubySchemaBaseURL + "/rubocop.json",
+	},
+	{
+		Name:      "Standard",
+		FileMatch: []string{".standard.yml", ".standard.yaml"},
+		URL:       rubySchemaBaseURL + "/standard.json",
+	},
+	{
+		Name:             "Packwerk package.yml",
+		FileMatch:        []string{"packs/*/package.yml", "packs/*/package.yaml", "packs/**/package.yml", "packs/**/package.yaml", "components/**/package.yml", "components/**/package.yaml"},
+		URL:              rubySchemaBaseURL + "/packwerk/package.json",
+		RequiredEvidence: catalogEvidencePackwerk,
+	},
+	{
+		Name:      "Sidekiq",
+		FileMatch: []string{"sidekiq.yml", "sidekiq.yaml", "config/sidekiq.yml", "config/sidekiq.yaml", "**/config/sidekiq.yml", "**/config/sidekiq.yaml"},
+		URL:       rubySchemaBaseURL + "/sidekiq.json",
+	},
+	{
+		Name:      "Shoryuken",
+		FileMatch: []string{"shoryuken.yml", "shoryuken.yaml", "config/shoryuken.yml", "config/shoryuken.yaml", "**/config/shoryuken.yml", "**/config/shoryuken.yaml"},
+		URL:       rubySchemaBaseURL + "/shoryuken.json",
+	},
+	{
+		Name:      "Honeybadger",
+		FileMatch: []string{"honeybadger.yml", "honeybadger.yaml", "config/honeybadger.yml", "config/honeybadger.yaml", "**/config/honeybadger.yml", "**/config/honeybadger.yaml"},
+		URL:       rubySchemaBaseURL + "/honeybadger.json",
+	},
+	{
+		Name:      "RoRvsWild",
+		FileMatch: []string{"rorvswild.yml", "rorvswild.yaml", "config/rorvswild.yml", "config/rorvswild.yaml", "**/config/rorvswild.yml", "**/config/rorvswild.yaml"},
+		URL:       rubySchemaBaseURL + "/rorvswild.json",
+	},
+	{
+		Name:      "Scout APM",
+		FileMatch: []string{"scout_apm.yml", "scout_apm.yaml", "config/scout_apm.yml", "config/scout_apm.yaml", "**/config/scout_apm.yml", "**/config/scout_apm.yaml"},
+		URL:       rubySchemaBaseURL + "/scout_apm.json",
+	},
+	{
+		Name:      "PgHero",
+		FileMatch: []string{"pghero.yml", "pghero.yaml", "config/pghero.yml", "config/pghero.yaml", "**/config/pghero.yml", "**/config/pghero.yaml"},
+		URL:       rubySchemaBaseURL + "/pghero.json",
+	},
+	{
+		Name:             "Rails I18n locale",
+		FileMatch:        []string{"config/locales/*.yml", "config/locales/*.yaml", "config/locales/**/*.yml", "config/locales/**/*.yaml", "**/config/locales/*.yml", "**/config/locales/*.yaml", "**/config/locales/**/*.yml", "**/config/locales/**/*.yaml"},
+		URL:              rubySchemaBaseURL + "/i18n/locale.json",
+		RequiredEvidence: catalogEvidenceRails,
+	},
+	{
+		Name:      "i18n-tasks",
+		FileMatch: []string{".i18n-tasks.yml", ".i18n-tasks.yaml", "i18n-tasks.yml", "i18n-tasks.yaml"},
+		URL:       rubySchemaBaseURL + "/i18n-tasks.json",
+	},
+	{
+		Name:             "Mongoid",
+		FileMatch:        []string{"mongoid.yml", "mongoid.yaml", "config/mongoid.yml", "config/mongoid.yaml", "**/config/mongoid.yml", "**/config/mongoid.yaml"},
+		URL:              rubySchemaBaseURL + "/mongoid.json",
+		RequiredEvidence: catalogEvidenceRubyProject,
+	},
+	{
+		Name:             "Vite Ruby",
+		FileMatch:        []string{"vite.json", "config/vite.json", "**/config/vite.json"},
+		URL:              rubySchemaBaseURL + "/vite.json",
+		RequiredEvidence: catalogEvidenceRubyProject,
+	},
+}
+
 type schemaStoreCatalog struct {
 	Schemas []schemaStoreEntry `json:"schemas"`
 
@@ -35,10 +168,11 @@ type schemaStoreCatalog struct {
 }
 
 type schemaStoreEntry struct {
-	Name      string   `json:"name"`
-	Source    string   `json:"source"`
-	FileMatch []string `json:"fileMatch"`
-	URL       string   `json:"url"`
+	Name             string   `json:"name"`
+	Source           string   `json:"source"`
+	FileMatch        []string `json:"fileMatch"`
+	URL              string   `json:"url"`
+	RequiredEvidence string   `json:"-"`
 }
 
 type schemaStorePattern struct {
@@ -54,6 +188,12 @@ type schemaStoreMatch struct {
 	matchType     string
 	pattern       string
 	ignorePattern string
+	evidence      string
+}
+
+type catalogMatchContext struct {
+	relativePath string
+	absolutePath string
 }
 
 func loadSchemaStoreCatalog(ctx context.Context, cache *SchemaCache, cfg Config) (*schemaStoreCatalog, *Warning, error) {
@@ -80,27 +220,40 @@ func loadSchemaStoreCatalog(ctx context.Context, cache *SchemaCache, cfg Config)
 func enabledSchemaStoreCatalogSources(cfg SchemaConfig) []CatalogSource {
 	sources := cfg.Catalogs.Sources
 	if len(sources) == 0 {
-		sources = []CatalogSource{defaultSchemaStoreCatalogSource()}
+		sources = defaultCatalogSources()
 	}
 	var out []CatalogSource
 	for _, source := range sources {
 		if source.Enabled != nil && !*source.Enabled {
 			continue
 		}
-		if source.Format == "" {
-			source.Format = "schemastore"
-		}
-		if source.Name == "" && source.Format == "schemastore" {
-			source.Name = "schemastore"
-		}
-		if source.Format == "schemastore" {
+		source = normalizeCatalogSource(source)
+		if source.Format == catalogFormatSchemaStore || source.Format == catalogFormatRubySchema {
 			out = append(out, source)
 		}
 	}
 	return out
 }
 
+func normalizeCatalogSource(source CatalogSource) CatalogSource {
+	if source.Format == "" {
+		if source.Name == catalogFormatRubySchema && source.URL == "" && source.Path == "" {
+			source.Format = catalogFormatRubySchema
+		} else {
+			source.Format = catalogFormatSchemaStore
+		}
+	}
+	if source.Name == "" {
+		source.Name = source.Format
+	}
+	return source
+}
+
 func loadSchemaStoreCatalogSource(ctx context.Context, cache *SchemaCache, cfg Config, source CatalogSource) (*schemaStoreCatalog, *Warning, error) {
+	source = normalizeCatalogSource(source)
+	if source.Format == catalogFormatRubySchema {
+		return loadRubySchemaCatalogSource(source), nil, nil
+	}
 	catalogURL := source.URL
 	if catalogURL == "" {
 		catalogURL = source.Path
@@ -143,6 +296,19 @@ func loadSchemaStoreCatalogSource(ctx context.Context, cache *SchemaCache, cfg C
 	}
 	addCuratedDefaultSchemaStoreAssociations(catalog, source, catalogURL)
 	return catalog, nil, nil
+}
+
+func loadRubySchemaCatalogSource(source CatalogSource) *schemaStoreCatalog {
+	sourceName := source.Name
+	if sourceName == "" {
+		sourceName = catalogFormatRubySchema
+	}
+	catalog := &schemaStoreCatalog{Schemas: make([]schemaStoreEntry, 0, len(rubySchemaCatalogEntries))}
+	for _, entry := range rubySchemaCatalogEntries {
+		entry.Source = sourceName
+		catalog.Schemas = append(catalog.Schemas, entry)
+	}
+	return catalog
 }
 
 func addCuratedDefaultSchemaStoreAssociations(catalog *schemaStoreCatalog, source CatalogSource, catalogURL string) {
@@ -210,7 +376,7 @@ func applySchemaStoreAssociation(document *Document, catalog *schemaStoreCatalog
 	if document.Schema != "" || catalog == nil {
 		return
 	}
-	match, ok := catalog.match(document.RelativePath, catalogConfig)
+	match, ok := catalog.matchDocument(document, catalogConfig)
 	if !ok {
 		return
 	}
@@ -253,6 +419,20 @@ func (catalog *schemaStoreCatalog) buildIndex() {
 }
 
 func (catalog *schemaStoreCatalog) match(rel string, catalogConfig CatalogConfig) (schemaStoreMatch, bool) {
+	return catalog.matchWithContext(catalogMatchContext{relativePath: rel}, catalogConfig)
+}
+
+func (catalog *schemaStoreCatalog) matchDocument(document *Document, catalogConfig CatalogConfig) (schemaStoreMatch, bool) {
+	if document == nil {
+		return schemaStoreMatch{}, false
+	}
+	return catalog.matchWithContext(catalogMatchContext{
+		relativePath: document.RelativePath,
+		absolutePath: document.Path,
+	}, catalogConfig)
+}
+
+func (catalog *schemaStoreCatalog) matchWithContext(ctx catalogMatchContext, catalogConfig CatalogConfig) (schemaStoreMatch, bool) {
 	if catalog == nil {
 		return schemaStoreMatch{}, false
 	}
@@ -261,7 +441,7 @@ func (catalog *schemaStoreCatalog) match(rel string, catalogConfig CatalogConfig
 		matchMode = CatalogMatchAuto
 	}
 	catalog.buildIndex()
-	rel = cleanGlob(rel)
+	rel := cleanGlob(ctx.relativePath)
 	match, ok := catalog.findMatch(rel, matchMode)
 	if !ok {
 		return schemaStoreMatch{}, false
@@ -272,6 +452,7 @@ func (catalog *schemaStoreCatalog) match(rel string, catalogConfig CatalogConfig
 		match.reason = catalogIgnoredReason(rel, match, ignore)
 		return match, true
 	}
+	match = applyCatalogEvidence(ctx, match)
 	match.reason = catalogMatchReason(rel, match)
 	return match, true
 }
@@ -355,8 +536,14 @@ func catalogMatchReason(rel string, match schemaStoreMatch) string {
 	switch match.action {
 	case SchemaMatchActionSkippedLowConfidence:
 		return fmt.Sprintf("auto catalog matching skipped low-confidence %s", catalogPatternReason(rel, base, match))
+	case SchemaMatchActionSkippedMissingEvidence:
+		return fmt.Sprintf("catalog candidate skipped because %s requires %s evidence (%s)", catalogPatternReason(rel, base, match), catalogEvidenceLabel(match.entry.RequiredEvidence), catalogMissingEvidenceHint(match.entry.RequiredEvidence))
 	default:
-		return catalogPatternReason(rel, base, match)
+		reason := catalogPatternReason(rel, base, match)
+		if match.evidence != "" {
+			reason += "; " + match.evidence
+		}
+		return reason
 	}
 }
 
@@ -384,6 +571,155 @@ func catalogIgnoredReason(rel string, match schemaStoreMatch, ignore CatalogIgno
 	return reason
 }
 
+func applyCatalogEvidence(ctx catalogMatchContext, match schemaStoreMatch) schemaStoreMatch {
+	if match.entry.RequiredEvidence == "" {
+		return match
+	}
+	ok, reason := catalogEvidenceSatisfied(ctx, match.entry.RequiredEvidence)
+	if ok {
+		match.evidence = reason
+		return match
+	}
+	match.action = SchemaMatchActionSkippedMissingEvidence
+	match.confidence = SchemaMatchConfidenceLow
+	return match
+}
+
+func catalogEvidenceSatisfied(ctx catalogMatchContext, required string) (bool, string) {
+	switch required {
+	case catalogEvidenceRubyProject:
+		return rubyProjectEvidence(ctx)
+	case catalogEvidenceRails:
+		return railsProjectEvidence(ctx)
+	case catalogEvidencePackwerk:
+		return packwerkEvidence(ctx)
+	default:
+		return true, ""
+	}
+}
+
+func rubyProjectEvidence(ctx catalogMatchContext) (bool, string) {
+	if found := firstEvidenceFile(ctx, "Gemfile", "Gemfile.lock", ".ruby-version"); found != "" {
+		return true, fmt.Sprintf("Ruby project evidence found at %s", filepath.ToSlash(found))
+	}
+	if found := firstEvidenceGlob(ctx, "*.gemspec"); found != "" {
+		return true, fmt.Sprintf("Ruby project evidence found at %s", filepath.ToSlash(found))
+	}
+	return false, ""
+}
+
+func railsProjectEvidence(ctx catalogMatchContext) (bool, string) {
+	if found := firstEvidenceFile(ctx, "config/application.rb", "bin/rails"); found != "" {
+		return true, fmt.Sprintf("Rails project evidence found at %s", filepath.ToSlash(found))
+	}
+	if found := firstEvidenceFileContaining(ctx, "rails", "Gemfile", "Gemfile.lock"); found != "" {
+		return true, fmt.Sprintf("Rails project evidence found in %s", filepath.ToSlash(found))
+	}
+	return false, ""
+}
+
+func packwerkEvidence(ctx catalogMatchContext) (bool, string) {
+	if found := firstEvidenceFile(ctx, "packwerk.yml", "packwerk.yaml"); found != "" {
+		return true, fmt.Sprintf("Packwerk evidence found at %s", filepath.ToSlash(found))
+	}
+	if found := firstEvidenceFileContaining(ctx, "packwerk", "Gemfile", "Gemfile.lock"); found != "" {
+		return true, fmt.Sprintf("Packwerk evidence found in %s", filepath.ToSlash(found))
+	}
+	return false, ""
+}
+
+func catalogEvidenceLabel(required string) string {
+	switch required {
+	case catalogEvidenceRubyProject:
+		return "Ruby project"
+	case catalogEvidenceRails:
+		return "Rails project"
+	case catalogEvidencePackwerk:
+		return "Packwerk"
+	default:
+		return "project"
+	}
+}
+
+func catalogMissingEvidenceHint(required string) string {
+	switch required {
+	case catalogEvidenceRubyProject:
+		return "expected Gemfile, Gemfile.lock, .ruby-version, or a .gemspec nearby"
+	case catalogEvidenceRails:
+		return "expected config/application.rb, bin/rails, or a Gemfile/Gemfile.lock containing rails nearby"
+	case catalogEvidencePackwerk:
+		return "expected packwerk.yml or a Gemfile/Gemfile.lock containing packwerk nearby"
+	default:
+		return "expected a nearby project marker"
+	}
+}
+
+func firstEvidenceFile(ctx catalogMatchContext, names ...string) string {
+	for _, dir := range evidenceSearchDirs(ctx) {
+		for _, name := range names {
+			candidate := filepath.Join(dir, filepath.FromSlash(name))
+			if evidenceFileExists(candidate) {
+				return candidate
+			}
+		}
+	}
+	return ""
+}
+
+func firstEvidenceGlob(ctx catalogMatchContext, pattern string) string {
+	for _, dir := range evidenceSearchDirs(ctx) {
+		matches, err := filepath.Glob(filepath.Join(dir, pattern))
+		if err != nil || len(matches) == 0 {
+			continue
+		}
+		return matches[0]
+	}
+	return ""
+}
+
+func firstEvidenceFileContaining(ctx catalogMatchContext, needle string, names ...string) string {
+	needle = strings.ToLower(needle)
+	for _, dir := range evidenceSearchDirs(ctx) {
+		for _, name := range names {
+			candidate := filepath.Join(dir, filepath.FromSlash(name))
+			data, err := os.ReadFile(candidate)
+			if err != nil {
+				continue
+			}
+			if strings.Contains(strings.ToLower(string(data)), needle) {
+				return candidate
+			}
+		}
+	}
+	return ""
+}
+
+func evidenceFileExists(candidate string) bool {
+	info, err := os.Stat(candidate)
+	return err == nil && !info.IsDir()
+}
+
+func evidenceSearchDirs(ctx catalogMatchContext) []string {
+	if ctx.absolutePath == "" {
+		return nil
+	}
+	start := filepath.Dir(filepath.Clean(ctx.absolutePath))
+	var dirs []string
+	for dir, hops := start, 0; dir != "" && hops < 8; dir, hops = filepath.Dir(dir), hops+1 {
+		dirs = append(dirs, dir)
+		if parent := filepath.Dir(dir); parent == dir {
+			break
+		}
+		if evidenceFileExists(filepath.Join(dir, ".git")) {
+			break
+		}
+		if info, err := os.Stat(filepath.Join(dir, ".git")); err == nil && info.IsDir() {
+			break
+		}
+	}
+	return dirs
+}
+
 func (match schemaStoreMatch) schemaMatch(rel string) *SchemaMatch {
 	out := &SchemaMatch{
 		Action:        match.action,
@@ -393,10 +729,10 @@ func (match schemaStoreMatch) schemaMatch(rel string) *SchemaMatch {
 		Pattern:       match.pattern,
 		IgnorePattern: match.ignorePattern,
 	}
-	if match.action == SchemaMatchActionMatched || match.action == SchemaMatchActionSkippedLowConfidence {
+	if match.action == SchemaMatchActionMatched || match.action == SchemaMatchActionSkippedLowConfidence || match.action == SchemaMatchActionSkippedMissingEvidence {
 		out.SuggestedAssociation = suggestedSchemaAssociation(rel, match.entry.URL)
 	}
-	if match.action == SchemaMatchActionSkippedLowConfidence {
+	if match.action == SchemaMatchActionSkippedLowConfidence || match.action == SchemaMatchActionSkippedMissingEvidence {
 		out.SuggestedCatalogIgnore = suggestedCatalogIgnore(rel)
 	}
 	return out
@@ -457,7 +793,7 @@ func lowConfidenceSchemaStoreGlob(pattern string) bool {
 
 func highConfidenceSchemaStoreBasenameGlob(pattern string) bool {
 	switch strings.ToLower(pattern) {
-	case "*.rubocop.yml", "*.rubocop.yaml":
+	case "*.rubocop.yml", "*.rubocop.yaml", "*.rubocop_todo.yml", "*.rubocop_todo.yaml":
 		return true
 	default:
 		return false

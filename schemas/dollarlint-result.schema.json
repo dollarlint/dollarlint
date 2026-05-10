@@ -267,7 +267,7 @@
       "properties": {
         "action": {
           "type": "string",
-          "enum": ["matched", "ignored", "skippedLowConfidence"]
+          "enum": ["matched", "ignored", "skippedLowConfidence", "skippedMissingEvidence"]
         },
         "reason": {
           "type": "string"

@@ -68,22 +68,25 @@ changelog:
   ai:
     use: openai
     prompt: |
-      Write the release notes for this release.
+      Write user-facing release notes for this release.
 
       Instructions:
       - do not use emojis
-      - write a short summary featuring the 2 or 3 most exciting or user-impacting changes, if it makes sense to do so
+      - do not preserve the commit list mechanically
+      - group related commits into 2 to 4 meaningful markdown sections
+      - lead with a short paragraph summarizing the most user-impacting changes
+      - mention only changes that matter to users, packagers, or contributors
+      - omit CI and internal workflow details unless they affect users or contributors
       - if many commits update the same dependency, group them in a single line and include the original version and latest version
-      - respond with only the generated release notes, nothing else
       - format the response as markdown
-      - do not change the original commit messages
+      - respond with only the generated release notes, nothing else
 
       Project name: {{ .ProjectName }}
       Git repository URL: {{ .GitURL }}
       Previous version: {{ .PreviousTag }}
       Version: {{ .Tag }}
 
-      Release notes:
+      Raw generated changelog:
       {{ .ReleaseNotes }}
   filters:
     exclude:

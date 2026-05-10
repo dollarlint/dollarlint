@@ -191,7 +191,7 @@ const mcpConfig = `{
         <tr
           ><td><code>--schema-store</code></td><td
             >Enable catalog matching for conventional filenames using the
-            SchemaStore catalog. Pass <code>--schema-store=false</code> to disable
+            built-in catalog sources. Pass <code>--schema-store=false</code> to disable
             catalog matching for one run.</td
           ></tr
         >
@@ -279,7 +279,7 @@ const mcpConfig = `{
     <h2>Inspect flags</h2>
     <p>
       <code>dollarlint inspect [path]</code> accepts the same discovery,
-      association, SchemaStore, catalog-fetch, and domain flags as <code
+      association, catalog, catalog-fetch, and domain flags as <code
         >validate</code
       >. It does not validate file contents or compile schemas; it stops after
       discovery, parsing enough to find in-file declarations, and schema
@@ -349,7 +349,7 @@ const mcpConfig = `{
         >
         <tr
           ><td><code>--schema-store</code></td><td
-            >Enable the built-in SchemaStore catalog in the generated config.
+            >Enable the built-in catalog sources in the generated config.
             Defaults to enabled; pass <code>--schema-store=false</code> to write catalog
             matching disabled.</td
           ></tr

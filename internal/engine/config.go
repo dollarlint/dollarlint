@@ -50,7 +50,7 @@ func DefaultConfig() Config {
 		Schemas: SchemaConfig{
 			Catalogs: CatalogConfig{
 				Match:   CatalogMatchAuto,
-				Sources: []CatalogSource{defaultSchemaStoreCatalogSource()},
+				Sources: defaultCatalogSources(),
 			},
 			Optimizations: OptimizationConfig{
 				Enabled: &optimizationsEnabled,
@@ -121,7 +121,7 @@ func (c *Config) ApplyDefaults() {
 		c.Schemas.Catalogs.Match = CatalogMatchAuto
 	}
 	if len(c.Schemas.Catalogs.Sources) == 0 {
-		c.Schemas.Catalogs.Sources = []CatalogSource{defaultSchemaStoreCatalogSource()}
+		c.Schemas.Catalogs.Sources = defaultCatalogSources()
 	}
 	if c.Schemas.Fetch.Retries == nil {
 		c.Schemas.Fetch.Retries = defaults.Schemas.Fetch.Retries
@@ -152,10 +152,26 @@ func (c *Config) ApplyDefaults() {
 func defaultSchemaStoreCatalogSource() CatalogSource {
 	enabled := true
 	return CatalogSource{
-		Name:    "schemastore",
-		Format:  "schemastore",
+		Name:    catalogFormatSchemaStore,
+		Format:  catalogFormatSchemaStore,
 		URL:     defaultSchemaStoreCatalogURL,
 		Enabled: &enabled,
+	}
+}
+
+func defaultRubySchemaCatalogSource() CatalogSource {
+	enabled := true
+	return CatalogSource{
+		Name:    catalogFormatRubySchema,
+		Format:  catalogFormatRubySchema,
+		Enabled: &enabled,
+	}
+}
+
+func defaultCatalogSources() []CatalogSource {
+	return []CatalogSource{
+		defaultSchemaStoreCatalogSource(),
+		defaultRubySchemaCatalogSource(),
 	}
 }
 
@@ -218,6 +234,14 @@ func validateConfigValues(cfg Config) error {
 	if cfg.Schemas.Catalogs.Match != "" {
 		if _, err := catalogMatchMode(cfg.Schemas); err != nil {
 			return err
+		}
+	}
+	for _, source := range cfg.Schemas.Catalogs.Sources {
+		source = normalizeCatalogSource(source)
+		switch source.Format {
+		case catalogFormatSchemaStore, catalogFormatRubySchema:
+		default:
+			return fmt.Errorf("unsupported catalog source format %q", source.Format)
 		}
 	}
 	if cfg.Parsing.JSON.Mode != "" {
@@ -520,8 +544,11 @@ func catalogSourceMergeKey(source CatalogSource) string {
 	if source.Name != "" {
 		return source.Name
 	}
-	if source.Format == "" || source.Format == "schemastore" {
-		return "schemastore"
+	if source.Format == "" || source.Format == catalogFormatSchemaStore {
+		return catalogFormatSchemaStore
+	}
+	if source.Format == catalogFormatRubySchema {
+		return catalogFormatRubySchema
 	}
 	return ""
 }

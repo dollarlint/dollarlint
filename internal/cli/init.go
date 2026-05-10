@@ -60,8 +60,8 @@ func newInitCommand(stdin io.Reader, stdout io.Writer) *cobra.Command {
 	cmd.Flags().BoolVar(&opts.defaults, "defaults", false, "Skip prompts and use defaults plus provided flags")
 	cmd.Flags().BoolVar(&opts.fetchRemote, "fetch-remote", opts.fetchRemote, "Allow fetching http(s) schemas in the generated config")
 	cmd.Flags().IntVar(&opts.fetchRetries, "fetch-retries", opts.fetchRetries, "Retries for transient remote schema fetch failures in the generated config")
-	cmd.Flags().BoolVar(&opts.schemaStore, "schema-store", opts.schemaStore, "Enable SchemaStore catalog filename matching in the generated config")
-	cmd.Flags().StringVar(&opts.catalogFailure, "schema-store-failure", opts.catalogFailure, "SchemaStore catalog failure policy in the generated config: warn, error, or skip")
+	cmd.Flags().BoolVar(&opts.schemaStore, "schema-store", opts.schemaStore, "Enable built-in catalog filename matching in the generated config")
+	cmd.Flags().StringVar(&opts.catalogFailure, "schema-store-failure", opts.catalogFailure, "Catalog failure policy in the generated config: warn, error, or skip")
 	return cmd
 }
 
@@ -341,6 +341,11 @@ match = "auto"
 name = "schemastore"
 format = "schemastore"
 url = "{{ .SchemaStoreURL }}"
+enabled = true
+
+[[schemas.catalogs.sources]]
+name = "rubyschema"
+format = "rubyschema"
 enabled = true
 
 # [[schemas.associations]]

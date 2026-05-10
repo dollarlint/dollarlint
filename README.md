@@ -191,7 +191,7 @@ timeout = "10s"
 retries = 2
 retryMinWait = "250ms"
 retryMaxWait = "2s"
-allowedDomains = ["*.schemastore.org", "raw.githubusercontent.com"]
+allowedDomains = ["*.schemastore.org", "www.rubyschema.org", "raw.githubusercontent.com"]
 blockedDomains = ["untrusted.example.com"]
 
 [schemas.compile]
@@ -206,6 +206,11 @@ match = "auto"
 name = "schemastore"
 format = "schemastore"
 url = "https://www.schemastore.org/api/json/catalog.json"
+enabled = true
+
+[[schemas.catalogs.sources]]
+name = "rubyschema"
+format = "rubyschema"
 enabled = true
 
 [[schemas.catalogs.ignore]]
@@ -282,12 +287,15 @@ Remote `http(s)` schema fetching is enabled by default, and successful schemas/c
 - `schemas.fetch.blockedDomains` denies hosts even if they otherwise match the allowlist.
 - Leave `allowedDomains` empty to allow any remote schema host.
 - For SchemaStore, prefer `*.schemastore.org` or include both `www.schemastore.org` and `json.schemastore.org`.
+- For RubySchema, include `www.rubyschema.org`.
 
 ### Catalog matching and coverage
 
-When `schemas.catalogs.enabled = true`, files without explicit schemas can match by filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional sources. The default `schemas.catalogs.match = "auto"` skips low-confidence generic bare filename matches such as `tasks.json`; use `"all"` when you want every catalog filename match applied.
+When `schemas.catalogs.enabled = true`, files without explicit schemas can match by filename using the built-in SchemaStore and RubySchema catalog sources, a local SchemaStore-shaped catalog, or additional sources. The default `schemas.catalogs.match = "auto"` skips low-confidence generic bare filename matches such as `tasks.json`; use `"all"` when you want every catalog filename match applied.
 
 When the built-in SchemaStore source is enabled, DollarLint layers on a small set of curated filename associations for known catalog gaps and drift. Today that includes Rust's `rustfmt.toml` / `.rustfmt.toml` and `release-plz.toml` / `.release-plz.toml`.
+
+The built-in RubySchema source covers common Ruby and Rails project configs such as RuboCop, Standard, Rails `config/database.yml`, Sidekiq, Shoryuken, Packwerk, i18n, Mongoid, Kamal, and related monitoring configs. Ambiguous Ruby/Rails filenames require nearby project evidence, such as `config/application.rb`, `bin/rails`, `Gemfile`, `Gemfile.lock`, `.ruby-version`, or Packwerk markers.
 
 Catalog matches are explainable in JSON output as `schemaMatch` and in text hints for catalog-sourced issues. DollarLint reports the catalog `fileMatch` pattern, confidence, why it matched or skipped, and a suggested config rule. If a catalog match is correct, add the suggested `[[schemas.associations]]` entry to make it explicit. If a file should never be inferred from catalogs, add:
 

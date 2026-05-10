@@ -85,6 +85,13 @@
       "title": "Managed 100 real-world validation sweep",
       "path": "reports/real-world-results/2026-05-09-managed-100-real-world-validation-sweep.json",
       "repoCount": 100
+    },
+    {
+      "id": "2026-05-10-pypa-sampleproject-sweep",
+      "date": "2026-05-10",
+      "title": "pypa-sampleproject sweep",
+      "path": "reports/real-world-results/2026-05-10-pypa-sampleproject-sweep.json",
+      "repoCount": 1
     }
   ]
 }

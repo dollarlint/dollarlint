@@ -69,6 +69,28 @@ func TestMissingWorkflowToolsDoesNotAcceptRealWorldWildcard(t *testing.T) {
 	}
 }
 
+func TestMissingWorkflowToolsAcceptsServerSideRealWorldFilter(t *testing.T) {
+	required := []string{"real_world_start_testing", "real_world_record_result"}
+	source := `
+mcp-servers:
+  dollarlint-repo:
+    env:
+      DOLLARLINT_MCP_TOOLS: "real_world_*"
+    allowed:
+      - "*"
+`
+	lock := `
+"tools": [
+                  "*"
+                ],
+"env": {"DOLLARLINT_MCP_TOOLS": "real_world_*"}
+--allow-tool dollarlint-repo --allow-tool github
+`
+	if missing := missingWorkflowTools(source, lock, required); len(missing) != 0 {
+		t.Fatalf("missing = %v, want none", missing)
+	}
+}
+
 func TestMissingWorkflowToolsRequiresToolInSourceAndLock(t *testing.T) {
 	required := []string{"real_world_start_testing"}
 	source := "allowed:\n  - real_world_start_testing\n"

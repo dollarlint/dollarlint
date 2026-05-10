@@ -14,6 +14,7 @@ const serverName = "DollarLint Tools"
 type repoServer struct {
 	root                 string
 	mcp                  *server.MCPServer
+	toolFilter           toolNameFilter
 	realWorldRuns        *realWorldRunRegistry
 	realWorldPrepareRuns *realWorldPrepareRegistry
 }
@@ -25,6 +26,7 @@ func main() {
 	}
 	rs := &repoServer{
 		root:                 root,
+		toolFilter:           toolNameFilterFromEnv(),
 		realWorldRuns:        newRealWorldRunRegistry(),
 		realWorldPrepareRuns: newRealWorldPrepareRegistry(),
 	}

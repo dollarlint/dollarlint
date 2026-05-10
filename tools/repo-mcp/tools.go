@@ -162,6 +162,9 @@ func (s *repoServer) addTool(name, description string, input map[string]any, han
 }
 
 func (s *repoServer) addToolWithHints(name, description string, input map[string]any, handler server.ToolHandlerFunc, hints toolHints) {
+	if !s.toolFilter.Allows(name) {
+		return
+	}
 	tool := mcp.NewToolWithRawSchema(name, description, mustRawJSON(input))
 	tool.RawOutputSchema = mustRawJSON(map[string]any{"type": "object", "additionalProperties": true})
 	tool.Annotations = mcp.ToolAnnotation{

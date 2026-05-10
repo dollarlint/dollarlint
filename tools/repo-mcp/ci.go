@@ -25,6 +25,8 @@ const (
 
 var ciJobOrder = []string{"test", "quality", "build", "docs", "goreleaser-check"}
 
+var workflowAllMCPToolsPattern = regexp.MustCompile(`"tools"\s*:\s*\[\s*"\*"\s*\]`)
+
 func ciReadinessCommands(job string) ([]namedCommand, error) {
 	if job == "" {
 		job = "all"
@@ -204,7 +206,7 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	requiredTools := requiredAgenticRealWorldTools()
 	missing := missingWorkflowTools(string(source), string(lock), requiredTools)
 	if len(missing) > 0 {
-		issues = append(issues, readinessIssue{Severity: "error", Message: "real-world workflow is missing real-world MCP tools: " + strings.Join(missing, ", "), Recommendation: "Add the missing tools to the workflow MCP server allowlist and regenerate the lock file."})
+		issues = append(issues, readinessIssue{Severity: "error", Message: "real-world workflow is missing real-world MCP tools: " + strings.Join(missing, ", "), Recommendation: "Add the missing tools to the workflow MCP server allowlist, or set " + toolFilterEnv + `: "real_world_*"` + ` and allow "*" for the filtered server, then regenerate the lock file.`})
 	}
 	checks = append(checks, map[string]any{"name": "real-world MCP allowlist", "ok": len(missing) == 0, "requiredTools": requiredTools, "missing": missing})
 
@@ -269,6 +271,9 @@ func requiredAgenticRealWorldTools() []string {
 }
 
 func missingWorkflowTools(source, lock string, required []string) []string {
+	if hasServerSideRealWorldToolFilter(source, lock) {
+		return nil
+	}
 	var missing []string
 	for _, tool := range required {
 		if !strings.Contains(source, tool) || !strings.Contains(lock, tool) {
@@ -276,6 +281,16 @@ func missingWorkflowTools(source, lock string, required []string) []string {
 		}
 	}
 	return missing
+}
+
+func hasServerSideRealWorldToolFilter(source, lock string) bool {
+	sourceHasFilter := strings.Contains(source, toolFilterEnv) && strings.Contains(source, "real_world_*")
+	lockHasFilter := strings.Contains(lock, toolFilterEnv) && strings.Contains(lock, "real_world_*")
+	sourceAllowsAll := strings.Contains(source, `- "*"`) || strings.Contains(source, `- '*'`) || strings.Contains(source, "- *")
+	lockAllowsAll := workflowAllMCPToolsPattern.MatchString(lock) ||
+		strings.Contains(lock, "dollarlint-repo(*)") ||
+		strings.Contains(lock, "--allow-tool dollarlint-repo --")
+	return sourceHasFilter && lockHasFilter && sourceAllowsAll && lockAllowsAll
 }
 
 func hasReadinessErrors(issues []readinessIssue) bool {

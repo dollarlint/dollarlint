@@ -138,6 +138,10 @@ name = "company"
 format = "schemastore"
 path = "./catalog.json"
 
+[[schemas.catalogs.ignore]]
+file = "generated/*.json"
+reason = "not catalog config"
+
 [output]
 showSkipped = true
 locations = true
@@ -179,6 +183,9 @@ schemaSource = "config-association"
 	}
 	if !cfg.Schemas.Catalogs.Enabled || cfg.Schemas.Catalogs.Failure != "skip" || cfg.Schemas.Catalogs.Match != CatalogMatchAll || len(cfg.Schemas.Catalogs.Sources) != 1 || cfg.Schemas.Catalogs.Sources[0].Path != filepath.Join(dir, "catalog.json") {
 		t.Fatalf("catalogs not decoded: %+v", cfg.Schemas.Catalogs)
+	}
+	if len(cfg.Schemas.Catalogs.Ignore) != 1 || cfg.Schemas.Catalogs.Ignore[0].File != "generated/*.json" || cfg.Schemas.Catalogs.Ignore[0].Reason == "" {
+		t.Fatalf("catalog ignores not decoded: %+v", cfg.Schemas.Catalogs.Ignore)
 	}
 	if fetchRetries(cfg.Schemas.Fetch) != 4 || cfg.Schemas.Fetch.RetryMinWait.Duration != 100*time.Millisecond || cfg.Schemas.Fetch.RetryMaxWait.Duration != time.Second {
 		t.Fatalf("fetch resilience config not decoded: %+v", cfg.Schemas.Fetch)
@@ -306,6 +313,10 @@ name = "company"
 format = "schemastore"
 path = "./catalog.json"
 
+[[schemas.catalogs.ignore]]
+file = "*.tasks.json"
+reason = "parent"
+
 [[schemas.associations]]
 file = "*.json"
 schema = "./root.schema"
@@ -339,6 +350,10 @@ name = "company"
 format = "schemastore"
 path = "./child-catalog.json"
 enabled = false
+
+[[schemas.catalogs.ignore]]
+file = "tasks.json"
+reason = "child"
 
 [[schemas.associations]]
 file = "*.yaml"
@@ -378,6 +393,9 @@ locations = false
 	}
 	if cfg.Schemas.Catalogs.Sources[0].Path != filepath.Join(dir, "packages", "api", "child-catalog.json") || cfg.Schemas.Catalogs.Sources[0].Enabled == nil || *cfg.Schemas.Catalogs.Sources[0].Enabled {
 		t.Fatalf("catalog source override = %+v", cfg.Schemas.Catalogs.Sources[0])
+	}
+	if len(cfg.Schemas.Catalogs.Ignore) != 2 || cfg.Schemas.Catalogs.Ignore[0].File != "*.tasks.json" || cfg.Schemas.Catalogs.Ignore[1].File != "packages/api/**/tasks.json" {
+		t.Fatalf("catalog ignore merge = %+v", cfg.Schemas.Catalogs.Ignore)
 	}
 	if len(cfg.Schemas.Associations) != 2 ||
 		cfg.Schemas.Associations[0].File != "*.json" ||

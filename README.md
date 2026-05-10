@@ -198,6 +198,10 @@ format = "schemastore"
 url = "https://www.schemastore.org/api/json/catalog.json"
 enabled = true
 
+[[schemas.catalogs.ignore]]
+file = "data/tasks.json"
+reason = "application data, not a tool config"
+
 [[schemas.associations]]
 file = "settings/*.toml"
 schema = "./schemas/settings.schema.json"
@@ -271,6 +275,16 @@ Remote `http(s)` schema fetching is enabled by default, and successful schemas/c
 ### Catalog matching and coverage
 
 When `schemas.catalogs.enabled = true`, files without explicit schemas can match by filename using the built-in SchemaStore catalog, a local SchemaStore-shaped catalog, or additional sources. The default `schemas.catalogs.match = "auto"` skips low-confidence generic bare filename matches such as `tasks.json`; use `"all"` when you want every catalog filename match applied.
+
+When the built-in SchemaStore source is enabled, DollarLint layers on a small set of curated filename associations for known catalog gaps and drift. Today that includes Rust's `rustfmt.toml` / `.rustfmt.toml` and `release-plz.toml` / `.release-plz.toml`.
+
+Catalog matches are explainable in JSON output as `schemaMatch` and in text hints for catalog-sourced issues. DollarLint reports the catalog `fileMatch` pattern, confidence, why it matched or skipped, and a suggested config rule. If a catalog match is correct, add the suggested `[[schemas.associations]]` entry to make it explicit. If a file should never be inferred from catalogs, add:
+
+```toml
+[[schemas.catalogs.ignore]]
+file = "data/tasks.json"
+reason = "application data, not a tool config"
+```
 
 Precedence is:
 1. in-file schema declaration

@@ -1,0 +1,70 @@
+package main
+
+import (
+	"strings"
+	"testing"
+)
+
+func TestCIReadinessCommandsMirrorCriticalCISteps(t *testing.T) {
+	commands, err := ciReadinessCommands("all")
+	if err != nil {
+		t.Fatalf("ci readiness commands: %v", err)
+	}
+	assertCommand := func(job, name, contains string) {
+		t.Helper()
+		for _, command := range commands {
+			if command.Job == job && command.Name == name {
+				if !strings.Contains(command.Cmd, contains) {
+					t.Fatalf("%s/%s command = %q, want containing %q", job, name, command.Cmd, contains)
+				}
+				return
+			}
+		}
+		t.Fatalf("missing command %s/%s", job, name)
+	}
+	assertCommand("quality", "check go formatting", "gofmt -l")
+	assertCommand("quality", "lint github actions workflows", "actionlint")
+	assertCommand("quality", "validate repository configs", "--exclude .goreleaser.yaml")
+	assertCommand("test", "core coverage", "coverage + 0 < minimum")
+	assertCommand("docs", "install docs dependencies", "npm ci")
+	assertCommand("goreleaser-check", "check goreleaser config", "goreleaser")
+}
+
+func TestDiagnoseFailureLogMapsRecentFailureShapes(t *testing.T) {
+	logText := `
+docs Check docs formatting > prettier --check .
+[warn] src/pages/reference/output.astro
+quality Staticcheck tools/repo-mcp/real_world.go:537:22: func is unused (U1000)
+quality Lint GitHub Actions workflows shellcheck reported issue SC2016
+400 model "gpt-5.5" is not accessible via the /chat/completions endpoint
+`
+	mappings := diagnoseFailureLog(logText)
+	if !hasMapping(mappings, "ci_readiness", `{"job":"docs"}`) {
+		t.Fatalf("missing docs mapping: %+v", mappings)
+	}
+	if !hasMapping(mappings, "ci_readiness", `{"job":"quality"}`) {
+		t.Fatalf("missing quality mapping: %+v", mappings)
+	}
+	if !hasMapping(mappings, "agentic_workflow_readiness", `{}`) {
+		t.Fatalf("missing agentic mapping: %+v", mappings)
+	}
+}
+
+func TestInaccessibleCopilotModelIssueFlagsGPT55(t *testing.T) {
+	issue, ok := inaccessibleCopilotModelIssue("GitHub variable GH_AW_MODEL_AGENT_COPILOT", "gpt-5.5")
+	if !ok || issue.Severity != "error" || !strings.Contains(issue.Message, "gpt-5.5") {
+		t.Fatalf("issue = %+v ok=%v", issue, ok)
+	}
+	if _, ok := inaccessibleCopilotModelIssue("default", "claude-sonnet-4.6"); ok {
+		t.Fatalf("claude default should not be flagged")
+	}
+}
+
+func hasMapping(mappings []failureMapping, tool, command string) bool {
+	for _, mapping := range mappings {
+		if mapping.LocalTool == tool && mapping.LocalCommand == command {
+			return true
+		}
+	}
+	return false
+}

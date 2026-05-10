@@ -40,7 +40,7 @@ func classifySkippedFile(rel, reason, detail string) skipClassification {
 			Reason:     reason,
 			Class:      SkipClassLockfile,
 			Importance: SkipImportanceLow,
-			Detail:     "dependency lockfile without schema coverage",
+			Detail:     fallback(detail, "dependency lockfile without schema coverage"),
 		}
 	}
 	if isKnownUnsupportedConfigSkip(lower, base) {
@@ -48,7 +48,7 @@ func classifySkippedFile(rel, reason, detail string) skipClassification {
 			Reason:     reason,
 			Class:      SkipClassUnsupportedConfig,
 			Importance: SkipImportanceHigh,
-			Detail:     "recognized hand-authored config without built-in or catalog schema support",
+			Detail:     fallback(detail, "recognized hand-authored config without built-in or catalog schema support"),
 		}
 	}
 	if isRepoManagementConfigSkip(lower, base) {
@@ -56,7 +56,7 @@ func classifySkippedFile(rel, reason, detail string) skipClassification {
 			Reason:     reason,
 			Class:      SkipClassRepoManagement,
 			Importance: SkipImportanceHigh,
-			Detail:     "repository-management config without schema coverage",
+			Detail:     fallback(detail, "repository-management config without schema coverage"),
 		}
 	}
 	if isLocaleDataSkip(lower) {
@@ -64,7 +64,7 @@ func classifySkippedFile(rel, reason, detail string) skipClassification {
 			Reason:     reason,
 			Class:      SkipClassLocaleData,
 			Importance: SkipImportanceLow,
-			Detail:     "locale or translation data without schema coverage",
+			Detail:     fallback(detail, "locale or translation data without schema coverage"),
 		}
 	}
 	if isTestDataSkip(lower) {
@@ -72,7 +72,7 @@ func classifySkippedFile(rel, reason, detail string) skipClassification {
 			Reason:     reason,
 			Class:      SkipClassTestData,
 			Importance: SkipImportanceLow,
-			Detail:     "test, fixture, or benchmark data without schema coverage",
+			Detail:     fallback(detail, "test, fixture, or benchmark data without schema coverage"),
 		}
 	}
 	if isApplicationDataSkip(lower) {
@@ -80,7 +80,7 @@ func classifySkippedFile(rel, reason, detail string) skipClassification {
 			Reason:     reason,
 			Class:      SkipClassApplicationData,
 			Importance: SkipImportanceLow,
-			Detail:     "application data without schema coverage",
+			Detail:     fallback(detail, "application data without schema coverage"),
 		}
 	}
 	if looksLikeConfigPath(lower, base) {
@@ -88,14 +88,14 @@ func classifySkippedFile(rel, reason, detail string) skipClassification {
 			Reason:     reason,
 			Class:      SkipClassUnknown,
 			Importance: SkipImportanceHigh,
-			Detail:     "schema-less file looks like project configuration",
+			Detail:     fallback(detail, "schema-less file looks like project configuration"),
 		}
 	}
 	return skipClassification{
 		Reason:     reason,
 		Class:      SkipClassUnknown,
 		Importance: SkipImportanceMedium,
-		Detail:     "schema-less JSON/YAML/TOML file",
+		Detail:     fallback(detail, "schema-less JSON/YAML/TOML file"),
 	}
 }
 

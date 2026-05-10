@@ -36,6 +36,7 @@ func TestFormatTextLocationsVerboseSkippedAndQuiet(t *testing.T) {
 	assertContains(t, text, "location: /name")
 	assertContains(t, text, "schema: file:///schema.json")
 	assertContains(t, text, "schemaSource: catalog:schemastore:Example")
+	assertContains(t, text, "schemaMatch: basename \"a.json\" matched catalog fileMatch \"a.json\"")
 	assertContains(t, text, "warnings")
 	assertContains(t, text, "catalog unavailable")
 	assertContains(t, text, "1 warning")
@@ -71,7 +72,7 @@ func TestFormatTextIssueBreakdownAndHints(t *testing.T) {
 				RelativePath: "data.json",
 				Keyword:      issueKeywordParse,
 				Message:      "parse data.json: multiple JSON values",
-				Hint:         "Use .jsonl for line-delimited data.",
+				Hint:         "Use .jsonl for line-delimited data.\nOr exclude generated fixtures.",
 			},
 			{
 				RelativePath:     "config.json",
@@ -84,6 +85,7 @@ func TestFormatTextIssueBreakdownAndHints(t *testing.T) {
 	text := FormatText(result, OutputConfig{})
 	assertContains(t, text, "dollarlint found 2 issues (1 parsing, 1 validation) in 2 files after 123ms")
 	assertContains(t, text, "hint: Use .jsonl for line-delimited data.")
+	assertContains(t, text, "Or exclude generated fixtures.")
 	assertContains(t, text, "Summary: 0 discovered, 0 validated, 0 skipped, 2 issues (1 parsing, 1 validation) in 123ms")
 }
 
@@ -106,9 +108,17 @@ func TestFormatJSONContract(t *testing.T) {
 				Format:       DocumentFormatJSON,
 				Schema:       "file:///tmp/repo/schema.json",
 				SchemaSource: "$schema",
-				Status:       StatusError,
-				Issues:       1,
-				Ignored:      1,
+				SchemaMatch: &SchemaMatch{
+					Action:               SchemaMatchActionMatched,
+					Reason:               `basename "config.json" matched catalog fileMatch "config.json"`,
+					Confidence:           SchemaMatchConfidenceMedium,
+					MatchType:            SchemaMatchTypeExactBasename,
+					Pattern:              "config.json",
+					SuggestedAssociation: "[[schemas.associations]]\nfile = \"config.json\"\nschema = \"https://example.com/schema.json\"",
+				},
+				Status:  StatusError,
+				Issues:  1,
+				Ignored: 1,
 			},
 			{
 				Path:           "/tmp/repo/package-lock.json",
@@ -173,23 +183,25 @@ func TestFormatJSONContract(t *testing.T) {
 			Issues        IssueSummary `json:"issues"`
 		} `json:"summary"`
 		Files []struct {
-			Path           string `json:"path"`
-			Schema         string `json:"schema"`
-			SchemaSource   string `json:"schemaSource"`
-			Issues         int    `json:"issues"`
-			Ignored        int    `json:"ignored"`
-			SkipReason     string `json:"skipReason"`
-			SkipClass      string `json:"skipClass"`
-			SkipImportance string `json:"skipImportance"`
-			SkipDetail     string `json:"skipDetail"`
+			Path           string       `json:"path"`
+			Schema         string       `json:"schema"`
+			SchemaSource   string       `json:"schemaSource"`
+			SchemaMatch    *SchemaMatch `json:"schemaMatch"`
+			Issues         int          `json:"issues"`
+			Ignored        int          `json:"ignored"`
+			SkipReason     string       `json:"skipReason"`
+			SkipClass      string       `json:"skipClass"`
+			SkipImportance string       `json:"skipImportance"`
+			SkipDetail     string       `json:"skipDetail"`
 		} `json:"files"`
 		Issues []struct {
-			Path         string `json:"path"`
-			Schema       string `json:"schema"`
-			Category     string `json:"category"`
-			SchemaSource string `json:"schemaSource"`
-			Line         int    `json:"line"`
-			Column       int    `json:"column"`
+			Path         string       `json:"path"`
+			Schema       string       `json:"schema"`
+			Category     string       `json:"category"`
+			SchemaSource string       `json:"schemaSource"`
+			SchemaMatch  *SchemaMatch `json:"schemaMatch"`
+			Line         int          `json:"line"`
+			Column       int          `json:"column"`
 		} `json:"issues"`
 		IgnoredIssues []struct {
 			Path         string `json:"path"`
@@ -213,11 +225,17 @@ func TestFormatJSONContract(t *testing.T) {
 	if len(decoded.Files) != 2 || decoded.Files[0].Path != "config.json" || decoded.Files[0].Schema != "schema.json" || decoded.Files[0].SchemaSource != "$schema" || decoded.Files[0].Issues != 1 || decoded.Files[0].Ignored != 1 {
 		t.Fatalf("json files = %+v", decoded.Files)
 	}
+	if decoded.Files[0].SchemaMatch == nil || decoded.Files[0].SchemaMatch.Action != SchemaMatchActionMatched || !strings.Contains(decoded.Files[0].SchemaMatch.SuggestedAssociation, "[[schemas.associations]]") {
+		t.Fatalf("json file schema match = %+v", decoded.Files[0].SchemaMatch)
+	}
 	if decoded.Files[1].Path != "package-lock.json" || decoded.Files[1].SkipReason != SkipReasonNoSchema || decoded.Files[1].SkipClass != SkipClassLockfile || decoded.Files[1].SkipImportance != SkipImportanceLow || decoded.Files[1].SkipDetail == "" {
 		t.Fatalf("json skipped file = %+v", decoded.Files[1])
 	}
 	if len(decoded.Issues) != 1 || decoded.Issues[0].Path != "config.json" || decoded.Issues[0].Schema != "schema.json" || decoded.Issues[0].Category != "validation" || decoded.Issues[0].SchemaSource != "$schema" || decoded.Issues[0].Line != 2 || decoded.Issues[0].Column != 11 {
 		t.Fatalf("json issues = %+v", decoded.Issues)
+	}
+	if decoded.Issues[0].SchemaMatch == nil || decoded.Issues[0].SchemaMatch.Pattern != "config.json" {
+		t.Fatalf("json issue schema match = %+v", decoded.Issues[0].SchemaMatch)
 	}
 	if len(decoded.IgnoredIssues) != 1 || decoded.IgnoredIssues[0].Category != "validation" || decoded.IgnoredIssues[0].IgnoreReason != "known extra" {
 		t.Fatalf("json ignored issues = %+v", decoded.IgnoredIssues)
@@ -279,6 +297,11 @@ func TestTextHelpers(t *testing.T) {
 	if styledCell(textStyleMuted, "x", 0) != textStyleMuted.Render("x") {
 		t.Fatalf("unstyled-width cell mismatch")
 	}
+	var builder strings.Builder
+	writeIndentedValue(&builder, "hint:", "")
+	if builder.Len() != 0 {
+		t.Fatalf("empty indented value should not write output")
+	}
 	cases := map[time.Duration]string{
 		0:                                    "0s",
 		500 * time.Microsecond:               "500µs",
@@ -308,9 +331,16 @@ func textFixtureResult() Result {
 		},
 		Issues: []Issue{
 			{
-				RelativePath:     "a.json",
-				Schema:           "file:///schema.json",
-				SchemaSource:     "catalog:schemastore:Example",
+				RelativePath: "a.json",
+				Schema:       "file:///schema.json",
+				SchemaSource: "catalog:schemastore:Example",
+				SchemaMatch: &SchemaMatch{
+					Action:     SchemaMatchActionMatched,
+					Reason:     `basename "a.json" matched catalog fileMatch "a.json"`,
+					Confidence: SchemaMatchConfidenceMedium,
+					MatchType:  SchemaMatchTypeExactBasename,
+					Pattern:    "a.json",
+				},
 				Keyword:          "minimum",
 				KeywordLocation:  "/minimum",
 				Property:         "count",

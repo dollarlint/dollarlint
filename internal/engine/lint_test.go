@@ -812,6 +812,25 @@ func TestApplySchemaAssociationSkipsIncompleteRules(t *testing.T) {
 	}
 }
 
+func TestMissingSchemaCoverageIssueIncludesCatalogDecision(t *testing.T) {
+	issue := issueForMissingSchemaCoverage(&Document{
+		Path:         "/repo/tasks.json",
+		RelativePath: "tasks.json",
+		SchemaMatch: &SchemaMatch{
+			Reason:                 `auto catalog matching skipped low-confidence basename "tasks.json" matched catalog fileMatch "tasks.json"`,
+			SuggestedAssociation:   "[[schemas.associations]]\nfile = \"tasks.json\"\nschema = \"https://example.com/tasks.schema.json\"",
+			SuggestedCatalogIgnore: "[[schemas.catalogs.ignore]]\nfile = \"tasks.json\"\nreason = \"not this catalog schema\"",
+		},
+	})
+	if issue.SchemaMatch == nil || !strings.Contains(issue.Hint, "Suggested explicit association") || !strings.Contains(issue.Hint, "Suggested catalog ignore") {
+		t.Fatalf("missing coverage issue = %+v", issue)
+	}
+	issue = issueForMissingSchemaCoverage(&Document{Path: "/repo/file.json", RelativePath: "file.json"})
+	if issue.Hint != "" || issue.SchemaMatch != nil {
+		t.Fatalf("unexpected missing coverage hint = %+v", issue)
+	}
+}
+
 func TestLintAppliesSchemaStoreAssociationsWhenEnabled(t *testing.T) {
 	var catalogRequests int
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -846,8 +865,11 @@ func TestLintAppliesSchemaStoreAssociationsWhenEnabled(t *testing.T) {
 	if result.Files[0].SchemaSource != "catalog:schemastore" || !strings.HasSuffix(result.Files[0].Schema, "/schema.json") {
 		t.Fatalf("file schema = %+v", result.Files[0])
 	}
-	if !strings.Contains(result.Issues[0].Hint, "catalog:schemastore") || !strings.Contains(result.Issues[0].Hint, "tool version") {
+	if !strings.Contains(result.Issues[0].Hint, "catalog:schemastore") || !strings.Contains(result.Issues[0].Hint, "tool version") || !strings.Contains(result.Issues[0].Hint, "Suggested explicit association") {
 		t.Fatalf("catalog issue hint = %+v", result.Issues[0])
+	}
+	if result.Issues[0].SchemaMatch == nil || result.Issues[0].SchemaMatch.Action != SchemaMatchActionMatched || result.Issues[0].SchemaMatch.SuggestedAssociation == "" {
+		t.Fatalf("catalog issue schema match = %+v", result.Issues[0].SchemaMatch)
 	}
 }
 

@@ -52,7 +52,7 @@ func (s *repoServer) handleProjectMap(ctx context.Context, request mcp.CallToolR
 		"docs":      "docs",
 		"examples":  []string{"examples/basics", "examples/nested-configs", "examples/schemastore", "examples/azure"},
 		"release":   []string{".goreleaser.yaml", ".github/workflows/prepare-release.yml", ".github/workflows/release.yml"},
-		"keyChecks": []string{"go test ./...", "go vet ./...", "npm run build in docs", goreleaserSnapshotCheckCommand},
+		"keyChecks": []string{"ci_readiness", "agentic_workflow_readiness", "go test ./...", "go vet ./...", "npm run build in docs", goreleaserCheckCommand},
 	})
 }
 

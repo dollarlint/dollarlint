@@ -436,6 +436,9 @@ func mergeSchemaConfig(parent *SchemaConfig, child SchemaConfig, presence config
 	if presence.has("schemas.catalogs.sources") {
 		parent.Catalogs.Sources = mergeCatalogSources(parent.Catalogs.Sources, child.Catalogs.Sources)
 	}
+	if presence.has("schemas.catalogs.ignore") {
+		parent.Catalogs.Ignore = append(append([]CatalogIgnoreRule(nil), parent.Catalogs.Ignore...), child.Catalogs.Ignore...)
+	}
 	if presence.has("schemas.optimizations.enabled") {
 		parent.Optimizations.Enabled = child.Optimizations.Enabled
 	}
@@ -573,6 +576,9 @@ func normalizeConfigAuthoredPaths(cfg *Config, root, configPath string) {
 	}
 	for i := range cfg.Schemas.Catalogs.Sources {
 		cfg.Schemas.Catalogs.Sources[i].Path = configRelativeLocalPath(configDir, cfg.Schemas.Catalogs.Sources[i].Path)
+	}
+	for i := range cfg.Schemas.Catalogs.Ignore {
+		cfg.Schemas.Catalogs.Ignore[i].File = configRelativeGlob(root, configDir, cfg.Schemas.Catalogs.Ignore[i].File)
 	}
 	for i := range cfg.Ignore {
 		cfg.Ignore[i].File = configRelativeGlob(root, configDir, cfg.Ignore[i].File)

@@ -1,0 +1,468 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-09-10-real-world-validation-tests",
+  "date": "2026-05-09",
+  "title": "10 real-world validation tests",
+  "dollarlintRevision": "621eb22e0fa38ab9017bfc6647e9f4e10654e79e",
+  "workingTreeNote": "Working tree was dirty before recording with modified tools/repo-mcp/main.go and tools/repo-mcp/real_world.go; no manual code edits were made during the sweep.",
+  "corpus": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086",
+  "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3505474527",
+  "command": "real_world_start_validation corpusDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086\" cacheDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.3505474527\" outputArtifact=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-10-real-world-validation-tests-3202203494.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-10-real-world-validation-tests-3202203494.json",
+  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-09-10-real-world-validation-tests.dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "caddy",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: go.sum. Remote schema refs: 0."
+    },
+    {
+      "repository": "helm",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: go.sum, internal/plugin/testdata/src/extismv1-test/go.sum. Remote schema refs: 12."
+    },
+    {
+      "repository": "next.js",
+      "command": "npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts OR cargo fetch --locked OR npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false",
+      "status": "needs-review",
+      "notes": "MCP first-pass scan found 2 local $schema refs, including test/e2e/app-dir/nx-handling/apps/next-nx-test/project.json:3 -\u003e ../../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+    },
+    {
+      "repository": "poetry",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: poetry.lock, tests/fixtures/deleted_directory_dependency/poetry.lock, tests/fixtures/deleted_file_dependency/poetry.lock, and 9 more. Remote schema refs: 1."
+    },
+    {
+      "repository": "prisma",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: packages/cli/src/__tests__/fixtures/custom-output-npm/package-lock.json, packages/cli/src/__tests__/fixtures/custom-output-pnpm/pnpm-lock.yaml, packages/cli/src/__tests__/fixtures/custom-output-yarn/yarn.lock, and 9 more. Remote schema refs: 1."
+    },
+    {
+      "repository": "pydantic",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: pydantic-core/Cargo.lock, pydantic-core/uv.lock, uv.lock. Remote schema refs: 2."
+    },
+    {
+      "repository": "redis",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "rubygems",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: spec/realworld/fixtures/tapioca/Gemfile.lock, spec/realworld/fixtures/warbler/Gemfile.lock, test/rubygems/test_gem_ext_cargo_builder/custom_name/ext/custom_name_lib/Cargo.lock, and 1 more. Remote schema refs: 0."
+    },
+    {
+      "repository": "scikit-learn",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "sentry",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: api-docs/pnpm-lock.yaml, pnpm-lock.yaml, uv.lock. Remote schema refs: 6."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "caddy",
+      "outcome": "product-signal",
+      "findings": [
+        "The only validation issues were nine `.github/FUNDING.yml` catalog findings: eight `expected string, received null` entries for blank provider placeholders plus one `otechie` additional property.",
+        "The output was otherwise clean and focused, with only one medium-signal skipped issue-template file, so the developer experience problem is specifically the repetitive Funding.yml block rather than broad noise.",
+        "This repeats the same blank Funding provider pattern observed in scikit-learn, making it stronger evidence that this SchemaStore-backed UX deserves product handling."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Group or specialize repeated `.github/FUNDING.yml` blank-provider findings so empty template keys are summarized with one clear explanation and fix guidance.",
+          "rationale": "Caddy and scikit-learn both produced long, repetitive Funding.yml null-provider blocks; repeated evidence across repos suggests the current output is noisier than necessary for a common GitHub template shape."
+        }
+      ],
+      "followUp": [
+        "Use Caddy plus scikit-learn as paired fixtures when designing GitHub Funding grouping or hint behavior."
+      ],
+      "notes": "DollarLint correctly explains the catalog source and keeps coverage clear, but repeated blank Funding provider keys produce a verbose result from a single underlying situation."
+    },
+    {
+      "repository": "helm",
+      "outcome": "product-signal",
+      "findings": [
+        "The terminal preview reported 214 issues across 200 files, including 150 YAML parsing failures, and the first screen is dominated by Helm template syntax such as `{{ .Values... }}` being parsed as plain YAML.",
+        "The structured top issue groups correctly identify the main parse and Chart.yaml validation groups as fixture-data, but that classification is not enough to keep the interactive CLI experience from feeling like a wall of expected test fixture failures.",
+        "Many affected paths are under `internal/.../testdata` and `pkg/.../testdata`, including intentionally malformed charts and templated chart files that are normal for Helm's own test corpus.",
+        "The validation did not crash and schema-source hints exist for Chart.yaml findings, but a developer trying DollarLint on Helm would have to mentally filter a large amount of expected fixture/template noise before seeing actionable project-level config."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Detect Helm chart templates and Helm test fixture directories before raw YAML parsing, then classify them as templated/testdata skips or group their parser failures behind a concise fixture summary.",
+          "rationale": "Helm produced 150 parser failures mostly from templated or intentionally invalid testdata files; the structured artifact knows they are fixtures, but the CLI preview still overwhelms the developer with raw parse errors."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Promote fixture-data grouping into the human CLI output when most findings come from `testdata` paths, so expected invalid fixtures are summarized separately from likely actionable repository configuration.",
+          "rationale": "The top groups marked Helm findings as fixture-data, but the visible terminal output still listed individual fixture errors first, reducing actionability."
+        }
+      ],
+      "followUp": [
+        "Use Helm as a regression corpus for templated YAML and testdata-aware CLI summarization."
+      ],
+      "notes": "This is a high-value product signal: templated Helm YAML and intentionally invalid chart fixtures need better pre-classification, suppression, or grouping before they become raw parser findings in the main output."
+    },
+    {
+      "repository": "next.js",
+      "outcome": "product-signal",
+      "findings": [
+        "The run completed on a large repo and produced useful schema-source hints, but the terminal preview was long and truncated because repeated fixture and vendored/package issues dominated the output.",
+        "Many `packages/next-codemod/bin/__testfixtures__/*/pnpm-workspace.yaml` files were reported as catalog-backed `expected object, received null` issues, and the top issue group treated them as product-relevant instead of fixture-data despite the `__testfixtures__` path.",
+        "Several `packages/next/src/compiled/*/package.json` files reported `author.url` format issues for vendored/compiled package metadata; these are likely lower-actionability than root project config and would benefit from dependency/vendor classification.",
+        "Empty JSON parse errors and missing local `$schema` files under `test/...` were classified as fixture-data, which is the right direction, but the CLI still interleaves some expected fixture issues with main findings.",
+        "Vercel schema compile failures were reported as grouped warnings/skips rather than file validation issues, which is better behavior than the verbose schema issue seen in Sentry."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Recognize `__testfixtures__` directories as fixture/test data before assigning product-relevant catalog findings.",
+          "rationale": "Next.js produced many repeated pnpm workspace null-object findings from `__testfixtures__` paths, but those should be treated like expected fixture data rather than actionable project configuration."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Classify vendored or compiled package metadata under paths such as `packages/next/src/compiled/*/package.json` separately from first-party project package manifests.",
+          "rationale": "Next.js surfaced repeated package.json author URL findings from compiled dependency metadata, which is much less actionable than root or workspace package configuration."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Continue using grouped warning/skip behavior for remote schema compile failures, as seen with Vercel schema warnings in Next.js, and make it consistent with Sentry's file-level schema compile case.",
+          "rationale": "The Next.js Vercel schema failures were easier to understand as schema-source warnings than as repo-file issues."
+        }
+      ],
+      "followUp": [
+        "Add Next.js `__testfixtures__` pnpm-workspace files to fixture classification tests.",
+        "Use Next.js compiled package metadata to test vendor/dependency path demotion."
+      ],
+      "notes": "Next.js reinforces fixture and vendor classification improvements: `__testfixtures__` should be recognized, vendored compiled package metadata should be lower priority, and large CLI output should keep high-actionability repo config in view."
+    },
+    {
+      "repository": "poetry",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "The terminal preview grouped 18 issues by file and included schema-source hints for catalog-backed PyProject and .cirrus.yml findings, so a developer can distinguish likely external catalog/schema drift from repository config problems.",
+        "Most findings were in tests/fixtures paths and the top issue groups marked them as fixture-data rather than treating them as production configuration defects.",
+        "Skipped coverage was visible and explained: unknown GitHub issue templates were medium-signal custom YAML, while the larger skipped set was low-signal test or fixture data."
+      ],
+      "caveats": [
+        "The two .cirrus.yml catalog-backed issues may still be false positives from SchemaStore/catalog drift, but DollarLint attached explicit hints to verify the catalog schema before treating them as bugs."
+      ],
+      "notes": "DollarLint behaved reasonably here: it did not crash, grouped expected fixture findings, and made skipped coverage understandable enough for a developer to decide what to inspect."
+    },
+    {
+      "repository": "prisma",
+      "outcome": "product-signal",
+      "findings": [
+        "The actual issue set was small: one GitHub Workflow catalog finding, one empty JSON fixture parse error with a useful hint, and two null `pnpm-workspace.yaml` fixture findings grouped as fixture-data.",
+        "The GitHub Workflow `strategy` must include `matrix` finding repeats the same likely catalog/schema limitation seen in rubygems, this time in `.github/workflows/test-template.yml`.",
+        "The skipped-files section includes a very long list of low-signal test/e2e lockfiles and fixtures; the grouping is correct, but the human preview becomes truncated and dominated by files that are explicitly low actionability.",
+        "Medium-signal unknown skips such as `.vscode/extensions.json`, root `pnpm-lock.yaml`, and issue templates are visible, but they are visually crowded by the long low-signal fixture list."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Escalate the recurring GitHub Workflow `strategy` without `matrix` catalog mismatch to a tracked schema-drift fixture and consider a curated patch or targeted hint.",
+          "rationale": "Both rubygems and prisma report the same likely false-positive shape on normal workflow files, so it is no longer a single-repo oddity."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Cap or collapse very large low-signal skipped-file groups in terminal output, while keeping full details in JSON artifacts.",
+          "rationale": "Prisma's low-signal e2e fixture and lockfile skip list made the CLI preview truncate, reducing visibility of the few actionable medium-signal skips and actual findings."
+        }
+      ],
+      "followUp": [
+        "Use Prisma as a fixture for skipped-file display limits with large e2e/fixture corpora."
+      ],
+      "notes": "DollarLint classified the Prisma findings well, but this result reinforces two UX improvements: handle recurring GitHub Workflow catalog drift and cap or summarize very large low-signal skipped groups in the CLI output."
+    },
+    {
+      "repository": "pydantic",
+      "outcome": "product-signal",
+      "findings": [
+        "The only validation issue was `pydantic-core/.codecov.yml` where `coverage.range` is an array; DollarLint attached a catalog-backed hint, so a developer can treat it as possible Codecov schema drift rather than a definite repository bug.",
+        "Skipped coverage included `pydantic-core/.cargo/config.toml` as high-signal unsupported hand-authored config and `pydantic-core/.rustfmt.toml` as high-signal schema-less project configuration.",
+        "The skipped section is clear and prioritized: docs plugin data and GitHub issue templates are medium signal, while mypy fixture pyprojects are low-signal test data."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Add or wire schema coverage for common Rust config files such as `.cargo/config.toml` and `.rustfmt.toml`, or provide a more specific built-in explanation when they are intentionally unsupported.",
+          "rationale": "Pydantic's `pydantic-core` subtree surfaced both files as high-signal skipped configuration; these are common hand-authored Rust config surfaces, so coverage would improve mixed-language repository validation."
+        }
+      ],
+      "followUp": [
+        "Check whether suitable schemas exist for Cargo config and rustfmt config, or add built-in recognition with targeted skip guidance if schema validation is not practical."
+      ],
+      "notes": "The result is understandable, but it exposes a product coverage gap for common Rust configuration files in mixed Python/Rust projects."
+    },
+    {
+      "repository": "redis",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint inferred unrelated catalog schemas for generic in-repo data files: `src/commands/watch.json` was treated as a Grunt Watch task and `src/commands/cluster.json` as an RKE Cluster Configuration file, creating misleading validation issues on Redis command metadata.",
+        "The old `.travis.yml` files under vendored deps produced many repeated enum findings for values like `freebsd`, `mingw`, and `msvc`; the stale-catalog hints are helpful, but the block is noisy for a developer looking for actionable Redis configuration issues.",
+        "`deps/jemalloc/.cirrus.yml` produced a duplicate-key YAML parse error with a clear parser hint, but because it lives in a dependency subtree and may follow tool-specific semantics, it is a coverage/correctness caveat rather than an obvious Redis config bug.",
+        "Skipped coverage was large: hundreds of `src/commands/*.json` files were schema-less domain data. The skip grouping explains that they are unknown JSON, but the output still mixes these domain files with project configuration triage."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Tighten SchemaStore catalog inference for generic JSON basenames such as `watch.json` and `cluster.json` so matches require path/context evidence, explicit schema hints, or stronger filename conventions.",
+          "rationale": "Redis command metadata files were validated against unrelated Grunt Watch and RKE schemas solely because of generic names, producing false and misleading findings in normal source data."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Add a concise grouping or suppression strategy for repeated catalog-version enum mismatches from legacy CI configs in dependency/vendor subtrees.",
+          "rationale": "Redis showed many Travis enum findings from vendored `deps/*` configs; each has a hint, but the repeated stale-catalog shape dominates the terminal preview and reduces actionability."
+        }
+      ],
+      "followUp": [
+        "Add regression coverage using Redis-style `src/commands/watch.json` and `src/commands/cluster.json` to prevent generic catalog-name false positives."
+      ],
+      "notes": "This is a real product signal. The biggest issue is overly broad catalog inference for generic JSON filenames inside domain-data directories; it can manufacture wrong validation failures that a developer would reasonably distrust."
+    },
+    {
+      "repository": "rubygems",
+      "outcome": "product-signal",
+      "findings": [
+        "The result was compact and readable: one catalog-backed GitHub Workflow issue and two high-signal skipped custom config files.",
+        "The GitHub Workflow finding says `strategy` must include `matrix` even though the source excerpt shows a plausible `strategy: fail-fast: false` shape; DollarLint includes a catalog hint, but this is likely schema drift or a schema limitation on a common config surface.",
+        "Skipped `.changelog.yml` and `.github/config.yml` were clearly called out as high-signal unknown project configuration, so the coverage gap was visible rather than hidden."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "Track common GitHub Workflow catalog false-positive shapes, including `strategy` with `fail-fast` but no `matrix`, and consider a curated schema patch or more specific hint when they recur.",
+          "rationale": "Rubygems produced a single likely schema-drift finding on a normal GitHub Actions workflow; a targeted hint or patch would reduce distrust in catalog-backed validation for common CI files."
+        }
+      ],
+      "followUp": [
+        "Add this workflow excerpt to a catalog-drift watchlist if similar GitHub Workflow `strategy` findings appear in more repos."
+      ],
+      "notes": "The output is usable, but it reinforces that catalog-backed GitHub Workflow false positives can appear on otherwise normal workflow files. This is lower severity than Redis because the catalog source is clear and there is only one issue."
+    },
+    {
+      "repository": "scikit-learn",
+      "outcome": "product-signal",
+      "findings": [
+        "The `.github/FUNDING.yml` result repeats eight separate `expected string, received null` findings for blank funding-provider keys that look like placeholder comments, which is technically precise but noisy for a developer trying to decide what to fix.",
+        "A catalog-backed `.github/dependabot.yml` finding on `reviewers` includes the external-schema hint, so the source of uncertainty is clear, but it is still another likely catalog-version mismatch to triage.",
+        "DollarLint handled a bad external CircleCI catalog schema safely by warning and skipping `.circleci/config.yml`, and it surfaced the skip in the skipped-files section rather than reporting a false file issue.",
+        "Skipped coverage was visible and prioritized: `doc/jupyter_lite_config.json` was high-signal unknown project configuration, while benchmark and generated environment files were lower signal."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "Group repeated catalog-backed GitHub Funding null/blank provider findings into a single explanation when many keys in `.github/FUNDING.yml` are empty placeholder entries.",
+          "rationale": "In scikit-learn, eight near-identical null provider errors dominate the result even though they share the same cause and fix; grouping would make the output quieter without hiding the validation problem."
+        }
+      ],
+      "followUp": [
+        "Consider adding a focused fixture for `.github/FUNDING.yml` with blank provider keys to decide whether grouping or a more specific hint is warranted."
+      ],
+      "notes": "The run is interpretable and mostly well explained, but the Funding.yml block shows a UX opportunity: repeated placeholder/null catalog findings could be grouped or explained as blank template entries so the user gets one clear action instead of a run of nearly identical issues."
+    },
+    {
+      "repository": "sentry",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint validated `.github/workflows/openapi.yml` against `catalog:schemastore:openapi.json`, producing OpenAPI required-property and additional-property errors for a GitHub Actions workflow. The `.github/workflows/` path should be stronger evidence than the generic `openapi.yml` filename.",
+        "The `.github/dependabot.yml` `reviewers` findings repeat another catalog drift shape already seen in scikit-learn, and they are clearly hinted as catalog-backed.",
+        "`vercel.json` produced a schema compile failure as a file-level schema issue, with detailed metaschema output. That is honest, but it is a lot of low-actionability schema-infrastructure detail for a developer validating their repository.",
+        "The run skipped 717 files and the preview was truncated. High-signal unknown configs such as `.mcp.json`, `.vscode/settings.json`, `figma.config.json`, and service configs are useful, but they compete with large low-signal test-data/application-data groups."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Make path-specific catalog matches outrank generic basename matches, especially for `.github/workflows/*.yml` so workflow files are never inferred as unrelated OpenAPI/YAML schemas by filename alone.",
+          "rationale": "Sentry's `.github/workflows/openapi.yml` was treated as an OpenAPI document despite living in the GitHub Actions workflow directory, causing a block of misleading validation errors."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Report remote schema compile failures, such as the Vercel schema metaschema failure, as a grouped schema-source warning/skip instead of a verbose file issue when the repository file itself was not validated.",
+          "rationale": "The Sentry `vercel.json` output exposed internal schema compile diagnostics in the main findings list, which is truthful but hard for a developer to act on as a repo configuration problem."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Collapse very large skipped-file groups in CLI output and prioritize high-signal unknown config examples before low-signal data/test examples.",
+          "rationale": "Sentry had 717 skipped files and the preview truncated, making useful high-signal unknown configs harder to scan."
+        }
+      ],
+      "followUp": [
+        "Add a regression fixture for `.github/workflows/openapi.yml` to enforce path-priority over generic OpenAPI filename matching.",
+        "Compare Sentry and Prisma skipped-output behavior when designing CLI display caps."
+      ],
+      "notes": "This is a strong product signal. The OpenAPI-vs-GitHub-Workflow mismatch is a path-priority correctness bug in catalog inference, and the schema-compile/skipped-output behavior adds ergonomics issues on a large mixed repo."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "next.js",
+      "ecosystem": "TypeScript/React",
+      "cloneURL": "https://github.com/vercel/next.js.git",
+      "commit": "ed9a295f3b1f065fe6e77163abe022c55a6db93e",
+      "notes": "Large TypeScript monorepo with package metadata, examples, CI, and tooling config.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086/next-js",
+      "status": "cloned"
+    },
+    {
+      "name": "prisma",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/prisma/prisma.git",
+      "commit": "d6d9fc9ed341946d45c7d0aba35081a7bd741aa1",
+      "notes": "TypeScript monorepo with package-manager and workflow configuration.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086/prisma",
+      "status": "cloned"
+    },
+    {
+      "name": "helm",
+      "ecosystem": "Go/YAML",
+      "cloneURL": "https://github.com/helm/helm.git",
+      "commit": "0752c1f5b5362434e000ae65328064dd653264d6",
+      "notes": "Kubernetes-adjacent Go project with many YAML, chart, and CI configuration files.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086/helm",
+      "status": "cloned"
+    },
+    {
+      "name": "poetry",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/python-poetry/poetry.git",
+      "commit": "811a12dae0fe81f199e3f1b88b8b8be9eed543c2",
+      "notes": "Python packaging tool with pyproject-heavy metadata and CI configuration.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086/poetry",
+      "status": "cloned"
+    },
+    {
+      "name": "redis",
+      "ecosystem": "C",
+      "cloneURL": "https://github.com/redis/redis.git",
+      "commit": "7bdab45ff1c16d5555e8cafb5985939079be428f",
+      "notes": "C systems repository with build, CI, and configuration files.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086/redis",
+      "status": "cloned"
+    },
+    {
+      "name": "scikit-learn",
+      "ecosystem": "Python/Cython",
+      "cloneURL": "https://github.com/scikit-learn/scikit-learn.git",
+      "commit": "5a73062f9a79256edd1563b9bef9c932d0284d60",
+      "notes": "Scientific Python project with pyproject, CI, docs, and packaging configuration.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086/scikit-learn",
+      "status": "cloned"
+    },
+    {
+      "name": "pydantic",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/pydantic/pydantic.git",
+      "commit": "7a369fb502a473b1e387905359bdb3070ee7534a",
+      "notes": "Python library with pyproject metadata, GitHub Actions, docs, and test fixtures.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086/pydantic",
+      "status": "cloned"
+    },
+    {
+      "name": "caddy",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/caddyserver/caddy.git",
+      "commit": "9c78b97f9e79773d45cf3ad0326bfb5480861ac0",
+      "notes": "Go web server with modules, CI, release, and config examples.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086/caddy",
+      "status": "cloned"
+    },
+    {
+      "name": "rubygems",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/rubygems/rubygems.git",
+      "commit": "66ae777975c0ceb78e4003b2e3edb3dfa9ab9088",
+      "notes": "Ruby packaging tool with gemspecs, CI, and project metadata.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086/rubygems",
+      "status": "cloned"
+    },
+    {
+      "name": "sentry",
+      "ecosystem": "Python/TypeScript",
+      "cloneURL": "https://github.com/getsentry/sentry.git",
+      "commit": "31da7806a0ab6f73de7e7c36f9ebdd73fc20157c",
+      "notes": "Large mixed monorepo with CI, package, and service configuration.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.2356570086/sentry",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 4316,
+    "validated": 2185,
+    "skipped": 1972,
+    "failed": 159,
+    "issues": {
+      "total": 334,
+      "parsing": 159,
+      "validation": 172,
+      "schema": 3,
+      "coverage": 0
+    },
+    "warnings": 4,
+    "duration": {
+      "nanos": 23837850836
+    }
+  },
+  "findings": [
+    "Validated 10 fresh public repositories: next.js, prisma, helm, poetry, redis, scikit-learn, pydantic, caddy, rubygems, and sentry. The managed run discovered 4,316 candidate files, validated 2,185, skipped 1,972, and produced 334 issues plus 4 warnings.",
+    "DollarLint built successfully and all 10 validation jobs completed; no repository was blocked. Poetry behaved reasonably with expected fixture findings and clear skipped coverage, while the other nine repositories produced product-signaling correctness or ergonomics feedback.",
+    "The strongest correctness signals were schema-inference mistakes where generic names outranked context: Sentry's `.github/workflows/openapi.yml` was treated as OpenAPI instead of GitHub Workflow, and Redis domain files `src/commands/watch.json` and `src/commands/cluster.json` were treated as unrelated Grunt/RKE configs.",
+    "The strongest fixture/template signal came from Helm: templated and intentionally invalid chart testdata produced 150 parser failures and dominated the CLI despite structured fixture grouping. Next.js also showed `__testfixtures__` paths being treated as product-relevant pnpm workspace findings.",
+    "Several repositories showed recurring catalog-drift or catalog-noise patterns: blank `.github/FUNDING.yml` provider keys in Caddy and scikit-learn, GitHub Workflow `strategy`/`matrix` findings in rubygems and prisma, Dependabot `reviewers`, legacy Travis enum values, Codecov range, Firebase runtime, and Fossa config values.",
+    "Large skipped-file sets in Sentry and Prisma showed that the grouping model is useful but the terminal display can still be overwhelmed by low-signal examples before the user reaches high-signal unknown configs.",
+    "Coverage gaps surfaced for common Rust configuration files in pydantic (`.cargo/config.toml`, `.rustfmt.toml`) and for several high-signal unknown project config files across large mixed repositories."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "high",
+      "recommendation": "Make path-specific catalog matches outrank generic basename matches and tighten generic JSON/YAML basename inference with path/context evidence.",
+      "rationale": "Sentry's `.github/workflows/openapi.yml` was validated as OpenAPI, and Redis `watch.json`/`cluster.json` command metadata was validated as unrelated catalog configs. These are misleading correctness failures caused by over-broad inference."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Improve fixture, templated, and vendor classification before parsing or catalog validation, including Helm chart templates, `testdata`, `__testfixtures__`, and compiled/vendor package metadata paths.",
+      "rationale": "Helm produced 150 raw parser failures from templated or intentionally invalid testdata, while Next.js treated `__testfixtures__` pnpm workspaces and compiled dependency package metadata as actionable findings."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Promote fixture-data grouping and cap/collapse large low-signal skipped groups in human CLI output, preserving full details in JSON artifacts.",
+      "rationale": "Helm, Prisma, Sentry, and Next.js all had useful structured grouping, but the visible terminal output was still noisy or truncated before the most actionable context was easy to scan."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Curate recurring catalog-drift patterns with targeted hints, grouping, or schema patches for common cases such as blank GitHub Funding provider keys, GitHub Workflow `strategy` without `matrix`, Dependabot `reviewers`, and legacy CI enum values.",
+      "rationale": "Multiple repos produced repeated catalog-backed findings that were technically explained by hints but noisy enough to reduce developer confidence and actionability."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Handle remote schema compile failures consistently as grouped schema-source warnings or skips rather than verbose file-level issues when validation never ran against the repository file.",
+      "rationale": "Next.js Vercel schema failures were easier to interpret as grouped warnings; Sentry's `vercel.json` exposed a verbose metaschema failure in the main findings list."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Add or improve coverage for common Rust configuration files such as `.cargo/config.toml` and `.rustfmt.toml`, or provide targeted unsupported-config guidance.",
+      "rationale": "Pydantic's Rust subtree surfaced these as high-signal skipped config files, which is a common mixed-language repository surface."
+    }
+  ],
+  "productDecisions": [
+    "No code changes were made during this sweep; product signals were recorded for prioritization rather than patched inline.",
+    "No dependency install commands were run. The Next.js local `$schema` refs into fixture `node_modules` were left as `needs-review` to avoid running package-manager lifecycle scripts during validation.",
+    "The final assessment is productChangesToConsider because the sweep found multiple correctness and ergonomics improvements worth considering."
+  ],
+  "followUp": [
+    "Add regression fixtures for `.github/workflows/openapi.yml`, Redis `src/commands/watch.json` and `src/commands/cluster.json`, Helm templated chart testdata, and Next.js `__testfixtures__` pnpm workspaces.",
+    "Design a CLI display cap for large low-signal skipped-file groups using Prisma and Sentry as examples.",
+    "Use Caddy and scikit-learn as paired fixtures for GitHub Funding blank-provider grouping or hints.",
+    "Track GitHub Workflow `strategy`/`matrix` catalog drift using rubygems and prisma examples.",
+    "Review Vercel schema compile behavior so Sentry and Next.js receive consistent warning/skip treatment."
+  ]
+}

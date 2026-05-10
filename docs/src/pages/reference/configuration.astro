@@ -53,6 +53,10 @@ format = "schemastore"
 url = "https://www.schemastore.org/api/json/catalog.json"
 enabled = true
 
+# [[schemas.catalogs.ignore]]
+# file = "data/tasks.json"
+# reason = "application data, not a tool config"
+
 # [[schemas.associations]]
 # file = "settings/*.toml"
 # schema = "./schemas/settings.schema.json"
@@ -405,6 +409,20 @@ extends = "../../.dollarlint.toml"</code></pre>
         >dollarlint init</code
       > enables SchemaStore by default.
     </p>
+    <p>
+      When the built-in SchemaStore source is enabled, DollarLint adds a small
+      curated layer for known filename gaps and drift. The current curated Rust
+      associations cover <code>rustfmt.toml</code> / <code>.rustfmt.toml</code>
+      and <code>release-plz.toml</code> / <code>.release-plz.toml</code>.
+    </p>
+    <p>
+      Catalog matches are reported with <code>schemaMatch</code> metadata in JSON
+      output and with explanatory text hints for catalog-sourced issues. When the
+      inferred schema is correct, add the suggested <code
+        >[[schemas.associations]]</code
+      > rule to make it explicit. When a file should never be inferred from a catalog,
+      use <code>schemas.catalogs.ignore</code>.
+    </p>
     <table>
       <thead>
         <tr>
@@ -461,6 +479,23 @@ extends = "../../.dollarlint.toml"</code></pre>
         <tr
           ><td><code>schemas.catalogs.sources[].enabled</code></td><td
             >Disable one source without deleting it.</td
+          ></tr
+        >
+        <tr
+          ><td><code>schemas.catalogs.ignore</code></td><td
+            >List file globs that should not receive catalog-inferred schemas.
+            Explicit in-file schemas and configured associations still take
+            precedence.</td
+          ></tr
+        >
+        <tr
+          ><td><code>schemas.catalogs.ignore[].file</code></td><td
+            >File glob for a catalog inference opt-out.</td
+          ></tr
+        >
+        <tr
+          ><td><code>schemas.catalogs.ignore[].reason</code></td><td
+            >Optional explanation shown with the skipped catalog decision.</td
           ></tr
         >
       </tbody>

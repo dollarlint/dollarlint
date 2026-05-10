@@ -74,6 +74,8 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 	if err != nil {
 		return Result{}, err
 	}
+	catalogConfig := cfg.Schemas.Catalogs
+	catalogConfig.Match = catalogMatch
 	documents := make([]*Document, 0, len(files))
 	validatedDocuments := make([]*Document, 0, len(files))
 	fileIndexes := map[string]int{}
@@ -102,12 +104,13 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 		documents = append(documents, document)
 		applySchemaAssociation(document, cfg.Schemas.Associations, "config-association")
 		applyBuiltinSchemaAssociation(document)
-		applySchemaStoreAssociation(document, schemaStoreCatalog, catalogMatch)
+		applySchemaStoreAssociation(document, schemaStoreCatalog, catalogConfig)
 	}
 	for _, document := range documents {
 		index := fileIndexes[document.RelativePath]
 		result.Files[index].Schema = document.Schema
 		result.Files[index].SchemaSource = document.SchemaSource
+		result.Files[index].SchemaMatch = document.SchemaMatch
 		parseIssues := issuesForDocumentParseErrors(document)
 		for _, issue := range parseIssues {
 			addIssue(&result, issue)
@@ -122,7 +125,7 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 				result.Files[index].Message = "file is not covered by an inline schema, config association, built-in association, or catalog match"
 				addIssue(&result, issueForMissingSchemaCoverage(document))
 			} else if len(parseIssues) == 0 {
-				applySkippedFileClassification(&result.Files[index], document, SkipReasonNoSchema, "")
+				applySkippedFileClassification(&result.Files[index], document, SkipReasonNoSchema, schemaMatchSkipDetail(document.SchemaMatch))
 				result.Summary.Skipped++
 			}
 			continue
@@ -131,7 +134,10 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 		if err != nil {
 			result.Files[index].Status = StatusError
 			result.Files[index].Message = err.Error()
-			addIssue(&result, issueForError(DiscoveredFile{Path: document.Path, RelativePath: document.RelativePath}, document.Schema, issueKeywordSchema, err))
+			issue := issueForError(DiscoveredFile{Path: document.Path, RelativePath: document.RelativePath}, document.Schema, issueKeywordSchema, err)
+			issue.SchemaSource = document.SchemaSource
+			issue.SchemaMatch = document.SchemaMatch
+			addIssue(&result, issue)
 			continue
 		}
 		document.Schema = resolved
@@ -231,4 +237,11 @@ func mergeResult(result *Result, partial Result) {
 	result.Files = append(result.Files, partial.Files...)
 	result.Issues = append(result.Issues, partial.Issues...)
 	result.Warnings = append(result.Warnings, partial.Warnings...)
+}
+
+func schemaMatchSkipDetail(match *SchemaMatch) string {
+	if match == nil || match.Reason == "" {
+		return ""
+	}
+	return match.Reason
 }

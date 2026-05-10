@@ -157,7 +157,7 @@ func writeIssueRow(builder *strings.Builder, issue Issue, output OutputConfig, w
 		writeVerboseIssueDetails(builder, issue)
 	}
 	if issue.Hint != "" {
-		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("hint:"), issue.Hint)
+		writeIndentedValue(builder, "hint:", issue.Hint)
 	}
 }
 
@@ -174,8 +174,23 @@ func writeVerboseIssueDetails(builder *strings.Builder, issue Issue) {
 	if issue.SchemaSource != "" {
 		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("schemaSource:"), issue.SchemaSource)
 	}
+	if issue.SchemaMatch != nil && issue.SchemaMatch.Reason != "" {
+		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("schemaMatch:"), issue.SchemaMatch.Reason)
+	}
 	if issue.Schema != "" {
 		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("schema:"), issue.Schema)
+	}
+}
+
+func writeIndentedValue(builder *strings.Builder, label, value string) {
+	value = strings.TrimRight(value, "\n")
+	if value == "" {
+		return
+	}
+	lines := strings.Split(value, "\n")
+	fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render(label), lines[0])
+	for _, line := range lines[1:] {
+		fmt.Fprintf(builder, "      %s\n", line)
 	}
 }
 

@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"path"
@@ -10,13 +11,27 @@ import (
 
 const defaultSchemaStoreCatalogURL = "https://www.schemastore.org/api/json/catalog.json"
 
+var curatedDefaultSchemaStoreAssociations = []schemaStoreEntry{
+	{
+		Name:      "rustfmt",
+		FileMatch: []string{"rustfmt.toml", ".rustfmt.toml"},
+		URL:       "https://www.schemastore.org/rustfmt.json",
+	},
+	{
+		Name:      "release-plz.toml",
+		FileMatch: []string{"release-plz.toml", ".release-plz.toml"},
+		URL:       "https://raw.githubusercontent.com/MarcoIeni/release-plz/main/.schema/latest.json",
+	},
+}
+
 type schemaStoreCatalog struct {
 	Schemas []schemaStoreEntry `json:"schemas"`
 
 	indexed        bool
 	exactPaths     map[string]schemaStoreEntry
 	exactBasenames map[string]schemaStoreEntry
-	globs          []schemaStorePattern
+	pathGlobs      []schemaStorePattern
+	basenameGlobs  []schemaStorePattern
 }
 
 type schemaStoreEntry struct {
@@ -29,6 +44,16 @@ type schemaStoreEntry struct {
 type schemaStorePattern struct {
 	pattern string
 	entry   schemaStoreEntry
+}
+
+type schemaStoreMatch struct {
+	entry         schemaStoreEntry
+	action        string
+	reason        string
+	confidence    string
+	matchType     string
+	pattern       string
+	ignorePattern string
 }
 
 func loadSchemaStoreCatalog(ctx context.Context, cache *SchemaCache, cfg Config) (*schemaStoreCatalog, *Warning, error) {
@@ -116,7 +141,22 @@ func loadSchemaStoreCatalogSource(ctx context.Context, cache *SchemaCache, cfg C
 		}
 		catalog.Schemas = append(catalog.Schemas, entry)
 	}
+	addCuratedDefaultSchemaStoreAssociations(catalog, source, catalogURL)
 	return catalog, nil, nil
+}
+
+func addCuratedDefaultSchemaStoreAssociations(catalog *schemaStoreCatalog, source CatalogSource, catalogURL string) {
+	if catalog == nil || catalogURL != defaultSchemaStoreCatalogURL {
+		return
+	}
+	sourceName := source.Name
+	if sourceName == "" {
+		sourceName = "schemastore"
+	}
+	for _, association := range curatedDefaultSchemaStoreAssociations {
+		association.Source = sourceName
+		catalog.Schemas = append(catalog.Schemas, association)
+	}
 }
 
 func schemaStoreCatalogError(cfg Config, source CatalogSource, format string, args ...any) (*schemaStoreCatalog, *Warning, error) {
@@ -166,16 +206,20 @@ func resolveCatalogURI(raw string) (string, error) {
 	return file.String(), nil
 }
 
-func applySchemaStoreAssociation(document *Document, catalog *schemaStoreCatalog, matchMode string) {
+func applySchemaStoreAssociation(document *Document, catalog *schemaStoreCatalog, catalogConfig CatalogConfig) {
 	if document.Schema != "" || catalog == nil {
 		return
 	}
-	entry, ok := catalog.match(document.RelativePath, matchMode)
+	match, ok := catalog.match(document.RelativePath, catalogConfig)
 	if !ok {
 		return
 	}
-	document.Schema = entry.URL
-	document.SchemaSource = entry.schemaSource()
+	document.SchemaMatch = match.schemaMatch(document.RelativePath)
+	if match.action != SchemaMatchActionMatched {
+		return
+	}
+	document.Schema = match.entry.URL
+	document.SchemaSource = match.entry.schemaSource()
 }
 
 func (catalog *schemaStoreCatalog) buildIndex() {
@@ -192,7 +236,11 @@ func (catalog *schemaStoreCatalog) buildIndex() {
 				continue
 			}
 			if hasGlobMeta(pattern) {
-				catalog.globs = append(catalog.globs, schemaStorePattern{pattern: pattern, entry: entry})
+				if strings.Contains(pattern, "/") {
+					catalog.pathGlobs = append(catalog.pathGlobs, schemaStorePattern{pattern: pattern, entry: entry})
+					continue
+				}
+				catalog.basenameGlobs = append(catalog.basenameGlobs, schemaStorePattern{pattern: pattern, entry: entry})
 				continue
 			}
 			if strings.Contains(pattern, "/") {
@@ -204,31 +252,173 @@ func (catalog *schemaStoreCatalog) buildIndex() {
 	}
 }
 
-func (catalog *schemaStoreCatalog) match(rel, matchMode string) (schemaStoreEntry, bool) {
+func (catalog *schemaStoreCatalog) match(rel string, catalogConfig CatalogConfig) (schemaStoreMatch, bool) {
 	if catalog == nil {
-		return schemaStoreEntry{}, false
+		return schemaStoreMatch{}, false
 	}
+	matchMode := catalogConfig.Match
 	if matchMode == "" {
 		matchMode = CatalogMatchAuto
 	}
 	catalog.buildIndex()
 	rel = cleanGlob(rel)
+	match, ok := catalog.findMatch(rel, matchMode)
+	if !ok {
+		return schemaStoreMatch{}, false
+	}
+	if ignore, ignored := catalogIgnoreMatch(catalogConfig.Ignore, rel); ignored {
+		match.action = SchemaMatchActionIgnored
+		match.ignorePattern = ignore.File
+		match.reason = catalogIgnoredReason(rel, match, ignore)
+		return match, true
+	}
+	match.reason = catalogMatchReason(rel, match)
+	return match, true
+}
+
+func (catalog *schemaStoreCatalog) findMatch(rel, matchMode string) (schemaStoreMatch, bool) {
 	if entry, ok := catalog.exactPaths[rel]; ok {
-		return entry, true
+		return newSchemaStoreMatch(entry, SchemaMatchTypeExactPath, rel, SchemaMatchConfidenceHigh, matchMode), true
 	}
+	for _, candidate := range catalog.pathGlobs {
+		if matchPattern(candidate.pattern, rel) {
+			return newSchemaStoreMatch(candidate.entry, SchemaMatchTypePathGlob, candidate.pattern, SchemaMatchConfidenceHigh, matchMode), true
+		}
+	}
+	var lowConfidenceMatch schemaStoreMatch
+	var hasLowConfidenceMatch bool
 	base := path.Base(rel)
-	if entry, ok := catalog.exactBasenames[base]; ok && (matchMode == CatalogMatchAll || !lowConfidenceSchemaStoreBasename(base)) {
-		return entry, true
+	if entry, ok := catalog.exactBasenames[base]; ok {
+		confidence := SchemaMatchConfidenceMedium
+		if lowConfidenceSchemaStoreBasename(base) {
+			confidence = SchemaMatchConfidenceLow
+		}
+		match := newSchemaStoreMatch(entry, SchemaMatchTypeExactBasename, base, confidence, matchMode)
+		if match.action != SchemaMatchActionSkippedLowConfidence {
+			return match, true
+		}
+		lowConfidenceMatch = match
+		hasLowConfidenceMatch = true
 	}
-	for _, candidate := range catalog.globs {
-		if matchMode == CatalogMatchAuto && lowConfidenceSchemaStoreGlob(candidate.pattern) {
+	for _, candidate := range catalog.basenameGlobs {
+		if !matchPattern(candidate.pattern, rel) {
 			continue
 		}
-		if matchPattern(candidate.pattern, rel) {
-			return candidate.entry, true
+		confidence := SchemaMatchConfidenceMedium
+		if lowConfidenceSchemaStoreGlob(candidate.pattern) {
+			confidence = SchemaMatchConfidenceLow
+		}
+		match := newSchemaStoreMatch(candidate.entry, SchemaMatchTypeBasenameGlob, candidate.pattern, confidence, matchMode)
+		if match.action != SchemaMatchActionSkippedLowConfidence {
+			return match, true
+		}
+		if !hasLowConfidenceMatch {
+			lowConfidenceMatch = match
+			hasLowConfidenceMatch = true
 		}
 	}
-	return schemaStoreEntry{}, false
+	if hasLowConfidenceMatch {
+		return lowConfidenceMatch, true
+	}
+	return schemaStoreMatch{}, false
+}
+
+func newSchemaStoreMatch(entry schemaStoreEntry, matchType, pattern, confidence, matchMode string) schemaStoreMatch {
+	action := SchemaMatchActionMatched
+	if matchMode == CatalogMatchAuto && confidence == SchemaMatchConfidenceLow {
+		action = SchemaMatchActionSkippedLowConfidence
+	}
+	return schemaStoreMatch{
+		entry:      entry,
+		action:     action,
+		confidence: confidence,
+		matchType:  matchType,
+		pattern:    pattern,
+	}
+}
+
+func catalogIgnoreMatch(rules []CatalogIgnoreRule, rel string) (CatalogIgnoreRule, bool) {
+	for i := len(rules) - 1; i >= 0; i-- {
+		rule := rules[i]
+		if rule.File == "" {
+			continue
+		}
+		if matchPattern(rule.File, rel) {
+			return rule, true
+		}
+	}
+	return CatalogIgnoreRule{}, false
+}
+
+func catalogMatchReason(rel string, match schemaStoreMatch) string {
+	base := path.Base(rel)
+	switch match.action {
+	case SchemaMatchActionSkippedLowConfidence:
+		return fmt.Sprintf("auto catalog matching skipped low-confidence %s", catalogPatternReason(rel, base, match))
+	default:
+		return catalogPatternReason(rel, base, match)
+	}
+}
+
+func catalogPatternReason(rel, base string, match schemaStoreMatch) string {
+	switch match.matchType {
+	case SchemaMatchTypeExactPath:
+		return fmt.Sprintf("path %q exactly matched catalog fileMatch %q", rel, match.pattern)
+	case SchemaMatchTypePathGlob:
+		return fmt.Sprintf("path %q matched catalog fileMatch %q", rel, match.pattern)
+	case SchemaMatchTypeExactBasename:
+		return fmt.Sprintf("basename %q matched catalog fileMatch %q", base, match.pattern)
+	case SchemaMatchTypeBasenameGlob:
+		return fmt.Sprintf("basename %q matched catalog fileMatch %q", base, match.pattern)
+	default:
+		return fmt.Sprintf("path %q matched catalog fileMatch %q", rel, match.pattern)
+	}
+}
+
+func catalogIgnoredReason(rel string, match schemaStoreMatch, ignore CatalogIgnoreRule) string {
+	reason := fmt.Sprintf("catalog match ignored by schemas.catalogs.ignore rule %q", ignore.File)
+	if ignore.Reason != "" {
+		reason += ": " + ignore.Reason
+	}
+	reason += " (candidate: " + catalogPatternReason(rel, path.Base(rel), match) + ")"
+	return reason
+}
+
+func (match schemaStoreMatch) schemaMatch(rel string) *SchemaMatch {
+	out := &SchemaMatch{
+		Action:        match.action,
+		Reason:        match.reason,
+		Confidence:    match.confidence,
+		MatchType:     match.matchType,
+		Pattern:       match.pattern,
+		IgnorePattern: match.ignorePattern,
+	}
+	if match.action == SchemaMatchActionMatched || match.action == SchemaMatchActionSkippedLowConfidence {
+		out.SuggestedAssociation = suggestedSchemaAssociation(rel, match.entry.URL)
+	}
+	if match.action == SchemaMatchActionSkippedLowConfidence {
+		out.SuggestedCatalogIgnore = suggestedCatalogIgnore(rel)
+	}
+	return out
+}
+
+func suggestedSchemaAssociation(rel, schema string) string {
+	if rel == "" || schema == "" {
+		return ""
+	}
+	return "[[schemas.associations]]\nfile = " + tomlBasicString(rel) + "\nschema = " + tomlBasicString(schema)
+}
+
+func suggestedCatalogIgnore(rel string) string {
+	if rel == "" {
+		return ""
+	}
+	return "[[schemas.catalogs.ignore]]\nfile = " + tomlBasicString(rel) + "\nreason = \"not this catalog schema\""
+}
+
+func tomlBasicString(value string) string {
+	encoded, _ := json.Marshal(value)
+	return string(encoded)
 }
 
 func addSchemaStoreExact(entries map[string]schemaStoreEntry, key string, entry schemaStoreEntry) {

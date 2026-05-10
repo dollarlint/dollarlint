@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -15,20 +16,28 @@ import (
 )
 
 type commandResult struct {
-	Name      string `json:"name"`
-	Command   string `json:"command"`
-	ExitCode  int    `json:"exitCode"`
-	Duration  string `json:"duration"`
-	Output    string `json:"output,omitempty"`
-	Succeeded bool   `json:"succeeded"`
+	Job         string `json:"job,omitempty"`
+	Name        string `json:"name"`
+	Command     string `json:"command"`
+	ExitCode    int    `json:"exitCode"`
+	Duration    string `json:"duration"`
+	Output      string `json:"output,omitempty"`
+	Succeeded   bool   `json:"succeeded"`
+	Skipped     bool   `json:"skipped,omitempty"`
+	SkipReason  string `json:"skipReason,omitempty"`
+	FailureHint string `json:"failureHint,omitempty"`
 }
 
 type namedCommand struct {
-	Name string
-	Cmd  string
-	Dir  string
+	Job         string
+	Name        string
+	Cmd         string
+	Dir         string
+	FailureHint string
+	OptionalEnv string
 }
 
+const goreleaserCheckCommand = "go run github.com/goreleaser/goreleaser/v2@latest check"
 const goreleaserSnapshotCheckCommand = "go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean --skip=publish"
 
 func verifyCommands(profile string) ([]namedCommand, error) {
@@ -36,11 +45,7 @@ func verifyCommands(profile string) ([]namedCommand, error) {
 	case "quick":
 		return []namedCommand{{Name: "go test", Cmd: "go test ./..."}, {Name: "go vet", Cmd: "go vet ./..."}}, nil
 	case "docs":
-		return []namedCommand{
-			{Name: "docs format", Cmd: "npm run format:check", Dir: "docs"},
-			{Name: "docs audit", Cmd: "npm run audit", Dir: "docs"},
-			{Name: "docs build", Cmd: "npm run build", Dir: "docs"},
-		}, nil
+		return ciReadinessCommands("docs")
 	case "release":
 		return []namedCommand{
 			{Name: "goreleaser snapshot", Cmd: goreleaserSnapshotCheckCommand},
@@ -48,21 +53,7 @@ func verifyCommands(profile string) ([]namedCommand, error) {
 	case "examples":
 		return exampleCommands("all", "text", true)
 	case "ci", "full":
-		return []namedCommand{
-			{Name: "go mod verify", Cmd: "go mod verify"},
-			{Name: "go test", Cmd: "go test ./..."},
-			{Name: "engine coverage", Cmd: "go test -coverprofile=coverage.out ./internal/engine && go tool cover -func=coverage.out | tail -n 1"},
-			{Name: "go vet", Cmd: "go vet ./..."},
-			{Name: "staticcheck", Cmd: "go run honnef.co/go/tools/cmd/staticcheck@v0.7.0 ./..."},
-			{Name: "govulncheck", Cmd: "go run golang.org/x/vuln/cmd/govulncheck@v1.3.0 ./..."},
-			{Name: "actionlint", Cmd: "go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12"},
-			{Name: "go build", Cmd: "go build ./..."},
-			{Name: "docs format", Cmd: "npm run format:check", Dir: "docs"},
-			{Name: "docs audit", Cmd: "npm run audit", Dir: "docs"},
-			{Name: "docs build", Cmd: "npm run build", Dir: "docs"},
-			{Name: "goreleaser snapshot", Cmd: goreleaserSnapshotCheckCommand},
-			{Name: "diff check", Cmd: "git diff --check"},
-		}, nil
+		return ciReadinessCommands("all")
 	default:
 		return nil, fmt.Errorf("unknown verify profile %q", profile)
 	}
@@ -111,6 +102,7 @@ func (s *repoServer) runCommandSet(ctx context.Context, request mcp.CallToolRequ
 func (s *repoServer) runCommandSetData(ctx context.Context, request mcp.CallToolRequest, profile string, commands []namedCommand) (map[string]any, error) {
 	p := newProgress(ctx, s.mcp, request, len(commands))
 	results := make([]commandResult, 0, len(commands))
+	failed := make([]commandResult, 0)
 	ok := true
 	for _, command := range commands {
 		p.step("Running " + command.Name)
@@ -118,17 +110,34 @@ func (s *repoServer) runCommandSetData(ctx context.Context, request mcp.CallTool
 		results = append(results, result)
 		if !result.Succeeded {
 			ok = false
+			failed = append(failed, result)
 		}
 	}
 	return map[string]any{
-		"profile":  profile,
-		"ok":       ok,
-		"commands": results,
+		"profile":        profile,
+		"ok":             ok,
+		"commands":       results,
+		"failedCommands": failed,
 	}, nil
 }
 
 func (s *repoServer) run(ctx context.Context, command namedCommand) commandResult {
 	start := time.Now()
+	if command.OptionalEnv != "" && os.Getenv(command.OptionalEnv) == "" {
+		reason := command.OptionalEnv + " is not set"
+		return commandResult{
+			Job:         command.Job,
+			Name:        command.Name,
+			Command:     command.Cmd,
+			ExitCode:    0,
+			Duration:    time.Since(start).Round(time.Millisecond).String(),
+			Output:      reason,
+			Succeeded:   true,
+			Skipped:     true,
+			SkipReason:  reason,
+			FailureHint: command.FailureHint,
+		}
+	}
 	dir := s.root
 	if command.Dir != "" {
 		dir = filepath.Join(s.root, command.Dir)
@@ -148,12 +157,14 @@ func (s *repoServer) run(ctx context.Context, command namedCommand) commandResul
 		}
 	}
 	return commandResult{
-		Name:      command.Name,
-		Command:   command.Cmd,
-		ExitCode:  exitCode,
-		Duration:  time.Since(start).Round(time.Millisecond).String(),
-		Output:    truncate(output.String(), 12000),
-		Succeeded: err == nil,
+		Job:         command.Job,
+		Name:        command.Name,
+		Command:     command.Cmd,
+		ExitCode:    exitCode,
+		Duration:    time.Since(start).Round(time.Millisecond).String(),
+		Output:      truncate(output.String(), 12000),
+		Succeeded:   err == nil,
+		FailureHint: command.FailureHint,
 	}
 }
 

@@ -77,6 +77,7 @@ func leafValidationIssues(document *Document, err *jsonschema.ValidationError) [
 		RelativePath:     document.RelativePath,
 		Schema:           document.Schema,
 		SchemaSource:     document.SchemaSource,
+		SchemaMatch:      document.SchemaMatch,
 		Keyword:          keywordName(err),
 		KeywordLocation:  keywordLocation(err),
 		Property:         propertyName(err),
@@ -131,9 +132,24 @@ func catalogValidationIssueHint(document *Document, issue Issue) string {
 		return ""
 	}
 	if issue.Keyword == "enum" {
-		return fmt.Sprintf("This issue came from %s; if this value is valid for the repo's tool version, the external catalog schema may be stale, version-mismatched, or incomplete.", document.SchemaSource)
+		return appendCatalogMatchHint(document,
+			fmt.Sprintf("This issue came from %s; if this value is valid for the repo's tool version, the external catalog schema may be stale, version-mismatched, or incomplete.", document.SchemaSource))
 	}
-	return fmt.Sprintf("This issue came from %s; confirm the external catalog schema matches this repo's tool version and conventions before treating it as a config bug.", document.SchemaSource)
+	return appendCatalogMatchHint(document,
+		fmt.Sprintf("This issue came from %s; confirm the external catalog schema matches this repo's tool version and conventions before treating it as a config bug.", document.SchemaSource))
+}
+
+func appendCatalogMatchHint(document *Document, hint string) string {
+	if document == nil || document.SchemaMatch == nil || document.SchemaMatch.Action != SchemaMatchActionMatched {
+		return hint
+	}
+	if document.SchemaMatch.Reason != "" {
+		hint += " Matched because " + document.SchemaMatch.Reason + "."
+	}
+	if document.SchemaMatch.SuggestedAssociation != "" {
+		hint += "\nSuggested explicit association:\n" + document.SchemaMatch.SuggestedAssociation
+	}
+	return hint
 }
 
 func isMkDocsInheritedRequiredIssue(document *Document, issue Issue) bool {
@@ -440,12 +456,23 @@ func issueForError(file DiscoveredFile, schema, keyword string, err error) Issue
 }
 
 func issueForMissingSchemaCoverage(document *Document) Issue {
-	return Issue{
+	issue := Issue{
 		File:         document.Path,
 		RelativePath: document.RelativePath,
+		SchemaMatch:  document.SchemaMatch,
 		Keyword:      "schemaCoverage",
 		Message:      "file must declare a schema or match a configured schema association, built-in association, or catalog entry",
 	}
+	if document.SchemaMatch != nil && document.SchemaMatch.Reason != "" {
+		issue.Hint = document.SchemaMatch.Reason
+		if document.SchemaMatch.SuggestedAssociation != "" {
+			issue.Hint += "\nSuggested explicit association:\n" + document.SchemaMatch.SuggestedAssociation
+		}
+		if document.SchemaMatch.SuggestedCatalogIgnore != "" {
+			issue.Hint += "\nSuggested catalog ignore:\n" + document.SchemaMatch.SuggestedCatalogIgnore
+		}
+	}
+	return issue
 }
 
 func issuesForDocumentParseErrors(document *Document) []Issue {

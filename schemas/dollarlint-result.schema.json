@@ -136,6 +136,9 @@
         "schemaSource": {
           "type": "string"
         },
+        "schemaMatch": {
+          "$ref": "#/$defs/schemaMatch"
+        },
         "status": {
           "type": "string",
           "enum": ["validated", "skipped", "error"]
@@ -189,6 +192,9 @@
         "schemaSource": {
           "type": "string"
         },
+        "schemaMatch": {
+          "$ref": "#/$defs/schemaMatch"
+        },
         "category": {
           "type": "string",
           "enum": ["parsing", "validation", "schema", "coverage"]
@@ -218,6 +224,39 @@
           "type": "string"
         },
         "ignoreReason": {
+          "type": "string"
+        }
+      }
+    },
+    "schemaMatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": ["matched", "ignored", "skippedLowConfidence"]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "matchType": {
+          "type": "string",
+          "enum": ["exactPath", "pathGlob", "exactBasename", "basenameGlob"]
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "ignorePattern": {
+          "type": "string"
+        },
+        "suggestedAssociation": {
+          "type": "string"
+        },
+        "suggestedCatalogIgnore": {
           "type": "string"
         }
       }

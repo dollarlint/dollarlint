@@ -52,6 +52,25 @@ const (
 )
 
 const (
+	SchemaMatchActionMatched              = "matched"
+	SchemaMatchActionIgnored              = "ignored"
+	SchemaMatchActionSkippedLowConfidence = "skippedLowConfidence"
+)
+
+const (
+	SchemaMatchConfidenceHigh   = "high"
+	SchemaMatchConfidenceMedium = "medium"
+	SchemaMatchConfidenceLow    = "low"
+)
+
+const (
+	SchemaMatchTypeExactPath     = "exactPath"
+	SchemaMatchTypePathGlob      = "pathGlob"
+	SchemaMatchTypeExactBasename = "exactBasename"
+	SchemaMatchTypeBasenameGlob  = "basenameGlob"
+)
+
+const (
 	JSONParsingStrict = "strict"
 	JSONParsingJSONC  = "jsonc"
 	JSONParsingAuto   = "auto"
@@ -120,10 +139,11 @@ type AzureOptimization struct {
 }
 
 type CatalogConfig struct {
-	Enabled bool            `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
-	Failure string          `json:"failure,omitempty" yaml:"failure,omitempty" toml:"failure,omitempty"`
-	Match   string          `json:"match,omitempty" yaml:"match,omitempty" toml:"match,omitempty"`
-	Sources []CatalogSource `json:"sources,omitempty" yaml:"sources,omitempty" toml:"sources,omitempty"`
+	Enabled bool                `json:"enabled,omitempty" yaml:"enabled,omitempty" toml:"enabled,omitempty"`
+	Failure string              `json:"failure,omitempty" yaml:"failure,omitempty" toml:"failure,omitempty"`
+	Match   string              `json:"match,omitempty" yaml:"match,omitempty" toml:"match,omitempty"`
+	Sources []CatalogSource     `json:"sources,omitempty" yaml:"sources,omitempty" toml:"sources,omitempty"`
+	Ignore  []CatalogIgnoreRule `json:"ignore,omitempty" yaml:"ignore,omitempty" toml:"ignore,omitempty"`
 }
 
 type CatalogSource struct {
@@ -148,6 +168,11 @@ type FetchConfig struct {
 type SchemaAssociation struct {
 	File   string `json:"file" yaml:"file" toml:"file"`
 	Schema string `json:"schema" yaml:"schema" toml:"schema"`
+}
+
+type CatalogIgnoreRule struct {
+	File   string `json:"file" yaml:"file" toml:"file"`
+	Reason string `json:"reason,omitempty" yaml:"reason,omitempty" toml:"reason,omitempty"`
 }
 
 type CompileConfig struct {
@@ -211,36 +236,49 @@ type IssueSummary struct {
 }
 
 type FileResult struct {
-	Path           string `json:"path"`
-	RelativePath   string `json:"relativePath"`
-	Format         string `json:"format"`
-	Schema         string `json:"schema,omitempty"`
-	SchemaSource   string `json:"schemaSource,omitempty"`
-	Status         string `json:"status"`
-	Issues         int    `json:"issues"`
-	Ignored        int    `json:"ignored"`
-	Message        string `json:"message,omitempty"`
-	SkipReason     string `json:"skipReason,omitempty"`
-	SkipClass      string `json:"skipClass,omitempty"`
-	SkipImportance string `json:"skipImportance,omitempty"`
-	SkipDetail     string `json:"skipDetail,omitempty"`
+	Path           string       `json:"path"`
+	RelativePath   string       `json:"relativePath"`
+	Format         string       `json:"format"`
+	Schema         string       `json:"schema,omitempty"`
+	SchemaSource   string       `json:"schemaSource,omitempty"`
+	SchemaMatch    *SchemaMatch `json:"schemaMatch,omitempty"`
+	Status         string       `json:"status"`
+	Issues         int          `json:"issues"`
+	Ignored        int          `json:"ignored"`
+	Message        string       `json:"message,omitempty"`
+	SkipReason     string       `json:"skipReason,omitempty"`
+	SkipClass      string       `json:"skipClass,omitempty"`
+	SkipImportance string       `json:"skipImportance,omitempty"`
+	SkipDetail     string       `json:"skipDetail,omitempty"`
 }
 
 type Issue struct {
-	File             string `json:"file"`
-	RelativePath     string `json:"relativePath"`
-	Schema           string `json:"schema,omitempty"`
-	SchemaSource     string `json:"schemaSource,omitempty"`
-	Keyword          string `json:"keyword,omitempty"`
-	KeywordLocation  string `json:"keywordLocation,omitempty"`
-	Property         string `json:"property,omitempty"`
-	InstanceLocation string `json:"instanceLocation,omitempty"`
-	Line             int    `json:"line,omitempty"`
-	Column           int    `json:"column,omitempty"`
-	Message          string `json:"message"`
-	Hint             string `json:"hint,omitempty"`
-	Ignored          bool   `json:"ignored,omitempty"`
-	IgnoreReason     string `json:"ignoreReason,omitempty"`
+	File             string       `json:"file"`
+	RelativePath     string       `json:"relativePath"`
+	Schema           string       `json:"schema,omitempty"`
+	SchemaSource     string       `json:"schemaSource,omitempty"`
+	SchemaMatch      *SchemaMatch `json:"schemaMatch,omitempty"`
+	Keyword          string       `json:"keyword,omitempty"`
+	KeywordLocation  string       `json:"keywordLocation,omitempty"`
+	Property         string       `json:"property,omitempty"`
+	InstanceLocation string       `json:"instanceLocation,omitempty"`
+	Line             int          `json:"line,omitempty"`
+	Column           int          `json:"column,omitempty"`
+	Message          string       `json:"message"`
+	Hint             string       `json:"hint,omitempty"`
+	Ignored          bool         `json:"ignored,omitempty"`
+	IgnoreReason     string       `json:"ignoreReason,omitempty"`
+}
+
+type SchemaMatch struct {
+	Action                 string `json:"action,omitempty"`
+	Reason                 string `json:"reason,omitempty"`
+	Confidence             string `json:"confidence,omitempty"`
+	MatchType              string `json:"matchType,omitempty"`
+	Pattern                string `json:"pattern,omitempty"`
+	IgnorePattern          string `json:"ignorePattern,omitempty"`
+	SuggestedAssociation   string `json:"suggestedAssociation,omitempty"`
+	SuggestedCatalogIgnore string `json:"suggestedCatalogIgnore,omitempty"`
 }
 
 type Warning struct {

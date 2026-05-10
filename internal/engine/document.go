@@ -35,6 +35,7 @@ type Document struct {
 	Data          any
 	Schema        string
 	SchemaSource  string
+	SchemaMatch   *SchemaMatch
 	SourceMap     SourceMap
 	LineDocuments []LineDocument
 	ParseErrors   []DocumentParseError

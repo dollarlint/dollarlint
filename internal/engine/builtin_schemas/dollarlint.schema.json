@@ -166,8 +166,27 @@
           "items": {
             "$ref": "#/$defs/catalogSource"
           }
+        },
+        "ignore": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/catalogIgnoreRule"
+          }
         }
       }
+    },
+    "catalogIgnoreRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": ["file"]
     },
     "catalogSource": {
       "type": "object",

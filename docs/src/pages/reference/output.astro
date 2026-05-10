@@ -76,6 +76,18 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues (2 parsing, 6 validation
       classify why a file was not validated. This separates low-value data or lockfile
       skips from higher-signal unsupported project configuration.
     </p>
+    <p>
+      Files and issues produced from catalog inference may also include <code
+        >schemaMatch</code
+      >. This object records whether the catalog candidate was <code
+        >matched</code
+      >,
+      <code>ignored</code>, or <code>skippedLowConfidence</code>, the matched
+      catalog pattern, confidence, a human-readable reason, and suggested config
+      snippets such as <code>[[schemas.associations]]</code> or <code
+        >[[schemas.catalogs.ignore]]</code
+      >.
+    </p>
 
     <h2>Bundle</h2>
     <pre><code>dollarlint validate . --format bundle --locations --show-skipped --output dollarlint.bundle.json</code></pre>

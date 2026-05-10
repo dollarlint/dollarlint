@@ -71,6 +71,13 @@
       "title": "gpt-5.5 managed MCP 10 repo smoke 2026-05-09",
       "path": "reports/real-world-results/2026-05-09-gpt-5-5-managed-mcp-10-repo-smoke-2026-05-09.json",
       "repoCount": 10
+    },
+    {
+      "id": "2026-05-09-10-real-world-validation-tests",
+      "date": "2026-05-09",
+      "title": "10 real-world validation tests",
+      "path": "reports/real-world-results/2026-05-09-10-real-world-validation-tests.json",
+      "repoCount": 10
     }
   ]
 }

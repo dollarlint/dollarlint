@@ -30,34 +30,36 @@ type jsonSummary struct {
 }
 
 type jsonFileResult struct {
-	Path           string `json:"path"`
-	Format         string `json:"format"`
-	Schema         string `json:"schema,omitempty"`
-	SchemaSource   string `json:"schemaSource,omitempty"`
-	Status         string `json:"status"`
-	Issues         int    `json:"issues"`
-	Ignored        int    `json:"ignored"`
-	Message        string `json:"message,omitempty"`
-	SkipReason     string `json:"skipReason,omitempty"`
-	SkipClass      string `json:"skipClass,omitempty"`
-	SkipImportance string `json:"skipImportance,omitempty"`
-	SkipDetail     string `json:"skipDetail,omitempty"`
+	Path           string       `json:"path"`
+	Format         string       `json:"format"`
+	Schema         string       `json:"schema,omitempty"`
+	SchemaSource   string       `json:"schemaSource,omitempty"`
+	SchemaMatch    *SchemaMatch `json:"schemaMatch,omitempty"`
+	Status         string       `json:"status"`
+	Issues         int          `json:"issues"`
+	Ignored        int          `json:"ignored"`
+	Message        string       `json:"message,omitempty"`
+	SkipReason     string       `json:"skipReason,omitempty"`
+	SkipClass      string       `json:"skipClass,omitempty"`
+	SkipImportance string       `json:"skipImportance,omitempty"`
+	SkipDetail     string       `json:"skipDetail,omitempty"`
 }
 
 type jsonIssue struct {
-	Path             string `json:"path"`
-	Schema           string `json:"schema,omitempty"`
-	SchemaSource     string `json:"schemaSource,omitempty"`
-	Category         string `json:"category"`
-	Keyword          string `json:"keyword,omitempty"`
-	KeywordLocation  string `json:"keywordLocation,omitempty"`
-	Property         string `json:"property,omitempty"`
-	InstanceLocation string `json:"instanceLocation,omitempty"`
-	Line             int    `json:"line,omitempty"`
-	Column           int    `json:"column,omitempty"`
-	Message          string `json:"message"`
-	Hint             string `json:"hint,omitempty"`
-	IgnoreReason     string `json:"ignoreReason,omitempty"`
+	Path             string       `json:"path"`
+	Schema           string       `json:"schema,omitempty"`
+	SchemaSource     string       `json:"schemaSource,omitempty"`
+	SchemaMatch      *SchemaMatch `json:"schemaMatch,omitempty"`
+	Category         string       `json:"category"`
+	Keyword          string       `json:"keyword,omitempty"`
+	KeywordLocation  string       `json:"keywordLocation,omitempty"`
+	Property         string       `json:"property,omitempty"`
+	InstanceLocation string       `json:"instanceLocation,omitempty"`
+	Line             int          `json:"line,omitempty"`
+	Column           int          `json:"column,omitempty"`
+	Message          string       `json:"message"`
+	Hint             string       `json:"hint,omitempty"`
+	IgnoreReason     string       `json:"ignoreReason,omitempty"`
 }
 
 type jsonWarning struct {
@@ -78,16 +80,21 @@ func newJSONResult(result Result) jsonResult {
 	root := schemaDisplayRoot(result.Root)
 	files := make([]jsonFileResult, 0, len(result.Files))
 	schemaSources := map[string]string{}
+	schemaMatches := map[string]*SchemaMatch{}
 	for _, file := range result.Files {
 		path := resultPath(file.RelativePath, file.Path)
 		if file.SchemaSource != "" {
 			schemaSources[path] = file.SchemaSource
+		}
+		if file.SchemaMatch != nil {
+			schemaMatches[path] = file.SchemaMatch
 		}
 		files = append(files, jsonFileResult{
 			Path:           path,
 			Format:         file.Format,
 			Schema:         displaySchema(file.Schema, root),
 			SchemaSource:   file.SchemaSource,
+			SchemaMatch:    file.SchemaMatch,
 			Status:         file.Status,
 			Issues:         file.Issues,
 			Ignored:        file.Ignored,
@@ -102,7 +109,7 @@ func newJSONResult(result Result) jsonResult {
 	issues := make([]jsonIssue, 0, len(result.Issues))
 	ignoredIssues := make([]jsonIssue, 0)
 	for _, issue := range result.Issues {
-		out := newJSONIssue(issue, schemaSources, root)
+		out := newJSONIssue(issue, schemaSources, schemaMatches, root)
 		if issue.Ignored {
 			ignoredIssues = append(ignoredIssues, out)
 			continue
@@ -148,16 +155,21 @@ func newJSONSummary(summary Summary) jsonSummary {
 	}
 }
 
-func newJSONIssue(issue Issue, schemaSources map[string]string, root string) jsonIssue {
+func newJSONIssue(issue Issue, schemaSources map[string]string, schemaMatches map[string]*SchemaMatch, root string) jsonIssue {
 	path := resultPath(issue.RelativePath, issue.File)
 	schemaSource := issue.SchemaSource
 	if schemaSource == "" {
 		schemaSource = schemaSources[path]
 	}
+	schemaMatch := issue.SchemaMatch
+	if schemaMatch == nil {
+		schemaMatch = schemaMatches[path]
+	}
 	return jsonIssue{
 		Path:             path,
 		Schema:           displaySchema(issue.Schema, root),
 		SchemaSource:     schemaSource,
+		SchemaMatch:      schemaMatch,
 		Category:         issueCategory(issue),
 		Keyword:          issue.Keyword,
 		KeywordLocation:  issue.KeywordLocation,

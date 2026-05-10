@@ -18,6 +18,10 @@ name = "schemastore"
 format = "schemastore"
 url = "https://www.schemastore.org/api/json/catalog.json"
 enabled = true`;
+
+const catalogIgnoreConfig = `[[schemas.catalogs.ignore]]
+file = "data/tasks.json"
+reason = "application data, not a tool config"`;
 ---
 
 <DocsLayout title="Catalogs and SchemaStore" current="/guides/schemastore/">
@@ -51,6 +55,30 @@ enabled = true`;
         >"all"</code
       > when you intentionally want every catalog filename match applied.
     </p>
+    <p>
+      When the built-in SchemaStore source is enabled, DollarLint supplements it
+      with a small set of curated filename associations for known catalog gaps
+      and drift, including Rust's <code>rustfmt.toml</code> / <code
+        >.rustfmt.toml</code
+      > and <code>release-plz.toml</code> / <code>.release-plz.toml</code>.
+    </p>
+
+    <h2>Understand and lock in matches</h2>
+    <p>
+      Catalog decisions are explainable. JSON output includes <code
+        >schemaMatch</code
+      > on files and catalog-backed issues, and text hints for catalog-sourced issues
+      include why DollarLint chose that schema. The explanation names the matched
+      catalog <code>fileMatch</code>, the confidence, and a suggested <code
+        >[[schemas.associations]]</code
+      > rule you can add when the match is correct.
+    </p>
+    <p>
+      When a low-confidence catalog candidate is intentionally not a schema
+      match, add a catalog ignore rule so future runs make that choice explicit:
+    </p>
+
+    <CodeBlock code={catalogIgnoreConfig} language="toml" />
 
     <h2>Use a custom catalog</h2>
     <pre><code>dollarlint validate . --schema-store-url ./catalog.json</code></pre>

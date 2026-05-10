@@ -9,7 +9,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-const serverName = "dollarlint-repo"
+const serverName = "DollarLint Tools"
 
 type repoServer struct {
 	root                 string

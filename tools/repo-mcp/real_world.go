@@ -55,7 +55,8 @@ func (s *repoServer) realWorldMCPContract(ctx context.Context) map[string]any {
 	shortRevision := strings.TrimSpace(s.output(ctx, "git rev-parse --short HEAD"))
 	status := s.output(ctx, "git status --short")
 	return map[string]any{
-		"server":           "dollarlint_repo",
+		"server":           serverName,
+		"toolNamespace":    "dollarlint_repo",
 		"contractVersion":  realWorldMCPContractVersion,
 		"managedFlow":      true,
 		"revision":         revision,

@@ -48,6 +48,12 @@ func TestSchemaStoreCatalogAssociations(t *testing.T) {
 			if file.SchemaSource != "catalog:company:Example conventional config" {
 				t.Fatalf("schema source = %q", file.SchemaSource)
 			}
+			if file.SchemaMatch == nil || file.SchemaMatch.Action != SchemaMatchActionMatched || file.SchemaMatch.MatchType != SchemaMatchTypeExactBasename || file.SchemaMatch.Confidence != SchemaMatchConfidenceMedium || !strings.Contains(file.SchemaMatch.Reason, "example.config.json") {
+				t.Fatalf("schema match = %+v", file.SchemaMatch)
+			}
+			if !strings.Contains(file.SchemaMatch.SuggestedAssociation, `file = "example.config.json"`) || !strings.Contains(file.SchemaMatch.SuggestedAssociation, `schema = "file://`) {
+				t.Fatalf("suggested association = %q", file.SchemaMatch.SuggestedAssociation)
+			}
 			sawCatalogSource = true
 		}
 		if file.RelativePath == "plain.json" && file.Status == StatusSkipped {
@@ -94,12 +100,15 @@ func TestSchemaStoreAutoSkipsGenericBasenameMatches(t *testing.T) {
 			if file.Status != StatusSkipped || file.SchemaSource != "" {
 				t.Fatalf("generic basename should be skipped in auto mode: %+v", file)
 			}
+			if file.SchemaMatch == nil || file.SchemaMatch.Action != SchemaMatchActionSkippedLowConfidence || file.SchemaMatch.Confidence != SchemaMatchConfidenceLow || !strings.Contains(file.SchemaMatch.SuggestedCatalogIgnore, "[[schemas.catalogs.ignore]]") {
+				t.Fatalf("generic basename skip match = %+v", file.SchemaMatch)
+			}
 		case "config/tasks.json":
-			if file.SchemaSource != "catalog:test:Path tasks" {
+			if file.SchemaSource != "catalog:test:Path tasks" || file.SchemaMatch == nil || file.SchemaMatch.MatchType != SchemaMatchTypeExactPath || file.SchemaMatch.Confidence != SchemaMatchConfidenceHigh {
 				t.Fatalf("path-specific match was not applied: %+v", file)
 			}
 		case "package.json":
-			if file.SchemaSource != "catalog:test:Package" {
+			if file.SchemaSource != "catalog:test:Package" || file.SchemaMatch == nil || file.SchemaMatch.MatchType != SchemaMatchTypeExactBasename || file.SchemaMatch.Confidence != SchemaMatchConfidenceMedium {
 				t.Fatalf("distinctive basename match was not applied: %+v", file)
 			}
 		}
@@ -152,8 +161,11 @@ func TestSchemaStoreAutoSkipsLeadingWildcardBasenameGlobs(t *testing.T) {
 			if file.SchemaSource != "" || file.Status != StatusSkipped {
 				t.Fatalf("leading wildcard glob should be skipped in auto mode: %+v", file)
 			}
+			if file.SchemaMatch == nil || file.SchemaMatch.Action != SchemaMatchActionSkippedLowConfidence || file.SchemaMatch.MatchType != SchemaMatchTypeBasenameGlob {
+				t.Fatalf("leading wildcard skip match = %+v", file.SchemaMatch)
+			}
 		case ".rubocop.yml":
-			if file.SchemaSource != "catalog:test:Rubocop" {
+			if file.SchemaSource != "catalog:test:Rubocop" || file.SchemaMatch == nil || file.SchemaMatch.Action != SchemaMatchActionMatched {
 				t.Fatalf("distinctive leading wildcard glob should be applied: %+v", file)
 			}
 		}
@@ -166,6 +178,124 @@ func TestSchemaStoreAutoSkipsLeadingWildcardBasenameGlobs(t *testing.T) {
 	}
 	if result.Summary.Issues.Total != 2 {
 		t.Fatalf("all summary = %+v issues=%+v", result.Summary, result.Issues)
+	}
+}
+
+func TestSchemaStorePathPatternsOutrankBasenames(t *testing.T) {
+	dir := t.TempDir()
+	catalogPath := filepath.Join(dir, "catalog.json")
+	writeFile(t, catalogPath, `{
+  "schemas": [
+    {"name": "Generic OpenAPI", "fileMatch": ["openapi.yaml"], "url": "./generic.schema.json"},
+    {"name": "Workflow", "fileMatch": [".github/workflows/*.yaml"], "url": "./workflow.schema.json"}
+  ]
+}`)
+	writeFile(t, filepath.Join(dir, "generic.schema.json"), `{"type":"object","required":["openapi"]}`)
+	writeFile(t, filepath.Join(dir, "workflow.schema.json"), `{"type":"object","required":["name"],"properties":{"name":{"type":"string"}}}`)
+	writeFile(t, filepath.Join(dir, ".github", "workflows", "openapi.yaml"), `name: ci`)
+
+	cfg := DefaultConfig()
+	cfg.Schemas.Catalogs.Enabled = true
+	cfg.Schemas.Catalogs.Sources = []CatalogSource{{Name: "test", Format: "schemastore", Path: catalogPath}}
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if result.Summary.Issues.Total != 0 || result.Summary.Validated != 1 {
+		t.Fatalf("summary = %+v issues=%+v", result.Summary, result.Issues)
+	}
+	for _, file := range result.Files {
+		if file.RelativePath == ".github/workflows/openapi.yaml" {
+			if file.SchemaSource != "catalog:test:Workflow" || file.SchemaMatch == nil || file.SchemaMatch.MatchType != SchemaMatchTypePathGlob {
+				t.Fatalf("path glob should outrank basename: %+v", file)
+			}
+		}
+	}
+}
+
+func TestSchemaStoreCatalogIgnoreSuppressesInferredMatch(t *testing.T) {
+	dir := t.TempDir()
+	catalogPath := filepath.Join(dir, "catalog.json")
+	writeFile(t, catalogPath, `{
+  "schemas": [
+    {"name": "Known", "fileMatch": ["ignored.json", "explicit.json"], "url": "./known.schema.json"}
+  ]
+}`)
+	writeFile(t, filepath.Join(dir, "known.schema.json"), `{"type":"object","required":["name"]}`)
+	writeFile(t, filepath.Join(dir, "explicit.schema.json"), `{"type":"object","required":["ok"],"properties":{"ok":{"type":"boolean"}}}`)
+	writeFile(t, filepath.Join(dir, "ignored.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "explicit.json"), `{"ok": true}`)
+
+	cfg := DefaultConfig()
+	cfg.Schemas.Catalogs.Enabled = true
+	cfg.Schemas.Catalogs.Sources = []CatalogSource{{Name: "test", Format: "schemastore", Path: catalogPath}}
+	cfg.Schemas.Catalogs.Ignore = []CatalogIgnoreRule{{File: "*.json", Reason: "application payloads"}}
+	cfg.Schemas.Associations = []SchemaAssociation{{File: "explicit.json", Schema: filepath.Join(dir, "explicit.schema.json")}}
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if result.Summary.Validated != 1 || result.Summary.Skipped != 4 || result.Summary.Issues.Total != 0 {
+		t.Fatalf("summary = %+v issues=%+v", result.Summary, result.Issues)
+	}
+	for _, file := range result.Files {
+		switch file.RelativePath {
+		case "ignored.json":
+			if file.SchemaSource != "" || file.SchemaMatch == nil || file.SchemaMatch.Action != SchemaMatchActionIgnored || file.SchemaMatch.IgnorePattern != "*.json" || !strings.Contains(file.SkipDetail, "application payloads") {
+				t.Fatalf("ignored catalog file = %+v", file)
+			}
+		case "explicit.json":
+			if file.SchemaSource != "config-association" || file.SchemaMatch != nil {
+				t.Fatalf("explicit association should win before catalog ignore: %+v", file)
+			}
+		}
+	}
+}
+
+func TestSchemaStoreMatchHelperEdges(t *testing.T) {
+	if match, ok := (*schemaStoreCatalog)(nil).match("anything.json", CatalogConfig{}); ok || match.action != "" {
+		t.Fatalf("nil catalog match = %+v, %v", match, ok)
+	}
+	(*schemaStoreCatalog)(nil).buildIndex()
+	emptyCatalog := &schemaStoreCatalog{}
+	emptyCatalog.buildIndex()
+	emptyCatalog.buildIndex()
+	indexCatalog := &schemaStoreCatalog{Schemas: []schemaStoreEntry{{Name: "edges", FileMatch: []string{"", "nested/file.json", "*.json", "file.json"}}}}
+	indexCatalog.buildIndex()
+	if len(indexCatalog.exactPaths) != 1 || len(indexCatalog.exactBasenames) != 1 || len(indexCatalog.basenameGlobs) != 1 {
+		t.Fatalf("edge catalog index = %+v", indexCatalog)
+	}
+	if match, ok := emptyCatalog.match("anything.json", CatalogConfig{}); ok || match.action != "" {
+		t.Fatalf("empty catalog match = %+v, %v", match, ok)
+	}
+	if ignore, ok := catalogIgnoreMatch(nil, "file.json"); ok || ignore.File != "" {
+		t.Fatalf("unexpected empty catalog ignore match = %+v, %v", ignore, ok)
+	}
+	if ignore, ok := catalogIgnoreMatch([]CatalogIgnoreRule{{File: "*.yaml"}, {}}, "file.json"); ok || ignore.File != "" {
+		t.Fatalf("unexpected blank catalog ignore match = %+v, %v", ignore, ok)
+	}
+	if ignore, ok := catalogIgnoreMatch([]CatalogIgnoreRule{{}, {File: "*.json", Reason: "last"}}, "file.json"); !ok || ignore.Reason != "last" {
+		t.Fatalf("catalog ignore match = %+v, %v", ignore, ok)
+	}
+	if ignore, ok := catalogIgnoreMatch([]CatalogIgnoreRule{{File: "*.yaml"}}, "file.json"); ok || ignore.File != "" {
+		t.Fatalf("unexpected catalog ignore match = %+v, %v", ignore, ok)
+	}
+	if suggestedSchemaAssociation("", "schema.json") != "" || suggestedSchemaAssociation("file.json", "") != "" {
+		t.Fatalf("empty association suggestions should be omitted")
+	}
+	if suggestedCatalogIgnore("") != "" {
+		t.Fatalf("empty catalog ignore suggestion should be omitted")
+	}
+	if got := catalogPatternReason("file.json", "file.json", schemaStoreMatch{pattern: "*.json"}); !strings.Contains(got, `path "file.json" matched`) {
+		t.Fatalf("fallback catalog pattern reason = %q", got)
+	}
+	if lowConfidenceSchemaStoreGlob("path/*.json") {
+		t.Fatalf("path-qualified glob should not be low confidence")
+	}
+	entries := map[string]schemaStoreEntry{"file.json": {Name: "first"}}
+	addSchemaStoreExact(entries, "file.json", schemaStoreEntry{Name: "second"})
+	if entries["file.json"].Name != "first" {
+		t.Fatalf("duplicate exact entry should keep first: %+v", entries)
 	}
 }
 
@@ -390,6 +520,48 @@ func TestSchemaStoreCatalogSourceEdges(t *testing.T) {
 	_, warning, err := schemaStoreCatalogError(cfg, CatalogSource{Path: "./catalog.json"}, "boom")
 	if err != nil || warning == nil || warning.Source != "catalog" {
 		t.Fatalf("catalog warning source fallback = %+v, %v", warning, err)
+	}
+}
+
+func TestCuratedDefaultSchemaStoreAssociations(t *testing.T) {
+	catalog := &schemaStoreCatalog{
+		Schemas: []schemaStoreEntry{
+			{
+				Name:      "upstream rustfmt",
+				Source:    "schemastore",
+				FileMatch: []string{"rustfmt.toml"},
+				URL:       "https://example.com/upstream-rustfmt.json",
+			},
+		},
+	}
+	addCuratedDefaultSchemaStoreAssociations(nil, CatalogSource{}, defaultSchemaStoreCatalogURL)
+	addCuratedDefaultSchemaStoreAssociations(catalog, CatalogSource{}, "./catalog.json")
+	if len(catalog.Schemas) != 1 {
+		t.Fatalf("custom catalog should not get curated associations: %+v", catalog.Schemas)
+	}
+
+	addCuratedDefaultSchemaStoreAssociations(catalog, CatalogSource{}, defaultSchemaStoreCatalogURL)
+	if len(catalog.Schemas) != 3 {
+		t.Fatalf("curated associations = %+v", catalog.Schemas)
+	}
+
+	match, ok := catalog.match("tools/rustfmt.toml", CatalogConfig{})
+	if !ok || match.entry.URL != "https://example.com/upstream-rustfmt.json" {
+		t.Fatalf("upstream rustfmt should win when present: %+v ok=%v", match, ok)
+	}
+
+	match, ok = catalog.match("tools/.rustfmt.toml", CatalogConfig{})
+	if !ok || match.entry.URL != "https://www.schemastore.org/rustfmt.json" || match.entry.Source != "schemastore" {
+		t.Fatalf("curated rustfmt dotfile match = %+v ok=%v", match, ok)
+	}
+	schemaMatch := match.schemaMatch("tools/.rustfmt.toml")
+	if schemaMatch.Action != SchemaMatchActionMatched || !strings.Contains(schemaMatch.SuggestedAssociation, `file = "tools/.rustfmt.toml"`) {
+		t.Fatalf("curated rustfmt schemaMatch = %+v", schemaMatch)
+	}
+
+	match, ok = catalog.match(".release-plz.toml", CatalogConfig{})
+	if !ok || match.entry.Name != "release-plz.toml" || !strings.Contains(match.entry.URL, "release-plz/main/.schema/latest.json") {
+		t.Fatalf("curated release-plz match = %+v ok=%v", match, ok)
 	}
 }
 

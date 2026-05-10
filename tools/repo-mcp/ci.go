@@ -27,6 +27,12 @@ var ciJobOrder = []string{"test", "quality", "build", "docs", "goreleaser-check"
 
 var workflowAllMCPToolsPattern = regexp.MustCompile(`"tools"\s*:\s*\[\s*"\*"\s*\]`)
 
+const (
+	agenticWorkflowSourceRel            = ".github/workflows/real-world-testing.md"
+	agenticWorkflowLockRel              = ".github/workflows/real-world-testing.lock.yml"
+	agenticWorkflowReadinessDescription = "Validate the real-world agentic workflow before pushing, including actionlint, MCP allowlist, generated lock freshness, PR publishing credentials, and known-bad model settings."
+)
+
 func ciReadinessCommands(job string) ([]namedCommand, error) {
 	if job == "" {
 		job = "all"
@@ -184,8 +190,8 @@ type readinessIssue struct {
 
 func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	p := newProgress(ctx, s.mcp, request, 7)
-	sourceRel := ".github/workflows/real-world-testing.md"
-	lockRel := ".github/workflows/real-world-testing.lock.yml"
+	sourceRel := agenticWorkflowSourceRel
+	lockRel := agenticWorkflowLockRel
 	sourcePath := filepath.Join(s.root, sourceRel)
 	lockPath := filepath.Join(s.root, lockRel)
 	var issues []readinessIssue

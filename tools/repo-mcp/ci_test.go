@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -57,6 +59,26 @@ func TestInaccessibleCopilotModelIssueFlagsGPT55(t *testing.T) {
 	}
 	if _, ok := inaccessibleCopilotModelIssue("default", "claude-sonnet-4.6"); ok {
 		t.Fatalf("claude default should not be flagged")
+	}
+}
+
+func TestAgenticWorkflowReadinessUsesCurrentWorkflowNames(t *testing.T) {
+	staleScheduleWord := "week" + "ly"
+	staleWorkflowName := staleScheduleWord + "-real-world-testing"
+	for _, value := range []string{
+		agenticWorkflowSourceRel,
+		agenticWorkflowLockRel,
+		agenticWorkflowReadinessDescription,
+	} {
+		if strings.Contains(value, staleScheduleWord) || strings.Contains(value, staleWorkflowName) {
+			t.Fatalf("stale scheduled workflow reference in %q", value)
+		}
+	}
+	if agenticWorkflowSourceRel != ".github/workflows/real-world-testing.md" {
+		t.Fatalf("source workflow = %q, want real-world-testing.md", agenticWorkflowSourceRel)
+	}
+	if agenticWorkflowLockRel != ".github/workflows/real-world-testing.lock.yml" {
+		t.Fatalf("lock workflow = %q, want real-world-testing.lock.yml", agenticWorkflowLockRel)
 	}
 }
 
@@ -123,6 +145,14 @@ func TestRealWorldSafeOutputPolicyIssuesRequirePrintfForSafeoutputsCLI(t *testin
 	}
 }
 
+func TestRealWorldSafeOutputPolicyIssuesAcceptCheckedInWorkflow(t *testing.T) {
+	source := readRepoFile(t, agenticWorkflowSourceRel)
+	lock := readRepoFile(t, agenticWorkflowLockRel)
+	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 0 {
+		t.Fatalf("issues = %+v, want checked-in workflow to satisfy safe output policy", issues)
+	}
+}
+
 func TestRealWorldPRCredentialIssuesRequireWritableOutputPath(t *testing.T) {
 	issues, check := realWorldPRCredentialIssues(
 		true,
@@ -179,4 +209,13 @@ func hasMapping(mappings []failureMapping, tool, command string) bool {
 		}
 	}
 	return false
+}
+
+func readRepoFile(t *testing.T, rel string) string {
+	t.Helper()
+	content, err := os.ReadFile(filepath.Join("..", "..", rel))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(content)
 }

@@ -19,13 +19,15 @@ func issuesFromSchemaError(document *Document, err error, output OutputConfig) [
 	if errors.As(err, &validationErr) {
 		return issuesFromValidationErrorWithOutput(document, validationErr, output)
 	}
-	return []Issue{{
+	issue := Issue{
 		File:         document.Path,
 		RelativePath: document.RelativePath,
 		Schema:       document.Schema,
 		Keyword:      issueKeywordSchema,
 		Message:      err.Error(),
-	}}
+	}
+	applyValidationIssueHint(document, &issue, output)
+	return []Issue{issue}
 }
 
 func issuesFromValidationError(document *Document, err *jsonschema.ValidationError) []Issue {
@@ -38,40 +40,40 @@ func issuesFromValidationErrorWithOutput(document *Document, err *jsonschema.Val
 		mode = BranchErrorsBest
 	}
 	if mode == BranchErrorsAll {
-		return collectAllValidationIssues(document, err, nil)
+		return collectAllValidationIssues(document, err, nil, output)
 	}
-	return collectValidationIssues(document, err, nil)
+	return collectValidationIssues(document, err, nil, output)
 }
 
-func collectAllValidationIssues(document *Document, err *jsonschema.ValidationError, issues []Issue) []Issue {
+func collectAllValidationIssues(document *Document, err *jsonschema.ValidationError, issues []Issue, output OutputConfig) []Issue {
 	if len(err.Causes) > 0 {
 		for _, cause := range err.Causes {
-			issues = collectAllValidationIssues(document, cause, issues)
+			issues = collectAllValidationIssues(document, cause, issues, output)
 		}
 		return issues
 	}
-	return append(issues, leafValidationIssues(document, err)...)
+	return append(issues, leafValidationIssues(document, err, output)...)
 }
 
-func collectValidationIssues(document *Document, err *jsonschema.ValidationError, issues []Issue) []Issue {
-	return append(issues, compactValidationIssues(document, err)...)
+func collectValidationIssues(document *Document, err *jsonschema.ValidationError, issues []Issue, output OutputConfig) []Issue {
+	return append(issues, compactValidationIssues(document, err, output)...)
 }
 
-func compactValidationIssues(document *Document, err *jsonschema.ValidationError) []Issue {
+func compactValidationIssues(document *Document, err *jsonschema.ValidationError, output OutputConfig) []Issue {
 	if len(err.Causes) > 0 {
 		if isChoiceValidationError(err) {
-			return bestChoiceIssues(document, err)
+			return bestChoiceIssues(document, err, output)
 		}
 		var issues []Issue
 		for _, cause := range err.Causes {
-			issues = append(issues, compactValidationIssues(document, cause)...)
+			issues = append(issues, compactValidationIssues(document, cause, output)...)
 		}
 		return dedupeIssues(issues)
 	}
-	return leafValidationIssues(document, err)
+	return leafValidationIssues(document, err, output)
 }
 
-func leafValidationIssues(document *Document, err *jsonschema.ValidationError) []Issue {
+func leafValidationIssues(document *Document, err *jsonschema.ValidationError, output OutputConfig) []Issue {
 	base := Issue{
 		File:             document.Path,
 		RelativePath:     document.RelativePath,
@@ -92,7 +94,7 @@ func leafValidationIssues(document *Document, err *jsonschema.ValidationError) [
 			issue := base
 			issue.Property = missing
 			issue.Message = fmt.Sprintf("must have required property %q", missing)
-			applyValidationIssueHint(document, &issue)
+			applyValidationIssueHint(document, &issue, output)
 			issues = append(issues, issue)
 		}
 	case *kind.AdditionalProperties:
@@ -104,52 +106,14 @@ func leafValidationIssues(document *Document, err *jsonschema.ValidationError) [
 			issue.Column = 0
 			applyIssuePosition(document, &issue)
 			issue.Message = fmt.Sprintf("must not have additional property %q", property)
-			applyValidationIssueHint(document, &issue)
+			applyValidationIssueHint(document, &issue, output)
 			issues = append(issues, issue)
 		}
 	default:
-		applyValidationIssueHint(document, &base)
+		applyValidationIssueHint(document, &base, output)
 		issues = append(issues, base)
 	}
 	return issues
-}
-
-func applyValidationIssueHint(document *Document, issue *Issue) {
-	if issue.Hint != "" {
-		return
-	}
-	if isMkDocsInheritedRequiredIssue(document, *issue) {
-		issue.Hint = "This MkDocs config declares top-level INHERIT; MkDocs merges inherited settings before use, so validate the rendered config or add a narrow ignore rule for the inherited required property."
-		return
-	}
-	if hint := catalogValidationIssueHint(document, *issue); hint != "" {
-		issue.Hint = hint
-	}
-}
-
-func catalogValidationIssueHint(document *Document, issue Issue) string {
-	if document == nil || !isCatalogSchemaSource(document.SchemaSource) {
-		return ""
-	}
-	if issue.Keyword == "enum" {
-		return appendCatalogMatchHint(document,
-			fmt.Sprintf("This issue came from %s; if this value is valid for the repo's tool version, the external catalog schema may be stale, version-mismatched, or incomplete.", document.SchemaSource))
-	}
-	return appendCatalogMatchHint(document,
-		fmt.Sprintf("This issue came from %s; confirm the external catalog schema matches this repo's tool version and conventions before treating it as a config bug.", document.SchemaSource))
-}
-
-func appendCatalogMatchHint(document *Document, hint string) string {
-	if document == nil || document.SchemaMatch == nil || document.SchemaMatch.Action != SchemaMatchActionMatched {
-		return hint
-	}
-	if document.SchemaMatch.Reason != "" {
-		hint += " Matched because " + document.SchemaMatch.Reason + "."
-	}
-	if document.SchemaMatch.SuggestedAssociation != "" {
-		hint += "\nSuggested explicit association:\n" + document.SchemaMatch.SuggestedAssociation
-	}
-	return hint
 }
 
 func isMkDocsInheritedRequiredIssue(document *Document, issue Issue) bool {
@@ -185,15 +149,15 @@ type choiceIssueScore struct {
 	issues                int
 }
 
-func bestChoiceIssues(document *Document, err *jsonschema.ValidationError) []Issue {
+func bestChoiceIssues(document *Document, err *jsonschema.ValidationError, output OutputConfig) []Issue {
 	if len(err.Causes) == 0 {
-		return leafValidationIssues(document, err)
+		return leafValidationIssues(document, err, output)
 	}
 	context := instanceLocation(err.InstanceLocation)
 	var best []Issue
 	var bestScore choiceIssueScore
 	for i, cause := range err.Causes {
-		issues := compactValidationIssues(document, cause)
+		issues := compactValidationIssues(document, cause, output)
 		score := scoreChoiceIssues(context, issues)
 		if i == 0 || betterChoiceScore(score, bestScore) {
 			best = issues
@@ -443,19 +407,20 @@ func ratString(value *big.Rat) string {
 	return strings.TrimRight(strings.TrimRight(value.FloatString(6), "0"), ".")
 }
 
-func issueForError(file DiscoveredFile, schema, keyword string, err error) Issue {
+func issueForError(file DiscoveredFile, schema, keyword string, err error, output OutputConfig) Issue {
 	message := err.Error()
-	return Issue{
+	issue := Issue{
 		File:         file.Path,
 		RelativePath: file.RelativePath,
 		Schema:       schema,
 		Keyword:      keyword,
 		Message:      message,
-		Hint:         hintForIssue(file, keyword, message),
 	}
+	applyFileIssueHint(file, &issue, output)
+	return issue
 }
 
-func issueForMissingSchemaCoverage(document *Document) Issue {
+func issueForMissingSchemaCoverage(document *Document, output OutputConfig) Issue {
 	issue := Issue{
 		File:         document.Path,
 		RelativePath: document.RelativePath,
@@ -463,7 +428,7 @@ func issueForMissingSchemaCoverage(document *Document) Issue {
 		Keyword:      "schemaCoverage",
 		Message:      "file must declare a schema or match a configured schema association, built-in association, or catalog entry",
 	}
-	if document.SchemaMatch != nil && document.SchemaMatch.Reason != "" {
+	if issueHintsEnabled(output) && document.SchemaMatch != nil && document.SchemaMatch.Reason != "" {
 		issue.Hint = document.SchemaMatch.Reason
 		if document.SchemaMatch.SuggestedAssociation != "" {
 			issue.Hint += "\nSuggested explicit association:\n" + document.SchemaMatch.SuggestedAssociation
@@ -475,64 +440,24 @@ func issueForMissingSchemaCoverage(document *Document) Issue {
 	return issue
 }
 
-func issuesForDocumentParseErrors(document *Document) []Issue {
+func issuesForDocumentParseErrors(document *Document, output OutputConfig) []Issue {
 	if document == nil || len(document.ParseErrors) == 0 {
 		return nil
 	}
 	issues := make([]Issue, 0, len(document.ParseErrors))
 	for _, parseErr := range document.ParseErrors {
-		issues = append(issues, Issue{
+		issue := Issue{
 			File:         document.Path,
 			RelativePath: document.RelativePath,
 			Keyword:      issueKeywordParse,
 			Line:         parseErr.Line,
 			Column:       parseErr.Column,
 			Message:      parseErr.Message,
-			Hint: hintForIssue(DiscoveredFile{
-				Path:         document.Path,
-				RelativePath: document.RelativePath,
-			}, issueKeywordParse, parseErr.Message),
-		})
+		}
+		applyFileIssueHint(DiscoveredFile{Path: document.Path, RelativePath: document.RelativePath}, &issue, output)
+		issues = append(issues, issue)
 	}
 	return issues
-}
-
-func hintForIssue(file DiscoveredFile, keyword, message string) string {
-	if keyword != issueKeywordParse {
-		return ""
-	}
-	lower := strings.ToLower(message)
-	ext := strings.ToLower(path.Ext(file.RelativePath))
-	if ext == "" {
-		ext = strings.ToLower(path.Ext(file.Path))
-	}
-	if strings.HasSuffix(strings.ToLower(file.RelativePath), ".baseline.jsonc") ||
-		strings.Contains(strings.ToLower(file.RelativePath), "/tests/baselines/") {
-		return "This looks like a test baseline artifact rather than a standalone JSON document; exclude generated or baseline fixtures."
-	}
-	if strings.Contains(lower, "multiple json values") ||
-		strings.Contains(lower, "after top-level value") {
-		return "This file contains content after the first JSON value; use .jsonl/.ndjson for line-delimited data, or exclude generated/test fixtures."
-	}
-	if strings.Contains(lower, "unexpected eof") || lower == "eof" || strings.HasSuffix(lower, ": eof") {
-		if fileIsEmpty(file.Path) {
-			return "Empty JSON files are not valid documents; add a value such as {} or exclude placeholder fixtures."
-		}
-		return "The document ends before a complete value is parsed; check for an unfinished object, array, string, or comment."
-	}
-	if (ext == ".yaml" || ext == ".yml") && fileContainsToken(file.Path, "<%") {
-		return "This YAML file appears to contain template tags; exclude it or validate the rendered YAML instead."
-	}
-	if (ext == ".yaml" || ext == ".yml") && strings.Contains(lower, "mapping key") && strings.Contains(lower, "already defined") {
-		return "This YAML parser rejects duplicate mapping keys; exclude deliberately invalid fixtures or remove the duplicate key."
-	}
-	if ext == ".json" && (strings.Contains(lower, "invalid literal") || strings.Contains(lower, "looking for beginning of value")) {
-		return "This file is not valid JSON/JSONC despite its .json extension; rename it, exclude it, or use .jsonl/.ndjson for record streams."
-	}
-	if ext == ".toml" {
-		return "This TOML file is syntactically invalid; exclude it if it is an intentionally broken test fixture."
-	}
-	return ""
 }
 
 func fileIsEmpty(path string) bool {

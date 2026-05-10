@@ -6,12 +6,14 @@ import (
 )
 
 type documentValidation struct {
-	index    int
-	issues   []Issue
-	warnings []Warning
-	err      error
-	skipped  bool
-	message  string
+	index         int
+	issues        []Issue
+	warnings      []Warning
+	schemaWarning *schemaSourceFailureWarning
+	err           error
+	skipped       bool
+	skipReason    string
+	message       string
 }
 
 type parsedDocument struct {

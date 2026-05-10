@@ -23,7 +23,7 @@ const (
 	realWorldResultsSchema        = "./real-world-results.schema.json"
 	realWorldEntrySchema          = "../real-world-result-entry.schema.json"
 	realWorldHistorySchemaVersion = 3
-	realWorldMCPContractVersion   = 6
+	realWorldMCPContractVersion   = 7
 	realWorldManifestName         = "real-world-manifest.json"
 	realWorldCorpusTempPrefix     = "dollarlint-corpus."
 	realWorldCacheTempPrefix      = "dollarlint-cache."
@@ -68,6 +68,10 @@ func (s *repoServer) realWorldMCPContract(ctx context.Context) map[string]any {
 			"Do not call legacy/path-based runners during managed real-world testing.",
 			"Keep long-running prep/validation tool calls open for progress notifications; do not poll with shell sleep loops.",
 			"Record qualitative developer-experience feedback for every delivered repository result.",
+		},
+		"analysisTools": []string{
+			"real_world_artifact_query",
+			"real_world_recommendation_backlog",
 		},
 	}
 }

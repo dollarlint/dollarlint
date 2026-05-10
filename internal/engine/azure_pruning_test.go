@@ -110,11 +110,11 @@ func TestAzureARMResourcePruningCanBeDisabled(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lint without pruning: %v", err)
 	}
-	if !result.HasIssues() || *badRequests == 0 {
+	if result.HasIssues() || result.Summary.Warnings != 1 || result.Summary.Skipped != 1 || *badRequests == 0 {
 		t.Fatalf("expected disabled pruning to fetch and compile unused provider schema: result=%+v badRequests=%d", result, *badRequests)
 	}
-	if !strings.Contains(result.Issues[0].Message, "schema compile failed") {
-		t.Fatalf("expected compile issue, got %+v", result.Issues)
+	if result.Warnings[0].Kind != "schemaRemoteSchemaUnavailable" || !strings.Contains(result.Warnings[0].Hint, "remote schema compile failed") {
+		t.Fatalf("expected remote compile warning, got %+v", result.Warnings)
 	}
 }
 

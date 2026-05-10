@@ -71,13 +71,16 @@ type sarifRegion struct {
 }
 
 type sarifProperties struct {
-	Schema           string `json:"schema,omitempty"`
-	Keyword          string `json:"keyword,omitempty"`
-	KeywordLocation  string `json:"keywordLocation,omitempty"`
-	Property         string `json:"property,omitempty"`
-	InstanceLocation string `json:"instanceLocation,omitempty"`
-	WarningKind      string `json:"warningKind,omitempty"`
-	WarningSource    string `json:"warningSource,omitempty"`
+	Schema              string `json:"schema,omitempty"`
+	Keyword             string `json:"keyword,omitempty"`
+	KeywordLocation     string `json:"keywordLocation,omitempty"`
+	Property            string `json:"property,omitempty"`
+	InstanceLocation    string `json:"instanceLocation,omitempty"`
+	IssueHintID         string `json:"issueHintId,omitempty"`
+	IssueHint           string `json:"issueHint,omitempty"`
+	IssueHintConfidence string `json:"issueHintConfidence,omitempty"`
+	WarningKind         string `json:"warningKind,omitempty"`
+	WarningSource       string `json:"warningSource,omitempty"`
 }
 
 type sarifSuppression struct {
@@ -169,11 +172,14 @@ func sarifResults(result Result) []sarifResult {
 				},
 			}},
 			Properties: sarifProperties{
-				Schema:           issue.Schema,
-				Keyword:          issue.Keyword,
-				KeywordLocation:  issue.KeywordLocation,
-				Property:         issue.Property,
-				InstanceLocation: issue.InstanceLocation,
+				Schema:              issue.Schema,
+				Keyword:             issue.Keyword,
+				KeywordLocation:     issue.KeywordLocation,
+				Property:            issue.Property,
+				InstanceLocation:    issue.InstanceLocation,
+				IssueHintID:         issueHintID(issue),
+				IssueHint:           issue.Hint,
+				IssueHintConfidence: issueHintConfidence(issue),
 			},
 		}
 		if issue.Ignored {
@@ -227,6 +233,20 @@ func sarifLevel(issue Issue) string {
 		return "none"
 	}
 	return "error"
+}
+
+func issueHintID(issue Issue) string {
+	if issue.IssueHint == nil {
+		return ""
+	}
+	return issue.IssueHint.ID
+}
+
+func issueHintConfidence(issue Issue) string {
+	if issue.IssueHint == nil {
+		return ""
+	}
+	return issue.IssueHint.Confidence
 }
 
 func sarifWarningRuleID(warning Warning) string {

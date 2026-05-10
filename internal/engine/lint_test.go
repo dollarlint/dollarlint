@@ -444,6 +444,73 @@ func TestLintParseSchemaAndPrimeErrors(t *testing.T) {
 	}
 }
 
+func TestLintGroupsRemoteSchemaCompileFailuresAsWarningsAndSkips(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/schema+json")
+		_, _ = w.Write([]byte(`{"type":42}`))
+	}))
+	defer server.Close()
+
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "a.json"), `{"$schema":`+strconv.Quote(server.URL+`/schema.json`)+`,"name":"a"}`)
+	writeFile(t, filepath.Join(dir, "b.json"), `{"$schema":`+strconv.Quote(server.URL+`/schema.json`)+`,"name":"b"}`)
+
+	result, err := Lint(context.Background(), Options{Root: dir, Config: configWithoutSchemaStore()})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if result.Summary.Issues.Total != 0 || result.Summary.Warnings != 1 || result.Summary.Validated != 0 || result.Summary.Skipped != 2 {
+		t.Fatalf("summary = %+v issues=%+v warnings=%+v", result.Summary, result.Issues, result.Warnings)
+	}
+	warning := result.Warnings[0]
+	if warning.Kind != "schemaRemoteSchemaUnavailable" ||
+		warning.Source != "$schema" ||
+		warning.Schema != server.URL+"/schema.json" ||
+		warning.Path != "" ||
+		!strings.Contains(warning.Message, "Remote schema could not be used for 2 files") ||
+		!strings.Contains(warning.Hint, "Affected files: a.json, b.json.") ||
+		!strings.Contains(warning.Hint, "Technical details: remote schema compile failed") {
+		t.Fatalf("remote schema warning = %+v", warning)
+	}
+	for _, file := range result.Files {
+		if file.Status != StatusSkipped || file.SkipReason != SkipReasonSchemaUnavailable || file.SkipClass != SkipClassExternalSchema {
+			t.Fatalf("remote schema skipped file = %+v", file)
+		}
+	}
+}
+
+func TestSchemaSourceFailureWarningHelpers(t *testing.T) {
+	if source := schemaFailureSource(nil); source != "remote-schema" {
+		t.Fatalf("nil schema failure source = %q", source)
+	}
+	if source := schemaFailureSource(&Document{SchemaSource: "config-association"}); source != "config-association" {
+		t.Fatalf("document schema failure source = %q", source)
+	}
+	if label := affectedFilesLabel(nil); label != "files that use it" {
+		t.Fatalf("empty affected label = %q", label)
+	}
+	if label := affectedFilesLabel([]string{"a.json"}); label != "a.json" {
+		t.Fatalf("single affected label = %q", label)
+	}
+	paths := []string{"a.json", "b.json", "c.json"}
+	if list := limitedPathList(paths, 2); list != "a.json, b.json, and 1 more" {
+		t.Fatalf("limited path list = %q", list)
+	}
+	group := schemaSourceFailureWarningGroups{}
+	group.add(schemaSourceFailureWarning{
+		Kind:         "schemaRemoteSchemaUnavailable",
+		Source:       "$schema",
+		Schema:       "https://example.com/schema.json",
+		SchemaSource: "$schema",
+		Phase:        "compile",
+		Detail:       "remote schema compile failed",
+	})
+	warnings := group.warnings()
+	if len(warnings) != 1 || !strings.Contains(warnings[0].Message, "files that use it") || !strings.Contains(warnings[0].Hint, "Technical details: remote schema compile failed") {
+		t.Fatalf("schema source warning without paths = %+v", warnings)
+	}
+}
+
 func TestLintMissingDependencySchemaHint(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "project.json"), `{"$schema":"./node_modules/tool/schema.json","name":"app"}`)
@@ -719,6 +786,9 @@ func TestSkipClassification(t *testing.T) {
 			t.Fatalf("classifySkippedFile(%q) = %+v", tc.path, classification)
 		}
 	}
+	if classification := classifySkippedFile("config.json", SkipReasonSchemaUnavailable, "remote unavailable"); classification.Class != SkipClassExternalSchema || classification.Importance != SkipImportanceMedium || classification.Detail != "remote unavailable" {
+		t.Fatalf("external schema classification = %+v", classification)
+	}
 }
 
 func TestLintBranchErrorsOutputMode(t *testing.T) {
@@ -821,11 +891,11 @@ func TestMissingSchemaCoverageIssueIncludesCatalogDecision(t *testing.T) {
 			SuggestedAssociation:   "[[schemas.associations]]\nfile = \"tasks.json\"\nschema = \"https://example.com/tasks.schema.json\"",
 			SuggestedCatalogIgnore: "[[schemas.catalogs.ignore]]\nfile = \"tasks.json\"\nreason = \"not this catalog schema\"",
 		},
-	})
+	}, OutputConfig{})
 	if issue.SchemaMatch == nil || !strings.Contains(issue.Hint, "Suggested explicit association") || !strings.Contains(issue.Hint, "Suggested catalog ignore") {
 		t.Fatalf("missing coverage issue = %+v", issue)
 	}
-	issue = issueForMissingSchemaCoverage(&Document{Path: "/repo/file.json", RelativePath: "file.json"})
+	issue = issueForMissingSchemaCoverage(&Document{Path: "/repo/file.json", RelativePath: "file.json"}, OutputConfig{})
 	if issue.Hint != "" || issue.SchemaMatch != nil {
 		t.Fatalf("unexpected missing coverage hint = %+v", issue)
 	}
@@ -898,7 +968,7 @@ func TestLintCanDisableSchemaStoreAssociations(t *testing.T) {
 
 func TestValidateDocumentNonValidationError(t *testing.T) {
 	err := errors.New("plain")
-	issue := issueForError(DiscoveredFile{Path: "/tmp/a.json", RelativePath: "a.json"}, "schema", issueKeywordSchema, err)
+	issue := issueForError(DiscoveredFile{Path: "/tmp/a.json", RelativePath: "a.json"}, "schema", issueKeywordSchema, err, OutputConfig{})
 	if issue.Message != "plain" || issue.Schema != "schema" || issue.Keyword != issueKeywordSchema {
 		t.Fatalf("issueForError = %+v", issue)
 	}

@@ -95,7 +95,7 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 			fileResult.Status = StatusError
 			fileResult.Message = parsed.err.Error()
 			result.Files = append(result.Files, fileResult)
-			addIssue(&result, issueForError(file, "", issueKeywordParse, parsed.err))
+			addIssue(&result, issueForError(file, "", issueKeywordParse, parsed.err, cfg.Output))
 			continue
 		}
 		fileResult.Format = document.Format
@@ -111,7 +111,7 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 		result.Files[index].Schema = document.Schema
 		result.Files[index].SchemaSource = document.SchemaSource
 		result.Files[index].SchemaMatch = document.SchemaMatch
-		parseIssues := issuesForDocumentParseErrors(document)
+		parseIssues := issuesForDocumentParseErrors(document, cfg.Output)
 		for _, issue := range parseIssues {
 			addIssue(&result, issue)
 		}
@@ -123,7 +123,7 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 			if cfg.Schemas.RequireCoverage {
 				result.Files[index].Status = StatusError
 				result.Files[index].Message = "file is not covered by an inline schema, config association, built-in association, or catalog match"
-				addIssue(&result, issueForMissingSchemaCoverage(document))
+				addIssue(&result, issueForMissingSchemaCoverage(document, cfg.Output))
 			} else if len(parseIssues) == 0 {
 				applySkippedFileClassification(&result.Files[index], document, SkipReasonNoSchema, schemaMatchSkipDetail(document.SchemaMatch))
 				result.Summary.Skipped++
@@ -134,7 +134,7 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 		if err != nil {
 			result.Files[index].Status = StatusError
 			result.Files[index].Message = err.Error()
-			issue := issueForError(DiscoveredFile{Path: document.Path, RelativePath: document.RelativePath}, document.Schema, issueKeywordSchema, err)
+			issue := issueForError(DiscoveredFile{Path: document.Path, RelativePath: document.RelativePath}, document.Schema, issueKeywordSchema, err, cfg.Output)
 			issue.SchemaSource = document.SchemaSource
 			issue.SchemaMatch = document.SchemaMatch
 			addIssue(&result, issue)
@@ -152,6 +152,7 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 			validatedDocuments = append(validatedDocuments, document)
 		}
 	}
+	var schemaWarnings schemaSourceFailureWarningGroups
 	for _, validation := range validateDocuments(ctx, cache, cfg, validatedDocuments) {
 		document := validatedDocuments[validation.index]
 		index := fileIndexes[document.RelativePath]
@@ -161,11 +162,18 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 		for _, warning := range validation.warnings {
 			addWarning(&result, warning)
 		}
+		if validation.schemaWarning != nil {
+			schemaWarnings.add(*validation.schemaWarning)
+		}
 		if validation.skipped {
 			if result.Files[index].Status != StatusError {
 				result.Files[index].Status = StatusSkipped
 				result.Files[index].Message = validation.message
-				applySkippedFileClassification(&result.Files[index], document, SkipReasonCatalogSchemaUnavailable, validation.message)
+				skipReason := validation.skipReason
+				if skipReason == "" {
+					skipReason = SkipReasonCatalogSchemaUnavailable
+				}
+				applySkippedFileClassification(&result.Files[index], document, skipReason, validation.message)
 				result.Summary.Skipped++
 			}
 			continue
@@ -181,6 +189,9 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 			}
 		}
 		result.Summary.Validated++
+	}
+	for _, warning := range schemaWarnings.warnings() {
+		addWarning(&result, warning)
 	}
 	for i := range result.Files {
 		if result.Files[i].Status == StatusError {

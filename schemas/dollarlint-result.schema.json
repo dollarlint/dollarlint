@@ -154,13 +154,14 @@
         },
         "skipReason": {
           "type": "string",
-          "enum": ["noSchema", "catalogSchemaUnavailable"]
+          "enum": ["noSchema", "catalogSchemaUnavailable", "schemaUnavailable"]
         },
         "skipClass": {
           "type": "string",
           "enum": [
             "application-data",
             "external-catalog",
+            "external-schema",
             "locale-data",
             "lockfile",
             "repo-management-config",
@@ -223,7 +224,39 @@
         "hint": {
           "type": "string"
         },
+        "issueHint": {
+          "$ref": "#/$defs/issueHint"
+        },
         "ignoreReason": {
+          "type": "string"
+        }
+      }
+    },
+    "issueHint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "suggestion": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "source": {
+          "type": "string"
+        },
+        "groupKey": {
           "type": "string"
         }
       }

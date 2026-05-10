@@ -3,10 +3,13 @@ import Logo from "../components/Logo.astro";
 import "../styles/dollar.css";
 
 const {
-  title = "DollarLint docs",
+  title = "Docs",
   description = "Documentation for the DollarLint CLI.",
   current = "/",
 } = Astro.props;
+
+const siteTitle = "DollarLint";
+const documentTitle = current === "/" ? siteTitle : `${title} · ${siteTitle}`;
 
 const nav = [
   {
@@ -20,7 +23,6 @@ const nav = [
       { href: "/guides/schemastore/", label: "Catalogs" },
       { href: "/guides/github-action/", label: "GitHub Action" },
       { href: "/guides/mcp/", label: "MCP server" },
-      { href: "/guides/examples/", label: "Examples" },
     ],
   },
   {
@@ -258,7 +260,7 @@ const slogans = [
     <link rel="icon" type="image/png" sizes="1024x1024" href="/site-icon.png" />
     <link rel="apple-touch-icon" sizes="1024x1024" href="/site-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <title>{title}</title>
+    <title>{documentTitle}</title>
   </head>
   <body class:list={[current === "/" && "is-home"]}>
     <div class="site-shell">

@@ -146,6 +146,7 @@ reason = "not catalog config"
 showSkipped = true
 locations = true
 branchErrors = "all"
+issueHints = "verbose"
 
 [[ignore]]
 file = "*.json"
@@ -196,7 +197,7 @@ schemaSource = "config-association"
 	if cfg.Schemas.Optimizations.Azure.PruneResources == nil || *cfg.Schemas.Optimizations.Azure.PruneResources {
 		t.Fatalf("Azure resource pruning opt-out not decoded: %+v", cfg.Schemas)
 	}
-	if !cfg.Output.ShowSkipped || !cfg.Output.Locations || cfg.Output.BranchErrors != BranchErrorsAll {
+	if !cfg.Output.ShowSkipped || !cfg.Output.Locations || cfg.Output.BranchErrors != BranchErrorsAll || cfg.Output.IssueHints != IssueHintsVerbose {
 		t.Fatalf("output preferences not decoded: %+v", cfg.Output)
 	}
 	if len(cfg.Discovery.Include) != 1 || cfg.Discovery.Include[0] != "*.json" || len(cfg.Discovery.Exclude) != 1 || cfg.Discovery.Exclude[0] != "generated/**" {
@@ -280,6 +281,15 @@ schema = "./schema.json"
 	}
 	if _, err := branchErrorMode(OutputConfig{BranchErrors: "explode"}); err == nil {
 		t.Fatalf("expected invalid branch errors mode")
+	}
+	if mode, err := issueHintsMode(OutputConfig{}); err != nil || mode != IssueHintsAuto {
+		t.Fatalf("issue hints default = %q, %v", mode, err)
+	}
+	if mode, err := issueHintsMode(OutputConfig{IssueHints: IssueHintsVerbose}); err != nil || mode != IssueHintsVerbose {
+		t.Fatalf("issue hints verbose = %q, %v", mode, err)
+	}
+	if _, err := issueHintsMode(OutputConfig{IssueHints: "explode"}); err == nil {
+		t.Fatalf("expected invalid issue hints mode")
 	}
 	if fetchRetries(FetchConfig{}) != 0 {
 		t.Fatalf("nil fetch retries should resolve to zero")
@@ -464,6 +474,12 @@ branchErrors = "explode"
 `)
 	if _, _, err := LoadConfig(dir, ""); err == nil || !strings.Contains(err.Error(), "output.branchErrors") {
 		t.Fatalf("expected invalid branchErrors error, got %v", err)
+	}
+	writeFile(t, badTOML, `[output]
+issueHints = "nope"
+`)
+	if _, _, err := LoadConfig(dir, ""); err == nil || !strings.Contains(err.Error(), "output.issueHints") {
+		t.Fatalf("expected invalid issueHints error, got %v", err)
 	}
 	blockingDir := filepath.Join(dir, "block")
 	if err := os.Mkdir(blockingDir, 0o755); err != nil {

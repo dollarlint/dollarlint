@@ -59,6 +59,7 @@ type jsonIssue struct {
 	Column           int          `json:"column,omitempty"`
 	Message          string       `json:"message"`
 	Hint             string       `json:"hint,omitempty"`
+	IssueHint        *IssueHint   `json:"issueHint,omitempty"`
 	IgnoreReason     string       `json:"ignoreReason,omitempty"`
 }
 
@@ -179,6 +180,7 @@ func newJSONIssue(issue Issue, schemaSources map[string]string, schemaMatches ma
 		Column:           issue.Column,
 		Message:          issue.Message,
 		Hint:             issue.Hint,
+		IssueHint:        issue.IssueHint,
 		IgnoreReason:     issue.IgnoreReason,
 	}
 }

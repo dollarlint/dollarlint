@@ -74,6 +74,7 @@ func DefaultConfig() Config {
 		},
 		Output: OutputConfig{
 			BranchErrors: BranchErrorsBest,
+			IssueHints:   IssueHintsAuto,
 		},
 	}
 }
@@ -142,6 +143,9 @@ func (c *Config) ApplyDefaults() {
 	}
 	if c.Output.BranchErrors == "" {
 		c.Output.BranchErrors = defaults.Output.BranchErrors
+	}
+	if c.Output.IssueHints == "" {
+		c.Output.IssueHints = defaults.Output.IssueHints
 	}
 }
 
@@ -223,6 +227,11 @@ func validateConfigValues(cfg Config) error {
 	}
 	if cfg.Output.BranchErrors != "" {
 		if _, err := branchErrorMode(cfg.Output); err != nil {
+			return err
+		}
+	}
+	if cfg.Output.IssueHints != "" {
+		if _, err := issueHintsMode(cfg.Output); err != nil {
 			return err
 		}
 	}
@@ -555,6 +564,9 @@ func mergeOutputConfig(parent *OutputConfig, child OutputConfig, presence config
 	if presence.has("output.branchErrors") {
 		parent.BranchErrors = child.BranchErrors
 	}
+	if presence.has("output.issueHints") {
+		parent.IssueHints = child.IssueHints
+	}
 }
 
 func isConfigFileName(path string) bool {
@@ -730,6 +742,19 @@ func branchErrorMode(cfg OutputConfig) (string, error) {
 		return mode, nil
 	default:
 		return "", fmt.Errorf("unsupported output.branchErrors %q; expected best or all", mode)
+	}
+}
+
+func issueHintsMode(cfg OutputConfig) (string, error) {
+	mode := cfg.IssueHints
+	if mode == "" {
+		mode = IssueHintsAuto
+	}
+	switch mode {
+	case IssueHintsAuto, IssueHintsOff, IssueHintsVerbose:
+		return mode, nil
+	default:
+		return "", fmt.Errorf("unsupported output.issueHints %q; expected auto, off, or verbose", mode)
 	}
 }
 

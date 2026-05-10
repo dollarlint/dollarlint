@@ -22,6 +22,8 @@ var (
 	ansiEscapeRE     = regexp.MustCompile(`\x1b\[[0-?]*[ -/]*[@-~]`)
 )
 
+const skippedFileGroupDisplayLimit = 8
+
 func FormatJSON(result Result) ([]byte, error) {
 	return json.MarshalIndent(result, "", "  ")
 }
@@ -53,9 +55,10 @@ func FormatBundle(result Result, output OutputConfig) ([]byte, error) {
 		JSON:          result,
 		SARIF:         json.RawMessage(sarif),
 		Styled: BundleStyledOutput{
-			Plain:   StripANSI(styled),
-			ANSI:    styled,
-			Options: output,
+			Plain:     StripANSI(styled),
+			ANSI:      styled,
+			Options:   output,
+			Truncated: textOutputTruncated(result, output),
 		},
 	}
 	return json.MarshalIndent(bundle, "", "  ")
@@ -85,7 +88,9 @@ func FormatText(result Result, output OutputConfig) string {
 		}
 		builder.WriteString(textStyleError.Render(headline))
 		builder.WriteString("\n")
-		writeGroupedIssues(&builder, result, output)
+		hintCounts := issueHintGroupCounts(result)
+		writeIssueHintSummary(&builder, result, output, hintCounts)
+		writeGroupedIssues(&builder, result, output, hintCounts)
 	} else {
 		builder.WriteString(textStyleSuccess.Render(passHeadline(result)))
 		builder.WriteString("\n")
@@ -114,7 +119,7 @@ func passHeadline(result Result) string {
 	return headline
 }
 
-func writeGroupedIssues(builder *strings.Builder, result Result, output OutputConfig) {
+func writeGroupedIssues(builder *strings.Builder, result Result, output OutputConfig, hintCounts map[string]int) {
 	grouped := map[string][]Issue{}
 	for _, issue := range result.Issues {
 		if issue.Ignored {
@@ -133,12 +138,12 @@ func writeGroupedIssues(builder *strings.Builder, result Result, output OutputCo
 		widths := issueColumnWidths(issues, output)
 		fmt.Fprintf(builder, "\n%s\n", textStyleFile.Render(file))
 		for _, issue := range issues {
-			writeIssueRow(builder, issue, output, widths)
+			writeIssueRow(builder, issue, output, widths, hintCounts)
 		}
 	}
 }
 
-func writeIssueRow(builder *strings.Builder, issue Issue, output OutputConfig, widths textWidths) {
+func writeIssueRow(builder *strings.Builder, issue Issue, output OutputConfig, widths textWidths, hintCounts map[string]int) {
 	location := issueLocation(issue, output)
 	keyword := fallback(issue.Keyword, "issue")
 	messageWidth := 0
@@ -156,9 +161,114 @@ func writeIssueRow(builder *strings.Builder, issue Issue, output OutputConfig, w
 	if output.Verbose {
 		writeVerboseIssueDetails(builder, issue)
 	}
-	if issue.Hint != "" {
-		writeIndentedValue(builder, "hint:", issue.Hint)
+	if hint := issueHintForText(issue, output, hintCounts); hint != "" {
+		writeIndentedValue(builder, "hint:", hint)
 	}
+}
+
+type issueHintGroup struct {
+	Hint  IssueHint
+	Files map[string]bool
+	Count int
+}
+
+func writeIssueHintSummary(builder *strings.Builder, result Result, output OutputConfig, hintCounts map[string]int) {
+	if !issueHintsEnabled(output) {
+		return
+	}
+	groups := groupedIssueHints(result, hintCounts)
+	if len(groups) == 0 {
+		return
+	}
+	builder.WriteString("\n")
+	builder.WriteString(textStyleMuted.Render("issue hints"))
+	builder.WriteString("\n")
+	for _, group := range groups {
+		label := group.Hint.ID
+		if label == "" {
+			label = group.Hint.Title
+		}
+		fmt.Fprintf(builder, "  %s %s\n",
+			textStyleKeyword.Render(label),
+			textStyleMuted.Render(fmt.Sprintf("(%d issue%s across %d file%s)", group.Count, plural(group.Count), len(group.Files), plural(len(group.Files)))),
+		)
+		if group.Hint.Title != "" {
+			writeIndentedValue(builder, "why:", group.Hint.Title)
+		}
+		if group.Hint.Detail != "" {
+			writeIndentedValue(builder, "detail:", group.Hint.Detail)
+		}
+		if group.Hint.Suggestion != "" {
+			writeIndentedValue(builder, "suggestion:", group.Hint.Suggestion)
+		}
+		if issueHintsVerbose(output) {
+			writeIndentedValue(builder, "metadata:", issueHintMetadata(group.Hint))
+		}
+	}
+}
+
+func issueHintGroupCounts(result Result) map[string]int {
+	counts := map[string]int{}
+	for _, issue := range result.Issues {
+		if issue.Ignored || issue.IssueHint == nil || issue.IssueHint.GroupKey == "" {
+			continue
+		}
+		counts[issue.IssueHint.GroupKey]++
+	}
+	return counts
+}
+
+func groupedIssueHints(result Result, hintCounts map[string]int) []issueHintGroup {
+	indexes := map[string]int{}
+	var groups []issueHintGroup
+	for _, issue := range result.Issues {
+		if issue.Ignored || issue.IssueHint == nil || issue.IssueHint.GroupKey == "" || hintCounts[issue.IssueHint.GroupKey] < 2 {
+			continue
+		}
+		key := issue.IssueHint.GroupKey
+		index, ok := indexes[key]
+		if !ok {
+			index = len(groups)
+			indexes[key] = index
+			groups = append(groups, issueHintGroup{Hint: *issue.IssueHint, Files: map[string]bool{}})
+		}
+		groups[index].Count++
+		groups[index].Files[resultPath(issue.RelativePath, issue.File)] = true
+	}
+	sort.Slice(groups, func(i, j int) bool {
+		if groups[i].Count != groups[j].Count {
+			return groups[i].Count > groups[j].Count
+		}
+		return groups[i].Hint.ID < groups[j].Hint.ID
+	})
+	return groups
+}
+
+func issueHintForText(issue Issue, output OutputConfig, hintCounts map[string]int) string {
+	if issue.IssueHint == nil {
+		return issue.Hint
+	}
+	if !issueHintsEnabled(output) {
+		return ""
+	}
+	if !issueHintsVerbose(output) && hintCounts[issue.IssueHint.GroupKey] > 1 {
+		return ""
+	}
+	return issueHintText(*issue.IssueHint, issueHintsVerbose(output))
+}
+
+func issueHintMetadata(hint IssueHint) string {
+	var parts []string
+	if hint.ID != "" {
+		parts = append(parts, "rule "+hint.ID)
+	}
+	if hint.Confidence != "" {
+		parts = append(parts, "confidence "+hint.Confidence)
+	}
+	if hint.Source != "" {
+		parts = append(parts, "source "+hint.Source)
+	}
+	return strings.Join(parts, "; ")
 }
 
 func writeVerboseIssueDetails(builder *strings.Builder, issue Issue) {
@@ -214,8 +324,17 @@ func writeSkipped(builder *strings.Builder, result Result, showSkipped bool) {
 		if group.Detail != "" {
 			fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("why:"), group.Detail)
 		}
-		for _, file := range group.Files {
+		files := group.Files
+		omitted := 0
+		if shouldCollapseSkippedFileGroup(group) {
+			files = group.Files[:skippedFileGroupDisplayLimit]
+			omitted = len(group.Files) - skippedFileGroupDisplayLimit
+		}
+		for _, file := range files {
 			fmt.Fprintf(builder, "    %s\n", file)
+		}
+		if omitted > 0 {
+			fmt.Fprintf(builder, "    %s\n", textStyleMuted.Render(fmt.Sprintf("... %d more skipped file%s omitted from text output; use --format json for the full list", omitted, plural(omitted))))
 		}
 	}
 }
@@ -267,6 +386,22 @@ func skippedFileGroups(files []FileResult) []skippedFileGroup {
 		sort.Strings(groups[i].Files)
 	}
 	return groups
+}
+
+func textOutputTruncated(result Result, output OutputConfig) bool {
+	if output.Quiet || !output.ShowSkipped {
+		return false
+	}
+	for _, group := range skippedFileGroups(result.Files) {
+		if shouldCollapseSkippedFileGroup(group) {
+			return true
+		}
+	}
+	return false
+}
+
+func shouldCollapseSkippedFileGroup(group skippedFileGroup) bool {
+	return len(group.Files) > skippedFileGroupDisplayLimit && group.Importance == SkipImportanceLow
 }
 
 func normalizedSkipInfo(file FileResult) skipClassification {
@@ -323,6 +458,8 @@ func skipClassLabel(value string) string {
 		return "application data"
 	case SkipClassExternalCatalog:
 		return "external catalog"
+	case SkipClassExternalSchema:
+		return "external schema"
 	case SkipClassLocaleData:
 		return "locale data"
 	case SkipClassLockfile:
@@ -342,6 +479,8 @@ func skipReasonLabel(value string) string {
 	switch value {
 	case SkipReasonCatalogSchemaUnavailable:
 		return "catalog schema unavailable"
+	case SkipReasonSchemaUnavailable:
+		return "schema unavailable"
 	case SkipReasonNoSchema:
 		return "no schema"
 	default:

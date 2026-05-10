@@ -298,6 +298,185 @@ func TestTriageRealWorldOutputRejectsCountMismatch(t *testing.T) {
 	}
 }
 
+func TestRealWorldArtifactQueryReturnsRecordedCollateral(t *testing.T) {
+	root := t.TempDir()
+	corpus := filepath.Join(root, "corpus")
+	watchPath := filepath.Join(corpus, "redis", "src", "commands", "watch.json")
+	if err := os.MkdirAll(filepath.Dir(watchPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(watchPath, []byte("{\"summary\":\"WATCH command\"}\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	artifactRel := "reports/real-world-artifacts/sample.dollarlint.json"
+	artifactPath := filepath.Join(root, artifactRel)
+	if err := os.MkdirAll(filepath.Dir(artifactPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	bundle := `{
+  "formatVersion": 1,
+  "json": {
+    "root": "` + filepath.ToSlash(corpus) + `",
+    "summary": {
+      "discovered": 4,
+      "validated": 2,
+      "skipped": 1,
+      "failed": 1,
+      "issues": {"total": 3, "parsing": 1, "validation": 2, "schema": 0, "coverage": 0},
+      "ignored": 0,
+      "warnings": 1,
+      "durationNanos": 99
+    },
+    "files": [
+      {"path": "redis/src/commands/watch.json", "format": "json", "status": "validated", "issues": 1},
+      {"path": "redis/deps/jemalloc/.travis.yml", "format": "yaml", "status": "validated", "issues": 1},
+      {"path": "redis/data/domain.json", "format": "json", "status": "skipped", "skipClass": "application-data", "skipReason": "noSchema"},
+      {"path": "helm/chart/templates/deploy.yaml", "format": "yaml", "status": "error", "issues": 1}
+    ],
+    "issues": [
+      {"path": "redis/src/commands/watch.json", "category": "validation", "schemaSource": "catalog:schemastore:Grunt Watch", "keyword": "required", "line": 1, "column": 2, "message": "must have required property tasks"},
+      {"path": "redis/deps/jemalloc/.travis.yml", "category": "validation", "schemaSource": "catalog:schemastore:Travis", "keyword": "enum", "message": "value must be one of linux, osx"},
+      {"path": "helm/chart/templates/deploy.yaml", "category": "parsing", "keyword": "parse", "message": "yaml: invalid map key from Helm template"}
+    ],
+    "warnings": [
+      {"kind": "schemaCatalogSchemaUnavailable", "path": "redis/.circleci/config.yml", "schemaSource": "catalog:schemastore:CircleCI config.yml", "message": "catalog schema could not be used"}
+    ]
+  },
+  "sarif": {"version": "2.1.0", "runs": []},
+  "styled": {"plain": "dollarlint found 3 issues\nredis/src/commands/watch.json\n", "ansi": "\u001b[31mdollarlint found 3 issues\u001b[0m\n", "options": {"locations": true}}
+}`
+	if err := os.WriteFile(artifactPath, []byte(bundle), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	history := realWorldHistory{Entries: []realWorldEntry{{
+		ID:                      "sample",
+		Date:                    "2026-05-09",
+		Title:                   "Sample",
+		DollarLintRevision:      "abc123",
+		Corpus:                  corpus,
+		Command:                 "bin/dollarlint validate",
+		OutputArtifact:          "/tmp/out.json",
+		PersistedOutputArtifact: artifactRel,
+		Repositories: []realWorldRepository{{
+			Name:     "redis",
+			CloneURL: "https://github.com/redis/redis.git",
+			Path:     filepath.Join(corpus, "redis"),
+		}},
+	}}}
+	if err := saveRealWorldHistory(root, history); err != nil {
+		t.Fatal(err)
+	}
+
+	server := &repoServer{root: root}
+	out, err := server.queryRealWorldArtifact(realWorldArtifactQueryArgs{
+		EntryID:        "sample",
+		Repository:     "redis",
+		Recommendation: "Tighten generic JSON basename catalog inference for watch.json",
+		Limit:          4,
+	})
+	if err != nil {
+		t.Fatalf("query artifact: %v", err)
+	}
+	summary := out["summary"].(*realWorldResult)
+	if summary.Discovered != 3 || summary.Issues.Total != 2 || summary.Issues.Parsing != 0 {
+		t.Fatalf("filtered summary = %+v", summary)
+	}
+	examples := out["recommendationExamples"].(map[string]any)
+	issueGroups := examples["issueGroups"].([]realWorldIssueGroup)
+	if len(issueGroups) == 0 || !strings.Contains(strings.Join(issueGroups[0].Paths, " "), "watch.json") {
+		t.Fatalf("recommendation issue groups = %+v", issueGroups)
+	}
+	coverage := out["skippedCoverageByRepository"].([]map[string]any)
+	if len(coverage) != 1 || coverage[0]["repository"] != "redis" || coverage[0]["skipped"] != 1 {
+		t.Fatalf("skipped coverage = %+v", coverage)
+	}
+	preview := out["cliPreview"].(map[string]any)
+	if !strings.Contains(preview["plain"].(string), "dollarlint found") {
+		t.Fatalf("cli preview = %+v", preview)
+	}
+}
+
+func TestRealWorldRecommendationBacklogClustersRecordedRecommendations(t *testing.T) {
+	root := t.TempDir()
+	history := realWorldHistory{Entries: []realWorldEntry{
+		{
+			ID:    "first",
+			Date:  "2026-05-09",
+			Title: "First",
+			ProductRecommendations: []realWorldProductRecommendation{
+				{
+					Strength:       "high",
+					Recommendation: "Tighten SchemaStore catalog inference for generic JSON basenames such as watch.json and cluster.json.",
+					Rationale:      "Redis command metadata files were validated against unrelated schemas solely because of generic names.",
+				},
+				{
+					Strength:       "low",
+					Recommendation: "No product change is recommended from this sweep.",
+					Rationale:      "The run behaved reasonably.",
+				},
+			},
+			ValidationFeedback: []realWorldValidationFeedback{{
+				Repository: "caddy",
+				Outcome:    realWorldFeedbackProductSignal,
+				ProductRecommendations: []realWorldProductRecommendation{{
+					Strength:       "med",
+					Recommendation: "Group repeated `.github/FUNDING.yml` blank-provider findings.",
+					Rationale:      "Caddy produced repetitive null provider findings from one GitHub Funding template shape.",
+				}},
+			}},
+		},
+		{
+			ID:    "second",
+			Date:  "2026-05-10",
+			Title: "Second",
+			ValidationFeedback: []realWorldValidationFeedback{{
+				Repository: "scikit-learn",
+				Outcome:    realWorldFeedbackProductSignal,
+				ProductRecommendations: []realWorldProductRecommendation{{
+					Strength:       "low",
+					Recommendation: "Group catalog-backed GitHub Funding null provider findings in `.github/FUNDING.yml`.",
+					Rationale:      "Eight near-identical null provider errors dominated the result.",
+				}},
+			}},
+		},
+	}}
+	if err := saveRealWorldHistory(root, history); err != nil {
+		t.Fatal(err)
+	}
+	server := &repoServer{root: root}
+	out, err := server.realWorldRecommendationBacklog(realWorldRecommendationBacklogArgs{Limit: 10, MinOccurrences: 1})
+	if err != nil {
+		t.Fatalf("recommendation backlog: %v", err)
+	}
+	clusters := out["clusters"].([]realWorldRecommendationBacklogCluster)
+	var funding, generic *realWorldRecommendationBacklogCluster
+	for i := range clusters {
+		switch clusters[i].Key {
+		case "github-funding-blank-providers":
+			funding = &clusters[i]
+		case "schemastore-generic-basename":
+			generic = &clusters[i]
+		case "no-product-change-recommended-from-sweep-run":
+			t.Fatalf("no-change recommendation should be excluded by default: %+v", clusters[i])
+		}
+	}
+	if funding == nil || funding.Count != 2 || funding.HighestStrength != "med" || !containsString(funding.Repositories, "caddy") {
+		t.Fatalf("funding cluster = %+v", funding)
+	}
+	if generic == nil || generic.HighestStrength != "high" || len(generic.SuggestedRegressionFixtures) == 0 {
+		t.Fatalf("generic cluster = %+v", generic)
+	}
+
+	filtered, err := server.realWorldRecommendationBacklog(realWorldRecommendationBacklogArgs{Limit: 10, MinOccurrences: 2})
+	if err != nil {
+		t.Fatalf("filtered backlog: %v", err)
+	}
+	filteredClusters := filtered["clusters"].([]realWorldRecommendationBacklogCluster)
+	if len(filteredClusters) != 1 || filteredClusters[0].Key != "github-funding-blank-providers" {
+		t.Fatalf("filtered clusters = %+v", filteredClusters)
+	}
+}
+
 func TestRealWorldInspectCorpusDraftsDependencyPrep(t *testing.T) {
 	root := t.TempDir()
 	corpus := filepath.Join(root, "corpus")

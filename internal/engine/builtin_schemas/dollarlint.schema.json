@@ -304,6 +304,10 @@
         "branchErrors": {
           "type": "string",
           "enum": ["best", "all"]
+        },
+        "issueHints": {
+          "type": "string",
+          "enum": ["auto", "off", "verbose"]
         }
       }
     },

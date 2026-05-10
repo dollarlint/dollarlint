@@ -250,6 +250,7 @@ func requiredAgenticRealWorldTools() []string {
 	return []string{
 		"real_world_start_testing",
 		"real_world_history",
+		"real_world_artifact_query",
 		"real_world_prepare_corpus",
 		"real_world_next_prepared_repo",
 		"real_world_prepare_status",
@@ -262,6 +263,7 @@ func requiredAgenticRealWorldTools() []string {
 		"real_world_finish_validation",
 		"real_world_cancel_validation",
 		"real_world_triage_output",
+		"real_world_recommendation_backlog",
 		"real_world_record_result",
 	}
 }

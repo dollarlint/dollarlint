@@ -11,11 +11,13 @@ const (
 const (
 	SkipReasonNoSchema                 = "noSchema"
 	SkipReasonCatalogSchemaUnavailable = "catalogSchemaUnavailable"
+	SkipReasonSchemaUnavailable        = "schemaUnavailable"
 )
 
 const (
 	SkipClassApplicationData   = "application-data"
 	SkipClassExternalCatalog   = "external-catalog"
+	SkipClassExternalSchema    = "external-schema"
 	SkipClassLocaleData        = "locale-data"
 	SkipClassLockfile          = "lockfile"
 	SkipClassRepoManagement    = "repo-management-config"
@@ -33,6 +35,14 @@ const (
 const (
 	JSONFormatVersion = 1
 	JSONResultSchema  = "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json"
+)
+
+const InspectFormatVersion = 1
+
+const (
+	InspectAssociationStatusAssociated   = "associated"
+	InspectAssociationStatusUnassociated = "unassociated"
+	InspectAssociationStatusError        = "error"
 )
 
 const (
@@ -79,6 +89,18 @@ const (
 const (
 	BranchErrorsBest = "best"
 	BranchErrorsAll  = "all"
+)
+
+const (
+	IssueHintsAuto    = "auto"
+	IssueHintsOff     = "off"
+	IssueHintsVerbose = "verbose"
+)
+
+const (
+	IssueHintConfidenceHigh   = "high"
+	IssueHintConfidenceMedium = "medium"
+	IssueHintConfidenceLow    = "low"
 )
 
 const (
@@ -185,6 +207,7 @@ type OutputConfig struct {
 	Quiet        bool   `json:"quiet,omitempty" yaml:"quiet,omitempty" toml:"quiet,omitempty"`
 	Locations    bool   `json:"locations,omitempty" yaml:"locations,omitempty" toml:"locations,omitempty"`
 	BranchErrors string `json:"branchErrors,omitempty" yaml:"branchErrors,omitempty" toml:"branchErrors,omitempty"`
+	IssueHints   string `json:"issueHints,omitempty" yaml:"issueHints,omitempty" toml:"issueHints,omitempty"`
 }
 
 type IgnoreRule struct {
@@ -213,6 +236,37 @@ type Result struct {
 	Files    []FileResult `json:"files"`
 	Issues   []Issue      `json:"issues,omitempty"`
 	Warnings []Warning    `json:"warnings,omitempty"`
+}
+
+type InspectResult struct {
+	FormatVersion int            `json:"formatVersion"`
+	Root          string         `json:"root"`
+	Summary       InspectSummary `json:"summary"`
+	Files         []InspectFile  `json:"files"`
+	Warnings      []Warning      `json:"warnings"`
+}
+
+type InspectSummary struct {
+	Discovered    int      `json:"discovered"`
+	Associated    int      `json:"associated"`
+	Unassociated  int      `json:"unassociated"`
+	Errors        int      `json:"errors"`
+	Warnings      int      `json:"warnings"`
+	Duration      Duration `json:"duration,omitempty"`
+	DurationNanos int64    `json:"durationNanos,omitempty"`
+}
+
+type InspectFile struct {
+	Path                   string       `json:"path"`
+	Format                 string       `json:"format,omitempty"`
+	Schema                 string       `json:"schema,omitempty"`
+	SchemaSource           string       `json:"schemaSource,omitempty"`
+	SchemaMatch            *SchemaMatch `json:"schemaMatch,omitempty"`
+	AssociationStatus      string       `json:"associationStatus"`
+	Reason                 string       `json:"reason"`
+	SuggestedAssociation   string       `json:"suggestedAssociation,omitempty"`
+	SuggestedCatalogIgnore string       `json:"suggestedCatalogIgnore,omitempty"`
+	Message                string       `json:"message,omitempty"`
 }
 
 type Summary struct {
@@ -266,8 +320,19 @@ type Issue struct {
 	Column           int          `json:"column,omitempty"`
 	Message          string       `json:"message"`
 	Hint             string       `json:"hint,omitempty"`
+	IssueHint        *IssueHint   `json:"issueHint,omitempty"`
 	Ignored          bool         `json:"ignored,omitempty"`
 	IgnoreReason     string       `json:"ignoreReason,omitempty"`
+}
+
+type IssueHint struct {
+	ID         string `json:"id"`
+	Title      string `json:"title"`
+	Detail     string `json:"detail,omitempty"`
+	Suggestion string `json:"suggestion,omitempty"`
+	Confidence string `json:"confidence,omitempty"`
+	Source     string `json:"source,omitempty"`
+	GroupKey   string `json:"groupKey,omitempty"`
 }
 
 type SchemaMatch struct {

@@ -422,11 +422,12 @@ func TestSchemaStoreMatchedSchemaFailurePolicy(t *testing.T) {
 	catalogDir := filepath.Join(dir, "node_modules", "catalog-fixtures")
 	writeFile(t, filepath.Join(catalogDir, "catalog.json"), `{
   "schemas": [
-    {"name": "Broken", "fileMatch": ["broken.json"], "url": "./broken.schema.json"}
+    {"name": "Broken", "fileMatch": ["broken.json", "also-broken.json"], "url": "./broken.schema.json"}
   ]
 }`)
 	writeFile(t, filepath.Join(catalogDir, "broken.schema.json"), `{"type":"not-a-json-schema-type"}`)
 	writeFile(t, filepath.Join(dir, "broken.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "also-broken.json"), `{}`)
 
 	cfg := DefaultConfig()
 	cfg.Schemas.Catalogs.Enabled = true
@@ -436,12 +437,13 @@ func TestSchemaStoreMatchedSchemaFailurePolicy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("warn catalog schema failure should continue, got %v", err)
 	}
-	if result.Summary.Issues.Total != 0 || result.Summary.Warnings != 1 || result.Summary.Validated != 0 || result.Summary.Skipped != 1 {
+	if result.Summary.Issues.Total != 0 || result.Summary.Warnings != 1 || result.Summary.Validated != 0 || result.Summary.Skipped != 2 {
 		t.Fatalf("warn catalog schema failure summary = %+v issues=%+v warnings=%+v", result.Summary, result.Issues, result.Warnings)
 	}
 	if result.Warnings[0].Kind != "schemaCatalogSchemaUnavailable" ||
-		!strings.Contains(result.Warnings[0].Message, "Catalog schema could not be used for broken.json") ||
-		!strings.Contains(result.Warnings[0].Message, "this is not a finding in the file") ||
+		!strings.Contains(result.Warnings[0].Message, "Catalog schema could not be used for 2 files") ||
+		!strings.Contains(result.Warnings[0].Message, "this is not a finding in those files") ||
+		!strings.Contains(result.Warnings[0].Hint, "Affected files: also-broken.json, broken.json.") ||
 		!strings.Contains(result.Warnings[0].Hint, "Technical details: catalog schema compile failed") {
 		t.Fatalf("catalog schema warning = %+v", result.Warnings[0])
 	}
@@ -451,7 +453,7 @@ func TestSchemaStoreMatchedSchemaFailurePolicy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("skip catalog schema failure should continue, got %v", err)
 	}
-	if result.Summary.Issues.Total != 0 || result.Summary.Warnings != 0 || result.Summary.Validated != 0 || result.Summary.Skipped != 1 {
+	if result.Summary.Issues.Total != 0 || result.Summary.Warnings != 0 || result.Summary.Validated != 0 || result.Summary.Skipped != 2 {
 		t.Fatalf("skip catalog schema failure summary = %+v issues=%+v warnings=%+v", result.Summary, result.Issues, result.Warnings)
 	}
 

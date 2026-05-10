@@ -15,11 +15,13 @@ const (
 const (
 	SkipReasonNoSchema                 = engine.SkipReasonNoSchema
 	SkipReasonCatalogSchemaUnavailable = engine.SkipReasonCatalogSchemaUnavailable
+	SkipReasonSchemaUnavailable        = engine.SkipReasonSchemaUnavailable
 )
 
 const (
 	SkipClassApplicationData   = engine.SkipClassApplicationData
 	SkipClassExternalCatalog   = engine.SkipClassExternalCatalog
+	SkipClassExternalSchema    = engine.SkipClassExternalSchema
 	SkipClassLocaleData        = engine.SkipClassLocaleData
 	SkipClassLockfile          = engine.SkipClassLockfile
 	SkipClassRepoManagement    = engine.SkipClassRepoManagement
@@ -35,8 +37,15 @@ const (
 )
 
 const (
-	JSONFormatVersion   = engine.JSONFormatVersion
-	BundleFormatVersion = engine.BundleFormatVersion
+	JSONFormatVersion    = engine.JSONFormatVersion
+	BundleFormatVersion  = engine.BundleFormatVersion
+	InspectFormatVersion = engine.InspectFormatVersion
+)
+
+const (
+	InspectAssociationStatusAssociated   = engine.InspectAssociationStatusAssociated
+	InspectAssociationStatusUnassociated = engine.InspectAssociationStatusUnassociated
+	InspectAssociationStatusError        = engine.InspectAssociationStatusError
 )
 
 const (
@@ -53,6 +62,18 @@ const (
 const (
 	BranchErrorsBest = engine.BranchErrorsBest
 	BranchErrorsAll  = engine.BranchErrorsAll
+)
+
+const (
+	IssueHintsAuto    = engine.IssueHintsAuto
+	IssueHintsOff     = engine.IssueHintsOff
+	IssueHintsVerbose = engine.IssueHintsVerbose
+)
+
+const (
+	IssueHintConfidenceHigh   = engine.IssueHintConfidenceHigh
+	IssueHintConfidenceMedium = engine.IssueHintConfidenceMedium
+	IssueHintConfidenceLow    = engine.IssueHintConfidenceLow
 )
 
 const (
@@ -79,7 +100,11 @@ type Result = engine.Result
 type Summary = engine.Summary
 type IssueSummary = engine.IssueSummary
 type FileResult = engine.FileResult
+type InspectResult = engine.InspectResult
+type InspectSummary = engine.InspectSummary
+type InspectFile = engine.InspectFile
 type Issue = engine.Issue
+type IssueHint = engine.IssueHint
 type Warning = engine.Warning
 type BundleOutput = engine.BundleOutput
 type BundleStyledOutput = engine.BundleStyledOutput

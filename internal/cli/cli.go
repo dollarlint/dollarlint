@@ -33,6 +33,36 @@ type validateOptions struct {
 	verbose           bool
 	quiet             bool
 	locations         bool
+	issueHints        string
+	includes          []string
+	excludes          []string
+	noDefaultExcludes bool
+	noGitIgnore       bool
+	forceExclude      bool
+	associations      []string
+	schemaStore       bool
+	schemaStoreURL    string
+	catalogFailure    string
+	maxDepth          int
+	fetchRemote       bool
+	noSchemaCache     bool
+	fetchRetries      int
+	fetchRetryMinWait string
+	fetchRetryMaxWait string
+	allowedDomains    []string
+	blockedDomains    []string
+	fetchTimeout      string
+	compileTimeout    string
+}
+
+type inspectOptions struct {
+	configPath *string
+	format     string
+	outputPath string
+	run        runConfigOptions
+}
+
+type runConfigOptions struct {
 	includes          []string
 	excludes          []string
 	noDefaultExcludes bool
@@ -94,6 +124,7 @@ func NewRootCommandWithIO(stdin io.Reader, stdout io.Writer) *cobra.Command {
 	}
 	cmd.PersistentFlags().StringVar(&configPath, "config", "", "Path to a dollarlint config file")
 	cmd.AddCommand(newValidateCommand(stdout, &configPath))
+	cmd.AddCommand(newInspectCommand(stdout, &configPath))
 	cmd.AddCommand(newInitCommand(stdin, stdout))
 	cmd.AddCommand(newServeCommand(stdin, stdout, &configPath))
 	cmd.AddCommand(newVersionCommand(stdout))
@@ -114,6 +145,23 @@ func newValidateCommand(stdout io.Writer, configPath *string) *cobra.Command {
 	return cmd
 }
 
+func newInspectCommand(stdout io.Writer, configPath *string) *cobra.Command {
+	opts := inspectOptions{
+		configPath: configPath,
+		run:        runConfigOptions{fetchRemote: true, fetchRetries: defaultFetchRetries},
+	}
+	cmd := &cobra.Command{
+		Use:   "inspect [path]",
+		Short: "List discovered files and explain schema associations",
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runInspect(cmd, stdout, args, &opts)
+		},
+	}
+	addInspectFlags(cmd, &opts)
+	return cmd
+}
+
 func newVersionCommand(stdout io.Writer) *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
@@ -128,10 +176,11 @@ func newVersionCommand(stdout io.Writer) *cobra.Command {
 func addValidateFlags(cmd *cobra.Command, opts *validateOptions) {
 	cmd.Flags().StringVar(&opts.format, "format", outputFormatText, "Output format: text, json, sarif, or bundle")
 	cmd.Flags().StringVarP(&opts.outputPath, "output", "o", "", "Write output to a file instead of stdout")
-	cmd.Flags().BoolVar(&opts.showSkipped, "show-skipped", false, "Show skipped files grouped by reason, class, and coverage signal")
+	cmd.Flags().BoolVar(&opts.showSkipped, "show-skipped", false, "Show skipped files grouped by reason, class, and coverage signal; noisy low-signal groups are summarized")
 	cmd.Flags().BoolVar(&opts.verbose, "verbose", false, "Show expanded issue metadata in text output")
 	cmd.Flags().BoolVar(&opts.quiet, "quiet", false, "Use terse text output")
 	cmd.Flags().BoolVar(&opts.locations, "locations", false, "Include line and column locations in text output")
+	cmd.Flags().StringVar(&opts.issueHints, "issue-hints", "", "Issue hint mode: auto, off, or verbose")
 	cmd.Flags().StringArrayVar(&opts.includes, "include", nil, "Glob to include during discovery; repeatable")
 	cmd.Flags().StringArrayVar(&opts.excludes, "exclude", nil, "Additional discovery exclude glob; repeatable")
 	cmd.Flags().BoolVar(&opts.noDefaultExcludes, "no-default-excludes", false, "Disable built-in discovery excludes for common generated and dependency directories")
@@ -151,6 +200,29 @@ func addValidateFlags(cmd *cobra.Command, opts *validateOptions) {
 	cmd.Flags().StringArrayVar(&opts.blockedDomains, "block-domain", nil, "Block remote schemas from this domain; repeatable")
 	cmd.Flags().StringVar(&opts.fetchTimeout, "fetch-timeout", "", "Timeout for fetching schemas, e.g. 10s")
 	cmd.Flags().StringVar(&opts.compileTimeout, "compile-timeout", "", "Timeout for compiling schemas, e.g. 30s")
+	cmd.Flags().Lookup("fetch-remote").NoOptDefVal = "true"
+}
+
+func addInspectFlags(cmd *cobra.Command, opts *inspectOptions) {
+	cmd.Flags().StringVar(&opts.format, "format", outputFormatText, "Output format: text or json")
+	cmd.Flags().StringVarP(&opts.outputPath, "output", "o", "", "Write output to a file instead of stdout")
+	cmd.Flags().StringArrayVar(&opts.run.includes, "include", nil, "Glob to include during discovery; repeatable")
+	cmd.Flags().StringArrayVar(&opts.run.excludes, "exclude", nil, "Additional discovery exclude glob; repeatable")
+	cmd.Flags().BoolVar(&opts.run.noDefaultExcludes, "no-default-excludes", false, "Disable built-in discovery excludes for common generated and dependency directories")
+	cmd.Flags().BoolVar(&opts.run.noGitIgnore, "no-gitignore", false, "Do not apply .gitignore patterns during discovery")
+	cmd.Flags().BoolVar(&opts.run.forceExclude, "force-exclude", false, "Apply discovery excludes even to explicitly passed files")
+	cmd.Flags().StringArrayVar(&opts.run.associations, "schema", nil, "Associate a file glob with a schema as glob=uri; repeatable")
+	cmd.Flags().BoolVar(&opts.run.schemaStore, "schema-store", false, "Match conventional filenames using the SchemaStore catalog")
+	cmd.Flags().StringVar(&opts.run.schemaStoreURL, "schema-store-url", "", "SchemaStore catalog URL or local path")
+	cmd.Flags().StringVar(&opts.run.catalogFailure, "schema-store-failure", "", "SchemaStore catalog failure policy: warn, error, or skip")
+	cmd.Flags().BoolVar(&opts.run.fetchRemote, "fetch-remote", true, "Allow fetching http(s) catalogs")
+	cmd.Flags().BoolVar(&opts.run.noSchemaCache, "no-schema-cache", false, "Disable disk cache for remote catalogs")
+	cmd.Flags().IntVar(&opts.run.fetchRetries, "fetch-retries", defaultFetchRetries, "Number of retries for transient remote catalog fetch failures")
+	cmd.Flags().StringVar(&opts.run.fetchRetryMinWait, "fetch-retry-min-wait", "", "Minimum wait between remote catalog fetch retries, e.g. 250ms")
+	cmd.Flags().StringVar(&opts.run.fetchRetryMaxWait, "fetch-retry-max-wait", "", "Maximum wait between remote catalog fetch retries, e.g. 2s")
+	cmd.Flags().StringArrayVar(&opts.run.allowedDomains, "allow-domain", nil, "Allow remote catalogs from this domain; repeatable")
+	cmd.Flags().StringArrayVar(&opts.run.blockedDomains, "block-domain", nil, "Block remote catalogs from this domain; repeatable")
+	cmd.Flags().StringVar(&opts.run.fetchTimeout, "fetch-timeout", "", "Timeout for fetching catalogs, e.g. 10s")
 	cmd.Flags().Lookup("fetch-remote").NoOptDefVal = "true"
 }
 
@@ -203,6 +275,85 @@ func runValidate(cmd *cobra.Command, stdout io.Writer, args []string, opts *vali
 }
 
 func applyValidateConfigOptions(cmd *cobra.Command, opts *validateOptions, cfg *dollarlint.Config) error {
+	if err := applyRunConfigOptions(cmd, runConfigOptionsFromValidate(opts), cfg); err != nil {
+		return err
+	}
+	cfg.Output.ShowSkipped = cfg.Output.ShowSkipped || opts.showSkipped
+	cfg.Output.Verbose = cfg.Output.Verbose || opts.verbose
+	cfg.Output.Quiet = cfg.Output.Quiet || opts.quiet
+	cfg.Output.Locations = cfg.Output.Locations || opts.locations
+	if opts.issueHints != "" {
+		cfg.Output.IssueHints = opts.issueHints
+	}
+	return nil
+}
+
+func runInspect(cmd *cobra.Command, stdout io.Writer, args []string, opts *inspectOptions) error {
+	startedAt := time.Now()
+	root := "."
+	if len(args) == 1 {
+		root = args[0]
+	}
+	if err := validateExplicitTarget(root); err != nil {
+		return err
+	}
+	cfg, configPath, err := dollarlint.LoadConfig(root, *opts.configPath)
+	if err != nil {
+		return err
+	}
+	overlay := func(config *dollarlint.Config) error {
+		return applyRunConfigOptions(cmd, opts.run, config)
+	}
+	if err := overlay(&cfg); err != nil {
+		return err
+	}
+	format, err := validateInspectOutputFormat(opts.format)
+	if err != nil {
+		return err
+	}
+	result, err := dollarlint.Inspect(context.Background(), dollarlint.Options{
+		Root:           root,
+		Config:         cfg,
+		ConfigPath:     configPath,
+		ExplicitConfig: *opts.configPath != "",
+		ConfigOverlay:  overlay,
+		StartedAt:      startedAt,
+	})
+	if err != nil {
+		return err
+	}
+	data, err := formatInspectResult(result, format)
+	if err != nil {
+		return err
+	}
+	return writeValidateOutput(stdout, opts.outputPath, data)
+}
+
+func runConfigOptionsFromValidate(opts *validateOptions) runConfigOptions {
+	return runConfigOptions{
+		includes:          opts.includes,
+		excludes:          opts.excludes,
+		noDefaultExcludes: opts.noDefaultExcludes,
+		noGitIgnore:       opts.noGitIgnore,
+		forceExclude:      opts.forceExclude,
+		associations:      opts.associations,
+		schemaStore:       opts.schemaStore,
+		schemaStoreURL:    opts.schemaStoreURL,
+		catalogFailure:    opts.catalogFailure,
+		maxDepth:          opts.maxDepth,
+		fetchRemote:       opts.fetchRemote,
+		noSchemaCache:     opts.noSchemaCache,
+		fetchRetries:      opts.fetchRetries,
+		fetchRetryMinWait: opts.fetchRetryMinWait,
+		fetchRetryMaxWait: opts.fetchRetryMaxWait,
+		allowedDomains:    opts.allowedDomains,
+		blockedDomains:    opts.blockedDomains,
+		fetchTimeout:      opts.fetchTimeout,
+		compileTimeout:    opts.compileTimeout,
+	}
+}
+
+func applyRunConfigOptions(cmd *cobra.Command, opts runConfigOptions, cfg *dollarlint.Config) error {
 	if len(opts.includes) > 0 {
 		cfg.Discovery.Include = opts.includes
 	}
@@ -276,10 +427,6 @@ func applyValidateConfigOptions(cmd *cobra.Command, opts *validateOptions, cfg *
 			return err
 		}
 	}
-	cfg.Output.ShowSkipped = cfg.Output.ShowSkipped || opts.showSkipped
-	cfg.Output.Verbose = cfg.Output.Verbose || opts.verbose
-	cfg.Output.Quiet = cfg.Output.Quiet || opts.quiet
-	cfg.Output.Locations = cfg.Output.Locations || opts.locations
 	return nil
 }
 
@@ -295,6 +442,17 @@ func validateOutputFormat(format string) (string, error) {
 		return outputFormatBundle, nil
 	default:
 		return "", fmt.Errorf("unknown output format %q (expected text, json, sarif, or bundle)", format)
+	}
+}
+
+func validateInspectOutputFormat(format string) (string, error) {
+	switch strings.ToLower(format) {
+	case "", outputFormatText:
+		return outputFormatText, nil
+	case outputFormatJSON:
+		return outputFormatJSON, nil
+	default:
+		return "", fmt.Errorf("unknown inspect output format %q (expected text or json)", format)
 	}
 }
 
@@ -353,6 +511,15 @@ func formatValidateResult(result dollarlint.Result, output dollarlint.OutputConf
 		return dollarlint.FormatBundle(result, output)
 	default:
 		return []byte(dollarlint.FormatText(result, output)), nil
+	}
+}
+
+func formatInspectResult(result dollarlint.InspectResult, format string) ([]byte, error) {
+	switch format {
+	case outputFormatJSON:
+		return dollarlint.FormatInspectJSON(result)
+	default:
+		return []byte(dollarlint.FormatInspectText(result)), nil
 	}
 }
 

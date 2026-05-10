@@ -32,6 +32,14 @@ func classifySkippedFile(rel, reason, detail string) skipClassification {
 			Detail:     fallback(detail, "catalog-inferred schema could not be used; this is not a finding in the file"),
 		}
 	}
+	if reason == SkipReasonSchemaUnavailable {
+		return skipClassification{
+			Reason:     reason,
+			Class:      SkipClassExternalSchema,
+			Importance: SkipImportanceMedium,
+			Detail:     fallback(detail, "external schema could not be used; this is not a finding in the file"),
+		}
+	}
 
 	lower := strings.ToLower(cleanGlob(rel))
 	base := path.Base(lower)

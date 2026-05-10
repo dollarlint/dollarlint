@@ -41,6 +41,13 @@ const mcpConfig = `{
           >
         </tr>
         <tr>
+          <td><code>dollarlint inspect [path]</code></td>
+          <td
+            >List discovered files, show the schema each file would use, and
+            explain why that association was chosen.</td
+          >
+        </tr>
+        <tr>
           <td><code>dollarlint init [path]</code></td>
           <td
             >Mint a starter <code>.dollarlint.toml</code> in the target directory.</td
@@ -134,7 +141,14 @@ const mcpConfig = `{
         >
         <tr
           ><td><code>--show-skipped</code></td><td
-            >Show skipped files grouped by reason, class, and coverage signal.</td
+            >Show skipped files grouped by reason, class, and coverage signal;
+            noisy low-signal groups are summarized.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--issue-hints</code></td><td
+            >Control curated issue hints: <code>auto</code>, <code>off</code>, or
+            <code>verbose</code>.</td
           ></tr
         >
         <tr
@@ -258,7 +272,41 @@ const mcpConfig = `{
       for focused <code>oneOf</code>/<code>anyOf</code> diagnostics, or <code
         >"all"</code
       > when debugging every failed schema branch.
+      Issue hints may be controlled either by <code>--issue-hints</code> or
+      <code>output.issueHints</code>.
     </p>
+
+    <h2>Inspect flags</h2>
+    <p>
+      <code>dollarlint inspect [path]</code> accepts the same discovery,
+      association, SchemaStore, catalog-fetch, and domain flags as <code
+        >validate</code
+      >. It does not validate file contents or compile schemas; it stops after
+      discovery, parsing enough to find in-file declarations, and schema
+      association.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Flag</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          ><td><code>--format</code></td><td
+            >Choose <code>text</code> or <code>json</code>. Defaults to <code
+              >text</code
+            >.</td
+          ></tr
+        >
+        <tr
+          ><td><code>--output</code>, <code>-o</code></td><td
+            >Write inspect output to a file instead of stdout.</td
+          ></tr
+        >
+      </tbody>
+    </table>
 
     <h2>Init flags</h2>
     <table>

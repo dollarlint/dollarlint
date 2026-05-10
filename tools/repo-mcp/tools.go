@@ -34,6 +34,20 @@ func (s *repoServer) addTools() {
 		"repositories":   arrayStringSchema("Repository names or clone URLs to check."),
 		"includeEntries": map[string]any{"type": "boolean", "description": "Include full structured history entries. Defaults to false."},
 	}), s.handleRealWorldHistory, true)
+	s.addTool("real_world_artifact_query", "Query a recorded real-world DollarLint artifact for grouped issues, warnings, skipped coverage, CLI preview, and recommendation examples.", schemaObject(map[string]any{
+		"entryID":        map[string]any{"type": "string", "description": "Recorded real-world entry id. Defaults to the latest entry with a readable persisted artifact."},
+		"outputArtifact": map[string]any{"type": "string", "description": "Manual bundle/JSON artifact path. Relative paths are resolved from the repo root."},
+		"repository":     map[string]any{"type": "string", "description": "Optional repository name to filter within a multi-repo artifact."},
+		"focus":          enumSchema([]string{"all", "overview", "issues", "warnings", "skipped", "cli", "recommendation"}, "Subset of artifact collateral to return. Defaults to all."),
+		"recommendation": map[string]any{"type": "string", "description": "Optional product recommendation text; matching examples and groups are returned as recommendationExamples."},
+		"limit":          map[string]any{"type": "integer", "description": "Maximum groups/examples to return per section. Defaults to 8; capped at 50."},
+	}), s.handleRealWorldArtifactQuery, true)
+	s.addTool("real_world_recommendation_backlog", "Cluster product recommendations from recorded real-world results into a review backlog with example entries and fixture suggestions.", schemaObject(map[string]any{
+		"limit":           map[string]any{"type": "integer", "description": "Maximum clusters and examples to return. Defaults to 8; capped at 50."},
+		"minOccurrences":  map[string]any{"type": "integer", "description": "Minimum recommendations per cluster. Defaults to 1."},
+		"includeNoChange": map[string]any{"type": "boolean", "description": "Include explicit no-product-change recommendations. Defaults to false."},
+		"topic":           map[string]any{"type": "string", "description": "Optional exact cluster key or title substring to filter."},
+	}), s.handleRealWorldRecommendationBacklog, true)
 	s.addTool("real_world_start_testing", "Start a guided real-world validation sweep, check structured history and candidate duplicates, and return the next MCP tool to call.", schemaObject(map[string]any{
 		"title":                 map[string]any{"type": "string", "description": "Short sweep title."},
 		"repositories":          realWorldRepositoryArraySchema("Candidate repositories to check before preparing the corpus."),

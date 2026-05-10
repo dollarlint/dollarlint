@@ -2,6 +2,7 @@ package engine
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"path/filepath"
 	"strings"
@@ -62,6 +63,68 @@ func TestFormatTextLocationsVerboseSkippedAndQuiet(t *testing.T) {
 	passed = FormatText(Result{Summary: Summary{Warnings: 1, Duration: NewDuration(123 * time.Millisecond)}, Warnings: []Warning{{Kind: "x", Message: "careful"}}}, OutputConfig{})
 	assertContains(t, passed, "dollarlint passed with 1 warning in 123ms")
 	assertContains(t, passed, "careful")
+}
+
+func TestFormatTextCollapsesNoisySkippedGroupsAndLeavesJSONFullDetail(t *testing.T) {
+	result := noisySkippedFixtureResult()
+	text := FormatText(result, OutputConfig{ShowSkipped: true})
+	firstOmittedFixture := fmt.Sprintf("fixtures/case-%02d.json", skippedFileGroupDisplayLimit)
+
+	assertContains(t, text, fmt.Sprintf("fixtures/case-%02d.json", skippedFileGroupDisplayLimit-1))
+	assertContains(t, text, fmt.Sprintf("... %d more skipped files omitted from text output; use --format json for the full list", 3))
+	assertContains(t, text, fmt.Sprintf("configs/config-%02d.toml", skippedFileGroupDisplayLimit))
+	if strings.Contains(text, firstOmittedFixture) {
+		t.Fatalf("low-signal skipped group should be collapsed in text output:\n%s", text)
+	}
+
+	data, err := FormatJSON(result)
+	if err != nil {
+		t.Fatalf("FormatJSON: %v", err)
+	}
+	assertContains(t, string(data), firstOmittedFixture)
+
+	bundleData, err := FormatBundle(result, OutputConfig{ShowSkipped: true})
+	if err != nil {
+		t.Fatalf("FormatBundle: %v", err)
+	}
+	var bundle struct {
+		JSON struct {
+			Files []struct {
+				Path string `json:"path"`
+			} `json:"files"`
+		} `json:"json"`
+		Styled struct {
+			Plain     string `json:"plain"`
+			Truncated bool   `json:"truncated"`
+		} `json:"styled"`
+	}
+	if err := json.Unmarshal(bundleData, &bundle); err != nil {
+		t.Fatalf("decode bundle: %v\n%s", err, string(bundleData))
+	}
+	if !bundle.Styled.Truncated || strings.Contains(bundle.Styled.Plain, firstOmittedFixture) {
+		t.Fatalf("bundle styled output should be marked truncated and collapsed: %+v", bundle.Styled)
+	}
+	var foundOmittedFixture bool
+	for _, file := range bundle.JSON.Files {
+		if file.Path == firstOmittedFixture {
+			foundOmittedFixture = true
+			break
+		}
+	}
+	if !foundOmittedFixture {
+		t.Fatalf("bundle JSON should retain omitted fixture path: %+v", bundle.JSON.Files)
+	}
+
+	bundleData, err = FormatBundle(result, OutputConfig{})
+	if err != nil {
+		t.Fatalf("FormatBundle without skipped: %v", err)
+	}
+	if err := json.Unmarshal(bundleData, &bundle); err != nil {
+		t.Fatalf("decode uncollapsed bundle: %v\n%s", err, string(bundleData))
+	}
+	if bundle.Styled.Truncated {
+		t.Fatalf("bundle should not be marked truncated when skipped output is hidden: %+v", bundle.Styled)
+	}
 }
 
 func TestFormatTextIssueBreakdownAndHints(t *testing.T) {
@@ -297,6 +360,15 @@ func TestTextHelpers(t *testing.T) {
 	if styledCell(textStyleMuted, "x", 0) != textStyleMuted.Render("x") {
 		t.Fatalf("unstyled-width cell mismatch")
 	}
+	if textOutputTruncated(textFixtureResult(), OutputConfig{ShowSkipped: true}) {
+		t.Fatalf("single skipped file should not truncate text output")
+	}
+	if textOutputTruncated(noisySkippedFixtureResult(), OutputConfig{Quiet: true, ShowSkipped: true}) {
+		t.Fatalf("quiet output should not be marked truncated for hidden skipped files")
+	}
+	if skipClassLabel(SkipClassExternalSchema) != "external schema" || skipReasonLabel(SkipReasonSchemaUnavailable) != "schema unavailable" {
+		t.Fatalf("external schema skip labels mismatch")
+	}
 	var builder strings.Builder
 	writeIndentedValue(&builder, "hint:", "")
 	if builder.Len() != 0 {
@@ -392,6 +464,40 @@ func textFixtureResult() Result {
 				Ignored:          true,
 			},
 		},
+	}
+}
+
+func noisySkippedFixtureResult() Result {
+	var files []FileResult
+	for i := 0; i < skippedFileGroupDisplayLimit+3; i++ {
+		files = append(files, FileResult{
+			RelativePath:   fmt.Sprintf("fixtures/case-%02d.json", i),
+			Format:         DocumentFormatJSON,
+			Status:         StatusSkipped,
+			SkipReason:     SkipReasonNoSchema,
+			SkipClass:      SkipClassTestData,
+			SkipImportance: SkipImportanceLow,
+			SkipDetail:     "test, fixture, or benchmark data without schema coverage",
+		})
+	}
+	for i := 0; i < skippedFileGroupDisplayLimit+1; i++ {
+		files = append(files, FileResult{
+			RelativePath:   fmt.Sprintf("configs/config-%02d.toml", i),
+			Format:         DocumentFormatTOML,
+			Status:         StatusSkipped,
+			SkipReason:     SkipReasonNoSchema,
+			SkipClass:      SkipClassUnsupportedConfig,
+			SkipImportance: SkipImportanceHigh,
+			SkipDetail:     "recognized hand-authored config without built-in or catalog schema support",
+		})
+	}
+	return Result{
+		Summary: Summary{
+			Discovered: len(files),
+			Skipped:    len(files),
+			Duration:   NewDuration(123 * time.Millisecond),
+		},
+		Files: files,
 	}
 }
 

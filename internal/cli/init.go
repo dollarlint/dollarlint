@@ -353,6 +353,7 @@ verbose = false
 quiet = false
 locations = false
 branchErrors = "best"
+issueHints = "auto"
 
 # [[ignore]]
 # file = "fixtures/*.json"

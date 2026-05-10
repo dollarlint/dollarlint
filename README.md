@@ -120,6 +120,16 @@ dollarlint validate . --schema-store --schema-store-failure error
 
 Use `dollarlint validate <path>` for all validation runs. Bare paths are not accepted.
 
+### Inspect schema associations
+
+```sh
+dollarlint inspect .
+dollarlint inspect . --schema-store
+dollarlint inspect . --format json
+```
+
+`dollarlint inspect` lists every discovered file, the schema DollarLint would associate with it, and the reason for that association. Files without a schema are shown as `schema: none`; catalog decisions include the same explainable `schemaMatch` metadata and suggested config snippets as validation output.
+
 Exit codes:
 
 - `0`: no non-ignored issues
@@ -218,6 +228,7 @@ verbose = false
 quiet = false
 locations = false
 branchErrors = "best"
+issueHints = "auto"
 ```
 
 Output format and artifact location are run-time options, not persistent config. Use `--format text|json|sarif` and `--output <path>` on `dollarlint validate` when you need machine-readable output.
@@ -341,11 +352,13 @@ settings.json
 ```
 
 Use `--verbose` to show schema URI and keyword metadata under each issue. Use `--quiet` for terse success output.
+Use `--show-skipped` to show skipped files grouped by reason, class, and coverage signal. Large low-signal groups such as fixtures, lockfiles, and data files are summarized in text output with a count; `--format json` keeps every skipped file.
 Set `output.branchErrors = "all"` when you need every failed `oneOf`/`anyOf` branch leaf for schema debugging; the default `"best"` reports the closest matching branch.
+Issue hints are enabled by default with `output.issueHints = "auto"`. Set `"off"` to show raw issues without curated hints, or `"verbose"` to include hint rule IDs, confidence, and source links in text output.
 
-JSON output (`--format json`) includes a top-level `$schema` declaration, `formatVersion`, relative `path` fields, root-relative local schemas, active findings in `issues`, ignored findings in `ignoredIssues`, always-present arrays, per-issue `category`, structured warnings, skip classification fields on skipped files, and numeric `summary.durationNanos`. The output schema is published in `schemas/dollarlint-result.schema.json`.
+JSON output (`--format json`) includes a top-level `$schema` declaration, `formatVersion`, relative `path` fields, root-relative local schemas, active findings in `issues`, ignored findings in `ignoredIssues`, always-present arrays, per-issue `category`, structured `issueHint` metadata when a hint applies, structured warnings, skip classification fields on skipped files, and numeric `summary.durationNanos`. External catalog and remote schema compile failures are reported as grouped schema-source warnings with affected files marked skipped. The output schema is published in `schemas/dollarlint-result.schema.json`.
 
-Use `--format bundle` when you need one artifact that captures every renderer from the same validation run. Bundle output is JSON with `json`, `sarif`, and `styled` keys; `styled` includes the normal terminal text as both ANSI and plain strings, plus the text-output options used to render it.
+Use `--format bundle` when you need one artifact that captures every renderer from the same validation run. Bundle output is JSON with `json`, `sarif`, and `styled` keys; `styled` includes the normal terminal text as both ANSI and plain strings, plus the text-output options used to render it. If skipped-file text was summarized, `styled.truncated` is `true` while the `json` payload still contains full detail.
 
 Text output uses subtle terminal styling when color is available and stays plain for machine-readable formats such as `--format json`, `--format sarif`, and `--format bundle`.
 

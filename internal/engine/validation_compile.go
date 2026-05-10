@@ -3,6 +3,7 @@ package engine
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 
@@ -75,6 +76,22 @@ func validateLineDelimitedDocument(ctx context.Context, cache *SchemaCache, cfg 
 func validationForSchemaFailure(document *Document, cfg Config, phase string, err error) documentValidation {
 	message := fmt.Sprintf("schema %s failed for %s: %v", phase, document.Schema, err)
 	if !isCatalogSchemaSource(document.SchemaSource) {
+		if phase == "compile" && isRemoteURI(document.Schema) {
+			return documentValidation{
+				schemaWarning: newSchemaSourceFailureWarning(
+					"schemaRemoteSchemaUnavailable",
+					schemaFailureSource(document),
+					document.Schema,
+					document.SchemaSource,
+					phase,
+					document.RelativePath,
+					schemaSourceFailureDetail("remote schema", phase, document.Schema, err),
+				),
+				skipped:    true,
+				skipReason: SkipReasonSchemaUnavailable,
+				message:    schemaSourceSkippedMessage(phase),
+			}
+		}
 		return documentValidation{issues: []Issue{{
 			File:         document.Path,
 			RelativePath: document.RelativePath,
@@ -88,39 +105,177 @@ func validationForSchemaFailure(document *Document, cfg Config, phase string, er
 	if modeErr != nil {
 		return documentValidation{err: modeErr}
 	}
-	catalogMessage := fmt.Sprintf("catalog schema %s failed for %s using %s: %v", phase, document.RelativePath, document.Schema, err)
+	catalogMessage := schemaSourceFailureDetail("catalog schema", phase, document.Schema, err)
 	switch mode {
 	case CatalogFailureError:
 		return documentValidation{err: fmt.Errorf("%s", catalogMessage)}
 	case CatalogFailureSkip:
-		return documentValidation{skipped: true, message: catalogSchemaSkippedMessage(phase)}
+		return documentValidation{skipped: true, skipReason: SkipReasonCatalogSchemaUnavailable, message: catalogSchemaSkippedMessage(phase)}
 	default:
 		return documentValidation{
-			warnings: []Warning{{
-				Kind:         "schemaCatalogSchemaUnavailable",
-				Source:       document.SchemaSource,
-				Path:         document.RelativePath,
-				Schema:       document.Schema,
-				SchemaSource: document.SchemaSource,
-				Message:      catalogSchemaWarningMessage(phase, document.RelativePath, document.Schema),
-				Hint:         "Technical details: " + catalogMessage,
-			}},
-			skipped: true,
-			message: catalogSchemaSkippedMessage(phase),
+			schemaWarning: newSchemaSourceFailureWarning(
+				"schemaCatalogSchemaUnavailable",
+				document.SchemaSource,
+				document.Schema,
+				document.SchemaSource,
+				phase,
+				document.RelativePath,
+				catalogMessage,
+			),
+			skipped:    true,
+			skipReason: SkipReasonCatalogSchemaUnavailable,
+			message:    catalogSchemaSkippedMessage(phase),
 		}
 	}
-}
-
-func catalogSchemaWarningMessage(phase, path, schema string) string {
-	return fmt.Sprintf("Catalog schema could not be used for %s. The inferred schema %s failed to %s, so DollarLint skipped catalog-inferred validation for this file; this is not a finding in the file.", path, schema, phase)
 }
 
 func catalogSchemaSkippedMessage(phase string) string {
 	return fmt.Sprintf("catalog schema could not be used; skipped catalog-inferred validation after schema %s failure", phase)
 }
 
+func schemaSourceSkippedMessage(phase string) string {
+	return fmt.Sprintf("remote schema could not be used; skipped validation after schema %s failure", phase)
+}
+
 func isCatalogSchemaSource(source string) bool {
 	return source == "catalog" || strings.HasPrefix(source, "catalog:")
+}
+
+func schemaFailureSource(document *Document) string {
+	if document != nil && document.SchemaSource != "" {
+		return document.SchemaSource
+	}
+	return "remote-schema"
+}
+
+func schemaSourceFailureDetail(label, phase, schema string, err error) string {
+	return fmt.Sprintf("%s %s failed for %s: %v", label, phase, schema, err)
+}
+
+type schemaSourceFailureWarning struct {
+	Kind         string
+	Source       string
+	Schema       string
+	SchemaSource string
+	Phase        string
+	Path         string
+	Detail       string
+}
+
+func newSchemaSourceFailureWarning(kind, source, schema, schemaSource, phase, path, detail string) *schemaSourceFailureWarning {
+	return &schemaSourceFailureWarning{
+		Kind:         kind,
+		Source:       source,
+		Schema:       schema,
+		SchemaSource: schemaSource,
+		Phase:        phase,
+		Path:         path,
+		Detail:       detail,
+	}
+}
+
+type schemaSourceFailureWarningGroup struct {
+	Kind         string
+	Source       string
+	Schema       string
+	SchemaSource string
+	Phase        string
+	Detail       string
+	Paths        []string
+}
+
+type schemaSourceFailureWarningGroups struct {
+	indexes map[string]int
+	groups  []schemaSourceFailureWarningGroup
+}
+
+func (groups *schemaSourceFailureWarningGroups) add(warning schemaSourceFailureWarning) {
+	if groups.indexes == nil {
+		groups.indexes = map[string]int{}
+	}
+	key := strings.Join([]string{
+		warning.Kind,
+		warning.Source,
+		warning.Schema,
+		warning.SchemaSource,
+		warning.Phase,
+		warning.Detail,
+	}, "\x00")
+	index, ok := groups.indexes[key]
+	if !ok {
+		index = len(groups.groups)
+		groups.indexes[key] = index
+		groups.groups = append(groups.groups, schemaSourceFailureWarningGroup{
+			Kind:         warning.Kind,
+			Source:       warning.Source,
+			Schema:       warning.Schema,
+			SchemaSource: warning.SchemaSource,
+			Phase:        warning.Phase,
+			Detail:       warning.Detail,
+		})
+	}
+	if warning.Path != "" {
+		groups.groups[index].Paths = append(groups.groups[index].Paths, warning.Path)
+	}
+}
+
+func (groups schemaSourceFailureWarningGroups) warnings() []Warning {
+	out := make([]Warning, 0, len(groups.groups))
+	for _, group := range groups.groups {
+		paths := append([]string(nil), group.Paths...)
+		sort.Strings(paths)
+		out = append(out, Warning{
+			Kind:         group.Kind,
+			Source:       group.Source,
+			Schema:       group.Schema,
+			SchemaSource: group.SchemaSource,
+			Message:      schemaSourceFailureWarningMessage(group.Kind, group.Phase, group.Schema, paths),
+			Hint:         schemaSourceFailureWarningHint(group.Detail, paths),
+		})
+	}
+	return out
+}
+
+func schemaSourceFailureWarningMessage(kind, phase, schema string, paths []string) string {
+	subject := "Remote schema"
+	use := "validation"
+	if kind == "schemaCatalogSchemaUnavailable" {
+		subject = "Catalog schema"
+		use = "catalog-inferred validation"
+	}
+	return fmt.Sprintf("%s could not be used for %s. The schema %s failed to %s, so DollarLint skipped %s for files that use it; this is not a finding in those files.", subject, affectedFilesLabel(paths), schema, phase, use)
+}
+
+func schemaSourceFailureWarningHint(detail string, paths []string) string {
+	hint := ""
+	if len(paths) > 0 {
+		hint = "Affected files: " + limitedPathList(paths, 8) + "."
+	}
+	if detail != "" {
+		if hint != "" {
+			hint += " "
+		}
+		hint += "Technical details: " + detail
+	}
+	return hint
+}
+
+func affectedFilesLabel(paths []string) string {
+	switch len(paths) {
+	case 0:
+		return "files that use it"
+	case 1:
+		return paths[0]
+	default:
+		return fmt.Sprintf("%d files", len(paths))
+	}
+}
+
+func limitedPathList(paths []string, limit int) string {
+	if len(paths) <= limit {
+		return strings.Join(paths, ", ")
+	}
+	return fmt.Sprintf("%s, and %d more", strings.Join(paths[:limit], ", "), len(paths)-limit)
 }
 
 func hintForSchemaFailure(document *Document, message string) string {

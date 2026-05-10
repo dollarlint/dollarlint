@@ -188,6 +188,112 @@ func TestExecuteSuccessAndHelpers(t *testing.T) {
 	}
 }
 
+func TestExecuteInspectCommand(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "schema.schema"), `{"type":"object"}`)
+	writeFile(t, filepath.Join(dir, "inline.json"), `{"$schema":"./schema.schema","name":"ok"}`)
+	writeFile(t, filepath.Join(dir, "associated.yaml"), `name: ok`)
+	writeFile(t, filepath.Join(dir, "plain.toml"), `name = "ok"`)
+
+	var stdout, stderr bytes.Buffer
+	if code := Execute([]string{"inspect", dir, "--schema", "associated.yaml=./schema.schema"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("inspect exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "dollarlint inspected 3 discovered files: 2 associated, 1 without schema") ||
+		!strings.Contains(stdout.String(), "inline.json") ||
+		!strings.Contains(stdout.String(), "$schema property declared this schema") ||
+		!strings.Contains(stdout.String(), "associated.yaml") ||
+		!strings.Contains(stdout.String(), `config association matched file pattern "associated.yaml"`) ||
+		!strings.Contains(stdout.String(), "schema: none") {
+		t.Fatalf("inspect text output = %s", stdout.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"inspect", dir, "--format", "json", "--schema", "associated.yaml=./schema.schema"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("inspect json exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	var decoded struct {
+		FormatVersion int `json:"formatVersion"`
+		Summary       struct {
+			Discovered   int `json:"discovered"`
+			Associated   int `json:"associated"`
+			Unassociated int `json:"unassociated"`
+		} `json:"summary"`
+		Files []struct {
+			Path              string `json:"path"`
+			AssociationStatus string `json:"associationStatus"`
+			Reason            string `json:"reason"`
+		} `json:"files"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &decoded); err != nil {
+		t.Fatalf("decode inspect json: %v\n%s", err, stdout.String())
+	}
+	if decoded.FormatVersion != dollarlint.InspectFormatVersion || decoded.Summary.Discovered != 3 || decoded.Summary.Associated != 2 || decoded.Summary.Unassociated != 1 || len(decoded.Files) != 3 {
+		t.Fatalf("inspect json = %+v", decoded)
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"inspect", dir, "--format", "sarif"}, &stdout, &stderr); code != 2 {
+		t.Fatalf("inspect invalid format exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "expected text or json") {
+		t.Fatalf("inspect invalid format stderr = %s", stderr.String())
+	}
+}
+
+func TestExecuteIssueHintsFlag(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "mkdocs.schema.json"), `{
+  "type": "object",
+  "required": ["site_name"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "INHERIT": {"type": "string"},
+    "site_name": {"type": "string"}
+  }
+}`)
+	writeFile(t, filepath.Join(dir, "mkdocs.yml"), `# yaml-language-server: $schema=./mkdocs.schema.json
+INHERIT: ../mkdocs.yml
+`)
+
+	var stdout, stderr bytes.Buffer
+	if code := Execute([]string{"validate", dir}, &stdout, &stderr); code != 1 {
+		t.Fatalf("default issue hints exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "MkDocs inheritance") {
+		t.Fatalf("default issue hints output = %s", stdout.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", dir, "--issue-hints", "off"}, &stdout, &stderr); code != 1 {
+		t.Fatalf("issue hints off exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if strings.Contains(stdout.String(), "MkDocs inheritance") {
+		t.Fatalf("issue hints off output = %s", stdout.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", dir, "--issue-hints", "verbose"}, &stdout, &stderr); code != 1 {
+		t.Fatalf("verbose issue hints exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "rule mkdocs.inherited-required") {
+		t.Fatalf("verbose issue hints output = %s", stdout.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	if code := Execute([]string{"validate", dir, "--issue-hints", "loud"}, &stdout, &stderr); code != 2 {
+		t.Fatalf("invalid issue hints exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "output.issueHints") {
+		t.Fatalf("invalid issue hints stderr = %s", stderr.String())
+	}
+}
+
 func TestExecuteRemoteDomainFlags(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(30 * time.Millisecond)
@@ -455,6 +561,7 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 		`failure = "warn"`,
 		`match = "auto"`,
 		`branchErrors = "best"`,
+		`issueHints = "auto"`,
 	} {
 		if !strings.Contains(config, expected) {
 			t.Fatalf("default config missing %q:\n%s", expected, config)

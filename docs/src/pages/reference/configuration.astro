@@ -67,6 +67,7 @@ verbose = false
 quiet = false
 locations = false
 branchErrors = "best"
+issueHints = "auto"
 
 # [[ignore]]
 # file = "fixtures/*.json"
@@ -527,7 +528,8 @@ extends = "../../.dollarlint.toml"</code></pre>
         <tr
           ><td><code>output.showSkipped</code></td><td
             >Show skipped files in text output, grouped by reason, class, and
-            coverage signal.</td
+            coverage signal. Large low-signal groups are summarized in text;
+            JSON output keeps every skipped file.</td
           ></tr
         >
         <tr
@@ -553,6 +555,13 @@ extends = "../../.dollarlint.toml"</code></pre>
               >oneOf</code
             >/<code>anyOf</code> branch, or <code>all</code> to show every failed
             branch leaf when debugging complex schemas.</td
+          ></tr
+        >
+        <tr
+          ><td><code>output.issueHints</code></td><td
+            >Choose <code>auto</code> for curated hints, <code>off</code> for raw
+            issues only, or <code>verbose</code> to include hint rule IDs,
+            confidence, and source links in text output.</td
           ></tr
         >
       </tbody>

@@ -85,6 +85,7 @@ mcp-servers:
     allowed:
       - real_world_start_testing
       - real_world_history
+      - real_world_artifact_query
       - real_world_prepare_corpus
       - real_world_next_prepared_repo
       - real_world_prepare_status
@@ -97,6 +98,7 @@ mcp-servers:
       - real_world_finish_validation
       - real_world_cancel_validation
       - real_world_triage_output
+      - real_world_recommendation_backlog
       - real_world_record_result
 
 env:
@@ -182,11 +184,13 @@ Run DollarLint against a fresh, bounded set of public repositories, persist the 
    - Let the MCP tool sanity-check output counts and group parsing, validation, schema, coverage, warning, crash/performance, and output-contract signals by repository.
    - If `real_world_triage_output` returns an error, resolve the output/schema mismatch or record a blocker instead of proceeding from a hand-written Markdown report.
    - Use `draftRecord` as the starting point for the structured result. Adjust it only with evidence from the JSON artifact, dependency prep notes, validation feedback, or repository context.
+   - Use `real_world_artifact_query` when you need concrete grouped examples, skipped-file coverage, CLI preview text, or examples supporting a specific product recommendation. Do not search the artifact manually before trying this tool.
    - Product recommendations must include a strength label of `high`, `med`, or `low`, based on frequency, severity, reproducibility, and expected user impact. If there is no genuine product change to consider, use an explicit no-change recommendation in the record.
 
 5. Persist repository memory.
    - Call `real_world_record_result` with the title, corpus, cache directory, command, output artifact, repositories, dependency prep entries, validation feedback, findings, `productRecommendations` objects with `high`/`med`/`low` strength and rationale, product changes/decisions in `productDecisions`, and follow-up notes from the triage tool's `draftRecord`.
    - `real_world_record_result` automatically copies the raw DollarLint JSON output into `reports/real-world-artifacts/`, stores the repo-relative path as `persistedOutputArtifact`, and cleans managed temp corpus/cache dirs after recording succeeds; use that durable artifact for later per-file triage.
+   - Use `real_world_recommendation_backlog` after recording when you need to compare this run's recommendations with prior structured results or surface recurring product themes.
    - Do not create or update Markdown report files in the repository. Durable repository memory belongs in the MCP structured result.
    - If files changed, request a pull request through the configured `create-pull-request` safe output. Keep the PR title concise and mention the structured result entry.
 

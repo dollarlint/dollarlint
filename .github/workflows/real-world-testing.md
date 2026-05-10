@@ -210,7 +210,7 @@ safe-outputs:
                 `- Discussion: ${discussion.url}`,
                 ...entryLine,
                 `- Workflow run: ${runUrl}`,
-                '- Durable memory: merge this PR to make these tested repositories visible to future MCP history queries.',
+                '- Durable memory: this PR should be merged in order to retain these results for future MCP history queries.',
                 '<!-- real-world-output-links:end -->',
               ].join('\n');
 
@@ -221,7 +221,7 @@ safe-outputs:
                 `- Pull request: ${prUrl}`,
                 ...entryLine,
                 `- Workflow run: ${runUrl}`,
-                '- Merge the PR to persist this sweep in repo memory for future real-world testing.',
+                '- This PR should be merged in order to retain these results in repo memory for future real-world testing.',
                 '<!-- real-world-output-links:end -->',
               ].join('\n');
 
@@ -262,9 +262,9 @@ Before calling `real_world_start_testing`, derive the repository plan from those
 
 The workflow pre-builds `bin/dollarlint`; when the MCP flow asks for validation arguments, use `build: false` so validation uses the prebuilt CLI. Keep long-running prep or validation MCP calls open for progress notifications, and do not poll with shell sleep loops. Never run dependency lifecycle scripts, postinstall hooks, package-manager plugins, or repository install scripts.
 
-Durable repository memory must be written through `real_world_record_result` and the structured JSON files it manages. Do not create Markdown report files. Product recommendations are mandatory: include a `high`, `med`, or `low` strength with rationale, or record an explicit no-change recommendation when DollarLint behaved reasonably. If `real_world_record_result` changes repository files, `create_pull_request` is mandatory because merging that PR is how the repo remembers tested repositories. The PR body must say that merging it persists real-world testing memory.
+Durable repository memory must be written through `real_world_record_result` and the structured JSON files it manages. Do not create Markdown report files. Product recommendations are mandatory: include a `high`, `med`, or `low` strength with rationale, or record an explicit no-change recommendation when DollarLint behaved reasonably. If `real_world_record_result` changes repository files, `create_pull_request` is mandatory because merging that PR is how the repo remembers tested repositories. The PR body must say that it should be merged in order to retain the results in real-world testing memory.
 
-After recording, create exactly one GitHub Discussion through the configured safe output. Keep it concise: result counts, tested repositories, notable findings, product recommendations with strength labels, persisted artifact path, DollarLint commit, and workflow run URL. Put verbose examples or raw warnings inside `<details>` blocks. The Discussion body must include a "Durable memory PR" section explaining that a companion PR will be opened and must be merged for future sweeps to see this memory. If the Discussion falls back to an issue, say that the intended destination was a Discussion.
+After recording, create exactly one GitHub Discussion through the configured safe output. Keep it concise: result counts, tested repositories, notable findings, product recommendations with strength labels, persisted artifact path, DollarLint commit, and workflow run URL. Put verbose examples or raw warnings inside `<details>` blocks. The Discussion body must include a "Durable memory PR" section saying that a companion PR will be opened and that the PR should be merged in order to retain the results for future sweeps. If the Discussion falls back to an issue, say that the intended destination was a Discussion.
 
 The workflow may expose safe outputs either as direct tools or through a `safeoutputs` CLI wrapper. Use the available safe-output interface, but do not stop after committing locally. If using the CLI wrapper, send inline JSON on stdin with `printf '%s' '<json>' | safeoutputs create_pull_request .` and `printf '%s' '<json>' | safeoutputs create_discussion .`; do not rely on temporary payload files.
 

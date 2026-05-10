@@ -431,6 +431,13 @@ func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
 			Recommendation: "Mention github.event.inputs.max_repos and github.event.inputs.candidate_repos in the markdown prompt so manual dispatch controls the MCP repository plan.",
 		})
 	}
+	if !strings.Contains(source, "should be merged in order to retain") || !strings.Contains(lock, "should be merged in order to retain") {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "real-world workflow does not require the Discussion to explain that the PR retains the results",
+			Recommendation: `Ask the agent to include a "Durable memory PR" Discussion section saying that the PR should be merged in order to retain the results, then regenerate the lock file.`,
+		})
+	}
 	return issues
 }
 

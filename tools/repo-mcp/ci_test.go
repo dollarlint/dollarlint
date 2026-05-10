@@ -101,22 +101,22 @@ func TestMissingWorkflowToolsRequiresToolInSourceAndLock(t *testing.T) {
 }
 
 func TestRealWorldSafeOutputPolicyIssuesRequirePRAndLinker(t *testing.T) {
-	source := "tools:\n  bash:\n    - printf\ncreate-pull-request:\n  if-no-changes: error\njobs:\n  link-real-world-outputs:\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\n"
-	lock := `{"create_pull_request":{"if_no_changes":"error"},"link_real_world_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(safeoutputs:*)":true}`
+	source := "tools:\n  bash:\n    - printf\ncreate-pull-request:\n  if-no-changes: error\njobs:\n  link-real-world-outputs:\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n"
+	lock := `{"create_pull_request":{"if_no_changes":"error"},"link_real_world_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain"}`
 	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 0 {
 		t.Fatalf("issues = %+v, want none", issues)
 	}
 
 	source = "create-pull-request:\n"
 	lock = `{"create_pull_request":{}}`
-	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 3 {
-		t.Fatalf("issues = %+v, want missing PR policy, linker, and dispatch inputs", issues)
+	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 4 {
+		t.Fatalf("issues = %+v, want missing PR policy, linker, dispatch inputs, and Discussion retention text", issues)
 	}
 }
 
 func TestRealWorldSafeOutputPolicyIssuesRequirePrintfForSafeoutputsCLI(t *testing.T) {
-	source := "create-pull-request:\n  if-no-changes: error\njobs:\n  link-real-world-outputs:\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\n"
-	lock := `{"create_pull_request":{"if_no_changes":"error"},"link_real_world_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(safeoutputs:*)":true}`
+	source := "create-pull-request:\n  if-no-changes: error\njobs:\n  link-real-world-outputs:\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n"
+	lock := `{"create_pull_request":{"if_no_changes":"error"},"link_real_world_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain"}`
 	issues := realWorldSafeOutputPolicyIssues(source, lock)
 	if len(issues) != 1 || !strings.Contains(issues[0].Message, "printf") {
 		t.Fatalf("issues = %+v, want printf issue", issues)

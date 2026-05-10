@@ -54,19 +54,29 @@ Use that generated config as the starting point, then edit it for this repositor
 
 ## 3. Test and iterate
 
-1. Run:
+1. Inspect discovery and schema association first:
 
-       dollarlint validate . --locations --show-skipped
+       dollarlint inspect . --format json
 
-2. If important first-party files are skipped, add [[schemas.associations]] entries or add in-file schema declarations. Leave unimportant skipped files alone.
+   Prefer JSON output while analyzing. Use it to read every discovered file, whether it has a schema, why that schema was chosen or skipped, and any suggested config snippets.
 
-3. Exclude generated files, dependency folders, snapshots, baselines, and intentionally invalid fixtures with narrow discovery.exclude patterns only when they produce parse errors, validation noise, or excessive discovery volume. Do not exclude a file solely because it is skipped.
+2. Run:
 
-4. Use [[ignore]] only for known accepted validation issues. Do not hide unknown failures with broad excludes or ignores.
+       dollarlint validate . --format json --locations --show-skipped
 
-5. Re-run until discovered, validated, skipped, warning, and issue counts look reasonable for this repository. A nonzero skipped count is acceptable when the skipped files do not need schema coverage.
+   Use JSON fields such as schemaMatch, suggestedAssociation, suggestedCatalogIgnore, warnings, skipReason, skipClass, category, line, and column. Do not write JSON output artifacts into the repository unless the user asks; use stdout or a temporary file.
 
-6. Once the config is working, delete default values that are not useful to keep. Keep project-specific settings, intentional policy choices, and defaults that help future maintainers understand or tune validation.
+3. When inspect shows a correct catalog match for an important first-party config file, make it explicit in .dollarlint.toml with [[schemas.associations]]. Prefer explicit associations for project-owned configs that should keep being validated even if catalog behavior changes.
+
+4. If important first-party files are skipped, add [[schemas.associations]] entries or add in-file schema declarations. Leave unimportant skipped files alone.
+
+5. Exclude generated files, dependency folders, snapshots, baselines, and intentionally invalid fixtures with narrow discovery.exclude patterns only when they produce parse errors, validation noise, or excessive discovery volume. Do not exclude a file solely because it is skipped.
+
+6. Use [[ignore]] only for known accepted validation issues. Do not hide unknown failures with broad excludes or ignores.
+
+7. Re-run inspect and validate until discovered, associated, validated, skipped, warning, and issue counts look reasonable for this repository. A nonzero skipped count is acceptable when the skipped files do not need schema coverage.
+
+8. Once the config is working, delete default values that are not useful to keep. Keep project-specific settings, intentional policy choices, and defaults that help future maintainers understand or tune validation.
 
 ## 4. Report to the user
 
@@ -78,6 +88,8 @@ Include:
 - remaining active findings grouped by file with line/column when available
 - which active findings were ignored or excluded and why
 - which skipped files still need schema coverage, if any
+
+Write the final report for the user in concise human-readable prose, not as raw JSON.
 
 Separate parse errors, schema-fetch warnings, coverage gaps, and skipped files from user-actionable validation findings. Do not summarize skipped files as failures, and do not tune them away unless they are causing real parse, validation, or discovery noise.
 
@@ -98,6 +110,31 @@ Human docs:
       content="Token-light DollarLint setup instructions."
     />
     <title>Agent install · DollarLint</title>
+    <style>
+      :root {
+        color-scheme: light;
+        background: #fff;
+        color: #111;
+      }
+
+      body {
+        margin: 0;
+        background: #fff;
+        color: #111;
+        font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+
+      main {
+        max-width: 92ch;
+        padding: 24px;
+      }
+
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+    </style>
   </head>
   <body>
     <main>

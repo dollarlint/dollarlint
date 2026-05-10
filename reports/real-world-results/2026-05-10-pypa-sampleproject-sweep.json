@@ -1,0 +1,93 @@
+{
+  "$schema": "../real-world-result-entry.schema.json",
+  "schemaVersion": 3,
+  "id": "2026-05-10-pypa-sampleproject-sweep",
+  "date": "2026-05-10",
+  "title": "pypa-sampleproject sweep",
+  "dollarlintRevision": "e9e24f885eddd70b6dab4591a21d04ebe726e769",
+  "workingTreeNote": "Clean working tree before recording; on branch main.",
+  "corpus": "/tmp/dollarlint-corpus.1980027801",
+  "cacheDir": "/tmp/dollarlint-cache.1179432300",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.1980027801\" cacheDir=\"/tmp/dollarlint-cache.1179432300\" outputArtifact=\"/tmp/dollarlint-pypa-sampleproject-sweep-4039155712.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-pypa-sampleproject-sweep-4039155712.json",
+  "persistedOutputArtifact": "reports/real-world-artifacts/2026-05-10-pypa-sampleproject-sweep.dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "pypa-sampleproject",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "pypa-sampleproject",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "The CLI preview is concise and understandable: DollarLint reported 3 discovered files, 3 validated files, and 0 skipped files with no extra noise.",
+        "This repository produced no warnings, no skipped coverage, and no issues, so the result reads like a trustworthy clean pass for a small conventional Python project.",
+        "The corpus inspection found no local $schema references, so skipping dependency preparation did not reduce schema fidelity for this run."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "No product change recommended from this sweep; keep the current validation and summary behavior for small conventional repositories like this one.",
+          "rationale": "The repository validated cleanly with zero issues, zero warnings, and zero skipped files, and the CLI preview already communicated that outcome clearly without requiring extra interpretation."
+        }
+      ],
+      "productDecisions": [
+        "No product change proposed from this repository result."
+      ],
+      "followUp": [
+        "Revisit with a broader Python corpus if future sweeps need stronger evidence about Python-specific schema discovery or skipped-file ergonomics."
+      ],
+      "notes": "DollarLint behaved reasonably for this repository. The developer experience is clear and low-noise: the validation summary is actionable, there were no confusing skips or repeated warnings to interpret, and nothing in this result suggests a correctness or ergonomics change is needed from this single-repo sweep."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "pypa-sampleproject",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/pypa/sampleproject.git",
+      "commit": "621e4974ca25ce531773def586ba3ed8e736b3fc",
+      "path": "/tmp/dollarlint-corpus.1980027801/pypa-sampleproject",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 3,
+    "validated": 3,
+    "skipped": 0,
+    "failed": 0,
+    "issues": {
+      "total": 0,
+      "parsing": 0,
+      "validation": 0,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 1015170991
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 1 repo(s) behaved reasonably, 0 repo(s) produced product signals, and 0 repo(s) were blocked or uninterpretable.",
+    "DollarLint discovered 3 files, validated 3, skipped 0, failed 0, reported 0 issues, and emitted 0 warnings.",
+    "No crashes, output-contract failures, validation issues, or warnings were observed."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "No product change recommended from this sweep; keep the current validation and summary behavior for small conventional repositories like this one.",
+      "rationale": "The repository validated cleanly with zero issues, zero warnings, and zero skipped files, and the CLI preview already communicated that outcome clearly without requiring extra interpretation."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; record the triage and decide follow-up from the structured result.",
+    "No product change proposed from this repository result."
+  ],
+  "followUp": [
+    "Continue the next real-world sweep with fresh repositories.",
+    "Revisit with a broader Python corpus if future sweeps need stronger evidence about Python-specific schema discovery or skipped-file ergonomics."
+  ]
+}

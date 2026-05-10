@@ -1,0 +1,80 @@
+{
+  "formatVersion": 1,
+  "json": {
+    "$schema": "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json",
+    "formatVersion": 1,
+    "root": "/tmp/dollarlint-corpus.1980027801",
+    "summary": {
+      "discovered": 3,
+      "validated": 3,
+      "skipped": 0,
+      "failed": 0,
+      "issues": {
+        "total": 0,
+        "parsing": 0,
+        "validation": 0,
+        "schema": 0,
+        "coverage": 0
+      },
+      "ignored": 0,
+      "warnings": 0,
+      "durationNanos": 1015170991
+    },
+    "files": [
+      {
+        "path": "pypa-sampleproject/.github/workflows/release.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "pypa-sampleproject/.github/workflows/test.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "pypa-sampleproject/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      }
+    ],
+    "issues": [],
+    "ignoredIssues": [],
+    "warnings": []
+  },
+  "sarif": {
+    "version": "2.1.0",
+    "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+    "runs": [
+      {
+        "tool": {
+          "driver": {
+            "name": "dollarlint",
+            "informationUri": "https://github.com/dollarlint/dollarlint"
+          }
+        },
+        "results": []
+      }
+    ]
+  },
+  "styled": {
+    "plain": "dollarlint passed in 0s: 3 discovered, 3 validated, 0 skipped\n\nSummary: 3 discovered, 3 validated, 0 skipped, 0 issues in 0s\n",
+    "ansi": "dollarlint passed in 0s: 3 discovered, 3 validated, 0 skipped\n\nSummary: 3 discovered, 3 validated, 0 skipped, 0 issues in 0s\n",
+    "options": {
+      "showSkipped": true,
+      "locations": true
+    },
+    "truncated": false
+  }
+}

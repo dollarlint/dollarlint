@@ -69,6 +69,7 @@ func TestAgenticWorkflowReadinessUsesCurrentWorkflowNames(t *testing.T) {
 	for _, value := range []string{
 		agenticWorkflowSourceRel,
 		agenticWorkflowLockRel,
+		agenticOutputLinkerWorkflowRel,
 		agenticWorkflowReadinessDescription,
 	} {
 		if strings.Contains(value, staleScheduleWord) || strings.Contains(value, staleWorkflowName) {
@@ -80,6 +81,9 @@ func TestAgenticWorkflowReadinessUsesCurrentWorkflowNames(t *testing.T) {
 	}
 	if agenticWorkflowLockRel != ".github/workflows/agentic-product-testing.lock.yml" {
 		t.Fatalf("lock workflow = %q, want agentic-product-testing.lock.yml", agenticWorkflowLockRel)
+	}
+	if agenticOutputLinkerWorkflowRel != ".github/workflows/link-agentic-product-testing-outputs.yml" {
+		t.Fatalf("linker workflow = %q, want link-agentic-product-testing-outputs.yml", agenticOutputLinkerWorkflowRel)
 	}
 }
 
@@ -175,7 +179,8 @@ func TestRealWorldSafeOutputPolicyIssuesIgnoreNetworkPackageNames(t *testing.T) 
 func TestRealWorldSafeOutputPolicyIssuesAcceptCheckedInWorkflow(t *testing.T) {
 	source := readRepoFile(t, agenticWorkflowSourceRel)
 	lock := readRepoFile(t, agenticWorkflowLockRel)
-	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 0 {
+	linker := readRepoFile(t, agenticOutputLinkerWorkflowRel)
+	if issues := realWorldSafeOutputPolicyIssues(source, lock, linker); len(issues) != 0 {
 		t.Fatalf("issues = %+v, want checked-in workflow to satisfy safe output policy", issues)
 	}
 }

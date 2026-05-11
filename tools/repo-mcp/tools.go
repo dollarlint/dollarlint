@@ -30,9 +30,11 @@ func (s *repoServer) addTools() {
 	}), s.handleDiagnoseValidation, true)
 	s.addTool("real_world_capabilities", "Return the real-world testing MCP contract version, freshness metadata, and guided-flow capabilities.", schemaObject(nil), s.handleRealWorldCapabilities, true)
 	s.addTool("real_world_history", "List and query structured real-world corpus history, including repositories already tested.", schemaObject(map[string]any{
-		"repo":           map[string]any{"type": "string", "description": "Single repository name or clone URL to check."},
-		"repositories":   arrayStringSchema("Repository names or clone URLs to check."),
-		"includeEntries": map[string]any{"type": "boolean", "description": "Include full structured history entries. Defaults to false."},
+		"repo":               map[string]any{"type": "string", "description": "Single repository name or clone URL to check."},
+		"repositories":       arrayStringSchema("Repository names or clone URLs to check."),
+		"includeEntries":     map[string]any{"type": "boolean", "description": "Include full structured history entries. Defaults to false."},
+		"includeTestedRepos": map[string]any{"type": "boolean", "description": "Include a capped tested repository list. Defaults to false to keep responses compact."},
+		"limit":              map[string]any{"type": "integer", "description": "Maximum tested repositories to include when includeTestedRepos=true. Defaults to 25; capped at 200."},
 	}), s.handleRealWorldHistory, true)
 	s.addTool("real_world_artifact_query", "Query a recorded real-world DollarLint artifact for grouped issues, warnings, skipped coverage, CLI preview, and recommendation examples.", schemaObject(map[string]any{
 		"entryID":        map[string]any{"type": "string", "description": "Recorded real-world entry id. Defaults to the latest entry with a readable persisted artifact."},
@@ -52,6 +54,8 @@ func (s *repoServer) addTools() {
 		"title":                 map[string]any{"type": "string", "description": "Short sweep title."},
 		"repositories":          realWorldRepositoryArraySchema("Candidate repositories to check before preparing the corpus."),
 		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Allow intentional reruns of repositories already present in real-world history."},
+		"includeTestedRepos":    map[string]any{"type": "boolean", "description": "Include a capped tested repository list. Defaults to false to keep responses compact."},
+		"testedRepoLimit":       map[string]any{"type": "integer", "description": "Maximum tested repositories to include when includeTestedRepos=true. Defaults to 25; capped at 200."},
 	}), s.handleRealWorldStartTesting, true)
 	s.addTool("real_world_update_candidates", "Apply an add/remove/replace diff to a stored real-world candidate repository set, then recheck duplicate history.", schemaObject(map[string]any{
 		"candidateSetID":        map[string]any{"type": "string", "description": "Candidate set id returned by real_world_start_testing or real_world_update_candidates."},

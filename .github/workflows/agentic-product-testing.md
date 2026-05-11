@@ -119,167 +119,6 @@ safe-outputs:
       - reports/agentic-product-testing/**
     protected-files: fallback-to-issue
     draft: false
-  jobs:
-    link-outputs:
-      description: Cross-link the Agentic Product Testing Discussion and durable-memory PR after the built-in safe outputs run. Call this whenever a result PR is requested.
-      runs-on: ubuntu-latest
-      needs: safe_outputs
-      output: Linked the Agentic Product Testing Discussion and PR.
-      permissions:
-        contents: read
-        discussions: write
-        pull-requests: write
-      inputs:
-        discussion_title:
-          description: Exact title passed to create_discussion, without the configured title prefix unless already included.
-          required: true
-          type: string
-        entry_id:
-          description: Real-world result entry id returned by real_world_record_result.
-          required: false
-          type: string
-      steps:
-        - name: Link PR and Discussion
-          uses: actions/github-script@v9
-          env:
-            CREATED_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
-            CREATED_PR_URL: ${{ needs.safe_outputs.outputs.created_pr_url }}
-            WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          with:
-            script: |
-              const fs = require('fs');
-
-              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
-              const prNumber = process.env.CREATED_PR_NUMBER;
-              const prUrl = process.env.CREATED_PR_URL;
-              const runUrl = process.env.WORKFLOW_RUN_URL;
-              const owner = context.repo.owner;
-              const repo = context.repo.repo;
-
-              if (!outputPath || !fs.existsSync(outputPath)) {
-                core.setFailed('GH_AW_AGENT_OUTPUT was not available to link real-world outputs.');
-                return;
-              }
-
-              const agentOutput = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
-              const items = Array.isArray(agentOutput.items) ? agentOutput.items : [];
-              const linkItem = items.find((item) => item.type === 'link_outputs');
-              if (!linkItem) {
-                core.setFailed('The agent did not call link_outputs.');
-                return;
-              }
-
-              const discussionItem = items.find((item) => item.type === 'create_discussion');
-              const pullRequestItem = items.find((item) => item.type === 'create_pull_request');
-              if (!prNumber || !prUrl) {
-                if (!pullRequestItem) {
-                  core.warning('link_outputs was called, but no create_pull_request output was requested; skipping cross-link.');
-                  return;
-                }
-                core.setFailed('create_pull_request was requested, but safe outputs did not expose a created PR URL/number.');
-                return;
-              }
-              if (!discussionItem) {
-                core.setFailed('link_outputs requires a matching create_discussion output.');
-                return;
-              }
-              const requestedTitle = linkItem.discussion_title || discussionItem?.title || '';
-              if (!requestedTitle) {
-                core.setFailed('link_outputs requires discussion_title.');
-                return;
-              }
-              const expectedTitle = requestedTitle.startsWith('Agentic Product Testing: ')
-                ? requestedTitle
-                : `Agentic Product Testing: ${requestedTitle}`;
-
-              const discussionData = await github.graphql(
-                `query($owner: String!, $repo: String!) {
-                  repository(owner: $owner, name: $repo) {
-                    discussions(first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
-                      nodes { id number title url body updatedAt }
-                    }
-                  }
-                }`,
-                { owner, repo },
-              );
-              const discussions = discussionData.repository.discussions.nodes;
-              const exactTitleMatches = discussions.filter((item) => item.title === expectedTitle);
-              const discussion = exactTitleMatches.find((item) => item.body && item.body.includes(runUrl))
-                || exactTitleMatches[0]
-                || discussions.find((item) => item.body && item.body.includes(runUrl));
-              if (!discussion) {
-                core.setFailed(`Could not find the Agentic Product Testing Discussion titled ${expectedTitle} or containing ${runUrl}.`);
-                return;
-              }
-
-              const upsertBlock = (body, start, end, block) => {
-                const text = body || '';
-                const startIndex = text.indexOf(start);
-                const endIndex = text.indexOf(end);
-                if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-                  return `${text.slice(0, startIndex)}${block}${text.slice(endIndex + end.length)}`;
-                }
-                return `${text.trimEnd()}\n\n${block}`;
-              };
-
-              const entryLine = linkItem.entry_id ? [`- Real-world entry: \`${linkItem.entry_id}\``] : [];
-              const prBlock = [
-                '<!-- real-world-output-links:start -->',
-                '### Agentic Product Testing links',
-                '',
-                `- Discussion: ${discussion.url}`,
-                ...entryLine,
-                `- Workflow run: ${runUrl}`,
-                '- Durable memory: this PR should be merged in order to retain these results for future MCP history queries.',
-                '<!-- real-world-output-links:end -->',
-              ].join('\n');
-
-              const discussionBlock = [
-                '<!-- real-world-output-links:start -->',
-                '### Durable memory PR',
-                '',
-                `- Pull request: ${prUrl}`,
-                ...entryLine,
-                `- Workflow run: ${runUrl}`,
-                '- This PR should be merged in order to retain these results in repo memory for future Agentic Product Testing sweeps.',
-                '<!-- real-world-output-links:end -->',
-              ].join('\n');
-
-              const pr = await github.rest.pulls.get({ owner, repo, pull_number: Number(prNumber) });
-              const nextPrBody = upsertBlock(pr.data.body || '', '<!-- real-world-output-links:start -->', '<!-- real-world-output-links:end -->', prBlock);
-              if (nextPrBody !== (pr.data.body || '')) {
-                await github.rest.pulls.update({ owner, repo, pull_number: Number(prNumber), body: nextPrBody });
-              }
-
-              const nextDiscussionBody = upsertBlock(discussion.body || '', '<!-- real-world-output-links:start -->', '<!-- real-world-output-links:end -->', discussionBlock);
-              if (nextDiscussionBody !== (discussion.body || '')) {
-                try {
-                  await github.graphql(
-                    `mutation($discussionId: ID!, $body: String!) {
-                      updateDiscussion(input: {discussionId: $discussionId, body: $body}) {
-                        discussion { url }
-                      }
-                    }`,
-                    { discussionId: discussion.id, body: nextDiscussionBody },
-                  );
-                } catch (error) {
-                  core.warning(`Could not update Discussion body; posting a link comment instead. ${error.message}`);
-                  try {
-                    await github.graphql(
-                      `mutation($discussionId: ID!, $body: String!) {
-                        addDiscussionComment(input: {discussionId: $discussionId, body: $body}) {
-                          comment { url }
-                        }
-                      }`,
-                      { discussionId: discussion.id, body: discussionBlock },
-                    );
-                  } catch (commentError) {
-                    core.warning(`Could not comment on Discussion; the PR body still links back to it. ${commentError.message}`);
-                  }
-                }
-              }
-
-              core.info(`Linked ${prUrl} and ${discussion.url}.`);
 
 timeout-minutes: 90
 ---
@@ -294,19 +133,19 @@ Manual dispatch inputs for this run:
 - max_repos: `${{ github.event.inputs.max_repos }}`
 - candidate_repos: `${{ github.event.inputs.candidate_repos }}`
 
-Before calling `real_world_start_testing`, derive the repository plan from those literal inputs. Treat a missing or empty `max_repos` as `10`. If `candidate_repos` is a non-empty JSON array, parse it and pass at most `max_repos` entries exactly to `real_world_start_testing.repositories`; do not substitute different repositories unless MCP history reports duplicates and `allowPreviouslyTested` is false. If duplicates are reported, use the returned `candidateSetID` and call `real_world_update_candidates` with a small `diff.replace`, `diff.remove`, or `diff.add` instead of resubmitting the full repository list. When the candidate set is ready, prefer passing only `candidateSetID` and `expectedCount` to `real_world_prepare_corpus`. If `candidate_repos` is empty, choose up to `max_repos` diverse, well-known public repositories with conventional config files, skipping repositories already in MCP history unless the manual input explicitly asks for reruns.
+Before calling `real_world_start_testing`, derive the repository plan from those literal inputs. Treat a missing or empty `max_repos` as `10`. If `candidate_repos` is a non-empty JSON array, parse it and pass at most `max_repos` entries exactly to `real_world_start_testing.repositories`; do not substitute different repositories unless MCP history reports duplicates and `allowPreviouslyTested` is false. If `candidate_repos` is empty, choose up to `max_repos` diverse, well-known public repositories with conventional config files and let `real_world_start_testing` check them against MCP history; do not fetch the full tested-repository history first. If duplicates are reported, use the returned `candidateSetID` and call `real_world_update_candidates` with a small `diff.replace`, `diff.remove`, or `diff.add` instead of resubmitting the full repository list. When the candidate set is ready, prefer passing only `candidateSetID` and `expectedCount` to `real_world_prepare_corpus`.
 
 The workflow pre-builds `bin/dollarlint`; when the MCP flow asks for validation arguments, use `build: false` so validation uses the prebuilt CLI. Keep long-running prep or validation MCP calls open for progress notifications, and do not poll with shell sleep loops.
 
 Dependency prep is controlled structurally, not by judgment alone: this workflow does not expose package-manager commands through `tools.bash`, the agent job has read-only GitHub permissions, and `create_pull_request` is restricted to `reports/agentic-product-testing/**`. Use only the `real_world_*` MCP tools for cloning, inspection, validation, and result recording. Treat MCP `suggestedCommands` as audit guidance for dependency-prep notes; do not execute package-manager install/fetch commands from the agent shell. If schema fidelity would require dependency materialization that the MCP server cannot perform safely, record dependency prep as skipped or needs-review with the reason.
 
-Durable repository memory must be written through `real_world_record_result` and the structured JSON run directory it manages under `reports/agentic-product-testing/<run-id>/`. Do not create Markdown report files or a shared summary index. Product recommendations are mandatory: include a `high`, `med`, or `low` strength with rationale, or record an explicit no-change recommendation when DollarLint behaved reasonably. If `real_world_record_result` changes repository files, `create_pull_request` is mandatory because merging that PR is how the repo remembers tested repositories. The PR body must say that it should be merged in order to retain the results in Agentic Product Testing memory.
+Durable repository memory must be written through `real_world_record_result` and the structured JSON run directory it manages under `reports/agentic-product-testing/<run-id>/`. Do not create Markdown report files or a shared summary index. Product recommendations are mandatory: include a `high`, `med`, or `low` strength with rationale, or record an explicit no-change recommendation when DollarLint behaved reasonably. If `real_world_record_result` changes repository files, `create_pull_request` is mandatory because merging that PR is how the repo remembers tested repositories. The PR body must say that it should be merged in order to retain the results in Agentic Product Testing memory and must include this workflow run URL: `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`.
 
-After recording, create exactly one GitHub Discussion through the configured safe output in the `Agentic Product Testing` category. Keep it concise: result counts, tested repositories, notable findings, product recommendations with strength labels, persisted artifact path, DollarLint commit, and workflow run URL. Include `@agorischek` near the top of the Discussion body so the owner is notified. Put verbose examples or raw warnings inside `<details>` blocks. The Discussion body must include a "Durable memory PR" section saying that a companion PR will be opened and that the PR should be merged in order to retain the results for future sweeps. If the Discussion falls back to an issue, say that the intended destination was a Discussion.
+After recording, create exactly one GitHub Discussion through the configured safe output in the `Agentic Product Testing` category. Keep it concise: result counts, tested repositories, notable findings, product recommendations with strength labels, persisted artifact path, DollarLint commit, and workflow run URL. Format tested repositories as Markdown links using `discussionPacket.repositories[].markdown` when available; avoid a plain comma-separated repository list when URLs are known. Include `@agorischek` near the top of the Discussion body so the owner is notified. Put verbose examples or raw warnings inside `<details>` blocks. The Discussion body must include a "Durable memory PR" section saying that a companion PR will be opened and that the PR should be merged in order to retain the results for future sweeps. If the Discussion falls back to an issue, say that the intended destination was a Discussion.
 
 The workflow may expose safe outputs either as direct tools or through a `safeoutputs` CLI wrapper. Use the available safe-output interface, but do not stop after committing locally. If using the CLI wrapper, send inline JSON on stdin with `printf '%s' '<json>' | safeoutputs create_pull_request .` and `printf '%s' '<json>' | safeoutputs create_discussion .`; do not rely on temporary payload files.
 
-After requesting both `create_pull_request` and `create_discussion`, call `link_outputs` with the exact Discussion title and the recorded entry id. This post-safe-output step cross-links the final PR and Discussion URLs and fails if no PR was created.
+After requesting both `create_pull_request` and `create_discussion`, no extra linking tool call is needed. A deterministic follow-up workflow cross-links the final PR and Discussion URLs after the run completes.
 
 Do not fabricate results. If cloning, preparation, validation, triage, or recording blocks before a meaningful sweep completes, publish a short blocker summary with any partial artifacts and the next concrete fix.
 

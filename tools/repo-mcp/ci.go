@@ -482,6 +482,13 @@ func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
 			Recommendation: `Set create-pull-request.allowed-files to ["reports/agentic-product-testing/**"] and regenerate the lock file.`,
 		})
 	}
+	if !strings.Contains(source, "max-patch-size: 8192") || !strings.Contains(lock, `"max_patch_size":8192`) {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "Agentic Product Testing workflow PR patch limit is too small for structured report artifacts",
+			Recommendation: "Set safe-outputs.max-patch-size: 8192 and regenerate the lock file.",
+		})
+	}
 	if exposesPackageManagerShell(source, lock) {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",

@@ -96,6 +96,7 @@ pre-agent-steps:
       bin/dollarlint --version
 
 safe-outputs:
+  max-patch-size: 8192
   mentions:
     allow-team-members: false
     allow-context: false

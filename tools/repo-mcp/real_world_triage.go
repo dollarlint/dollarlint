@@ -404,6 +404,7 @@ func realWorldDiscussionPacket(details realWorldOutputDetails, perRepo []realWor
 	return map[string]any{
 		"purpose":                "Team-facing product discussion brief generated from the real-world validation artifact.",
 		"summary":                details.Summary,
+		"repositories":           realWorldDiscussionRepositories(perRepo),
 		"productRecommendations": recommendations,
 		"exampleIssues":          issueExamples,
 		"skippedGroups":          skippedGroups,
@@ -413,6 +414,53 @@ func realWorldDiscussionPacket(details realWorldOutputDetails, perRepo []realWor
 		"uxSignals":              realWorldUXSignals(details, issueExamples, skippedGroups),
 		"positiveEvidence":       realWorldPositiveEvidence(perRepo),
 	}
+}
+
+func realWorldDiscussionRepositories(perRepo []realWorldRepositoryTriage) []map[string]string {
+	out := []map[string]string{}
+	for _, repo := range perRepo {
+		url := realWorldRepositoryWebURL(repo)
+		if url == "" {
+			continue
+		}
+		name := nonEmpty(repo.Repository, repoNameFromURL(url))
+		item := map[string]string{
+			"name":     name,
+			"url":      url,
+			"markdown": fmt.Sprintf("[%s](%s)", escapeMarkdownLinkLabel(name), url),
+		}
+		out = append(out, item)
+	}
+	return out
+}
+
+func realWorldRepositoryWebURL(repo realWorldRepositoryTriage) string {
+	cloneURL := strings.TrimSpace(repo.CloneURL)
+	if cloneURL != "" {
+		if strings.HasPrefix(cloneURL, "git@github.com:") {
+			path := strings.TrimSuffix(strings.TrimPrefix(cloneURL, "git@github.com:"), ".git")
+			path = strings.Trim(path, "/")
+			if path != "" {
+				return "https://github.com/" + path
+			}
+		}
+		if strings.HasPrefix(cloneURL, "https://github.com/") || strings.HasPrefix(cloneURL, "http://github.com/") {
+			return strings.TrimSuffix(strings.TrimRight(cloneURL, "/"), ".git")
+		}
+		if strings.HasPrefix(cloneURL, "https://") || strings.HasPrefix(cloneURL, "http://") {
+			return strings.TrimSuffix(strings.TrimRight(cloneURL, "/"), ".git")
+		}
+	}
+	key := normalizeRepoQuery(repo.Repository)
+	if strings.Count(key, "/") == 1 {
+		return "https://github.com/" + key
+	}
+	return ""
+}
+
+func escapeMarkdownLinkLabel(label string) string {
+	replacer := strings.NewReplacer(`\`, `\\`, `[`, `\[`, `]`, `\]`)
+	return replacer.Replace(label)
 }
 
 func firstIssueGroups(groups []realWorldIssueGroup, limit int) []realWorldIssueGroup {

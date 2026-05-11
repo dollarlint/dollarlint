@@ -458,6 +458,16 @@ func TestTriageRealWorldOutputGroupsIssuesAndWarnings(t *testing.T) {
 	if len(triage.ProductRecommendations) == 0 || triage.FinalResponseContract["required"] == "" {
 		t.Fatalf("recommendations=%+v finalResponseContract=%+v", triage.ProductRecommendations, triage.FinalResponseContract)
 	}
+	discussionRepos, ok := triage.DiscussionPacket["repositories"].([]map[string]string)
+	if !ok {
+		t.Fatalf("discussion repositories = %#v", triage.DiscussionPacket["repositories"])
+	}
+	if len(discussionRepos) != 2 {
+		t.Fatalf("discussion repositories = %+v", discussionRepos)
+	}
+	if discussionRepos[0]["markdown"] != "[hugo](https://github.com/gohugoio/hugo)" {
+		t.Fatalf("hugo discussion repo = %+v", discussionRepos[0])
+	}
 }
 
 func TestTriageRealWorldOutputRejectsCountMismatch(t *testing.T) {

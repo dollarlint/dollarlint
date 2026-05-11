@@ -281,13 +281,6 @@ func limitedPathList(paths []string, limit int) string {
 	return fmt.Sprintf("%s, and %d more", strings.Join(paths[:limit], ", "), len(paths)-limit)
 }
 
-func hintForSchemaFailure(document *Document, message string) string {
-	if hint, ok := schemaFailureIssueHint(document, message); ok {
-		return issueHintText(hint, false)
-	}
-	return legacyHintForSchemaFailure(document, message)
-}
-
 func applySchemaFailureIssueHint(document *Document, issue *Issue, output OutputConfig) {
 	if issue == nil || issue.Hint != "" {
 		return

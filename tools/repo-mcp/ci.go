@@ -47,6 +47,7 @@ var workflowAllMCPToolsPattern = regexp.MustCompile(`"tools"\s*:\s*\[\s*"\*"\s*\
 const (
 	agenticWorkflowSourceRel            = ".github/workflows/agentic-product-testing.md"
 	agenticWorkflowLockRel              = ".github/workflows/agentic-product-testing.lock.yml"
+	agenticOutputLinkerWorkflowRel      = ".github/workflows/link-agentic-product-testing-outputs.yml"
 	agenticWorkflowReadinessDescription = "Validate the Agentic Product Testing workflow before pushing, including actionlint, MCP allowlist, generated lock freshness, PR publishing credentials, and known-bad model settings."
 )
 
@@ -209,21 +210,27 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	p := newProgress(ctx, s.mcp, request, 7)
 	sourceRel := agenticWorkflowSourceRel
 	lockRel := agenticWorkflowLockRel
+	linkerRel := agenticOutputLinkerWorkflowRel
 	sourcePath := filepath.Join(s.root, sourceRel)
 	lockPath := filepath.Join(s.root, lockRel)
+	linkerPath := filepath.Join(s.root, linkerRel)
 	var issues []readinessIssue
 	var checks []map[string]any
 
 	p.step("Checking workflow files")
 	source, sourceErr := os.ReadFile(sourcePath)
 	lock, lockErr := os.ReadFile(lockPath)
+	linker, linkerErr := os.ReadFile(linkerPath)
 	if sourceErr != nil {
 		issues = append(issues, readinessIssue{Severity: "error", Message: sourceErr.Error(), Recommendation: "Restore " + sourceRel + "."})
 	}
 	if lockErr != nil {
 		issues = append(issues, readinessIssue{Severity: "error", Message: lockErr.Error(), Recommendation: "Regenerate " + lockRel + "."})
 	}
-	checks = append(checks, map[string]any{"name": "workflow files", "ok": sourceErr == nil && lockErr == nil})
+	if linkerErr != nil {
+		issues = append(issues, readinessIssue{Severity: "error", Message: linkerErr.Error(), Recommendation: "Restore " + linkerRel + "."})
+	}
+	checks = append(checks, map[string]any{"name": "workflow files", "ok": sourceErr == nil && lockErr == nil && linkerErr == nil})
 
 	p.step("Checking real-world MCP allowlist")
 	requiredTools := requiredAgenticRealWorldTools()
@@ -234,7 +241,7 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	checks = append(checks, map[string]any{"name": "real-world MCP allowlist", "ok": len(missing) == 0, "requiredTools": requiredTools, "missing": missing})
 
 	p.step("Checking real-world safe outputs")
-	safeOutputIssues := realWorldSafeOutputPolicyIssues(string(source), string(lock))
+	safeOutputIssues := realWorldSafeOutputPolicyIssues(string(source), string(lock), string(linker))
 	issues = append(issues, safeOutputIssues...)
 	checks = append(checks, map[string]any{"name": "real-world safe outputs", "ok": len(safeOutputIssues) == 0})
 
@@ -257,8 +264,8 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	actionlint := s.run(ctx, namedCommand{
 		Job:         "agentic-workflow",
 		Name:        "actionlint Agentic Product Testing workflow",
-		Cmd:         actionlintCommand + " -shellcheck= " + lockRel,
-		FailureHint: "Fix actionlint diagnostics in " + lockRel + " or regenerate the lock file.",
+		Cmd:         actionlintCommand + " -shellcheck= " + lockRel + " " + linkerRel,
+		FailureHint: "Fix actionlint diagnostics in " + lockRel + " or " + linkerRel + ", or regenerate the lock file.",
 	})
 	if !actionlint.Succeeded {
 		issues = append(issues, readinessIssue{Severity: "error", Message: "actionlint failed for " + lockRel, Recommendation: actionlint.FailureHint})
@@ -274,6 +281,7 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 		"ok":                  !hasReadinessErrors(issues),
 		"sourceWorkflow":      sourceRel,
 		"generatedWorkflow":   lockRel,
+		"linkerWorkflow":      linkerRel,
 		"checks":              checks,
 		"issues":              issues,
 		"recentFailureSignal": "A recent Agentic Product Testing workflow run failed when COPILOT_MODEL was gpt-5.5; this tool flags that value because it was not accessible via Copilot chat completions.",
@@ -418,8 +426,12 @@ func hasServerSideRealWorldToolFilter(source, lock string) bool {
 	return sourceHasFilter && lockHasFilter && sourceAllowsAll && lockAllowsAll
 }
 
-func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
+func realWorldSafeOutputPolicyIssues(source, lock string, linkerSources ...string) []readinessIssue {
 	var issues []readinessIssue
+	linker := ""
+	if len(linkerSources) > 0 {
+		linker = linkerSources[0]
+	}
 	if !strings.Contains(source, "if-no-changes: error") || !strings.Contains(lock, `"if_no_changes":"error"`) {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
@@ -427,14 +439,27 @@ func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
 			Recommendation: "Set create-pull-request.if-no-changes: error and regenerate the lock file.",
 		})
 	}
-	if !strings.Contains(source, "link-outputs") || !strings.Contains(lock, "link_outputs") {
+	hasCustomLinker := strings.Contains(source, "link-outputs") && strings.Contains(lock, "link_outputs")
+	hasFollowupLinker := strings.Contains(linker, "workflow_run:") &&
+		strings.Contains(linker, `workflows: ["Agentic Product Testing"]`) &&
+		strings.Contains(linker, "pull-requests: write") &&
+		strings.Contains(linker, "discussions: write") &&
+		strings.Contains(linker, "real-world-output-links:start")
+	if !hasCustomLinker && !hasFollowupLinker {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
 			Message:        "Agentic Product Testing workflow is missing the post-safe-output PR/Discussion linker",
-			Recommendation: "Configure safe-outputs.jobs.link-outputs and regenerate the lock file.",
+			Recommendation: "Configure the deterministic link-agentic-product-testing-outputs workflow, or restore a safe-outputs linker job and regenerate the lock file.",
 		})
 	}
-	if strings.Contains(source, "link-outputs") && !strings.Contains(lock, "created_pr_url") {
+	if hasFollowupLinker && (!strings.Contains(source, "PR body") || !strings.Contains(source, "workflow run URL")) {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "Agentic Product Testing workflow does not require enough linking metadata in the PR body",
+			Recommendation: "Require the agent to include the workflow run URL in the durable-memory PR body so the deterministic linker can find it.",
+		})
+	}
+	if hasCustomLinker && !strings.Contains(lock, "created_pr_url") {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
 			Message:        "real-world linker cannot see the created PR URL in the generated workflow",
@@ -455,7 +480,7 @@ func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
 			Recommendation: "Mention github.event.inputs.max_repos and github.event.inputs.candidate_repos in the markdown prompt so manual dispatch controls the MCP repository plan.",
 		})
 	}
-	if !strings.Contains(source, "should be merged in order to retain") || !strings.Contains(lock, "should be merged in order to retain") {
+	if !strings.Contains(source, "should be merged in order to retain") {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
 			Message:        "Agentic Product Testing workflow does not require the Discussion to explain that the PR retains the results",

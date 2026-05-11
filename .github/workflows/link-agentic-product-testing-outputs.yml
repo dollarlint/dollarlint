@@ -1,0 +1,189 @@
+name: Link Agentic Product Testing outputs
+
+on:
+  workflow_run:
+    workflows: ["Agentic Product Testing"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Agentic Product Testing workflow run ID to link.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  discussions: write
+  pull-requests: write
+
+jobs:
+  link:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Link PR and Discussion
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const runId = context.eventName === 'workflow_run'
+              ? String(context.payload.workflow_run.id)
+              : String(core.getInput('run_id')).trim();
+            const runUrl = context.eventName === 'workflow_run'
+              ? context.payload.workflow_run.html_url
+              : `${context.serverUrl}/${owner}/${repo}/actions/runs/${runId}`;
+
+            if (!runId) {
+              core.setFailed('run_id is required.');
+              return;
+            }
+
+            const marker = `id: ${runId}`;
+            const upsertBlock = (body, start, end, block) => {
+              const text = body || '';
+              const startIndex = text.indexOf(start);
+              const endIndex = text.indexOf(end);
+              if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+                return `${text.slice(0, startIndex)}${block}${text.slice(endIndex + end.length)}`;
+              }
+              return `${text.trimEnd()}\n\n${block}`;
+            };
+
+            const pullRequests = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'open',
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 100,
+            });
+            let pullRequest = pullRequests.find((item) => {
+              const body = item.body || '';
+              return body.includes(runUrl) || body.includes(marker);
+            });
+
+            if (!pullRequest) {
+              const search = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${owner}/${repo} is:pr "${runUrl}"`,
+                per_page: 5,
+              });
+              const found = search.data.items.find((item) => item.pull_request);
+              if (found) {
+                const prNumber = Number(found.number);
+                const pr = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+                pullRequest = pr.data;
+              }
+            }
+
+            if (!pullRequest) {
+              core.setFailed(`Could not find an Agentic Product Testing PR for ${runUrl}.`);
+              return;
+            }
+
+            const discussionData = await github.graphql(
+              `query($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                  discussions(first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+                    nodes {
+                      id
+                      number
+                      title
+                      url
+                      body
+                      updatedAt
+                      comments(first: 50) {
+                        nodes { body url }
+                      }
+                    }
+                  }
+                }
+              }`,
+              { owner, repo },
+            );
+            const discussions = discussionData.repository.discussions.nodes;
+            const discussion = discussions.find((item) => {
+              const body = item.body || '';
+              return body.includes(runUrl) || body.includes(marker);
+            });
+
+            if (!discussion) {
+              core.setFailed(`Could not find an Agentic Product Testing Discussion for ${runUrl}.`);
+              return;
+            }
+
+            const source = [pullRequest.body, discussion.body].filter(Boolean).join('\n');
+            const entryMatch = source.match(/reports\/agentic-product-testing\/([^/`\s]+)\//);
+            const entryLine = entryMatch ? [`- Real-world entry: \`${entryMatch[1]}\``] : [];
+            const prBlock = [
+              '<!-- real-world-output-links:start -->',
+              '### Agentic Product Testing links',
+              '',
+              `- Discussion: ${discussion.url}`,
+              ...entryLine,
+              `- Workflow run: ${runUrl}`,
+              '- Durable memory: this PR should be merged in order to retain these results for future MCP history queries.',
+              '<!-- real-world-output-links:end -->',
+            ].join('\n');
+            const discussionBlock = [
+              '<!-- real-world-output-links:start -->',
+              '### Durable memory PR',
+              '',
+              `- Pull request: ${pullRequest.html_url}`,
+              ...entryLine,
+              `- Workflow run: ${runUrl}`,
+              '- This PR should be merged in order to retain these results in repo memory for future Agentic Product Testing sweeps.',
+              '<!-- real-world-output-links:end -->',
+            ].join('\n');
+
+            const nextPrBody = upsertBlock(
+              pullRequest.body || '',
+              '<!-- real-world-output-links:start -->',
+              '<!-- real-world-output-links:end -->',
+              prBlock,
+            );
+            if (nextPrBody !== (pullRequest.body || '')) {
+              await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: pullRequest.number,
+                body: nextPrBody,
+              });
+            }
+
+            const nextDiscussionBody = upsertBlock(
+              discussion.body || '',
+              '<!-- real-world-output-links:start -->',
+              '<!-- real-world-output-links:end -->',
+              discussionBlock,
+            );
+            if (nextDiscussionBody !== (discussion.body || '')) {
+              try {
+                await github.graphql(
+                  `mutation($discussionId: ID!, $body: String!) {
+                    updateDiscussion(input: {discussionId: $discussionId, body: $body}) {
+                      discussion { url }
+                    }
+                  }`,
+                  { discussionId: discussion.id, body: nextDiscussionBody },
+                );
+              } catch (error) {
+                core.warning(`Could not update Discussion body; posting a link comment instead. ${error.message}`);
+                const existingComment = (discussion.comments?.nodes || []).find((comment) => {
+                  const body = comment.body || '';
+                  return body.includes('real-world-output-links:start') && body.includes(pullRequest.html_url);
+                });
+                if (!existingComment) {
+                  await github.graphql(
+                    `mutation($discussionId: ID!, $body: String!) {
+                      addDiscussionComment(input: {discussionId: $discussionId, body: $body}) {
+                        comment { url }
+                      }
+                    }`,
+                    { discussionId: discussion.id, body: discussionBlock },
+                  );
+                }
+              }
+            }
+
+            core.info(`Linked ${pullRequest.html_url} and ${discussion.url}.`);

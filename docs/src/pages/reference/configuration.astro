@@ -419,9 +419,13 @@ extends = "../../.dollarlint.toml"</code></pre>
     </p>
     <p>
       When the built-in SchemaStore source is enabled, DollarLint adds a small
-      curated layer for known filename gaps and drift. The current curated Rust
-      associations cover <code>rustfmt.toml</code> / <code>.rustfmt.toml</code>
-      and <code>release-plz.toml</code> / <code>.release-plz.toml</code>.
+      curated layer for known filename gaps and drift. The current curated
+      associations cover <code>rustfmt.toml</code> / <code
+        >.rustfmt.toml</code
+      >, <code>release-plz.toml</code> / <code>.release-plz.toml</code>, and
+      .NET's <code>launchSettings.json</code> / <code
+        >Properties/launchSettings.json</code
+      >.
     </p>
     <p>
       The built-in RubySchema source covers common Ruby and Rails project
@@ -436,6 +440,13 @@ extends = "../../.dollarlint.toml"</code></pre>
         >[[schemas.associations]]</code
       > rule to make it explicit. When a file should never be inferred from a catalog,
       use <code>schemas.catalogs.ignore</code>.
+    </p>
+    <p>
+      Recognized config files without a usable built-in or catalog schema are
+      reported with <code>schemaGap</code> metadata. This marks known high-signal
+      gaps such as <code>netlify.toml</code>, <code>.cargo/config.toml</code>,
+      <code>.terraform-docs.yml</code>, and <code>.asf.yaml</code> without
+      pretending DollarLint has a schema for them.
     </p>
     <table>
       <thead>

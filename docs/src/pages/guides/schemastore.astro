@@ -65,7 +65,10 @@ reason = "application data, not a tool config"`;
       with a small set of curated filename associations for known catalog gaps
       and drift, including Rust's <code>rustfmt.toml</code> / <code
         >.rustfmt.toml</code
-      > and <code>release-plz.toml</code> / <code>.release-plz.toml</code>.
+      >, <code>release-plz.toml</code> / <code>.release-plz.toml</code>, and
+      .NET's <code>launchSettings.json</code> / <code
+        >Properties/launchSettings.json</code
+      >.
     </p>
     <p>
       The built-in RubySchema source covers Ruby and Rails project configs such
@@ -73,6 +76,15 @@ reason = "application data, not a tool config"`;
       Shoryuken, Packwerk, i18n, Mongoid, Kamal, and related monitoring configs.
       Generic Ruby/Rails filenames require nearby project evidence before they
       are associated.
+    </p>
+    <p>
+      Some important config files do not currently have a built-in or catalog
+      schema that DollarLint can use. When DollarLint recognizes one of those
+      known gaps, such as <code>netlify.toml</code>, <code
+        >.cargo/config.toml</code
+      >, <code>.terraform-docs.yml</code>, or <code>.asf.yaml</code>, JSON output
+      includes <code>schemaGap</code> context and skipped-file text explains the
+      gap instead of treating the file as an unknown blob.
     </p>
 
     <h2>Understand and lock in matches</h2>

@@ -117,6 +117,12 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues (2 parsing, 6 validation
         >[[schemas.catalogs.ignore]]</code
       >.
     </p>
+    <p>
+      Files and coverage issues for recognized config files without a usable
+      built-in or catalog schema may include <code>schemaGap</code>. The gap names
+      the config family, explains the current absence of schema support, and links
+      to the tool documentation when DollarLint knows one.
+    </p>
 
     <h2>Inspect</h2>
     <pre><code>dollarlint inspect . --format json</code></pre>
@@ -126,7 +132,8 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues (2 parsing, 6 validation
       <code>none</code>, the association source, and a human-readable reason.
       Catalog-backed entries include <code>schemaMatch</code> and suggested config
       snippets so you can turn inferred matches into explicit associations or catalog
-      ignore rules.
+      ignore rules. Known unsupported configs include <code>schemaGap</code>
+      metadata and documentation links.
     </p>
 
     <h2>Bundle</h2>

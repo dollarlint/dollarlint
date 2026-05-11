@@ -163,6 +163,7 @@ winget:
       - dollarlint
     use: archive
     goamd64: v1
+    skip_upload: true
     commit_msg_template: "DollarLint.DollarLint: {{ .Tag }}"
     repository:
       owner: dollarlint

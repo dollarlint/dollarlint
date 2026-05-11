@@ -43,6 +43,14 @@ func classifySkippedFile(rel, reason, detail string) skipClassification {
 
 	lower := strings.ToLower(cleanGlob(rel))
 	base := path.Base(lower)
+	if gap, ok := matchKnownSchemaGap(lower); ok {
+		return skipClassification{
+			Reason:     reason,
+			Class:      SkipClassUnsupportedConfig,
+			Importance: SkipImportanceHigh,
+			Detail:     fallback(detail, gap.Reason),
+		}
+	}
 	if isLockfileSkip(base) {
 		return skipClassification{
 			Reason:     reason,

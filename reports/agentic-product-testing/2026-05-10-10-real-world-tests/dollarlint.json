@@ -1,0 +1,1275 @@
+{
+  "formatVersion": 1,
+  "json": {
+    "$schema": "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json",
+    "formatVersion": 1,
+    "root": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912",
+    "summary": {
+      "discovered": 112,
+      "validated": 80,
+      "skipped": 32,
+      "failed": 0,
+      "issues": {
+        "total": 3,
+        "parsing": 0,
+        "validation": 3,
+        "schema": 0,
+        "coverage": 0
+      },
+      "ignored": 0,
+      "warnings": 0,
+      "durationNanos": 4192834374
+    },
+    "files": [
+      {
+        "path": "click/.devcontainer/devcontainer.json",
+        "format": "json",
+        "schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
+        "schemaSource": "catalog:schemastore:devcontainer.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/.github/ISSUE_TEMPLATE/config.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-issue-config.json",
+        "schemaSource": "catalog:schemastore:GitHub Issue Template configuration",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/.github/workflows/lock.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/.github/workflows/pre-commit.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/.github/workflows/publish.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/.github/workflows/tests.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/.github/workflows/zizmor.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/.pre-commit-config.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/pre-commit-config.json",
+        "schemaSource": "catalog:schemastore:.pre-commit-config.yml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/.readthedocs.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/readthedocs/readthedocs.org/master/readthedocs/rtd_tests/fixtures/spec/v2/schema.json",
+        "schemaSource": "catalog:schemastore:Read the Docs",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/examples/aliases/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/examples/colors/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/examples/completion/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/examples/complex/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/examples/imagepipe/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/examples/inout/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/examples/naval/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/examples/repo/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/examples/termui/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/examples/validation/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "click/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "commandline/appveyor.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/appveyor.json",
+        "schemaSource": "catalog:schemastore:appveyor.yml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "commandline/demo/ReadText.LocalizedDemo/Properties/launchSettings.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "commons-cli/.asf.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "commons-cli/.github/dependabot.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/dependabot-2.0.json",
+        "schemaSource": "catalog:schemastore:dependabot-v2.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "commons-cli/.github/workflows/codeql-analysis.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "commons-cli/.github/workflows/dependency-review.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "commons-cli/.github/workflows/maven.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "commons-cli/.github/workflows/scorecards-analysis.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "morgan/.eslintrc.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/eslintrc.json",
+        "schemaSource": "catalog:schemastore:.eslintrc",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "morgan/.github/dependabot.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/dependabot-2.0.json",
+        "schemaSource": "catalog:schemastore:dependabot-v2.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "morgan/.github/workflows/ci.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "morgan/.github/workflows/codeql.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "morgan/.github/workflows/scorecard.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "morgan/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "morgan/test/.eslintrc.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/eslintrc.json",
+        "schemaSource": "catalog:schemastore:.eslintrc",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "p-limit/.github/workflows/main.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "p-limit/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "rake/.github/dependabot.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/dependabot-2.0.json",
+        "schemaSource": "catalog:schemastore:dependabot-v2.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "rake/.github/release.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-release-config.json",
+        "schemaSource": "catalog:schemastore:GitHub automatically generated release notes configuration",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "rake/.github/workflows/coverage.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "rake/.github/workflows/dependabot_automerge.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "rake/.github/workflows/gh-pages.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "rake/.github/workflows/lint.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "rake/.github/workflows/push_gem.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "rake/.github/workflows/test.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "rake/.rubocop.yml",
+        "format": "yaml",
+        "schema": "https://www.rubyschema.org/rubocop.json",
+        "schemaSource": "catalog:rubyschema:RuboCop",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/.cargo/config.toml",
+        "format": "toml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unsupported-config",
+        "skipImportance": "high",
+        "skipDetail": "recognized hand-authored config without built-in or catalog schema support"
+      },
+      {
+        "path": "ripgrep/.github/FUNDING.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/.github/ISSUE_TEMPLATE/bug_report.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "ripgrep/.github/ISSUE_TEMPLATE/config.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-issue-config.json",
+        "schemaSource": "catalog:schemastore:GitHub Issue Template configuration",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/.github/workflows/ci.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 1,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/.github/workflows/release.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 1,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/crates/cli/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/crates/globset/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/crates/grep/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/crates/ignore/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/crates/matcher/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/crates/pcre2/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/crates/printer/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/crates/regex/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/crates/searcher/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/fuzz/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ripgrep/rustfmt.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/rustfmt.json",
+        "schemaSource": "catalog:schemastore:rustfmt",
+        "status": "validated",
+        "issues": 1,
+        "ignored": 0
+      },
+      {
+        "path": "symfony-console/.github/workflows/close-pull-request.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/application_1.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/application_2.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/command_1.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/command_2.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_argument_1.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_argument_2.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_argument_3.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_argument_4.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_argument_with_default_inf_value.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_argument_with_style.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_definition_1.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_definition_2.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_definition_3.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_definition_4.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_option_1.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_option_2.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_option_3.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_option_4.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_option_5.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_option_6.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_option_with_default_inf_value.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_option_with_style.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/Tests/Fixtures/input_option_with_style_array.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "symfony-console/composer.json",
+        "format": "json",
+        "schema": "https://getcomposer.org/schema.json",
+        "schemaSource": "catalog:schemastore:composer.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/.github/ISSUE_TEMPLATE/config.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-issue-config.json",
+        "schemaSource": "catalog:schemastore:GitHub Issue Template configuration",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/.github/dependabot.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/dependabot-2.0.json",
+        "schemaSource": "catalog:schemastore:dependabot-v2.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/.github/workflows/ci.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/.github/workflows/codeql.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/.github/workflows/prepare-release.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/.github/workflows/prerelease.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/.github/workflows/release.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/.golangci.yml",
+        "format": "yaml",
+        "schema": "https://golangci-lint.run/jsonschema/golangci.jsonschema.json",
+        "schemaSource": "catalog:schemastore:Golangci-lint Configuration",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/.goreleaser.yml",
+        "format": "yaml",
+        "schema": "https://goreleaser.com/static/schema.json",
+        "schemaSource": "catalog:schemastore:Goreleaser",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/.pre-commit-hooks.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/pre-commit-hooks.json",
+        "schemaSource": "catalog:schemastore:.pre-commit-hooks.yml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/codecov.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/codecov.json",
+        "schemaSource": "catalog:schemastore:Codecov configuration files",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "terraform-docs/examples/.terraform-docs.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "terraform-docs/examples/output_values.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "terraform-docs/netlify.toml",
+        "format": "toml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "terraform-docs/terraform/testdata/full-example/output-values.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "urfave-cli/.github/codecov.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/codecov.json",
+        "schemaSource": "catalog:schemastore:Codecov configuration files",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "urfave-cli/.github/dependabot.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/dependabot-2.0.json",
+        "schemaSource": "catalog:schemastore:dependabot-v2.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "urfave-cli/.github/workflows/lint.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "urfave-cli/.github/workflows/publish-docs.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "urfave-cli/.github/workflows/test.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "urfave-cli/.golangci.yaml",
+        "format": "yaml",
+        "schema": "https://golangci-lint.run/jsonschema/golangci.jsonschema.json",
+        "schemaSource": "catalog:schemastore:Golangci-lint Configuration",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "urfave-cli/mkdocs.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/mkdocs-1.6.json",
+        "schemaSource": "catalog:schemastore:mkdocs.yml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "urfave-cli/testdata/empty.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      }
+    ],
+    "issues": [
+      {
+        "path": "ripgrep/.github/workflows/ci.yml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "TARGET_FLAGS",
+        "instanceLocation": "/jobs/test/env/TARGET_FLAGS",
+        "line": 40,
+        "column": 20,
+        "message": "expected string, received null",
+        "hint": "This issue came from catalog:schemastore:GitHub Workflow.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because path \".github/workflows/ci.yml\" matched catalog fileMatch \"**/.github/workflows/*.yml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \".github/workflows/ci.yml\"\nschema = \"https://www.schemastore.org/github-workflow.json\""
+      },
+      {
+        "path": "ripgrep/.github/workflows/release.yml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "TARGET_FLAGS",
+        "instanceLocation": "/jobs/build-release/env/TARGET_FLAGS",
+        "line": 51,
+        "column": 20,
+        "message": "expected string, received null",
+        "hint": "This issue came from catalog:schemastore:GitHub Workflow.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because path \".github/workflows/release.yml\" matched catalog fileMatch \"**/.github/workflows/*.yml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \".github/workflows/release.yml\"\nschema = \"https://www.schemastore.org/github-workflow.json\""
+      },
+      {
+        "path": "ripgrep/rustfmt.toml",
+        "schema": "https://www.schemastore.org/rustfmt.json",
+        "schemaSource": "catalog:schemastore:rustfmt",
+        "category": "validation",
+        "keyword": "enum",
+        "keywordLocation": "/enum",
+        "property": "use_small_heuristics",
+        "instanceLocation": "/use_small_heuristics",
+        "line": 2,
+        "column": 24,
+        "message": "value \"max\" must be one of \"Default\", \"Off\", \"Max\"",
+        "hint": "This enum issue came from catalog:schemastore:rustfmt.\nIf this value is valid for the repo's tool version, the external catalog schema may be stale, version-mismatched, or incomplete.\nMatched because basename \"rustfmt.toml\" matched catalog fileMatch \"rustfmt.toml\".\nConfirm the tool's docs or runtime behavior before treating this as a repository configuration bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"rustfmt.toml\"\nschema = \"https://www.schemastore.org/rustfmt.json\""
+      }
+    ],
+    "ignoredIssues": [],
+    "warnings": []
+  },
+  "sarif": {
+    "version": "2.1.0",
+    "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+    "runs": [
+      {
+        "tool": {
+          "driver": {
+            "name": "dollarlint",
+            "informationUri": "https://github.com/dollarlint/dollarlint",
+            "rules": [
+              {
+                "id": "enum",
+                "name": "enum",
+                "shortDescription": {
+                  "text": "JSON Schema enum validation"
+                },
+                "properties": {
+                  "keyword": "enum"
+                }
+              },
+              {
+                "id": "type",
+                "name": "type",
+                "shortDescription": {
+                  "text": "JSON Schema type validation"
+                },
+                "properties": {
+                  "keyword": "type"
+                }
+              }
+            ]
+          }
+        },
+        "results": [
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected string, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ripgrep/.github/workflows/ci.yml"
+                  },
+                  "region": {
+                    "startLine": 40,
+                    "startColumn": 20
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-workflow.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "TARGET_FLAGS",
+              "instanceLocation": "/jobs/test/env/TARGET_FLAGS",
+              "issueHint": "This issue came from catalog:schemastore:GitHub Workflow.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because path \".github/workflows/ci.yml\" matched catalog fileMatch \"**/.github/workflows/*.yml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \".github/workflows/ci.yml\"\nschema = \"https://www.schemastore.org/github-workflow.json\""
+            }
+          },
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected string, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ripgrep/.github/workflows/release.yml"
+                  },
+                  "region": {
+                    "startLine": 51,
+                    "startColumn": 20
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-workflow.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "TARGET_FLAGS",
+              "instanceLocation": "/jobs/build-release/env/TARGET_FLAGS",
+              "issueHint": "This issue came from catalog:schemastore:GitHub Workflow.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because path \".github/workflows/release.yml\" matched catalog fileMatch \"**/.github/workflows/*.yml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \".github/workflows/release.yml\"\nschema = \"https://www.schemastore.org/github-workflow.json\""
+            }
+          },
+          {
+            "ruleId": "enum",
+            "level": "error",
+            "message": {
+              "text": "value \"max\" must be one of \"Default\", \"Off\", \"Max\""
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ripgrep/rustfmt.toml"
+                  },
+                  "region": {
+                    "startLine": 2,
+                    "startColumn": 24
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/rustfmt.json",
+              "keyword": "enum",
+              "keywordLocation": "/enum",
+              "property": "use_small_heuristics",
+              "instanceLocation": "/use_small_heuristics",
+              "issueHint": "This enum issue came from catalog:schemastore:rustfmt.\nIf this value is valid for the repo's tool version, the external catalog schema may be stale, version-mismatched, or incomplete.\nMatched because basename \"rustfmt.toml\" matched catalog fileMatch \"rustfmt.toml\".\nConfirm the tool's docs or runtime behavior before treating this as a repository configuration bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"rustfmt.toml\"\nschema = \"https://www.schemastore.org/rustfmt.json\""
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "styled": {
+    "plain": "dollarlint found 3 validation issues in 3 files after 0s\n\nripgrep/.github/workflows/ci.yml\n  40:20     type     expected string, received null  /jobs/test/env/TARGET_FLAGS\n    hint: This issue came from catalog:schemastore:GitHub Workflow.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because path \".github/workflows/ci.yml\" matched catalog fileMatch \"**/.github/workflows/*.yml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \".github/workflows/ci.yml\"\n      schema = \"https://www.schemastore.org/github-workflow.json\"\n\nripgrep/.github/workflows/release.yml\n  51:20     type     expected string, received null  /jobs/build-release/env/TARGET_FLAGS\n    hint: This issue came from catalog:schemastore:GitHub Workflow.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because path \".github/workflows/release.yml\" matched catalog fileMatch \"**/.github/workflows/*.yml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \".github/workflows/release.yml\"\n      schema = \"https://www.schemastore.org/github-workflow.json\"\n\nripgrep/rustfmt.toml\n  2:24      enum     value \"max\" must be one of \"Default\", \"Off\", \"Max\"  /use_small_heuristics\n    hint: This enum issue came from catalog:schemastore:rustfmt.\n      If this value is valid for the repo's tool version, the external catalog schema may be stale, version-mismatched, or incomplete.\n      Matched because basename \"rustfmt.toml\" matched catalog fileMatch \"rustfmt.toml\".\n      Confirm the tool's docs or runtime behavior before treating this as a repository configuration bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"rustfmt.toml\"\n      schema = \"https://www.schemastore.org/rustfmt.json\"\n\nskipped files\n  high signal: unknown/custom file (no schema)\n    why: schema-less file looks like project configuration\n    commandline/demo/ReadText.LocalizedDemo/Properties/launchSettings.json\n    commons-cli/.asf.yaml\n    terraform-docs/examples/.terraform-docs.yml\n  high signal: unsupported config (no schema)\n    why: recognized hand-authored config without built-in or catalog schema support\n    ripgrep/.cargo/config.toml\n  medium signal: unknown/custom file (no schema)\n    why: schema-less JSON/YAML/TOML file\n    ripgrep/.github/ISSUE_TEMPLATE/bug_report.yml\n    terraform-docs/examples/output_values.json\n    terraform-docs/netlify.toml\n  low signal: test or fixture data (no schema)\n    why: test, fixture, or benchmark data without schema coverage\n    symfony-console/Tests/Fixtures/application_1.json\n    symfony-console/Tests/Fixtures/application_2.json\n    symfony-console/Tests/Fixtures/command_1.json\n    symfony-console/Tests/Fixtures/command_2.json\n    symfony-console/Tests/Fixtures/input_argument_1.json\n    symfony-console/Tests/Fixtures/input_argument_2.json\n    symfony-console/Tests/Fixtures/input_argument_3.json\n    symfony-console/Tests/Fixtures/input_argument_4.json\n    ... 17 more skipped files omitted from text output; use --format json for the full list\n\nSummary: 112 discovered, 80 validated, 32 skipped, 3 validation issues in 0s\n",
+    "ansi": "dollarlint found 3 validation issues in 3 files after 0s\n\nripgrep/.github/workflows/ci.yml\n  40:20     type     expected string, received null  /jobs/test/env/TARGET_FLAGS\n    hint: This issue came from catalog:schemastore:GitHub Workflow.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because path \".github/workflows/ci.yml\" matched catalog fileMatch \"**/.github/workflows/*.yml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \".github/workflows/ci.yml\"\n      schema = \"https://www.schemastore.org/github-workflow.json\"\n\nripgrep/.github/workflows/release.yml\n  51:20     type     expected string, received null  /jobs/build-release/env/TARGET_FLAGS\n    hint: This issue came from catalog:schemastore:GitHub Workflow.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because path \".github/workflows/release.yml\" matched catalog fileMatch \"**/.github/workflows/*.yml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \".github/workflows/release.yml\"\n      schema = \"https://www.schemastore.org/github-workflow.json\"\n\nripgrep/rustfmt.toml\n  2:24      enum     value \"max\" must be one of \"Default\", \"Off\", \"Max\"  /use_small_heuristics\n    hint: This enum issue came from catalog:schemastore:rustfmt.\n      If this value is valid for the repo's tool version, the external catalog schema may be stale, version-mismatched, or incomplete.\n      Matched because basename \"rustfmt.toml\" matched catalog fileMatch \"rustfmt.toml\".\n      Confirm the tool's docs or runtime behavior before treating this as a repository configuration bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"rustfmt.toml\"\n      schema = \"https://www.schemastore.org/rustfmt.json\"\n\nskipped files\n  high signal: unknown/custom file (no schema)\n    why: schema-less file looks like project configuration\n    commandline/demo/ReadText.LocalizedDemo/Properties/launchSettings.json\n    commons-cli/.asf.yaml\n    terraform-docs/examples/.terraform-docs.yml\n  high signal: unsupported config (no schema)\n    why: recognized hand-authored config without built-in or catalog schema support\n    ripgrep/.cargo/config.toml\n  medium signal: unknown/custom file (no schema)\n    why: schema-less JSON/YAML/TOML file\n    ripgrep/.github/ISSUE_TEMPLATE/bug_report.yml\n    terraform-docs/examples/output_values.json\n    terraform-docs/netlify.toml\n  low signal: test or fixture data (no schema)\n    why: test, fixture, or benchmark data without schema coverage\n    symfony-console/Tests/Fixtures/application_1.json\n    symfony-console/Tests/Fixtures/application_2.json\n    symfony-console/Tests/Fixtures/command_1.json\n    symfony-console/Tests/Fixtures/command_2.json\n    symfony-console/Tests/Fixtures/input_argument_1.json\n    symfony-console/Tests/Fixtures/input_argument_2.json\n    symfony-console/Tests/Fixtures/input_argument_3.json\n    symfony-console/Tests/Fixtures/input_argument_4.json\n    ... 17 more skipped files omitted from text output; use --format json for the full list\n\nSummary: 112 discovered, 80 validated, 32 skipped, 3 validation issues in 0s\n",
+    "options": {
+      "showSkipped": true,
+      "locations": true
+    },
+    "truncated": true
+  }
+}

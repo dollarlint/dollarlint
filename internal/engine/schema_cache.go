@@ -24,6 +24,19 @@ const maxSchemaResponseBytes = 64 * 1024 * 1024
 
 const persistentSchemaCacheTTL = 24 * time.Hour
 
+type schemaFileReadError struct {
+	Path string
+	Err  error
+}
+
+func (err *schemaFileReadError) Error() string {
+	return fmt.Sprintf("read schema %s: %v", err.Path, err.Err)
+}
+
+func (err *schemaFileReadError) Unwrap() error {
+	return err.Err
+}
+
 type SchemaCache struct {
 	cfg      Config
 	client   *http.Client
@@ -204,7 +217,7 @@ func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error)
 		}
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return nil, fmt.Errorf("read schema %s: %w", path, err)
+			return nil, &schemaFileReadError{Path: path, Err: err}
 		}
 		return decodeSchemaDocument(data, path)
 	case "http", "https":

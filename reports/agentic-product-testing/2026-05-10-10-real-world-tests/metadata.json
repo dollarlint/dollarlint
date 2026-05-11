@@ -1,0 +1,365 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-05-10-10-real-world-tests",
+  "date": "2026-05-10",
+  "title": "10 real-world tests",
+  "dollarlintRevision": "fb3813070cdeb1e093fd1e89ef8456e5626b9d78",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912",
+  "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.2210881241",
+  "command": "real_world_start_validation corpusDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912\" cacheDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.2210881241\" outputArtifact=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-10-real-world-tests-1935543330.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-10-real-world-tests-1935543330.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-10-10-real-world-tests/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "click",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: uv.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "commandline",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "commons-cli",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "morgan",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "p-limit",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "rake",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "ripgrep",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock, fuzz/Cargo.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "symfony-console",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "terraform-docs",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: go.sum. Remote schema refs: 0."
+    },
+    {
+      "repository": "urfave-cli",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: docs/go.sum, go.sum. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "click",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint discovered and validated twenty files with zero skips, warnings, parser failures, or validation issues.",
+        "The CLI preview was compact despite the larger file count, so the successful result was easy for a developer to trust."
+      ],
+      "notes": "This Python repository produced clean, complete-looking coverage and no product signal."
+    },
+    {
+      "repository": "commandline",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint validated one file cleanly but skipped `demo/ReadText.LocalizedDemo/Properties/launchSettings.json` as a high-signal schema-less project configuration file.",
+        "The skip was clearly reported, so the UX was honest about coverage, but half of the discovered files in this .NET repo were outside validation coverage."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Add or improve schema association coverage for .NET `launchSettings.json` files, including paths under `Properties/`.",
+          "rationale": "A real .NET repository exposed `Properties/launchSettings.json` as high-signal unknown configuration, leaving a developer without validation for a common project file."
+        }
+      ],
+      "notes": "This is primarily a coverage signal for common .NET launch settings rather than a correctness problem in the current output."
+    },
+    {
+      "repository": "commons-cli",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint validated five files cleanly and skipped `.asf.yaml` as a high-signal schema-less project configuration file.",
+        "The skip was explicit and easy to understand, but for Apache projects `.asf.yaml` is hand-authored repository metadata, so it is a real coverage gap rather than noise."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "Consider adding schema support or a catalog association for `.asf.yaml`.",
+          "rationale": "Apache repositories commonly carry `.asf.yaml`; this sweep skipped it as high-signal unknown project configuration."
+        }
+      ],
+      "notes": "The output was clear; the product signal is missing schema association coverage for Apache Software Foundation metadata."
+    },
+    {
+      "repository": "morgan",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated seven discovered files with no skips, warnings, parser failures, or validation issues.",
+        "The CLI preview was short and clear, so a developer would not need to triage noisy secondary output."
+      ],
+      "notes": "This JavaScript middleware repo behaved as a straightforward clean run; no product change is suggested by the result."
+    },
+    {
+      "repository": "p-limit",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "The terminal output was concise and useful: DollarLint discovered two files, validated both, and reported no skipped files, warnings, or issues.",
+        "There was no noisy schema output or confusing classification for this small TypeScript/npm repository."
+      ],
+      "caveats": [
+        "Coverage was small, so this repo is a narrow sanity signal rather than broad evidence."
+      ],
+      "notes": "For a developer trying DollarLint here, the result is easy to interpret and does not suggest a product change."
+    },
+    {
+      "repository": "rake",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint discovered and validated nine files with no skipped coverage, warnings, parser errors, or validation issues.",
+        "The CLI preview was compact and left no ambiguous follow-up work for a developer."
+      ],
+      "notes": "This Ruby repository produced a straightforward clean result and does not suggest product changes."
+    },
+    {
+      "repository": "ripgrep",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint produced actionable locations and source excerpts for two GitHub Workflow env values where `TARGET_FLAGS:` is parsed as null and for `rustfmt.toml` where SchemaStore rejected lowercase `\"max\"` for `use_small_heuristics`.",
+        "The issue hints correctly warned that catalog-backed schemas may be version-mismatched or incomplete, which made the output safer to interpret.",
+        "The run skipped `.cargo/config.toml` as high-signal unsupported config, exposing a real coverage gap for a common Rust/Cargo file."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Add schema coverage or a first-class association for `.cargo/config.toml`.",
+          "rationale": "`ripgrep` skipped a common hand-authored Rust config file as high-signal unsupported config; validating it would improve real-world Rust coverage."
+        },
+        {
+          "strength": "low",
+          "recommendation": "Consider grouping catalog-version caveats at the summary level when inferred SchemaStore findings are likely tool-version sensitive.",
+          "rationale": "The GitHub Workflow and rustfmt issues had useful per-issue hints, but a developer still has to infer that these may be third-party schema drift rather than definite repository defects."
+        }
+      ],
+      "notes": "The terminal UX was readable, but a developer would likely need product-level help deciding whether the catalog-backed workflow/rustfmt findings are true repo bugs or external schema mismatches. The Cargo config skip is the clearest actionable coverage signal."
+    },
+    {
+      "repository": "symfony-console",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated the small non-fixture surface and skipped the large set of `Tests/Fixtures/*.json` files as low-signal test/fixture data without schema coverage.",
+        "Although the skipped ratio was high, the classification was specific and the CLI grouped/truncated the fixture list cleanly with a pointer to JSON output for the full list.",
+        "No parser failures, warnings, or validation issues were reported."
+      ],
+      "caveats": [
+        "Coverage confidence is limited because most discovered files were test fixtures, but that looks like expected repo shape rather than a product gap."
+      ],
+      "notes": "For a developer, the output clearly explains that the skipped files are fixtures, so this behaved reasonably despite the high skip count."
+    },
+    {
+      "repository": "terraform-docs",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint validated eleven files with no validation issues, but skipped four files, including high-signal `examples/.terraform-docs.yml` and medium-signal `netlify.toml`.",
+        "The skipped-file grouping was clear and separated low-signal test fixture data from project-like unknown config, which made the coverage caveat easy to understand.",
+        "The main developer-experience gap is that recognizable tool/deployment configs were discovered but not validated."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Add or improve schema association coverage for `netlify.toml`.",
+          "rationale": "`terraform-docs` skipped `netlify.toml` as unknown TOML config even though it is a recognizable deployment configuration file."
+        },
+        {
+          "strength": "low",
+          "recommendation": "Consider schema support for `.terraform-docs.yml` when validating repos that use terraform-docs itself.",
+          "rationale": "The repo's own example config was high-signal project configuration and remained unvalidated."
+        }
+      ],
+      "notes": "The output was honest and readable, but the skipped config set suggests useful additional coverage for Terraform-docs and Netlify-style configuration files."
+    },
+    {
+      "repository": "urfave-cli",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated the repo's normal config surface and explicitly skipped only `testdata/empty.yml` as low-signal test/fixture data with no schema coverage.",
+        "The skipped-file explanation was visible in the CLI preview and did not hide any apparent actionable issue.",
+        "No parser failures, warnings, or validation issues were reported."
+      ],
+      "notes": "The one skip looked intentional and well explained, so the developer experience was clear and appropriately quiet."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "p-limit",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/sindresorhus/p-limit.git",
+      "commit": "9f52583119f0cb0d85c6fec600c94a21fd89d060",
+      "notes": "Small npm library with modern TypeScript/package-manager config.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912/p-limit",
+      "status": "cloned"
+    },
+    {
+      "name": "click",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/pallets/click.git",
+      "commit": "fc6c7c47edd6110b6bd5a1a5297b2035214b0cd1",
+      "notes": "Python CLI library with packaging and CI configuration.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912/click",
+      "status": "cloned"
+    },
+    {
+      "name": "urfave-cli",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/urfave/cli.git",
+      "commit": "b5aa7101bd66f4340bfd737fe4bf12496d625632",
+      "notes": "Go CLI framework with module, workflow, and release configuration.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912/urfave-cli",
+      "status": "cloned"
+    },
+    {
+      "name": "ripgrep",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/BurntSushi/ripgrep.git",
+      "commit": "4519153e5e461527f4bca45b042fff45c4ec6fb9",
+      "notes": "Rust CLI project with Cargo and automation config.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912/ripgrep",
+      "status": "cloned"
+    },
+    {
+      "name": "rake",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/ruby/rake.git",
+      "commit": "4492980ec87ee64f8933cb0d0cb983b6745ca99f",
+      "notes": "Ruby build tool with gem and workflow configuration.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912/rake",
+      "status": "cloned"
+    },
+    {
+      "name": "symfony-console",
+      "ecosystem": "PHP",
+      "cloneURL": "https://github.com/symfony/console.git",
+      "commit": "d29223954adbe978d0c59f6f27cfcc1e43048d86",
+      "notes": "PHP component repository with Composer and CI config.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912/symfony-console",
+      "status": "cloned"
+    },
+    {
+      "name": "commons-cli",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/apache/commons-cli.git",
+      "commit": "a014c11faca29ccdca1d87322922e08a1af68c98",
+      "notes": "Apache Java CLI library with Maven and CI config.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912/commons-cli",
+      "status": "cloned"
+    },
+    {
+      "name": "commandline",
+      "ecosystem": "C#/.NET",
+      "cloneURL": "https://github.com/commandlineparser/commandline.git",
+      "commit": "1e3607b97af6141743edb3c434c06d5b492f6fb3",
+      "notes": ".NET command-line parser with NuGet and CI config.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912/commandline",
+      "status": "cloned"
+    },
+    {
+      "name": "morgan",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/expressjs/morgan.git",
+      "commit": "203c75852adadcc5e3a9ba23b0ef07a8e81c5af7",
+      "notes": "Node.js middleware library with package and automation config.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912/morgan",
+      "status": "cloned"
+    },
+    {
+      "name": "terraform-docs",
+      "ecosystem": "Go/Terraform",
+      "cloneURL": "https://github.com/terraform-docs/terraform-docs.git",
+      "commit": "9d4455198941806aa02ec14369de030cda2c2b59",
+      "notes": "Go/Terraform documentation generator with mixed config files.",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.296464912/terraform-docs",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 112,
+    "validated": 80,
+    "skipped": 32,
+    "failed": 0,
+    "issues": {
+      "total": 3,
+      "parsing": 0,
+      "validation": 3,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 4192834374
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 6 repos behaved reasonably, 4 repos produced product signals, and 0 repos were blocked or uninterpretable.",
+    "DollarLint discovered 112 files, validated 80, skipped 32, failed 0, reported 3 validation issues, and emitted 0 warnings.",
+    "The only validation issues were in ripgrep: two GitHub Workflow env null values and one rustfmt enum value from catalog-backed schemas.",
+    "Skipped coverage totaled 32 of 112 files, mostly low-signal test fixtures plus several high/medium-signal project config files."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "This sweep skipped 32 of 112 discovered files, which is useful context when judging corpus coverage."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Add or improve schema association coverage for .NET `launchSettings.json` files, including paths under `Properties/`.",
+      "rationale": "A real .NET repository exposed `Properties/launchSettings.json` as high-signal unknown configuration, leaving a developer without validation for a common project file."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider adding schema support or a catalog association for `.asf.yaml`.",
+      "rationale": "Apache repositories commonly carry `.asf.yaml`; this sweep skipped it as high-signal unknown project configuration."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Add schema coverage or a first-class association for `.cargo/config.toml`.",
+      "rationale": "`ripgrep` skipped a common hand-authored Rust config file as high-signal unsupported config; validating it would improve real-world Rust coverage."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider grouping catalog-version caveats at the summary level when inferred SchemaStore findings are likely tool-version sensitive.",
+      "rationale": "The GitHub Workflow and rustfmt issues had useful per-issue hints, but a developer still has to infer that these may be third-party schema drift rather than definite repository defects."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Add or improve schema association coverage for `netlify.toml`.",
+      "rationale": "`terraform-docs` skipped `netlify.toml` as unknown TOML config even though it is a recognizable deployment configuration file."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider schema support for `.terraform-docs.yml` when validating repos that use terraform-docs itself.",
+      "rationale": "The repo's own example config was high-signal project configuration and remained unvalidated."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; record the triage and decide follow-up from the structured result."
+  ],
+  "followUp": [
+    "Review the structured productRecommendations and decide whether to open implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting this corpus by default."
+  ]
+}

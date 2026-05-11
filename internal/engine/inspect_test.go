@@ -154,6 +154,23 @@ schema = "../../schema.schema"
 	}
 }
 
+func TestInspectReportsKnownSchemaGap(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "netlify.toml"), "[build]\ncommand = \"npm test\"\n")
+
+	result, err := Inspect(context.Background(), Options{Root: dir, Config: DefaultConfig()})
+	if err != nil {
+		t.Fatalf("Inspect: %v", err)
+	}
+	file := findInspectFile(result.Files, "netlify.toml")
+	if file.AssociationStatus != InspectAssociationStatusUnassociated || file.SchemaGap == nil || file.SchemaGap.Name != "Netlify deploy config" || !strings.Contains(file.Reason, "SchemaStore's Netlify schema") {
+		t.Fatalf("inspect schema gap file = %+v", file)
+	}
+	text := FormatInspectText(result)
+	assertContains(t, text, "SchemaStore's Netlify schema")
+	assertContains(t, text, "https://docs.netlify.com/build/configure-builds/file-based-configuration/")
+}
+
 func TestInspectDefaultsRootAndReturnsConfigurationErrors(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "plain.json"), `{}`)

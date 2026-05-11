@@ -1,0 +1,201 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-05-11-agentic-product-testing-sweep",
+  "date": "2026-05-11",
+  "title": "Agentic Product Testing sweep",
+  "dollarlintRevision": "9a5e42dd711b097415cafa11d60d13f68fa9a085",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.1962866839",
+  "cacheDir": "/tmp/dollarlint-cache.2843984055",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.1962866839\" cacheDir=\"/tmp/dollarlint-cache.2843984055\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-sweep-1695420114.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-sweep-1695420114.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-11-agentic-product-testing-sweep/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "actions/runner",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: src/Misc/expressionFunc/hashFiles/package-lock.json. Remote schema refs: 0."
+    },
+    {
+      "repository": "googleapis/release-please",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: package-lock.json, test/fixtures/plugins/cargo-workspace/Cargo.lock, test/fixtures/strategies/node/npm-shrinkwrap.json, and 4 more. Remote schema refs: 6."
+    },
+    {
+      "repository": "microsoft/azure-pipelines-vscode",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: .azure-pipelines/github-release/package-lock.json, package-lock.json, tools/extract-yaml-testcases/package-lock.json. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "actions/runner",
+      "outcome": "product-signal",
+      "findings": [
+        "GitHub Actions workflow validation reports a required matrix property for a strategy block that only uses fail-fast, and the CLI correctly flags possible catalog schema drift instead of presenting it as a certain repo bug.",
+        "A package.json name of \"hashFiles\" is treated as invalid under the catalog-backed npm package schema; the hint explains the schema source and suggests an explicit association, but this still leaves the developer to decide whether the catalog schema is appropriate for this embedded package file.",
+        "The terminal preview is readable and grouped, but 28 of 49 discovered files were skipped, so coverage caveats remain material even though most skips were test data."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Classify catalog-backed findings that look inconsistent with widely accepted real-world syntax as likely schema drift or schema-applicability warnings, separate from probable repository defects.",
+          "rationale": "Both reported issues depend on third-party catalog schemas and the current hints still require the user to infer whether DollarLint mistrusted the repo or the catalog. A stronger classification would make the result more actionable."
+        }
+      ],
+      "followUp": [
+        "Check whether GitHub's workflow schema really requires matrix when strategy only contains fail-fast or max-parallel.",
+        "Look for more embedded package.json cases to see whether bare package names in nested tooling directories frequently become noisy false positives."
+      ],
+      "notes": "DollarLint was clear enough to inspect the two reported issues, but both surfaced as catalog-backed schema judgments where the likely next step is to question schema applicability rather than fix the repository. That is useful, yet it suggests a product ergonomics gap around distinguishing likely catalog drift or convention mismatches from probable config defects."
+    },
+    {
+      "repository": "googleapis/release-please",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint grouped repeated catalog-context hints well, but most reported issues are tied to third-party catalog schemas on fixture files and common config files, including scoped package names in test fixtures, Helm Chart fixture shapes, and renovate.json accepting null poorly.",
+        "Coverage is also limited: 118 of 156 discovered files were skipped, including several hand-authored GitHub configuration files such as .github/.OwlBot.yaml, .github/release-please.yml, and .github/auto-label.yaml.",
+        "The CLI preview is one of the clearer results in the sweep because repeated issue hints are grouped before file-level findings, but the developer still has to infer when a finding is likely schema applicability noise versus a repository defect."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Reuse the grouped issue-hint presentation more aggressively for catalog-backed findings so repeated third-party schema caveats stay condensed and clearly separated from likely repository defects.",
+          "rationale": "This result was easier to interpret than the others because related catalog warnings were grouped first; expanding that pattern would improve signal in repos with many repeated schema-based findings."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Add stronger guidance when findings come from fixture-heavy paths or nested testdata so developers can quickly discount likely non-actionable catalog mismatches.",
+          "rationale": "Several issues came from test fixtures and embedded package files; explicit fixture-aware guidance would reduce false-alarm interpretation without hiding the findings."
+        }
+      ],
+      "followUp": [
+        "Check whether scoped package names like @here/pkgA are truly rejected by the applied package schema or reflect a schema/pattern mismatch in catalog metadata.",
+        "Evaluate whether common GitHub repo-maintenance YAML files should have better schema coverage or a clearer recommendation path."
+      ],
+      "notes": "This repository shows both a strength and a gap. Grouped issue hints reduce noise, especially for repeated catalog-backed findings, but the output still leans heavily on schemas whose applicability is uncertain in fixtures and nested config. Together with the skipped GitHub config files, that points to product work on both classification and coverage messaging."
+    },
+    {
+      "repository": "microsoft/azure-pipelines-vscode",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint reported no validation issues, but only 10 of 220 discovered files were validated and 195 unknown files were skipped, including hand-authored project configuration such as .vscode/settings.json, .config/1espt/PipelineAutobaseliningConfig.yml, and many Azure Pipelines example YAML files.",
+        "The CLI output remains readable, yet the dominant user-facing message is a very long skipped-files section, which makes the result feel like limited coverage rather than a meaningful pass.",
+        "Auto catalog matching explicitly declined low-confidence matches for files like .vscode/tasks.json, which is cautious, but the aggregate effect is that a repository centered on pipeline/config authoring gets very little schema coverage."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Improve skipped-coverage summaries so repositories with very high unknown-file ratios are surfaced as limited-coverage results rather than feeling like clean passes.",
+          "rationale": "This repo passed with 95% skipped coverage, and the current UX requires reading deep into skipped sections to realize how little of the repo was actually validated."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Expand or better guide schema coverage for common editor and CI configuration files that look hand-authored and important, or provide targeted guidance for how users can associate schemas for those file classes.",
+          "rationale": "High-signal files such as VS Code settings/tasks and Azure pipeline-related YAML appeared central to this repository but mostly landed in unknown/custom skips."
+        }
+      ],
+      "followUp": [
+        "Sample more Azure Pipelines-heavy repositories to confirm whether skipped unknown YAML is a recurring gap.",
+        "Consider whether the CLI summary should elevate a limited-coverage warning when skipped unknown files dominate discovered files."
+      ],
+      "notes": "From a developer perspective, this run is honest but not very useful: 'passed' is technically true while most interesting configuration files were not analyzed. That is a product signal about coverage communication and about missing schema support for common project configuration patterns."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "actions/runner",
+      "ecosystem": "dotnet",
+      "cloneURL": "https://github.com/actions/runner.git",
+      "commit": "0cdaa36d07ee723b55336dd6f45249651fe0de05",
+      "path": "/tmp/dollarlint-corpus.1962866839/actions-runner",
+      "status": "cloned"
+    },
+    {
+      "name": "microsoft/azure-pipelines-vscode",
+      "ecosystem": "node",
+      "cloneURL": "https://github.com/microsoft/azure-pipelines-vscode.git",
+      "commit": "c03e2338b0c38428f740ce0bf471b9caf8718c47",
+      "path": "/tmp/dollarlint-corpus.1962866839/microsoft-azure-pipelines-vscode",
+      "status": "cloned"
+    },
+    {
+      "name": "googleapis/release-please",
+      "ecosystem": "node",
+      "cloneURL": "https://github.com/googleapis/release-please.git",
+      "commit": "3ab7aec77a795d9428eb85d1b314822c3da52225",
+      "path": "/tmp/dollarlint-corpus.1962866839/googleapis-release-please",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 425,
+    "validated": 69,
+    "skipped": 356,
+    "failed": 0,
+    "issues": {
+      "total": 12,
+      "parsing": 0,
+      "validation": 12,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 3822340555
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 0 repo(s) behaved reasonably, 3 repo(s) produced product signals, and 0 repo(s) were blocked or uninterpretable.",
+    "DollarLint discovered 425 files, validated 69, skipped 356, failed 0, reported 12 issues, and emitted 0 warnings.",
+    "Repository concentration: googleapis/release-please: 10 issues, 0 warnings, 118 skipped; actions/runner: 2 issues, 0 warnings, 28 skipped.",
+    "Issue groups: googleapis/release-please fixture-data/pattern: 5; googleapis/release-please fixture-data/format: 2; googleapis/release-please fixture-data/type: 2; actions/runner catalog-schema-validation/required: 1.",
+    "Skipped coverage: 356 of 425 discovered files were skipped (83.8%)."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "This sweep skipped 356 of 425 discovered files (83.8%), which is useful context when judging corpus coverage."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Classify catalog-backed findings that look inconsistent with widely accepted real-world syntax as likely schema drift or schema-applicability warnings, separate from probable repository defects.",
+      "rationale": "Both reported issues depend on third-party catalog schemas and the current hints still require the user to infer whether DollarLint mistrusted the repo or the catalog. A stronger classification would make the result more actionable."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Reuse the grouped issue-hint presentation more aggressively for catalog-backed findings so repeated third-party schema caveats stay condensed and clearly separated from likely repository defects.",
+      "rationale": "This result was easier to interpret than the others because related catalog warnings were grouped first; expanding that pattern would improve signal in repos with many repeated schema-based findings."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Add stronger guidance when findings come from fixture-heavy paths or nested testdata so developers can quickly discount likely non-actionable catalog mismatches.",
+      "rationale": "Several issues came from test fixtures and embedded package files; explicit fixture-aware guidance would reduce false-alarm interpretation without hiding the findings."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Improve skipped-coverage summaries so repositories with very high unknown-file ratios are surfaced as limited-coverage results rather than feeling like clean passes.",
+      "rationale": "This repo passed with 95% skipped coverage, and the current UX requires reading deep into skipped sections to realize how little of the repo was actually validated."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Expand or better guide schema coverage for common editor and CI configuration files that look hand-authored and important, or provide targeted guidance for how users can associate schemas for those file classes.",
+      "rationale": "High-signal files such as VS Code settings/tasks and Azure pipeline-related YAML appeared central to this repository but mostly landed in unknown/custom skips."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; record the triage and decide follow-up from the structured result."
+  ],
+  "followUp": [
+    "Review the structured productRecommendations and decide whether to open implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting the same corpus by default.",
+    "Check whether GitHub's workflow schema really requires matrix when strategy only contains fail-fast or max-parallel.",
+    "Look for more embedded package.json cases to see whether bare package names in nested tooling directories frequently become noisy false positives.",
+    "Check whether scoped package names like @here/pkgA are truly rejected by the applied package schema or reflect a schema/pattern mismatch in catalog metadata.",
+    "Evaluate whether common GitHub repo-maintenance YAML files should have better schema coverage or a clearer recommendation path.",
+    "Sample more Azure Pipelines-heavy repositories to confirm whether skipped unknown YAML is a recurring gap.",
+    "Consider whether the CLI summary should elevate a limited-coverage warning when skipped unknown files dominate discovered files."
+  ]
+}

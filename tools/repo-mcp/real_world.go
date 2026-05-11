@@ -28,6 +28,8 @@ const (
 	realWorldCacheTempPrefix      = "dollarlint-cache."
 	realWorldOutputTempPrefix     = "dollarlint-"
 	realWorldCandidateSetPrefix   = "dollarlint-candidate-set-"
+	realWorldDefaultHistoryLimit  = 25
+	realWorldMaxHistoryLimit      = 200
 
 	realWorldFeedbackBehavedReasonably = "behaved-reasonably"
 	realWorldFeedbackProductSignal     = "product-signal"
@@ -174,6 +176,16 @@ type realWorldStartTestingArgs struct {
 	Title                 string                `json:"title"`
 	Repositories          []realWorldRepository `json:"repositories"`
 	AllowPreviouslyTested bool                  `json:"allowPreviouslyTested"`
+	IncludeTestedRepos    bool                  `json:"includeTestedRepos"`
+	TestedRepoLimit       int                   `json:"testedRepoLimit"`
+}
+
+type realWorldHistoryArgs struct {
+	Repo               string   `json:"repo"`
+	Repositories       []string `json:"repositories"`
+	IncludeEntries     bool     `json:"includeEntries"`
+	IncludeTestedRepos bool     `json:"includeTestedRepos"`
+	Limit              int      `json:"limit"`
 }
 
 type realWorldUpdateCandidatesArgs struct {
@@ -345,6 +357,9 @@ func (s *repoServer) realWorldStartTesting(ctx context.Context, args realWorldSt
 		message = "One or more candidate repositories were already tested; apply a candidate diff with replacements or restart with allowPreviouslyTested=true for an intentional rerun."
 		next = realWorldNextUpdateCandidates(realWorldCandidateSetID(candidateSet), duplicates)
 	}
+	if len(repositories) == 0 {
+		message = "No candidate repositories were provided. Choose candidate repositories, then call real_world_start_testing with that list; the tool will check duplicate history."
+	}
 	out := map[string]any{
 		"ok":                    ok,
 		"message":               message,
@@ -353,10 +368,8 @@ func (s *repoServer) realWorldStartTesting(ctx context.Context, args realWorldSt
 		"workingTreeNote":       workingTreeNote,
 		"entryCount":            len(history.Entries),
 		"repoCount":             len(tested),
-		"testedRepos":           tested,
 		"candidateRepositories": realWorldPublicRepositories(repositories),
 		"duplicates":            realWorldPublicRepositories(duplicates),
-		"recordResultContract":  realWorldRecordResultContract(),
 		"rules": []string{
 			"Do not create or update Markdown report files for repository memory.",
 			"Do not wait for every repository to clone before starting validation; managed validation can begin from the manifest while corpus preparation continues.",
@@ -370,6 +383,14 @@ func (s *repoServer) realWorldStartTesting(ctx context.Context, args realWorldSt
 			"After recording, the final user message must either recommend product changes to consider or state that the product behaved reasonably.",
 		},
 		"nextStep": next,
+	}
+	if args.IncludeTestedRepos {
+		testedRepos, truncated := limitedRealWorldTestedRepos(tested, args.TestedRepoLimit)
+		out["testedRepos"] = testedRepos
+		out["testedReposLimit"] = boundedRealWorldHistoryLimit(args.TestedRepoLimit)
+		out["testedReposTruncated"] = truncated
+	} else {
+		out["testedReposOmitted"] = "Default responses omit the full tested repository index to keep MCP output small. Pass candidate repositories to this tool for duplicate checks, or call real_world_history with specific repositories."
 	}
 	if candidateSet != nil {
 		out["candidateSetID"] = candidateSet.ID
@@ -440,15 +461,19 @@ func (s *repoServer) realWorldUpdateCandidates(ctx context.Context, args realWor
 }
 
 func (s *repoServer) handleRealWorldHistory(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	var args struct {
-		Repo           string   `json:"repo"`
-		Repositories   []string `json:"repositories"`
-		IncludeEntries bool     `json:"includeEntries"`
-	}
+	var args realWorldHistoryArgs
 	_ = request.BindArguments(&args)
-	history, err := loadRealWorldHistory(s.root)
+	out, err := s.realWorldHistory(args)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
+	}
+	return s.realWorldStructured(ctx, out)
+}
+
+func (s *repoServer) realWorldHistory(args realWorldHistoryArgs) (map[string]any, error) {
+	history, err := loadRealWorldHistory(s.root)
+	if err != nil {
+		return nil, err
 	}
 	tested := realWorldTestedRepos(history)
 	queries := append([]string{}, args.Repositories...)
@@ -470,14 +495,21 @@ func (s *repoServer) handleRealWorldHistory(ctx context.Context, request mcp.Cal
 		"layout":         realWorldRunsDirRelPath + "/<run-id>/" + realWorldRunMetadataFileName,
 		"entryCount":     len(history.Entries),
 		"repoCount":      len(tested),
-		"testedRepos":    tested,
 		"queries":        queryResults,
+	}
+	if args.IncludeTestedRepos {
+		testedRepos, truncated := limitedRealWorldTestedRepos(tested, args.Limit)
+		out["testedRepos"] = testedRepos
+		out["testedReposLimit"] = boundedRealWorldHistoryLimit(args.Limit)
+		out["testedReposTruncated"] = truncated
+	} else {
+		out["testedReposOmitted"] = "Default history responses omit the full tested repository index. Query specific repositories with repo/repositories, or pass includeTestedRepos=true with limit for a capped sample."
 	}
 	if args.IncludeEntries {
 		out["entries"] = history.Entries
 	}
 	out["nextStep"] = realWorldNextChooseRepositories()
-	return s.realWorldStructured(ctx, out)
+	return out, nil
 }
 
 func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -1598,9 +1630,9 @@ func realWorldNextAfterRecord(entry realWorldEntry) map[string]any {
 	if inGitHubAgenticWorkflow() {
 		next["githubAgenticWorkflow"] = true
 		next["discussion"] = "Publish a GitHub Discussion summary from the recorded MCP entry, including a Durable memory PR section that says the PR should be merged in order to retain the results."
-		next["pullRequest"] = "Request create_pull_request when recorded result files changed; merging that PR is how future real-world sweeps remember tested repositories."
+		next["pullRequest"] = "Request create_pull_request when recorded result files changed; include the workflow run URL in the PR body because a deterministic follow-up workflow uses it to cross-link the PR and Discussion."
 		next["safeOutputs"] = "If safe outputs are exposed through the safeoutputs CLI wrapper, pipe inline JSON with printf instead of writing temporary payload files; temp-file payload writes may be denied by the agent sandbox."
-		next["linkOutputs"] = "After requesting create_pull_request and create_discussion, call link_outputs with the Discussion title and entryID so the final PR and Discussion cross-link each other."
+		next["outputLinking"] = "No extra linker tool call is needed. The follow-up GitHub workflow cross-links the PR and Discussion after this run completes."
 	}
 	return next
 }
@@ -1868,6 +1900,24 @@ func realWorldTestedRepos(history realWorldHistory) []realWorldTestedRepo {
 		return repos[i].Key < repos[j].Key
 	})
 	return repos
+}
+
+func limitedRealWorldTestedRepos(repos []realWorldTestedRepo, limit int) ([]realWorldTestedRepo, bool) {
+	limit = boundedRealWorldHistoryLimit(limit)
+	if len(repos) <= limit {
+		return repos, false
+	}
+	return repos[:limit], true
+}
+
+func boundedRealWorldHistoryLimit(limit int) int {
+	if limit <= 0 {
+		return realWorldDefaultHistoryLimit
+	}
+	if limit > realWorldMaxHistoryLimit {
+		return realWorldMaxHistoryLimit
+	}
+	return limit
 }
 
 func realWorldRepoMatches(history realWorldHistory, query string) []realWorldTestedRepo {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -49,6 +50,89 @@ func TestRealWorldHistoryQueriesRepositories(t *testing.T) {
 	previous := realWorldPreviousEntries(history, realWorldRepository{CloneURL: "https://github.com/django/django"})
 	if len(previous) != 1 || previous[0] != "second" {
 		t.Fatalf("django previous entries = %+v", previous)
+	}
+}
+
+func TestRealWorldStartTestingOmitsFullHistoryByDefault(t *testing.T) {
+	root := t.TempDir()
+	var entries []realWorldEntry
+	for i := 0; i < 40; i++ {
+		repoName := fmt.Sprintf("repo-%02d", i)
+		entries = append(entries, realWorldEntry{
+			ID:    fmt.Sprintf("entry-%02d", i),
+			Date:  "2026-05-01",
+			Title: "Entry",
+			Repositories: []realWorldRepository{{
+				Name:     repoName,
+				CloneURL: "https://github.com/example/" + repoName + ".git",
+			}},
+		})
+	}
+	if err := saveRealWorldHistory(root, realWorldHistory{Entries: entries}); err != nil {
+		t.Fatal(err)
+	}
+	server := &repoServer{root: root}
+	out, err := server.realWorldStartTesting(context.Background(), realWorldStartTestingArgs{Title: "Compact"})
+	if err != nil {
+		t.Fatalf("start testing: %v", err)
+	}
+	if _, ok := out["testedRepos"]; ok {
+		t.Fatalf("testedRepos should be omitted by default: %+v", out)
+	}
+	if out["repoCount"] != 40 {
+		t.Fatalf("repoCount = %v", out["repoCount"])
+	}
+	if _, ok := out["testedReposOmitted"]; !ok {
+		t.Fatalf("missing testedReposOmitted hint: %+v", out)
+	}
+
+	withRepos, err := server.realWorldStartTesting(context.Background(), realWorldStartTestingArgs{Title: "Compact", IncludeTestedRepos: true, TestedRepoLimit: 3})
+	if err != nil {
+		t.Fatalf("start testing with tested repos: %v", err)
+	}
+	testedRepos := withRepos["testedRepos"].([]realWorldTestedRepo)
+	if len(testedRepos) != 3 || withRepos["testedReposTruncated"] != true {
+		t.Fatalf("tested repo sample len/truncated = %d/%v", len(testedRepos), withRepos["testedReposTruncated"])
+	}
+}
+
+func TestRealWorldHistoryDefaultsToCompactQueries(t *testing.T) {
+	root := t.TempDir()
+	history := realWorldHistory{Entries: []realWorldEntry{{
+		ID:    "first",
+		Date:  "2026-05-01",
+		Title: "First",
+		Repositories: []realWorldRepository{
+			{Name: "cargo", CloneURL: "https://github.com/rust-lang/cargo.git"},
+			{Name: "django", CloneURL: "https://github.com/django/django.git"},
+		},
+	}}}
+	if err := saveRealWorldHistory(root, history); err != nil {
+		t.Fatal(err)
+	}
+	server := &repoServer{root: root}
+	out, err := server.realWorldHistory(realWorldHistoryArgs{Repositories: []string{"rust-lang/cargo"}})
+	if err != nil {
+		t.Fatalf("history: %v", err)
+	}
+	if _, ok := out["testedRepos"]; ok {
+		t.Fatalf("testedRepos should be omitted by default: %+v", out)
+	}
+	queries := out["queries"].([]map[string]any)
+	if len(queries) != 1 || queries[0]["alreadyTested"] != true {
+		t.Fatalf("queries = %+v", queries)
+	}
+	if _, ok := out["testedReposOmitted"]; !ok {
+		t.Fatalf("missing omission hint: %+v", out)
+	}
+
+	withRepos, err := server.realWorldHistory(realWorldHistoryArgs{IncludeTestedRepos: true, Limit: 1})
+	if err != nil {
+		t.Fatalf("history with tested repos: %v", err)
+	}
+	testedRepos := withRepos["testedRepos"].([]realWorldTestedRepo)
+	if len(testedRepos) != 1 || withRepos["testedReposTruncated"] != true {
+		t.Fatalf("tested repo sample len/truncated = %d/%v", len(testedRepos), withRepos["testedReposTruncated"])
 	}
 }
 

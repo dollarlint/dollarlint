@@ -1,0 +1,166 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-05-11-agentic-product-testing-sweep",
+  "date": "2026-05-11",
+  "title": "Agentic Product Testing sweep",
+  "dollarlintRevision": "f386ea1365889f2d3ecb65b0a0675f38e52b0d87",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.462599715",
+  "cacheDir": "/tmp/dollarlint-cache.141551327",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.462599715\" cacheDir=\"/tmp/dollarlint-cache.141551327\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-sweep-2071544307.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-sweep-2071544307.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-11-agentic-product-testing-sweep/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "astral-sh/ruff",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock, crates/ty_completion_eval/truth/auto-import-includes-modules/uv.lock, crates/ty_completion_eval/truth/auto-import-skips-current-module/uv.lock, and 9 more. Remote schema refs: 3."
+    },
+    {
+      "repository": "oven-sh/bun",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: bench/bun.lock, bench/bundle/bun.lockb, bench/expect-to-equal/bun.lock, and 9 more. Remote schema refs: 9."
+    },
+    {
+      "repository": "rust-lang/rustfmt",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock, check_diff/Cargo.lock, ci/Cargo.lock, and 1 more. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "astral-sh/ruff",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint usefully separated likely intentional invalid fixture files from hand-authored configs, but the same run mixed those expected fixture failures with a real-looking mkdocs.yml warning and many uncovered config files, leaving the user to sort test-fixture noise from actionable repo feedback.",
+        "The mkdocs.yml hint about inherited configuration was especially helpful and shows good domain-aware guidance, but it stands out because similarly high-signal uncovered files like .github/actionlint.yaml and .cargo/config.toml are only reported as unsupported or unknown with no next action beyond absence of schema support.",
+        "The repo had substantial skipped coverage across project configuration files, and the current output truncates the skipped list in plain CLI mode, which makes it harder to judge what important config surface DollarLint still misses in a large real repository."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Promote high-signal skipped configuration files into a compact coverage summary with explicit next-step messaging, instead of burying them inside a long truncated skipped-files list.",
+          "rationale": "On a large repo like ruff, users can quickly miss important unsupported configs such as .github/actionlint.yaml and .cargo/config.toml because the current plain output truncates and flattens many skipped files."
+        },
+        {
+          "strength": "low",
+          "recommendation": "Extend domain-aware hints beyond MkDocs-style inheritance to other known config families where a finding or skip often has a common explanation.",
+          "rationale": "The MkDocs hint was much more actionable than adjacent unsupported/skipped config output, showing that targeted guidance materially improves developer interpretation."
+        }
+      ],
+      "notes": "This repo reveals an ergonomics and coverage product signal rather than a core correctness failure. DollarLint already has some strong targeted hints, but the experience would be more actionable if high-signal unsupported/skipped config files were summarized with clearer product-facing coverage messaging instead of blending into a long truncated skipped-file section."
+    },
+    {
+      "repository": "oven-sh/bun",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint did a good job grouping repeated catalog-backed findings by schema family, which kept a noisy repo somewhat readable even with many files involved.",
+        "The run still mixed intentionally malformed fixture files and likely catalog-schema mismatches with actionable-looking hand-authored config findings, and the plain CLI preview leaves the user to manually distinguish those categories across many files.",
+        "Several findings point at real ecosystem drift between SchemaStore schemas and current tool conventions, such as GitHub Action input typing and bunfig/package.json fields, so the tool needs stronger confidence cues than repeated 'confirm the external catalog schema' hints when many results in a repo share that root cause."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Add repository-level grouping that separates likely fixture/test-data failures from hand-authored configuration findings in the default output.",
+          "rationale": "Bun contains many intentionally malformed fixtures, and mixing them with normal config findings makes the default result harder to interpret quickly."
+        },
+        {
+          "strength": "high",
+          "recommendation": "Collapse repeated catalog-backed mismatches into a stronger root-cause summary with confidence wording when many findings stem from the same external schema family.",
+          "rationale": "This repo produced repeated package.json, GitHub Action, GitHub Workflow, bunfig, and tsconfig catalog-driven findings; users need clearer guidance that these may reflect schema drift rather than many unrelated repo bugs."
+        }
+      ],
+      "notes": "This repo suggests a meaningful ergonomics product change. DollarLint is technically informative, but on a large config-heavy repository the user still has to mentally de-duplicate likely catalog mismatch noise and fixture noise from truly actionable repo errors. Better root-cause grouping and confidence framing would make the output much easier to trust."
+    },
+    {
+      "repository": "rust-lang/rustfmt",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint surfaced the GitHub Workflow catalog context clearly, but the primary output still reads like six raw type errors without explaining that numeric workflow_dispatch choice values may be accepted by GitHub in practice and are a common false-positive edge for the catalog schema.",
+        "The CLI preview usefully grouped the six repeated validation errors into one file and one catalog context, which kept the result readable even with additional skipped-file coverage.",
+        "Skipped-file coverage was visible, but the repo still leaves a developer to manually infer whether the GitHub Workflow issues are likely actionable or just schema-catalog mismatch noise."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Add stronger result framing for catalog-backed findings when the suggested action is to confirm the external schema/tooling version, so users can quickly distinguish likely repo bugs from likely catalog-schema mismatches.",
+          "rationale": "This repo produced only catalog-backed GitHub Workflow errors, and the current output still leaves the user to infer whether the issue is actionable or likely schema fidelity noise."
+        }
+      ],
+      "notes": "DollarLint behaved mostly clearly on this repo, but the developer experience still suggests a product improvement: when a finding is driven by a SchemaStore catalog association that commonly disagrees with real-world GitHub workflow behavior, the tool should give stronger guidance that the issue may be a catalog/schema fidelity mismatch rather than only a repository bug. The grouping was good; the missing confidence framing is the product signal."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "astral-sh/ruff",
+      "ecosystem": "python",
+      "cloneURL": "https://github.com/astral-sh/ruff.git",
+      "commit": "766e2a13bf5df09ecf0518a70bd1f1d4e9109185",
+      "path": "/tmp/dollarlint-corpus.462599715/astral-sh-ruff",
+      "status": "cloned"
+    },
+    {
+      "name": "oven-sh/bun",
+      "ecosystem": "javascript",
+      "cloneURL": "https://github.com/oven-sh/bun.git",
+      "commit": "03ebdf8ff3abb1c06fc2d6bba3bcd158830e3765",
+      "path": "/tmp/dollarlint-corpus.462599715/oven-sh-bun",
+      "status": "cloned"
+    },
+    {
+      "name": "rust-lang/rustfmt",
+      "ecosystem": "rust",
+      "cloneURL": "https://github.com/rust-lang/rustfmt.git",
+      "commit": "ef22670aa4859d8dfd2d7a005bbf18450c9de798",
+      "path": "/tmp/dollarlint-corpus.462599715/rust-lang-rustfmt",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 1027,
+    "validated": 697,
+    "skipped": 319,
+    "failed": 11,
+    "issues": {
+      "total": 57,
+      "parsing": 11,
+      "validation": 46,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 11148087536
+    }
+  },
+  "findings": [
+    "All 3 tested repositories produced product-signal feedback rather than blocked or behaved-reasonably outcomes.",
+    "Large repositories with many fixtures or unsupported configs were understandable enough to inspect, but default output still makes developers manually separate test-fixture noise, skipped coverage, and catalog-schema mismatch noise from actionable hand-authored config issues.",
+    "DollarLint's strongest current behavior in this sweep was grouping repeated findings by catalog context and offering targeted hints like MkDocs inheritance guidance; the main remaining gaps are confidence framing and compact coverage summaries."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "high",
+      "recommendation": "Add repository-level grouping that separates likely fixture/test-data failures from hand-authored configuration findings in the default output.",
+      "rationale": "Bun and Ruff both mixed intentional invalid fixtures with real-looking config findings, forcing the user to manually classify what matters."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Collapse repeated catalog-backed mismatches into a stronger root-cause summary with confidence wording when many findings stem from the same external schema family.",
+      "rationale": "Bun and rustfmt both produced findings that look actionable at first glance but are likely driven by SchemaStore or ecosystem drift, so users need a clearer root-cause summary."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Promote high-signal skipped configuration files into a compact coverage summary with explicit next-step messaging.",
+      "rationale": "Ruff skipped important project config surfaces like .github/actionlint.yaml and .cargo/config.toml, but that signal is easy to miss in truncated skipped-file output."
+    }
+  ],
+  "productDecisions": [
+    "Treat this sweep as product-signal evidence focused on output ergonomics and confidence framing, not as evidence of a parsing or crash regression."
+  ],
+  "followUp": [
+    "Prioritize UX work around catalog-backed confidence framing and fixture-versus-hand-authored grouping in the default output.",
+    "Re-run a future sweep after those UX changes to check whether high-signal skipped config summaries reduce interpretation cost on large repositories."
+  ]
+}

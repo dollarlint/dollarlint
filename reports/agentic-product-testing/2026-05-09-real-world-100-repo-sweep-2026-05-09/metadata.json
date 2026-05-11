@@ -1540,7 +1540,7 @@
   },
   "findings": [
     "Validated 100 repositories; 53 had issues, 21 included parsing failures, and 21 had failed files.",
-    "Coverage gaps were common: 8 repositories had zero discovered files and 21 had >=70% skipped files.",
+    "Coverage gaps were common: 8 repositories had zero discovered files and 21 had \u003e=70% skipped files.",
     "Several repositories produced very high repeated validation issue counts (e.g., 100s to 1000s), increasing triage noise."
   ],
   "productRecommendations": [
@@ -1552,12 +1552,12 @@
     {
       "strength": "high",
       "recommendation": "Improve skipped-coverage reporting with explicit per-repo reason aggregation and a concise coverage confidence signal.",
-      "rationale": "8 repos had zero discovered files and 21 repos had >=70% skipped files, often leaving unclear what DollarLint actually checked."
+      "rationale": "8 repos had zero discovered files and 21 repos had \u003e=70% skipped files, often leaving unclear what DollarLint actually checked."
     },
     {
       "strength": "med",
       "recommendation": "Provide grouped/compacted issue summaries by schema/file/root cause alongside full details.",
-      "rationale": "Some repos generated large volumes of repetitive findings (for example >100 to thousands), making next actions harder to identify quickly."
+      "rationale": "Some repos generated large volumes of repetitive findings (for example \u003e100 to thousands), making next actions harder to identify quickly."
     }
   ],
   "productDecisions": [

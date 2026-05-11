@@ -26,7 +26,7 @@
       "repository": "next.js",
       "command": "npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts OR cargo fetch --locked OR npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 2 local $schema refs, including test/e2e/app-dir/nx-handling/apps/next-nx-test/project.json:3 -> ../../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 2 local $schema refs, including test/e2e/app-dir/nx-handling/apps/next-nx-test/project.json:3 -\u003e ../../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "poetry",

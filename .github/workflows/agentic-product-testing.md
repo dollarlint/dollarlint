@@ -120,8 +120,8 @@ safe-outputs:
     protected-files: fallback-to-issue
     draft: false
   jobs:
-    link-real-world-outputs:
-      description: Cross-link the Agentic Product Testing Discussion and durable-memory PR after the built-in safe outputs run. Call this whenever a real-world result PR is requested.
+    link-outputs:
+      description: Cross-link the Agentic Product Testing Discussion and durable-memory PR after the built-in safe outputs run. Call this whenever a result PR is requested.
       runs-on: ubuntu-latest
       needs: safe_outputs
       output: Linked the Agentic Product Testing Discussion and PR.
@@ -163,9 +163,9 @@ safe-outputs:
 
               const agentOutput = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
               const items = Array.isArray(agentOutput.items) ? agentOutput.items : [];
-              const linkItem = items.find((item) => item.type === 'link_real_world_outputs');
+              const linkItem = items.find((item) => item.type === 'link_outputs');
               if (!linkItem) {
-                core.setFailed('The agent did not call link_real_world_outputs.');
+                core.setFailed('The agent did not call link_outputs.');
                 return;
               }
 
@@ -173,19 +173,19 @@ safe-outputs:
               const pullRequestItem = items.find((item) => item.type === 'create_pull_request');
               if (!prNumber || !prUrl) {
                 if (!pullRequestItem) {
-                  core.warning('link_real_world_outputs was called, but no create_pull_request output was requested; skipping cross-link.');
+                  core.warning('link_outputs was called, but no create_pull_request output was requested; skipping cross-link.');
                   return;
                 }
                 core.setFailed('create_pull_request was requested, but safe outputs did not expose a created PR URL/number.');
                 return;
               }
               if (!discussionItem) {
-                core.setFailed('link_real_world_outputs requires a matching create_discussion output.');
+                core.setFailed('link_outputs requires a matching create_discussion output.');
                 return;
               }
               const requestedTitle = linkItem.discussion_title || discussionItem?.title || '';
               if (!requestedTitle) {
-                core.setFailed('link_real_world_outputs requires discussion_title.');
+                core.setFailed('link_outputs requires discussion_title.');
                 return;
               }
               const expectedTitle = requestedTitle.startsWith('Agentic Product Testing: ')
@@ -278,7 +278,7 @@ Manual dispatch inputs for this run:
 - max_repos: `${{ github.event.inputs.max_repos }}`
 - candidate_repos: `${{ github.event.inputs.candidate_repos }}`
 
-Before calling `real_world_start_testing`, derive the repository plan from those literal inputs. Treat a missing or empty `max_repos` as `10`. If `candidate_repos` is a non-empty JSON array, parse it and pass at most `max_repos` entries exactly to `real_world_start_testing.repositories`; do not substitute different repositories unless MCP history reports duplicates and `allowPreviouslyTested` is false. If `candidate_repos` is empty, choose up to `max_repos` diverse, well-known public repositories with conventional config files, skipping repositories already in MCP history unless the manual input explicitly asks for reruns.
+Before calling `real_world_start_testing`, derive the repository plan from those literal inputs. Treat a missing or empty `max_repos` as `10`. If `candidate_repos` is a non-empty JSON array, parse it and pass at most `max_repos` entries exactly to `real_world_start_testing.repositories`; do not substitute different repositories unless MCP history reports duplicates and `allowPreviouslyTested` is false. If duplicates are reported, use the returned `candidateSetID` and call `real_world_update_candidates` with a small `diff.replace`, `diff.remove`, or `diff.add` instead of resubmitting the full repository list. When the candidate set is ready, prefer passing only `candidateSetID` and `expectedCount` to `real_world_prepare_corpus`. If `candidate_repos` is empty, choose up to `max_repos` diverse, well-known public repositories with conventional config files, skipping repositories already in MCP history unless the manual input explicitly asks for reruns.
 
 The workflow pre-builds `bin/dollarlint`; when the MCP flow asks for validation arguments, use `build: false` so validation uses the prebuilt CLI. Keep long-running prep or validation MCP calls open for progress notifications, and do not poll with shell sleep loops.
 
@@ -290,7 +290,7 @@ After recording, create exactly one GitHub Discussion through the configured saf
 
 The workflow may expose safe outputs either as direct tools or through a `safeoutputs` CLI wrapper. Use the available safe-output interface, but do not stop after committing locally. If using the CLI wrapper, send inline JSON on stdin with `printf '%s' '<json>' | safeoutputs create_pull_request .` and `printf '%s' '<json>' | safeoutputs create_discussion .`; do not rely on temporary payload files.
 
-After requesting both `create_pull_request` and `create_discussion`, call `link_real_world_outputs` with the exact Discussion title and the recorded entry id. This post-safe-output step cross-links the final PR and Discussion URLs and fails if no PR was created.
+After requesting both `create_pull_request` and `create_discussion`, call `link_outputs` with the exact Discussion title and the recorded entry id. This post-safe-output step cross-links the final PR and Discussion URLs and fails if no PR was created.
 
 Do not fabricate results. If cloning, preparation, validation, triage, or recording blocks before a meaningful sweep completes, publish a short blocker summary with any partial artifacts and the next concrete fix.
 

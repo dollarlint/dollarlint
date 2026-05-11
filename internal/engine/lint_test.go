@@ -514,20 +514,36 @@ func TestSchemaSourceFailureWarningHelpers(t *testing.T) {
 func TestLintMissingDependencySchemaHint(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "project.json"), `{"$schema":"./node_modules/tool/schema.json","name":"app"}`)
+	writeFile(t, filepath.Join(dir, "other.json"), `{"$schema":"./node_modules/tool/schema.json","name":"other"}`)
 	result, err := Lint(context.Background(), Options{Root: dir, Config: configWithoutSchemaStore()})
 	if err != nil {
 		t.Fatalf("Lint: %v", err)
 	}
-	if len(result.Issues) != 1 {
+	if len(result.Issues) != 2 {
 		t.Fatalf("issues = %+v", result.Issues)
 	}
-	issue := result.Issues[0]
-	if issue.Keyword != issueKeywordSchema || !strings.Contains(issue.Message, "schema load failed") {
-		t.Fatalf("schema issue = %+v", issue)
+	for _, issue := range result.Issues {
+		if issue.Keyword != issueKeywordSchema || !strings.Contains(issue.Message, "schema load failed") {
+			t.Fatalf("schema issue = %+v", issue)
+		}
+		if issue.IssueHint == nil || issue.IssueHint.ID != "schema.local-dependency-unavailable" {
+			t.Fatalf("structured local schema hint = %+v", issue)
+		}
+		if issue.IssueHint.GroupKey != "schema:local-dependency-unavailable:node_modules/tool/schema.json" {
+			t.Fatalf("local schema group key = %q", issue.IssueHint.GroupKey)
+		}
+		if !strings.Contains(issue.Hint, "install project dependencies before validating") ||
+			!strings.Contains(issue.Hint, "dependency-prep unavailable") {
+			t.Fatalf("hint = %q", issue.Hint)
+		}
 	}
-	if !strings.Contains(issue.Hint, "install dependencies before validating") ||
-		!strings.Contains(issue.Hint, "tool schemas are unavailable") {
-		t.Fatalf("hint = %q", issue.Hint)
+	text := FormatText(result, OutputConfig{})
+	assertContains(t, text, "issue hints")
+	assertContains(t, text, "schema.local-dependency-unavailable")
+	assertContains(t, text, "2 issues across 2 files")
+	assertContains(t, text, "node_modules/tool/schema.json")
+	if strings.Count(text, "Dependency-local schema is unavailable.") != 1 {
+		t.Fatalf("dependency-local schema hint should be grouped once:\n%s", text)
 	}
 }
 

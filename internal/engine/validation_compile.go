@@ -3,6 +3,8 @@ package engine
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -92,14 +94,15 @@ func validationForSchemaFailure(document *Document, cfg Config, phase string, er
 				message:    schemaSourceSkippedMessage(phase),
 			}
 		}
-		return documentValidation{issues: []Issue{{
+		issue := Issue{
 			File:         document.Path,
 			RelativePath: document.RelativePath,
 			Schema:       document.Schema,
 			Keyword:      issueKeywordSchema,
 			Message:      message,
-			Hint:         hintForSchemaFailure(document, message),
-		}}}
+		}
+		applySchemaFailureIssueHint(document, &issue, cfg.Output)
+		return documentValidation{issues: []Issue{issue}}
 	}
 	mode, modeErr := catalogFailureMode(cfg.Schemas)
 	if modeErr != nil {
@@ -279,23 +282,146 @@ func limitedPathList(paths []string, limit int) string {
 }
 
 func hintForSchemaFailure(document *Document, message string) string {
+	if hint, ok := schemaFailureIssueHint(document, message); ok {
+		return issueHintText(hint, false)
+	}
+	return legacyHintForSchemaFailure(document, message)
+}
+
+func applySchemaFailureIssueHint(document *Document, issue *Issue, output OutputConfig) {
+	if issue == nil || issue.Hint != "" {
+		return
+	}
+	if issueHintsEnabled(output) {
+		if hint, ok := schemaFailureIssueHint(document, issue.Message); ok {
+			applyIssueHint(issue, hint)
+			return
+		}
+	}
+	issue.Hint = legacyHintForSchemaFailure(document, issue.Message)
+}
+
+type localSchemaFailureInfo struct {
+	DisplayPath string
+	GroupPath   string
+	Dependency  bool
+}
+
+func schemaFailureIssueHint(document *Document, message string) (IssueHint, bool) {
+	info, ok := classifyLocalSchemaFailure(document, message)
+	if !ok {
+		return IssueHint{}, false
+	}
+	if info.Dependency {
+		return IssueHint{
+			ID:         "schema.local-dependency-unavailable",
+			Title:      "Dependency-local schema is unavailable.",
+			Detail:     fmt.Sprintf("The file's $schema points at %s, but that schema file was not present in this checkout.", info.DisplayPath),
+			Suggestion: "Treat this as dependency-prep unavailable first: install project dependencies before validating, or exclude files whose tool schemas are unavailable.",
+			Confidence: IssueHintConfidenceHigh,
+			GroupKey:   "schema:local-dependency-unavailable:" + info.GroupPath,
+		}, true
+	}
+	return IssueHint{
+		ID:         "schema.local-schema-unavailable",
+		Title:      "Local schema file is unavailable.",
+		Detail:     fmt.Sprintf("The file's $schema points at %s, but DollarLint could not read that local schema file.", info.DisplayPath),
+		Suggestion: "Check the $schema path, generate the local schema if the project creates it, or exclude files whose local schemas are unavailable.",
+		Confidence: IssueHintConfidenceHigh,
+		GroupKey:   "schema:local-schema-unavailable:" + info.GroupPath,
+	}, true
+}
+
+func classifyLocalSchemaFailure(document *Document, message string) (localSchemaFailureInfo, bool) {
 	lowerMessage := strings.ToLower(message)
 	if !strings.Contains(lowerMessage, "no such file or directory") ||
 		!strings.Contains(lowerMessage, "read schema ") {
-		return ""
+		return localSchemaFailureInfo{}, false
 	}
 	schema := ""
+	documentPath := ""
 	if document != nil {
 		schema = document.Schema
+		documentPath = document.Path
 	}
-	lowerSchema := strings.ToLower(schema)
-	if strings.HasPrefix(lowerSchema, "file://") || strings.Contains(lowerMessage, "file://") {
-		if strings.Contains(lowerSchema, "/node_modules/") || strings.Contains(lowerMessage, "/node_modules/") {
-			return "The referenced local schema file is missing. If a project dependency provides it, install dependencies before validating, or exclude files whose tool schemas are unavailable."
+	schemaPath, ok := localSchemaPath(schema)
+	if !ok {
+		schemaPath, ok = schemaPathFromLoadMessage(message)
+	}
+	if !ok {
+		return localSchemaFailureInfo{}, false
+	}
+	displayPath, groupPath, dependency := displayLocalSchemaPath(schemaPath, documentPath)
+	return localSchemaFailureInfo{DisplayPath: displayPath, GroupPath: groupPath, Dependency: dependency}, true
+}
+
+func legacyHintForSchemaFailure(document *Document, message string) string {
+	info, ok := classifyLocalSchemaFailure(document, message)
+	if !ok {
+		return ""
+	}
+	if info.Dependency {
+		return "The referenced local schema file is missing. If a project dependency provides it, install dependencies before validating, or exclude files whose tool schemas are unavailable."
+	}
+	return "The referenced local schema file is missing. Check the $schema path, install the dependency that provides it, or exclude files whose local schemas are unavailable."
+}
+
+func localSchemaPath(raw string) (string, bool) {
+	parsed, err := url.Parse(raw)
+	if err != nil || parsed.Scheme != "file" || parsed.Path == "" {
+		return "", false
+	}
+	unescaped, err := url.PathUnescape(parsed.Path)
+	if err != nil {
+		return "", false
+	}
+	return filepath.Clean(filepath.FromSlash(unescaped)), true
+}
+
+func schemaPathFromLoadMessage(message string) (string, bool) {
+	const marker = "read schema "
+	start := strings.Index(strings.ToLower(message), marker)
+	if start < 0 {
+		return "", false
+	}
+	rest := message[start+len(marker):]
+	if end := strings.Index(rest, ": "); end >= 0 {
+		rest = rest[:end]
+	}
+	rest = strings.TrimSpace(rest)
+	if rest == "" {
+		return "", false
+	}
+	if path, ok := localSchemaPath(rest); ok {
+		return path, true
+	}
+	return filepath.Clean(filepath.FromSlash(rest)), true
+}
+
+func displayLocalSchemaPath(schemaPath, documentPath string) (string, string, bool) {
+	cleanPath := filepath.Clean(schemaPath)
+	slashPath := filepath.ToSlash(cleanPath)
+	if display, ok := trimToNodeModulesPath(slashPath); ok {
+		return display, display, true
+	}
+	if documentPath != "" {
+		if rel, err := filepath.Rel(filepath.Dir(documentPath), cleanPath); err == nil && rel != "." {
+			return filepath.ToSlash(rel), slashPath, false
 		}
-		return "The referenced local schema file is missing. Check the $schema path, install the dependency that provides it, or exclude files whose local schemas are unavailable."
 	}
-	return ""
+	return slashPath, slashPath, false
+}
+
+func trimToNodeModulesPath(slashPath string) (string, bool) {
+	if slashPath == "node_modules" || strings.HasPrefix(slashPath, "node_modules/") {
+		return slashPath, true
+	}
+	const segment = "/node_modules/"
+	index := strings.Index(slashPath, segment)
+	if index < 0 {
+		return "", false
+	}
+	return slashPath[index+1:], true
 }
 
 func compileSchema(ctx context.Context, cache *SchemaCache, cfg Config, schemaURI string, documentData any) (*jsonschema.Schema, error) {

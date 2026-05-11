@@ -22,11 +22,12 @@ const (
 	realWorldRunArtifactFileName  = "dollarlint.json"
 	realWorldEntrySchema          = "../metadata.schema.json"
 	realWorldHistorySchemaVersion = 4
-	realWorldMCPContractVersion   = 8
+	realWorldMCPContractVersion   = 9
 	realWorldManifestName         = "real-world-manifest.json"
 	realWorldCorpusTempPrefix     = "dollarlint-corpus."
 	realWorldCacheTempPrefix      = "dollarlint-cache."
 	realWorldOutputTempPrefix     = "dollarlint-"
+	realWorldCandidateSetPrefix   = "dollarlint-candidate-set-"
 
 	realWorldFeedbackBehavedReasonably = "behaved-reasonably"
 	realWorldFeedbackProductSignal     = "product-signal"
@@ -64,6 +65,7 @@ func (s *repoServer) realWorldMCPContract(ctx context.Context) map[string]any {
 		"staleIfMissing":   "If this object is missing or contractVersion is lower, restart the MCP server before running real-world testing.",
 		"happyPath": []string{
 			"Use runID-based real_world_* tools in nextStep order.",
+			"Use candidateSetID and real_world_update_candidates diffs instead of resubmitting large repository lists after duplicate checks.",
 			"Do not call legacy/path-based runners during managed real-world testing.",
 			"Keep long-running prep/validation tool calls open for progress notifications; do not poll with shell sleep loops.",
 			"Record qualitative developer-experience feedback for every delivered repository result.",
@@ -168,6 +170,60 @@ type realWorldRepository struct {
 	PreviousEntries []string `json:"previousEntries,omitempty"`
 }
 
+type realWorldStartTestingArgs struct {
+	Title                 string                `json:"title"`
+	Repositories          []realWorldRepository `json:"repositories"`
+	AllowPreviouslyTested bool                  `json:"allowPreviouslyTested"`
+}
+
+type realWorldUpdateCandidatesArgs struct {
+	CandidateSetID        string                 `json:"candidateSetID"`
+	Diff                  realWorldCandidateDiff `json:"diff"`
+	ExpectedCount         int                    `json:"expectedCount"`
+	AllowPreviouslyTested *bool                  `json:"allowPreviouslyTested"`
+	Title                 string                 `json:"title"`
+}
+
+type realWorldPrepareCorpusArgs struct {
+	Title                 string                 `json:"title"`
+	Repositories          []realWorldRepository  `json:"repositories"`
+	CandidateSetID        string                 `json:"candidateSetID"`
+	CandidateDiff         realWorldCandidateDiff `json:"candidateDiff"`
+	ExpectedCount         int                    `json:"expectedCount"`
+	Clone                 bool                   `json:"clone"`
+	AllowPreviouslyTested *bool                  `json:"allowPreviouslyTested"`
+	OutputName            string                 `json:"outputName"`
+	Concurrency           int                    `json:"concurrency"`
+	WaitForFirstResult    *bool                  `json:"waitForFirstResult"`
+}
+
+type realWorldCandidateSet struct {
+	SchemaVersion         int                   `json:"schemaVersion"`
+	ID                    string                `json:"id"`
+	Title                 string                `json:"title,omitempty"`
+	AllowPreviouslyTested bool                  `json:"allowPreviouslyTested,omitempty"`
+	CreatedAt             string                `json:"createdAt"`
+	UpdatedAt             string                `json:"updatedAt"`
+	Repositories          []realWorldRepository `json:"repositories"`
+}
+
+type realWorldCandidateDiff struct {
+	Add     []realWorldRepository           `json:"add,omitempty"`
+	Remove  []string                        `json:"remove,omitempty"`
+	Replace []realWorldCandidateReplacement `json:"replace,omitempty"`
+}
+
+type realWorldCandidateReplacement struct {
+	Match      string              `json:"match"`
+	Repository realWorldRepository `json:"repository"`
+}
+
+type realWorldCandidateDiffResult struct {
+	Added    []realWorldRepository `json:"added,omitempty"`
+	Removed  []realWorldRepository `json:"removed,omitempty"`
+	Replaced []map[string]any      `json:"replaced,omitempty"`
+}
+
 type realWorldResult struct {
 	Discovered int                    `json:"discovered"`
 	Validated  int                    `json:"validated"`
@@ -246,27 +302,29 @@ type realWorldRecordArgs struct {
 }
 
 func (s *repoServer) handleRealWorldStartTesting(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	var args struct {
-		Title                 string                `json:"title"`
-		Repositories          []realWorldRepository `json:"repositories"`
-		AllowPreviouslyTested bool                  `json:"allowPreviouslyTested"`
-	}
+	var args realWorldStartTestingArgs
 	_ = request.BindArguments(&args)
-	history, err := loadRealWorldHistory(s.root)
+	out, err := s.realWorldStartTesting(ctx, args)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
+	return s.realWorldStructured(ctx, out)
+}
+
+func (s *repoServer) realWorldStartTesting(ctx context.Context, args realWorldStartTestingArgs) (map[string]any, error) {
+	history, err := loadRealWorldHistory(s.root)
+	if err != nil {
+		return nil, err
+	}
 	tested := realWorldTestedRepos(history)
-	repositories := append([]realWorldRepository{}, args.Repositories...)
-	var duplicates []realWorldRepository
-	for i := range repositories {
-		previous := realWorldPreviousEntries(history, repositories[i])
-		if len(previous) == 0 {
-			continue
+	repositories, duplicates := realWorldAnnotateCandidateRepositories(history, args.Repositories)
+	var candidateSet *realWorldCandidateSet
+	if len(repositories) > 0 {
+		set := newRealWorldCandidateSet(args.Title, args.AllowPreviouslyTested, repositories)
+		if err := saveRealWorldCandidateSet(set); err != nil {
+			return nil, err
 		}
-		repositories[i].AlreadyTested = true
-		repositories[i].PreviousEntries = previous
-		duplicates = append(duplicates, repositories[i])
+		candidateSet = &set
 	}
 	status := s.output(ctx, "git status --short")
 	workingTreeNote := "clean working tree"
@@ -277,17 +335,17 @@ func (s *repoServer) handleRealWorldStartTesting(ctx context.Context, request mc
 	ok := len(duplicates) == 0 || args.AllowPreviouslyTested
 	next := realWorldNextChooseRepositories()
 	if len(repositories) > 0 && ok {
-		next = realWorldNextPrepareCorpus(args.Title, repositories, args.AllowPreviouslyTested)
+		next = realWorldNextPrepareCorpus(args.Title, repositories, realWorldCandidateSetID(candidateSet), args.AllowPreviouslyTested)
 	}
 	message := "Choose fresh public repositories, then call real_world_prepare_corpus."
 	if len(repositories) > 0 && ok {
 		message = "Candidate repositories are ready; call real_world_prepare_corpus next."
 	}
 	if len(duplicates) > 0 && !args.AllowPreviouslyTested {
-		message = "One or more candidate repositories were already tested; choose replacements or restart with allowPreviouslyTested=true for an intentional rerun."
-		next = realWorldNextChooseRepositories()
+		message = "One or more candidate repositories were already tested; apply a candidate diff with replacements or restart with allowPreviouslyTested=true for an intentional rerun."
+		next = realWorldNextUpdateCandidates(realWorldCandidateSetID(candidateSet), duplicates)
 	}
-	return s.realWorldStructured(ctx, map[string]any{
+	out := map[string]any{
 		"ok":                    ok,
 		"message":               message,
 		"title":                 args.Title,
@@ -312,7 +370,73 @@ func (s *repoServer) handleRealWorldStartTesting(ctx context.Context, request mc
 			"After recording, the final user message must either recommend product changes to consider or state that the product behaved reasonably.",
 		},
 		"nextStep": next,
-	})
+	}
+	if candidateSet != nil {
+		out["candidateSetID"] = candidateSet.ID
+		out["candidateSet"] = realWorldCandidateSetSummary(*candidateSet, duplicates, 0)
+	}
+	return out, nil
+}
+
+func (s *repoServer) handleRealWorldUpdateCandidates(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	var args realWorldUpdateCandidatesArgs
+	_ = request.BindArguments(&args)
+	out, err := s.realWorldUpdateCandidates(ctx, args)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	return s.realWorldStructured(ctx, out)
+}
+
+func (s *repoServer) realWorldUpdateCandidates(ctx context.Context, args realWorldUpdateCandidatesArgs) (map[string]any, error) {
+	if strings.TrimSpace(args.CandidateSetID) == "" {
+		return nil, fmt.Errorf("candidateSetID is required; call real_world_start_testing first")
+	}
+	set, err := loadRealWorldCandidateSet(args.CandidateSetID)
+	if err != nil {
+		return nil, err
+	}
+	if args.Title != "" {
+		set.Title = args.Title
+	}
+	if args.AllowPreviouslyTested != nil {
+		set.AllowPreviouslyTested = *args.AllowPreviouslyTested
+	}
+	updated, diffResult, err := applyRealWorldCandidateDiff(set.Repositories, args.Diff)
+	if err != nil {
+		return nil, err
+	}
+	history, err := loadRealWorldHistory(s.root)
+	if err != nil {
+		return nil, err
+	}
+	set.Repositories, _ = realWorldAnnotateCandidateRepositories(history, updated)
+	set.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
+	if err := saveRealWorldCandidateSet(set); err != nil {
+		return nil, err
+	}
+	_, duplicates := realWorldAnnotateCandidateRepositories(history, set.Repositories)
+	countOK := args.ExpectedCount <= 0 || len(set.Repositories) == args.ExpectedCount
+	ok := countOK && (len(duplicates) == 0 || set.AllowPreviouslyTested)
+	message := "Candidate set updated; call real_world_prepare_corpus with candidateSetID next."
+	next := realWorldNextPrepareCorpus(set.Title, set.Repositories, set.ID, set.AllowPreviouslyTested)
+	if len(duplicates) > 0 && !set.AllowPreviouslyTested {
+		message = "Candidate set still contains previously tested repositories; apply another small diff or set allowPreviouslyTested for an intentional rerun."
+		next = realWorldNextUpdateCandidates(set.ID, duplicates)
+	} else if !countOK {
+		message = fmt.Sprintf("Candidate set has %d repositories, expected %d; apply another diff before preparing the corpus.", len(set.Repositories), args.ExpectedCount)
+		next = realWorldNextUpdateCandidates(set.ID, nil)
+	}
+	return map[string]any{
+		"ok":                    ok,
+		"message":               message,
+		"candidateSetID":        set.ID,
+		"candidateSet":          realWorldCandidateSetSummary(set, duplicates, args.ExpectedCount),
+		"candidateRepositories": realWorldPublicRepositories(set.Repositories),
+		"duplicates":            realWorldPublicRepositories(duplicates),
+		"diff":                  diffResult,
+		"nextStep":              next,
+	}, nil
 }
 
 func (s *repoServer) handleRealWorldHistory(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -357,53 +481,104 @@ func (s *repoServer) handleRealWorldHistory(ctx context.Context, request mcp.Cal
 }
 
 func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	var args struct {
-		Title                 string                `json:"title"`
-		Repositories          []realWorldRepository `json:"repositories"`
-		Clone                 bool                  `json:"clone"`
-		AllowPreviouslyTested bool                  `json:"allowPreviouslyTested"`
-		OutputName            string                `json:"outputName"`
-		Concurrency           int                   `json:"concurrency"`
-		WaitForFirstResult    *bool                 `json:"waitForFirstResult"`
-	}
+	var args realWorldPrepareCorpusArgs
 	_ = request.BindArguments(&args)
-	history, err := loadRealWorldHistory(s.root)
+	out, err := s.realWorldPrepareCorpus(ctx, request, args)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
-	repositories := append([]realWorldRepository{}, args.Repositories...)
-	var duplicates []realWorldRepository
-	for i := range repositories {
-		previous := realWorldPreviousEntries(history, repositories[i])
-		if len(previous) == 0 {
-			continue
-		}
-		repositories[i].AlreadyTested = true
-		repositories[i].PreviousEntries = previous
-		duplicates = append(duplicates, repositories[i])
+	return s.realWorldStructured(ctx, out)
+}
+
+func (s *repoServer) realWorldPrepareCorpus(ctx context.Context, request mcp.CallToolRequest, args realWorldPrepareCorpusArgs) (map[string]any, error) {
+	history, err := loadRealWorldHistory(s.root)
+	if err != nil {
+		return nil, err
 	}
-	if len(duplicates) > 0 && !args.AllowPreviouslyTested {
-		return s.realWorldStructured(ctx, map[string]any{
+	allowPreviouslyTested := args.AllowPreviouslyTested != nil && *args.AllowPreviouslyTested
+	var candidateSet *realWorldCandidateSet
+	repositories := append([]realWorldRepository{}, args.Repositories...)
+	if strings.TrimSpace(args.CandidateSetID) != "" {
+		if len(args.Repositories) > 0 {
+			return nil, fmt.Errorf("omit repositories when candidateSetID is provided; use candidateDiff for small changes")
+		}
+		set, err := loadRealWorldCandidateSet(args.CandidateSetID)
+		if err != nil {
+			return nil, err
+		}
+		if args.Title != "" {
+			set.Title = args.Title
+		}
+		if args.AllowPreviouslyTested != nil {
+			set.AllowPreviouslyTested = *args.AllowPreviouslyTested
+		}
+		if !realWorldCandidateDiffEmpty(args.CandidateDiff) {
+			updated, _, err := applyRealWorldCandidateDiff(set.Repositories, args.CandidateDiff)
+			if err != nil {
+				return nil, err
+			}
+			set.Repositories = updated
+		}
+		set.Repositories, _ = realWorldAnnotateCandidateRepositories(history, set.Repositories)
+		set.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
+		if err := saveRealWorldCandidateSet(set); err != nil {
+			return nil, err
+		}
+		candidateSet = &set
+		repositories = set.Repositories
+		if args.Title == "" {
+			args.Title = set.Title
+		}
+		allowPreviouslyTested = set.AllowPreviouslyTested
+	} else if !realWorldCandidateDiffEmpty(args.CandidateDiff) {
+		return nil, fmt.Errorf("candidateDiff requires candidateSetID")
+	}
+	repositories, duplicates := realWorldAnnotateCandidateRepositories(history, repositories)
+	countOK := args.ExpectedCount <= 0 || len(repositories) == args.ExpectedCount
+	if len(duplicates) > 0 && !allowPreviouslyTested {
+		out := map[string]any{
 			"ok":         false,
-			"message":    "one or more repositories were already tested; pass allowPreviouslyTested=true for an intentional rerun",
+			"message":    "one or more repositories were already tested; apply a candidate diff or pass allowPreviouslyTested=true for an intentional rerun",
 			"duplicates": duplicates,
 			"nextStep":   realWorldNextChooseRepositories(),
-		})
+		}
+		if candidateSet != nil {
+			candidateSet.Repositories = repositories
+			out["candidateSetID"] = candidateSet.ID
+			out["candidateSet"] = realWorldCandidateSetSummary(*candidateSet, duplicates, args.ExpectedCount)
+			out["nextStep"] = realWorldNextUpdateCandidates(candidateSet.ID, duplicates)
+		}
+		return out, nil
+	}
+	if !countOK {
+		out := map[string]any{
+			"ok":      false,
+			"message": fmt.Sprintf("candidate set has %d repositories, expected %d; apply another diff before preparing the corpus", len(repositories), args.ExpectedCount),
+		}
+		if candidateSet != nil {
+			candidateSet.Repositories = repositories
+			out["candidateSetID"] = candidateSet.ID
+			out["candidateSet"] = realWorldCandidateSetSummary(*candidateSet, duplicates, args.ExpectedCount)
+			out["nextStep"] = realWorldNextUpdateCandidates(candidateSet.ID, nil)
+		} else {
+			out["nextStep"] = realWorldNextChooseRepositories()
+		}
+		return out, nil
 	}
 	if len(repositories) == 0 {
-		return mcp.NewToolResultError("repositories is required; call real_world_start_testing first if you need repository guidance"), nil
+		return nil, fmt.Errorf("repositories or candidateSetID is required; call real_world_start_testing first if you need repository guidance")
 	}
 	corpusDir, err := os.MkdirTemp("", realWorldCorpusTempPrefix)
 	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
+		return nil, err
 	}
 	cacheDir, err := os.MkdirTemp("", realWorldCacheTempPrefix)
 	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
+		return nil, err
 	}
 	outputArtifact, err := createRealWorldOutputPath(args.Title, args.OutputName)
 	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
+		return nil, err
 	}
 
 	if args.Clone {
@@ -416,7 +591,7 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 			Concurrency:    args.Concurrency,
 		})
 		if err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
+			return nil, err
 		}
 		wait := false
 		if args.WaitForFirstResult != nil {
@@ -425,14 +600,18 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 		if wait {
 			out, err := s.realWorldWaitForPreparedRepo(ctx, request, run)
 			if err != nil {
-				return mcp.NewToolResultError(err.Error()), nil
+				return nil, err
 			}
 			out["ok"] = true
 			out["started"] = true
 			out["clone"] = true
-			return s.realWorldStructured(ctx, out)
+			if candidateSet != nil {
+				out["candidateSetID"] = candidateSet.ID
+				out["candidateSet"] = realWorldCandidateSetSummary(*candidateSet, duplicates, args.ExpectedCount)
+			}
+			return out, nil
 		}
-		return s.realWorldStructured(ctx, map[string]any{
+		out := map[string]any{
 			"ok":               true,
 			"started":          true,
 			"clone":            true,
@@ -441,7 +620,12 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 			"run":              run.snapshot(),
 			"nextStep":         realWorldNextRunCorpusDuringPrepare(run),
 			"preparedRepoStep": realWorldNextPreparedRepo(run.ID),
-		})
+		}
+		if candidateSet != nil {
+			out["candidateSetID"] = candidateSet.ID
+			out["candidateSet"] = realWorldCandidateSetSummary(*candidateSet, duplicates, args.ExpectedCount)
+		}
+		return out, nil
 	}
 
 	cloneCommands := make([]string, 0, len(repositories))
@@ -485,7 +669,7 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 	}
 	manifestPath := filepath.Join(corpusDir, realWorldManifestName)
 	if err := writeJSONFile(manifestPath, manifest); err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
+		return nil, err
 	}
 	inspection, inspectErr := realWorldInspectCorpus(realWorldInspectArgs{
 		CorpusDir:      corpusDir,
@@ -513,6 +697,10 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 		"validationCommand": realWorldValidationCommand(corpusDir, cacheDir, outputArtifact, true, "warn", 1, "1ms", "1ms", nil),
 		"nextStep":          nextStep,
 	}
+	if candidateSet != nil {
+		out["candidateSetID"] = candidateSet.ID
+		out["candidateSet"] = realWorldCandidateSetSummary(*candidateSet, duplicates, args.ExpectedCount)
+	}
 	if inspectErr != nil {
 		out["dependencyPrepInspectionError"] = inspectErr.Error()
 	} else {
@@ -522,7 +710,7 @@ func (s *repoServer) handleRealWorldPrepareCorpus(ctx context.Context, request m
 		out["dependencyPrepSummary"] = inspection.Summary
 		out["dependencyPrepNeedsReview"] = inspection.NeedsReview
 	}
-	return s.realWorldStructured(ctx, out)
+	return out, nil
 }
 
 func (s *repoServer) handleRealWorldRecordResult(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -1238,29 +1426,73 @@ func realWorldDeveloperExperienceGuidance() map[string]any {
 
 func realWorldNextChooseRepositories() map[string]any {
 	return map[string]any{
-		"tool": "real_world_prepare_corpus",
-		"why":  "Choose fresh public repositories with diverse ecosystems, then start managed corpus preparation.",
+		"tool": "real_world_start_testing",
+		"why":  "Choose fresh public repositories with diverse ecosystems, create a candidate set, and check duplicate history before preparation.",
 		"requiredArgs": []string{
 			"title",
 			"repositories",
 		},
-		"recommendedArgs": map[string]any{
-			"clone": true,
-		},
 	}
 }
 
-func realWorldNextPrepareCorpus(title string, repositories []realWorldRepository, allowPreviouslyTested bool) map[string]any {
-	return map[string]any{
+func realWorldNextPrepareCorpus(title string, repositories []realWorldRepository, candidateSetID string, allowPreviouslyTested bool) map[string]any {
+	step := map[string]any{
 		"tool": "real_world_prepare_corpus",
 		"why":  "Start managed corpus preparation, flag duplicate repositories, and begin background clone/inspection jobs.",
 		"suggestedArgs": map[string]any{
 			"title":                 title,
-			"repositories":          realWorldPublicRepositories(repositories),
 			"clone":                 true,
 			"allowPreviouslyTested": allowPreviouslyTested,
 		},
 	}
+	args := step["suggestedArgs"].(map[string]any)
+	if candidateSetID != "" {
+		args["candidateSetID"] = candidateSetID
+		args["expectedCount"] = len(repositories)
+	} else {
+		args["repositories"] = realWorldPublicRepositories(repositories)
+	}
+	return step
+}
+
+func realWorldNextUpdateCandidates(candidateSetID string, duplicates []realWorldRepository) map[string]any {
+	step := map[string]any{
+		"tool": "real_world_update_candidates",
+		"why":  "Apply a small add/remove/replace diff to the stored candidate set instead of resubmitting the full repository list.",
+		"requiredArgs": []string{
+			"candidateSetID",
+			"diff",
+		},
+		"diffShape": map[string]any{
+			"replace": []map[string]any{
+				{
+					"match":      "existing repo name, clone URL, or owner/repo",
+					"repository": map[string]any{"name": "replacement", "ecosystem": "ecosystem", "cloneURL": "https://github.com/owner/repo.git"},
+				},
+			},
+			"remove": []string{"repo to remove"},
+			"add":    []map[string]any{{"name": "repo to add", "ecosystem": "ecosystem", "cloneURL": "https://github.com/owner/repo.git"}},
+		},
+	}
+	if candidateSetID != "" {
+		step["suggestedArgs"] = map[string]any{
+			"candidateSetID": candidateSetID,
+		}
+	}
+	if len(duplicates) > 0 {
+		var replace []map[string]any
+		for _, repo := range duplicates {
+			replace = append(replace, map[string]any{
+				"match": nonEmpty(repo.CloneURL, repo.Name),
+				"repository": map[string]any{
+					"name":     "choose-fresh-replacement",
+					"cloneURL": "https://github.com/owner/repo.git",
+				},
+			})
+		}
+		step["duplicateReplacementsNeeded"] = replace
+	}
+	return step
 }
 
 func realWorldNextInspectCorpus(runID, corpusDir, manifestPath string) map[string]any {
@@ -1368,7 +1600,7 @@ func realWorldNextAfterRecord(entry realWorldEntry) map[string]any {
 		next["discussion"] = "Publish a GitHub Discussion summary from the recorded MCP entry, including a Durable memory PR section that says the PR should be merged in order to retain the results."
 		next["pullRequest"] = "Request create_pull_request when recorded result files changed; merging that PR is how future real-world sweeps remember tested repositories."
 		next["safeOutputs"] = "If safe outputs are exposed through the safeoutputs CLI wrapper, pipe inline JSON with printf instead of writing temporary payload files; temp-file payload writes may be denied by the agent sandbox."
-		next["linkOutputs"] = "After requesting create_pull_request and create_discussion, call link_real_world_outputs with the Discussion title and entryID so the final PR and Discussion cross-link each other."
+		next["linkOutputs"] = "After requesting create_pull_request and create_discussion, call link_outputs with the Discussion title and entryID so the final PR and Discussion cross-link each other."
 	}
 	return next
 }
@@ -1671,6 +1903,208 @@ func realWorldPreviousEntries(history realWorldHistory, repo realWorldRepository
 	}
 	sort.Strings(entries)
 	return entries
+}
+
+func realWorldAnnotateCandidateRepositories(history realWorldHistory, repositories []realWorldRepository) ([]realWorldRepository, []realWorldRepository) {
+	out := make([]realWorldRepository, len(repositories))
+	var duplicates []realWorldRepository
+	for i := range repositories {
+		out[i] = realWorldCleanCandidateRepository(repositories[i])
+		previous := realWorldPreviousEntries(history, out[i])
+		if len(previous) == 0 {
+			continue
+		}
+		out[i].AlreadyTested = true
+		out[i].PreviousEntries = previous
+		duplicates = append(duplicates, out[i])
+	}
+	return out, duplicates
+}
+
+func realWorldCleanCandidateRepository(repo realWorldRepository) realWorldRepository {
+	repo.Path = ""
+	repo.Status = ""
+	repo.Error = ""
+	repo.AlreadyTested = false
+	repo.PreviousEntries = nil
+	return repo
+}
+
+func newRealWorldCandidateSet(title string, allowPreviouslyTested bool, repositories []realWorldRepository) realWorldCandidateSet {
+	now := time.Now().UTC().Format(time.RFC3339)
+	return realWorldCandidateSet{
+		SchemaVersion:         1,
+		ID:                    newRealWorldCandidateSetID(title),
+		Title:                 title,
+		AllowPreviouslyTested: allowPreviouslyTested,
+		CreatedAt:             now,
+		UpdatedAt:             now,
+		Repositories:          append([]realWorldRepository{}, repositories...),
+	}
+}
+
+func newRealWorldCandidateSetID(title string) string {
+	base := slugify(title)
+	if base == "" {
+		base = "candidate-set"
+	}
+	return fmt.Sprintf("%s-%d", base, time.Now().UTC().UnixNano())
+}
+
+func realWorldCandidateSetID(set *realWorldCandidateSet) string {
+	if set == nil {
+		return ""
+	}
+	return set.ID
+}
+
+func realWorldCandidateSetPath(id string) (string, error) {
+	id = strings.TrimSpace(id)
+	if id == "" {
+		return "", fmt.Errorf("candidateSetID is required")
+	}
+	if slugify(id) != id {
+		return "", fmt.Errorf("invalid candidateSetID %q", id)
+	}
+	return filepath.Join(os.TempDir(), realWorldCandidateSetPrefix+id+".json"), nil
+}
+
+func loadRealWorldCandidateSet(id string) (realWorldCandidateSet, error) {
+	path, err := realWorldCandidateSetPath(id)
+	if err != nil {
+		return realWorldCandidateSet{}, err
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return realWorldCandidateSet{}, fmt.Errorf("candidate set %q was not found; restart with real_world_start_testing", id)
+		}
+		return realWorldCandidateSet{}, err
+	}
+	var set realWorldCandidateSet
+	if err := json.Unmarshal(data, &set); err != nil {
+		return realWorldCandidateSet{}, fmt.Errorf("parse candidate set %q: %w", id, err)
+	}
+	if set.SchemaVersion != 1 {
+		return realWorldCandidateSet{}, fmt.Errorf("candidate set %q has unsupported schemaVersion %d", id, set.SchemaVersion)
+	}
+	if set.ID != id {
+		return realWorldCandidateSet{}, fmt.Errorf("candidate set %q contains mismatched id %q", id, set.ID)
+	}
+	return set, nil
+}
+
+func saveRealWorldCandidateSet(set realWorldCandidateSet) error {
+	if set.ID == "" {
+		return fmt.Errorf("candidate set is missing id")
+	}
+	set.SchemaVersion = 1
+	if set.CreatedAt == "" {
+		set.CreatedAt = time.Now().UTC().Format(time.RFC3339)
+	}
+	set.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
+	path, err := realWorldCandidateSetPath(set.ID)
+	if err != nil {
+		return err
+	}
+	return writeJSONFile(path, set)
+}
+
+func realWorldCandidateDiffEmpty(diff realWorldCandidateDiff) bool {
+	return len(diff.Add) == 0 && len(diff.Remove) == 0 && len(diff.Replace) == 0
+}
+
+func applyRealWorldCandidateDiff(repositories []realWorldRepository, diff realWorldCandidateDiff) ([]realWorldRepository, realWorldCandidateDiffResult, error) {
+	out := append([]realWorldRepository{}, repositories...)
+	result := realWorldCandidateDiffResult{}
+	for _, query := range diff.Remove {
+		index := realWorldCandidateIndex(out, query)
+		if index < 0 {
+			return nil, result, fmt.Errorf("candidate diff remove %q did not match a repository", query)
+		}
+		removed := out[index]
+		result.Removed = append(result.Removed, removed)
+		out = append(out[:index], out[index+1:]...)
+	}
+	for _, replacement := range diff.Replace {
+		index := realWorldCandidateIndex(out, replacement.Match)
+		if index < 0 {
+			return nil, result, fmt.Errorf("candidate diff replace %q did not match a repository", replacement.Match)
+		}
+		before := out[index]
+		after := realWorldCleanCandidateRepository(replacement.Repository)
+		if err := validateRealWorldDiffRepository(after, "replace "+replacement.Match); err != nil {
+			return nil, result, err
+		}
+		out[index] = after
+		result.Replaced = append(result.Replaced, map[string]any{
+			"match":   replacement.Match,
+			"removed": before,
+			"added":   after,
+		})
+	}
+	for _, repo := range diff.Add {
+		clean := realWorldCleanCandidateRepository(repo)
+		if err := validateRealWorldDiffRepository(clean, "add"); err != nil {
+			return nil, result, err
+		}
+		out = append(out, clean)
+		result.Added = append(result.Added, clean)
+	}
+	return out, result, nil
+}
+
+func validateRealWorldDiffRepository(repo realWorldRepository, operation string) error {
+	if strings.TrimSpace(repo.CloneURL) == "" {
+		return fmt.Errorf("candidate diff %s repository.cloneURL is required", operation)
+	}
+	return nil
+}
+
+func realWorldCandidateIndex(repositories []realWorldRepository, query string) int {
+	query = normalizeRepoQuery(query)
+	if query == "" {
+		return -1
+	}
+	querySlug := slugify(query)
+	for i, repo := range repositories {
+		fields := []string{
+			normalizeRepoQuery(repo.Name),
+			normalizeRepoQuery(repo.CloneURL),
+			normalizeRepoQuery(repoNameFromURL(repo.CloneURL)),
+			slugify(repo.Name),
+			slugify(repoNameFromURL(repo.CloneURL)),
+		}
+		for _, field := range fields {
+			if field == "" {
+				continue
+			}
+			if field == query || (querySlug != "" && field == querySlug) || (len(query) >= 4 && (strings.Contains(field, query) || strings.Contains(query, field))) {
+				return i
+			}
+		}
+	}
+	return -1
+}
+
+func realWorldCandidateSetSummary(set realWorldCandidateSet, duplicates []realWorldRepository, expectedCount int) map[string]any {
+	out := map[string]any{
+		"id":                    set.ID,
+		"title":                 set.Title,
+		"repositoryCount":       len(set.Repositories),
+		"allowPreviouslyTested": set.AllowPreviouslyTested,
+		"createdAt":             set.CreatedAt,
+		"updatedAt":             set.UpdatedAt,
+		"ready":                 len(duplicates) == 0 || set.AllowPreviouslyTested,
+	}
+	if expectedCount > 0 {
+		out["expectedCount"] = expectedCount
+		out["countMatchesExpected"] = len(set.Repositories) == expectedCount
+	}
+	if len(duplicates) > 0 {
+		out["duplicates"] = realWorldPublicRepositories(duplicates)
+	}
+	return out
 }
 
 func normalizedRepoKey(repo realWorldRepository) string {

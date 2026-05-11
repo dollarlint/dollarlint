@@ -53,9 +53,19 @@ func (s *repoServer) addTools() {
 		"repositories":          realWorldRepositoryArraySchema("Candidate repositories to check before preparing the corpus."),
 		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Allow intentional reruns of repositories already present in real-world history."},
 	}), s.handleRealWorldStartTesting, true)
+	s.addTool("real_world_update_candidates", "Apply an add/remove/replace diff to a stored real-world candidate repository set, then recheck duplicate history.", schemaObject(map[string]any{
+		"candidateSetID":        map[string]any{"type": "string", "description": "Candidate set id returned by real_world_start_testing or real_world_update_candidates."},
+		"diff":                  realWorldCandidateDiffSchema("Small repository-list edit to apply without resubmitting the full candidate set."),
+		"expectedCount":         map[string]any{"type": "integer", "description": "Optional guardrail: expected repository count after applying the diff."},
+		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Optionally update whether intentional reruns are allowed."},
+		"title":                 map[string]any{"type": "string", "description": "Optionally update the sweep title stored with the candidate set."},
+	}), s.handleRealWorldUpdateCandidates, false)
 	s.addToolWithHints("real_world_prepare_corpus", "Start managed real-world corpus preparation, flag previously tested repositories, optionally clone repos, and write an internal manifest.", schemaObject(map[string]any{
 		"title":                 map[string]any{"type": "string", "description": "Short sweep title used for the managed run."},
 		"repositories":          realWorldRepositoryArraySchema("Repositories planned for the corpus."),
+		"candidateSetID":        map[string]any{"type": "string", "description": "Candidate set id returned by real_world_start_testing or real_world_update_candidates. Prefer this over resubmitting repositories."},
+		"candidateDiff":         realWorldCandidateDiffSchema("Optional final small edit to apply to candidateSetID before preparing."),
+		"expectedCount":         map[string]any{"type": "integer", "description": "Optional guardrail: expected repository count before preparation starts."},
 		"clone":                 map[string]any{"type": "boolean", "description": "When true, start managed shallow git clones in the background and write incremental manifest updates. Defaults to false."},
 		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Allow intentional reruns of repositories already present in real-world history."},
 		"outputName":            map[string]any{"type": "string", "description": "Optional output JSON filename or absolute path."},
@@ -224,6 +234,36 @@ func realWorldRepositoryArraySchema(description string) map[string]any {
 			},
 		},
 	}
+}
+
+func realWorldCandidateDiffSchema(description string) map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"description":          description,
+		"additionalProperties": false,
+		"properties": map[string]any{
+			"add":    realWorldRepositoryArraySchema("Repositories to append to the candidate set."),
+			"remove": arrayStringSchema("Repository names, clone URLs, or owner/repo strings to remove from the candidate set."),
+			"replace": map[string]any{
+				"type":        "array",
+				"description": "Repositories to replace by matching an existing candidate by name, clone URL, or owner/repo.",
+				"items": map[string]any{
+					"type":                 "object",
+					"additionalProperties": false,
+					"properties": map[string]any{
+						"match":      map[string]any{"type": "string", "description": "Existing repository name, clone URL, or owner/repo to replace."},
+						"repository": realWorldRepositorySchema("Replacement repository."),
+					},
+				},
+			},
+		},
+	}
+}
+
+func realWorldRepositorySchema(description string) map[string]any {
+	schema := realWorldRepositoryArraySchema(description)
+	items, _ := schema["items"].(map[string]any)
+	return items
 }
 
 func realWorldDependencyPrepArraySchema(description string) map[string]any {

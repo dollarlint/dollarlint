@@ -375,6 +375,7 @@ func parseGitHubWorkflowPermissions(output string) (githubWorkflowPermissions, e
 func requiredAgenticRealWorldTools() []string {
 	return []string{
 		"real_world_start_testing",
+		"real_world_update_candidates",
 		"real_world_history",
 		"real_world_artifact_query",
 		"real_world_prepare_corpus",
@@ -426,14 +427,14 @@ func realWorldSafeOutputPolicyIssues(source, lock string) []readinessIssue {
 			Recommendation: "Set create-pull-request.if-no-changes: error and regenerate the lock file.",
 		})
 	}
-	if !strings.Contains(source, "link-real-world-outputs") || !strings.Contains(lock, "link_real_world_outputs") {
+	if !strings.Contains(source, "link-outputs") || !strings.Contains(lock, "link_outputs") {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
 			Message:        "Agentic Product Testing workflow is missing the post-safe-output PR/Discussion linker",
-			Recommendation: "Configure safe-outputs.jobs.link-real-world-outputs and regenerate the lock file.",
+			Recommendation: "Configure safe-outputs.jobs.link-outputs and regenerate the lock file.",
 		})
 	}
-	if strings.Contains(source, "link-real-world-outputs") && !strings.Contains(lock, "created_pr_url") {
+	if strings.Contains(source, "link-outputs") && !strings.Contains(lock, "created_pr_url") {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
 			Message:        "real-world linker cannot see the created PR URL in the generated workflow",

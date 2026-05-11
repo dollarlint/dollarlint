@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/mark3labs/mcp-go/mcp"
 )
 
 func TestRealWorldHistoryQueriesRepositories(t *testing.T) {
@@ -47,6 +49,110 @@ func TestRealWorldHistoryQueriesRepositories(t *testing.T) {
 	previous := realWorldPreviousEntries(history, realWorldRepository{CloneURL: "https://github.com/django/django"})
 	if len(previous) != 1 || previous[0] != "second" {
 		t.Fatalf("django previous entries = %+v", previous)
+	}
+}
+
+func TestRealWorldCandidateDiffReplacesDuplicateWithoutFullResubmit(t *testing.T) {
+	root := t.TempDir()
+	history := realWorldHistory{
+		Entries: []realWorldEntry{
+			{
+				ID:    "first",
+				Date:  "2026-05-01",
+				Title: "First",
+				Repositories: []realWorldRepository{
+					{Name: "cargo", Ecosystem: "Rust", CloneURL: "https://github.com/rust-lang/cargo.git"},
+				},
+			},
+		},
+	}
+	if err := saveRealWorldHistory(root, history); err != nil {
+		t.Fatal(err)
+	}
+	server := &repoServer{root: root}
+	ctx := context.Background()
+	start, err := server.realWorldStartTesting(ctx, realWorldStartTestingArgs{
+		Title: "Diff Candidates",
+		Repositories: []realWorldRepository{
+			{Name: "cargo", Ecosystem: "Rust", CloneURL: "https://github.com/rust-lang/cargo.git"},
+			{Name: "redis", Ecosystem: "C", CloneURL: "https://github.com/redis/redis.git"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("start testing: %v", err)
+	}
+	if start["ok"].(bool) {
+		t.Fatalf("start should reject duplicate candidate: %+v", start)
+	}
+	candidateSetID := start["candidateSetID"].(string)
+	if candidateSetID == "" {
+		t.Fatalf("missing candidateSetID: %+v", start)
+	}
+	if path, err := realWorldCandidateSetPath(candidateSetID); err == nil {
+		defer os.Remove(path)
+	}
+	next := start["nextStep"].(map[string]any)
+	if next["tool"] != "real_world_update_candidates" {
+		t.Fatalf("duplicate next step = %+v", next)
+	}
+
+	updated, err := server.realWorldUpdateCandidates(ctx, realWorldUpdateCandidatesArgs{
+		CandidateSetID: candidateSetID,
+		ExpectedCount:  2,
+		Diff: realWorldCandidateDiff{Replace: []realWorldCandidateReplacement{{
+			Match: "cargo",
+			Repository: realWorldRepository{
+				Name:      "django",
+				Ecosystem: "Python",
+				CloneURL:  "https://github.com/django/django.git",
+			},
+		}}},
+	})
+	if err != nil {
+		t.Fatalf("update candidates: %v", err)
+	}
+	if !updated["ok"].(bool) {
+		t.Fatalf("updated candidates should be ready: %+v", updated)
+	}
+	candidates := updated["candidateRepositories"].([]realWorldRepository)
+	if len(candidates) != 2 || candidates[0].Name != "django" || candidates[1].Name != "redis" {
+		t.Fatalf("updated candidates = %+v", candidates)
+	}
+	next = updated["nextStep"].(map[string]any)
+	if next["tool"] != "real_world_prepare_corpus" {
+		t.Fatalf("ready next step = %+v", next)
+	}
+	suggested := next["suggestedArgs"].(map[string]any)
+	if suggested["candidateSetID"] != candidateSetID {
+		t.Fatalf("prepare suggested args should use candidateSetID, got %+v", suggested)
+	}
+	if _, hasRepositories := suggested["repositories"]; hasRepositories {
+		t.Fatalf("prepare suggested args should not resubmit repositories: %+v", suggested)
+	}
+
+	prepared, err := server.realWorldPrepareCorpus(ctx, mcp.CallToolRequest{}, realWorldPrepareCorpusArgs{
+		CandidateSetID: candidateSetID,
+		ExpectedCount:  2,
+		Clone:          false,
+	})
+	if err != nil {
+		t.Fatalf("prepare corpus: %v", err)
+	}
+	if !prepared["ok"].(bool) {
+		t.Fatalf("prepare from candidate set failed: %+v", prepared)
+	}
+	defer os.RemoveAll(prepared["corpusDir"].(string))
+	defer os.RemoveAll(prepared["cacheDir"].(string))
+	repositories := prepared["repositories"].([]realWorldRepository)
+	if len(repositories) != 2 || repositories[0].Name != "django" || repositories[1].Name != "redis" {
+		t.Fatalf("prepared repositories = %+v", repositories)
+	}
+	manifest, err := readRealWorldManifest(prepared["manifestPath"].(string))
+	if err != nil {
+		t.Fatalf("read manifest: %v", err)
+	}
+	if len(manifest.Repositories) != 2 || manifest.Repositories[0].Name != "django" || manifest.Repositories[1].Name != "redis" {
+		t.Fatalf("manifest repositories = %+v", manifest.Repositories)
 	}
 }
 

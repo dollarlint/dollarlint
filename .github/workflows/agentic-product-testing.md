@@ -253,14 +253,30 @@ safe-outputs:
 
               const nextDiscussionBody = upsertBlock(discussion.body || '', '<!-- real-world-output-links:start -->', '<!-- real-world-output-links:end -->', discussionBlock);
               if (nextDiscussionBody !== (discussion.body || '')) {
-                await github.graphql(
-                  `mutation($discussionId: ID!, $body: String!) {
-                    updateDiscussion(input: {discussionId: $discussionId, body: $body}) {
-                      discussion { url }
-                    }
-                  }`,
-                  { discussionId: discussion.id, body: nextDiscussionBody },
-                );
+                try {
+                  await github.graphql(
+                    `mutation($discussionId: ID!, $body: String!) {
+                      updateDiscussion(input: {discussionId: $discussionId, body: $body}) {
+                        discussion { url }
+                      }
+                    }`,
+                    { discussionId: discussion.id, body: nextDiscussionBody },
+                  );
+                } catch (error) {
+                  core.warning(`Could not update Discussion body; posting a link comment instead. ${error.message}`);
+                  try {
+                    await github.graphql(
+                      `mutation($discussionId: ID!, $body: String!) {
+                        addDiscussionComment(input: {discussionId: $discussionId, body: $body}) {
+                          comment { url }
+                        }
+                      }`,
+                      { discussionId: discussion.id, body: discussionBlock },
+                    );
+                  } catch (commentError) {
+                    core.warning(`Could not comment on Discussion; the PR body still links back to it. ${commentError.message}`);
+                  }
+                }
               }
 
               core.info(`Linked ${prUrl} and ${discussion.url}.`);

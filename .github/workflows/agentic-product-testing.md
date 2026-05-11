@@ -120,6 +120,15 @@ safe-outputs:
     protected-files: fallback-to-issue
     draft: false
 
+post-steps:
+  - name: Fail incomplete Agentic Product Testing run
+    if: always()
+    run: |
+      if [ -f "${GH_AW_SAFE_OUTPUTS}" ] && jq -e 'select(.type == "report_incomplete")' "${GH_AW_SAFE_OUTPUTS}" >/dev/null; then
+        echo "::error::Agent reported the Agentic Product Testing run incomplete."
+        exit 1
+      fi
+
 timeout-minutes: 90
 ---
 
@@ -143,7 +152,7 @@ Durable repository memory must be written through `real_world_record_result` and
 
 After recording, create exactly one GitHub Discussion through the configured safe output in the `Agentic Product Testing` category. Keep it concise: result counts, tested repositories, notable findings, product recommendations with strength labels, persisted artifact path, DollarLint commit, and workflow run URL. Format tested repositories as Markdown links using `discussionPacket.repositories[].markdown` when available; avoid a plain comma-separated repository list when URLs are known. Include `@agorischek` near the top of the Discussion body so the owner is notified. Put verbose examples or raw warnings inside `<details>` blocks. The Discussion body must include a "Durable memory PR" section saying that a companion PR will be opened and that the PR should be merged in order to retain the results for future sweeps. If the Discussion falls back to an issue, say that the intended destination was a Discussion.
 
-The workflow may expose safe outputs either as direct tools or through a `safeoutputs` CLI wrapper. Use the available safe-output interface, but do not stop after committing locally. If using the CLI wrapper, send inline JSON on stdin with `printf '%s' '<json>' | safeoutputs create_pull_request .` and `printf '%s' '<json>' | safeoutputs create_discussion .`; do not rely on temporary payload files.
+The workflow may expose safe outputs either as direct tools or through a `safeoutputs` CLI wrapper. Use the available safe-output interface, but do not stop after committing locally. If using the CLI wrapper, send inline JSON on stdin with `printf '%s' '<json>' | safeoutputs create_pull_request .` and `printf '%s' '<json>' | safeoutputs create_discussion .`; do not rely on temporary payload files. A successful `create_pull_request` request may return only a patch artifact path during the agent job. Treat that as expected and successful; the later `safe_outputs` job turns the patch artifact into the actual PR, and the deterministic follow-up workflow links the final PR and Discussion URLs. Do not call `report_incomplete` merely because `create_pull_request` returned a patch artifact instead of an immediate PR URL.
 
 After requesting both `create_pull_request` and `create_discussion`, no extra linking tool call is needed. A deterministic follow-up workflow cross-links the final PR and Discussion URLs after the run completes.
 

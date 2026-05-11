@@ -459,6 +459,21 @@ func realWorldSafeOutputPolicyIssues(source, lock string, linkerSources ...strin
 			Recommendation: "Require the agent to include the workflow run URL in the durable-memory PR body so the deterministic linker can find it.",
 		})
 	}
+	if !strings.Contains(source, "patch artifact") || !strings.Contains(source, "Do not call `report_incomplete`") {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "Agentic Product Testing workflow does not explain asynchronous safe-output PR creation",
+			Recommendation: "Tell the agent that create_pull_request may return a patch artifact first, that this is expected, and that report_incomplete is not appropriate when the later safe_outputs job will create the PR.",
+		})
+	}
+	if !strings.Contains(source, "Fail incomplete Agentic Product Testing run") || !strings.Contains(source, "report_incomplete") ||
+		!strings.Contains(lock, "Fail incomplete Agentic Product Testing run") || !strings.Contains(lock, "report_incomplete") {
+		issues = append(issues, readinessIssue{
+			Severity:       "error",
+			Message:        "Agentic Product Testing workflow does not fail when the agent reports an incomplete run",
+			Recommendation: "Add a source-level post-step that checks GH_AW_SAFE_OUTPUTS for report_incomplete and exits non-zero, then regenerate the lock file.",
+		})
+	}
 	if hasCustomLinker && !strings.Contains(lock, "created_pr_url") {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",

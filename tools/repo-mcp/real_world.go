@@ -22,7 +22,7 @@ const (
 	realWorldRunArtifactFileName  = "dollarlint.json"
 	realWorldEntrySchema          = "../metadata.schema.json"
 	realWorldHistorySchemaVersion = 4
-	realWorldMCPContractVersion   = 9
+	realWorldMCPContractVersion   = 10
 	realWorldManifestName         = "real-world-manifest.json"
 	realWorldCorpusTempPrefix     = "dollarlint-corpus."
 	realWorldCacheTempPrefix      = "dollarlint-cache."
@@ -875,6 +875,10 @@ func (s *repoServer) realWorldEntryFromArgs(args realWorldRecordArgs) (realWorld
 		if len(args.ValidationFeedback) == 0 {
 			args.ValidationFeedback = run.validationFeedback()
 		}
+		if err := realWorldEnsureManagedOutputArtifact(run); err != nil {
+			return realWorldEntry{}, err
+		}
+		args.OutputArtifact = run.OutputArtifact
 	}
 	manifestPath := args.ManifestPath
 	if manifestPath == "" && args.Corpus != "" {

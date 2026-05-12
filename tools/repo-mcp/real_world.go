@@ -8,6 +8,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -37,6 +40,7 @@ const (
 	realWorldMaxCandidateTarget       = 2000
 	realWorldDefaultDiscoveryMinStars = 25
 	realWorldMaxDiscoveryPerQuery     = 100
+	realWorldGitHubAPIDefaultBaseURL  = "https://api.github.com"
 
 	realWorldFeedbackBehavedReasonably = "behaved-reasonably"
 	realWorldFeedbackProductSignal     = "product-signal"
@@ -491,7 +495,7 @@ func (s *repoServer) realWorldDiscoverCandidates(ctx context.Context, request mc
 
 	selected, omittedAlreadyTested, omittedCandidateDuplicates := realWorldSelectDiscoveredCandidates(history, groups, targetCount, args.AllowPreviouslyTested)
 	if len(selected) == 0 && firstSearchErr != nil {
-		return nil, fmt.Errorf("discover real-world candidates with GitHub CLI: %w", firstSearchErr)
+		return nil, fmt.Errorf("discover real-world candidates through GitHub API: %w", firstSearchErr)
 	}
 	if len(selected) == 0 {
 		return nil, fmt.Errorf("discover real-world candidates: GitHub search returned no usable repositories")
@@ -2292,21 +2296,29 @@ func realWorldCandidateDiscoverySpecs(ecosystems []string, minStars int) []realW
 }
 
 func realWorldSearchGitHubRepositories(ctx context.Context, root string, spec realWorldCandidateSearchSpec, limit int) ([]realWorldRepository, error) {
-	data, err := commandOutput(ctx, root, "gh", "api", "-X", "GET", "search/repositories",
-		"-f", "q="+spec.Query,
-		"-f", "per_page="+fmt.Sprint(limit),
-		"-f", "sort=updated",
-		"-f", "order=desc",
-	)
+	_ = root
+	request, err := realWorldGitHubSearchRequest(ctx, spec, limit)
 	if err != nil {
 		return nil, err
 	}
-	var response githubRepositorySearchResponse
-	if err := json.Unmarshal(data, &response); err != nil {
+	httpResponse, err := realWorldGitHubHTTPClient.Do(request)
+	if err != nil {
+		return nil, fmt.Errorf("call GitHub repository search API for %s: %w", spec.Ecosystem, err)
+	}
+	defer httpResponse.Body.Close()
+	data, err := io.ReadAll(io.LimitReader(httpResponse.Body, 4*1024*1024))
+	if err != nil {
+		return nil, fmt.Errorf("read GitHub repository search response for %s: %w", spec.Ecosystem, err)
+	}
+	if httpResponse.StatusCode < 200 || httpResponse.StatusCode >= 300 {
+		return nil, fmt.Errorf("GitHub repository search API returned %s for %s: %s", httpResponse.Status, spec.Ecosystem, truncate(string(data), 4000))
+	}
+	var searchResponse githubRepositorySearchResponse
+	if err := json.Unmarshal(data, &searchResponse); err != nil {
 		return nil, fmt.Errorf("parse GitHub repository search response for %s: %w", spec.Ecosystem, err)
 	}
-	repositories := make([]realWorldRepository, 0, len(response.Items))
-	for _, item := range response.Items {
+	repositories := make([]realWorldRepository, 0, len(searchResponse.Items))
+	for _, item := range searchResponse.Items {
 		repo, ok := realWorldRepositoryFromGitHubSearch(item, spec.Ecosystem)
 		if !ok {
 			continue
@@ -2314,6 +2326,58 @@ func realWorldSearchGitHubRepositories(ctx context.Context, root string, spec re
 		repositories = append(repositories, repo)
 	}
 	return repositories, nil
+}
+
+var realWorldGitHubHTTPClient = &http.Client{Timeout: 30 * time.Second}
+
+func realWorldGitHubSearchRequest(ctx context.Context, spec realWorldCandidateSearchSpec, limit int) (*http.Request, error) {
+	baseURL := realWorldGitHubAPIBaseURL()
+	endpoint, err := url.Parse(strings.TrimRight(baseURL, "/") + "/search/repositories")
+	if err != nil {
+		return nil, fmt.Errorf("parse GitHub API URL %q: %w", baseURL, err)
+	}
+	query := endpoint.Query()
+	query.Set("q", spec.Query)
+	query.Set("per_page", fmt.Sprint(limit))
+	query.Set("sort", "updated")
+	query.Set("order", "desc")
+	endpoint.RawQuery = query.Encode()
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Accept", "application/vnd.github+json")
+	request.Header.Set("User-Agent", "dollarlint-repo-mcp")
+	request.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	if token := realWorldGitHubToken(); token != "" {
+		request.Header.Set("Authorization", "Bearer "+token)
+	}
+	return request, nil
+}
+
+func realWorldGitHubAPIBaseURL() string {
+	for _, name := range []string{"DOLLARLINT_GITHUB_API_URL", "GITHUB_API_URL"} {
+		if value := strings.TrimSpace(os.Getenv(name)); value != "" {
+			return value
+		}
+	}
+	return realWorldGitHubAPIDefaultBaseURL
+}
+
+func realWorldGitHubToken() string {
+	for _, name := range []string{
+		"GITHUB_TOKEN",
+		"GH_TOKEN",
+		"GITHUB_PERSONAL_ACCESS_TOKEN",
+		"GITHUB_MCP_SERVER_TOKEN",
+		"GH_AW_GITHUB_MCP_SERVER_TOKEN",
+		"GH_AW_GITHUB_TOKEN",
+	} {
+		if value := strings.TrimSpace(os.Getenv(name)); value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func realWorldRepositoryFromGitHubSearch(item githubRepositorySearchItem, fallbackEcosystem string) (realWorldRepository, bool) {

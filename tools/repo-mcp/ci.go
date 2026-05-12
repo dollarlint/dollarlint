@@ -207,7 +207,7 @@ type readinessIssue struct {
 }
 
 func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	p := newProgress(ctx, s.mcp, request, 7)
+	p := newProgress(ctx, s.mcp, request, 8)
 	sourceRel := agenticWorkflowSourceRel
 	lockRel := agenticWorkflowLockRel
 	linkerRel := agenticOutputLinkerWorkflowRel
@@ -239,6 +239,11 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 		issues = append(issues, readinessIssue{Severity: "error", Message: "Agentic Product Testing workflow is missing real-world MCP tools: " + strings.Join(missing, ", "), Recommendation: "Add the missing tools to the workflow MCP server allowlist, or set " + toolFilterEnv + `: "real_world_*"` + ` and allow "*" for the filtered server, then regenerate the lock file.`})
 	}
 	checks = append(checks, map[string]any{"name": "real-world MCP allowlist", "ok": len(missing) == 0, "requiredTools": requiredTools, "missing": missing})
+
+	p.step("Checking real-world GitHub API discovery env")
+	discoveryEnvIssues := realWorldGitHubDiscoveryEnvIssues(string(source), string(lock))
+	issues = append(issues, discoveryEnvIssues...)
+	checks = append(checks, map[string]any{"name": "real-world GitHub API discovery env", "ok": len(discoveryEnvIssues) == 0})
 
 	p.step("Checking real-world safe outputs")
 	safeOutputIssues := realWorldSafeOutputPolicyIssues(string(source), string(lock), string(linker))
@@ -425,6 +430,26 @@ func hasServerSideRealWorldToolFilter(source, lock string) bool {
 		strings.Contains(lock, "dollarlint-repo(*)") ||
 		strings.Contains(lock, "--allow-tool dollarlint-repo --")
 	return sourceHasFilter && lockHasFilter && sourceAllowsAll && lockAllowsAll
+}
+
+func realWorldGitHubDiscoveryEnvIssues(source, lock string) []readinessIssue {
+	sourceHasToken := strings.Contains(source, `GITHUB_TOKEN: "${GITHUB_MCP_SERVER_TOKEN}"`) ||
+		strings.Contains(source, `GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_MCP_SERVER_TOKEN}"`) ||
+		strings.Contains(source, `GH_TOKEN: "${GITHUB_MCP_SERVER_TOKEN}"`)
+	lockHasToken := strings.Contains(lock, `"GITHUB_TOKEN": "${GITHUB_MCP_SERVER_TOKEN}"`) ||
+		strings.Contains(lock, `"GITHUB_TOKEN": "\${GITHUB_MCP_SERVER_TOKEN}"`) ||
+		strings.Contains(lock, `"GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_MCP_SERVER_TOKEN}"`) ||
+		strings.Contains(lock, `"GITHUB_PERSONAL_ACCESS_TOKEN": "\${GITHUB_MCP_SERVER_TOKEN}"`) ||
+		strings.Contains(lock, `"GH_TOKEN": "${GITHUB_MCP_SERVER_TOKEN}"`) ||
+		strings.Contains(lock, `"GH_TOKEN": "\${GITHUB_MCP_SERVER_TOKEN}"`)
+	if sourceHasToken && lockHasToken {
+		return nil
+	}
+	return []readinessIssue{{
+		Severity:       "error",
+		Message:        "Agentic Product Testing repo MCP is missing GitHub API token env for MCP-managed candidate discovery",
+		Recommendation: `Pass GITHUB_MCP_SERVER_TOKEN into the dollarlint-repo MCP server as GITHUB_TOKEN, GH_TOKEN, or GITHUB_PERSONAL_ACCESS_TOKEN, then regenerate the lock file.`,
+	}}
 }
 
 func realWorldSafeOutputPolicyIssues(source, lock string, linkerSources ...string) []readinessIssue {

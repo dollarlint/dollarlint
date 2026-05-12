@@ -17,19 +17,23 @@ import (
 )
 
 const (
-	realWorldRunsDirRelPath       = "reports/agentic-product-testing"
-	realWorldRunMetadataFileName  = "metadata.json"
-	realWorldRunArtifactFileName  = "dollarlint.json"
-	realWorldEntrySchema          = "../metadata.schema.json"
-	realWorldHistorySchemaVersion = 4
-	realWorldMCPContractVersion   = 10
-	realWorldManifestName         = "real-world-manifest.json"
-	realWorldCorpusTempPrefix     = "dollarlint-corpus."
-	realWorldCacheTempPrefix      = "dollarlint-cache."
-	realWorldOutputTempPrefix     = "dollarlint-"
-	realWorldCandidateSetPrefix   = "dollarlint-candidate-set-"
-	realWorldDefaultHistoryLimit  = 25
-	realWorldMaxHistoryLimit      = 200
+	realWorldRunsDirRelPath           = "reports/agentic-product-testing"
+	realWorldRunMetadataFileName      = "metadata.json"
+	realWorldRunArtifactFileName      = "dollarlint.json"
+	realWorldEntrySchema              = "../metadata.schema.json"
+	realWorldHistorySchemaVersion     = 4
+	realWorldMCPContractVersion       = 11
+	realWorldManifestName             = "real-world-manifest.json"
+	realWorldCorpusTempPrefix         = "dollarlint-corpus."
+	realWorldCacheTempPrefix          = "dollarlint-cache."
+	realWorldOutputTempPrefix         = "dollarlint-"
+	realWorldCandidateSetPrefix       = "dollarlint-candidate-set-"
+	realWorldDefaultHistoryLimit      = 25
+	realWorldMaxHistoryLimit          = 200
+	realWorldDefaultCandidateTarget   = 10
+	realWorldMaxCandidateTarget       = 2000
+	realWorldDefaultDiscoveryMinStars = 25
+	realWorldMaxDiscoveryPerQuery     = 100
 
 	realWorldFeedbackBehavedReasonably = "behaved-reasonably"
 	realWorldFeedbackProductSignal     = "product-signal"
@@ -67,6 +71,7 @@ func (s *repoServer) realWorldMCPContract(ctx context.Context) map[string]any {
 		"staleIfMissing":   "If this object is missing or contractVersion is lower, restart the MCP server before running real-world testing.",
 		"happyPath": []string{
 			"Use runID-based real_world_* tools in nextStep order.",
+			"When no explicit candidate repositories are provided, use real_world_discover_candidates instead of manual GitHub searching or hand-picked repo lists.",
 			"Use candidateSetID and real_world_update_candidates diffs instead of resubmitting large repository lists after duplicate checks.",
 			"Do not call legacy/path-based runners during managed real-world testing.",
 			"Keep long-running prep/validation tool calls open for progress notifications; do not poll with shell sleep loops.",
@@ -175,9 +180,19 @@ type realWorldRepository struct {
 type realWorldStartTestingArgs struct {
 	Title                 string                `json:"title"`
 	Repositories          []realWorldRepository `json:"repositories"`
+	TargetCount           int                   `json:"targetCount"`
 	AllowPreviouslyTested bool                  `json:"allowPreviouslyTested"`
 	IncludeTestedRepos    bool                  `json:"includeTestedRepos"`
 	TestedRepoLimit       int                   `json:"testedRepoLimit"`
+}
+
+type realWorldDiscoverCandidatesArgs struct {
+	Title                 string   `json:"title"`
+	TargetCount           int      `json:"targetCount"`
+	AllowPreviouslyTested bool     `json:"allowPreviouslyTested"`
+	Ecosystems            []string `json:"ecosystems"`
+	MinStars              int      `json:"minStars"`
+	PerQueryLimit         int      `json:"perQueryLimit"`
 }
 
 type realWorldHistoryArgs struct {
@@ -271,6 +286,26 @@ type realWorldTestedRepo struct {
 	LatestCommit string   `json:"latestCommit,omitempty"`
 }
 
+type realWorldCandidateSearchSpec struct {
+	Ecosystem string `json:"ecosystem"`
+	Query     string `json:"query"`
+}
+
+type githubRepositorySearchResponse struct {
+	Items []githubRepositorySearchItem `json:"items"`
+}
+
+type githubRepositorySearchItem struct {
+	FullName        string `json:"full_name"`
+	HTMLURL         string `json:"html_url"`
+	CloneURL        string `json:"clone_url"`
+	Language        string `json:"language"`
+	Archived        bool   `json:"archived"`
+	Fork            bool   `json:"fork"`
+	StargazersCount int    `json:"stargazers_count"`
+	PushedAt        string `json:"pushed_at"`
+}
+
 type realWorldManifest struct {
 	SchemaVersion             int                           `json:"schemaVersion"`
 	CreatedAt                 string                        `json:"createdAt"`
@@ -328,6 +363,7 @@ func (s *repoServer) realWorldStartTesting(ctx context.Context, args realWorldSt
 	if err != nil {
 		return nil, err
 	}
+	targetCount := boundedRealWorldCandidateTarget(args.TargetCount)
 	tested := realWorldTestedRepos(history)
 	repositories, duplicates := realWorldAnnotateCandidateRepositories(history, args.Repositories)
 	var candidateSet *realWorldCandidateSet
@@ -349,21 +385,25 @@ func (s *repoServer) realWorldStartTesting(ctx context.Context, args realWorldSt
 	if len(repositories) > 0 && ok {
 		next = realWorldNextPrepareCorpus(args.Title, repositories, realWorldCandidateSetID(candidateSet), args.AllowPreviouslyTested)
 	}
-	message := "Choose fresh public repositories, then call real_world_prepare_corpus."
+	message := "Candidate discovery is required before corpus preparation."
 	if len(repositories) > 0 && ok {
 		message = "Candidate repositories are ready; call real_world_prepare_corpus next."
 	}
 	if len(duplicates) > 0 && !args.AllowPreviouslyTested {
+		ok = false
 		message = "One or more candidate repositories were already tested; apply a candidate diff with replacements or restart with allowPreviouslyTested=true for an intentional rerun."
 		next = realWorldNextUpdateCandidates(realWorldCandidateSetID(candidateSet), duplicates)
 	}
 	if len(repositories) == 0 {
-		message = "No candidate repositories were provided. Choose candidate repositories, then call real_world_start_testing with that list; the tool will check duplicate history."
+		ok = false
+		message = "No candidate repositories were provided. Call real_world_discover_candidates with the target count; do not search GitHub or hand-pick repositories manually."
+		next = realWorldNextDiscoverCandidates(args.Title, targetCount, args.AllowPreviouslyTested)
 	}
 	out := map[string]any{
 		"ok":                    ok,
 		"message":               message,
 		"title":                 args.Title,
+		"targetCount":           targetCount,
 		"dollarlintRevision":    revision,
 		"workingTreeNote":       workingTreeNote,
 		"entryCount":            len(history.Entries),
@@ -395,6 +435,97 @@ func (s *repoServer) realWorldStartTesting(ctx context.Context, args realWorldSt
 	if candidateSet != nil {
 		out["candidateSetID"] = candidateSet.ID
 		out["candidateSet"] = realWorldCandidateSetSummary(*candidateSet, duplicates, 0)
+	}
+	return out, nil
+}
+
+func (s *repoServer) handleRealWorldDiscoverCandidates(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	var args realWorldDiscoverCandidatesArgs
+	_ = request.BindArguments(&args)
+	out, err := s.realWorldDiscoverCandidates(ctx, request, args)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	return s.realWorldStructured(ctx, out)
+}
+
+func (s *repoServer) realWorldDiscoverCandidates(ctx context.Context, request mcp.CallToolRequest, args realWorldDiscoverCandidatesArgs) (map[string]any, error) {
+	history, err := loadRealWorldHistory(s.root)
+	if err != nil {
+		return nil, err
+	}
+	targetCount := boundedRealWorldCandidateTarget(args.TargetCount)
+	title := strings.TrimSpace(args.Title)
+	if title == "" {
+		title = fmt.Sprintf("%d-repo real-world sweep", targetCount)
+	}
+	specs := realWorldCandidateDiscoverySpecs(args.Ecosystems, args.MinStars)
+	perQueryLimit := boundedRealWorldDiscoveryPerQuery(args.PerQueryLimit, targetCount, len(specs))
+	p := newProgress(ctx, s.mcp, request, len(specs)+1)
+
+	groups := make([][]realWorldRepository, 0, len(specs))
+	searchResults := make([]map[string]any, 0, len(specs))
+	var firstSearchErr error
+	for _, spec := range specs {
+		p.step("Searching GitHub repositories for " + spec.Ecosystem)
+		repositories, err := realWorldSearchGitHubRepositories(ctx, s.root, spec, perQueryLimit)
+		result := map[string]any{
+			"ecosystem": spec.Ecosystem,
+			"query":     spec.Query,
+			"limit":     perQueryLimit,
+			"returned":  len(repositories),
+		}
+		if err != nil {
+			result["error"] = err.Error()
+			if firstSearchErr == nil {
+				firstSearchErr = err
+			}
+		} else {
+			groups = append(groups, repositories)
+		}
+		searchResults = append(searchResults, result)
+	}
+
+	selected, omittedAlreadyTested, omittedCandidateDuplicates := realWorldSelectDiscoveredCandidates(history, groups, targetCount, args.AllowPreviouslyTested)
+	if len(selected) == 0 && firstSearchErr != nil {
+		return nil, fmt.Errorf("discover real-world candidates with GitHub CLI: %w", firstSearchErr)
+	}
+	if len(selected) == 0 {
+		return nil, fmt.Errorf("discover real-world candidates: GitHub search returned no usable repositories")
+	}
+	set := newRealWorldCandidateSet(title, args.AllowPreviouslyTested, selected)
+	if err := saveRealWorldCandidateSet(set); err != nil {
+		return nil, err
+	}
+	p.step(fmt.Sprintf("Saved candidate set with %d repositories", len(selected)))
+
+	message := fmt.Sprintf("Discovered %d real-world candidate repositories mechanically through GitHub search and saved a candidate set.", len(selected))
+	if len(selected) < targetCount {
+		message = fmt.Sprintf("Discovered %d real-world candidate repositories for a target of %d; proceed with the saved candidate set or call this tool again with broader filters.", len(selected), targetCount)
+	}
+	next := realWorldNextPrepareCorpus(title, selected, set.ID, args.AllowPreviouslyTested)
+	out := map[string]any{
+		"ok":                             true,
+		"message":                        message,
+		"title":                          title,
+		"targetCount":                    targetCount,
+		"selectedCount":                  len(selected),
+		"candidateSetID":                 set.ID,
+		"candidateSet":                   realWorldCandidateSetSummary(set, nil, len(selected)),
+		"candidatePreview":               realWorldRepositoryPreview(selected, 25),
+		"candidatePreviewLimit":          25,
+		"omittedAlreadyTestedCount":      len(omittedAlreadyTested),
+		"omittedCandidateDuplicateCount": omittedCandidateDuplicates,
+		"allowPreviouslyTested":          args.AllowPreviouslyTested,
+		"searchPlan":                     searchResults,
+		"nextStep":                       next,
+		"selectionRules": []string{
+			"Candidate discovery is MCP-managed; do not run shell GitHub searches or manually replace this list unless a later MCP duplicate check asks for a small diff.",
+			"Use candidateSetID with real_world_prepare_corpus rather than resubmitting the full candidate list.",
+		},
+	}
+	if len(omittedAlreadyTested) > 0 {
+		out["omittedAlreadyTestedPreview"] = realWorldRepositoryPreview(omittedAlreadyTested, 25)
 	}
 	return out, nil
 }
@@ -1463,10 +1594,34 @@ func realWorldDeveloperExperienceGuidance() map[string]any {
 func realWorldNextChooseRepositories() map[string]any {
 	return map[string]any{
 		"tool": "real_world_start_testing",
-		"why":  "Choose fresh public repositories with diverse ecosystems, create a candidate set, and check duplicate history before preparation.",
+		"why":  "Start the managed real-world testing flow with literal candidate repositories when provided; otherwise request MCP-managed candidate discovery.",
 		"requiredArgs": []string{
 			"title",
+		},
+		"optionalArgs": []string{
 			"repositories",
+			"targetCount",
+			"allowPreviouslyTested",
+		},
+	}
+}
+
+func realWorldNextDiscoverCandidates(title string, targetCount int, allowPreviouslyTested bool) map[string]any {
+	return map[string]any{
+		"tool": "real_world_discover_candidates",
+		"why":  "Let the MCP server mechanically discover a broad public candidate set, de-duplicate it against real-world history, and save it for preparation.",
+		"requiredArgs": []string{
+			"title",
+			"targetCount",
+		},
+		"suggestedArgs": map[string]any{
+			"title":                 title,
+			"targetCount":           boundedRealWorldCandidateTarget(targetCount),
+			"allowPreviouslyTested": allowPreviouslyTested,
+		},
+		"rules": []string{
+			"Do not run gh search, gh repo list, or ad hoc web searches for candidate selection.",
+			"Use the returned candidateSetID with real_world_prepare_corpus.",
 		},
 	}
 }
@@ -1982,6 +2137,196 @@ func realWorldCleanCandidateRepository(repo realWorldRepository) realWorldReposi
 	repo.AlreadyTested = false
 	repo.PreviousEntries = nil
 	return repo
+}
+
+func boundedRealWorldCandidateTarget(target int) int {
+	if target <= 0 {
+		return realWorldDefaultCandidateTarget
+	}
+	if target > realWorldMaxCandidateTarget {
+		return realWorldMaxCandidateTarget
+	}
+	return target
+}
+
+func boundedRealWorldDiscoveryPerQuery(perQueryLimit, targetCount, specCount int) int {
+	if perQueryLimit > 0 {
+		if perQueryLimit > realWorldMaxDiscoveryPerQuery {
+			return realWorldMaxDiscoveryPerQuery
+		}
+		return perQueryLimit
+	}
+	if specCount <= 0 {
+		return realWorldMaxDiscoveryPerQuery
+	}
+	limit := targetCount/specCount + 20
+	if targetCount%specCount != 0 {
+		limit++
+	}
+	if limit < 10 {
+		return 10
+	}
+	if limit > realWorldMaxDiscoveryPerQuery {
+		return realWorldMaxDiscoveryPerQuery
+	}
+	return limit
+}
+
+func realWorldCandidateDiscoverySpecs(ecosystems []string, minStars int) []realWorldCandidateSearchSpec {
+	if minStars <= 0 {
+		minStars = realWorldDefaultDiscoveryMinStars
+	}
+	if len(ecosystems) == 0 {
+		ecosystems = []string{
+			"TypeScript",
+			"JavaScript",
+			"Python",
+			"Go",
+			"Rust",
+			"Java",
+			"Kotlin",
+			"Ruby",
+			"PHP",
+			"C#",
+			"C++",
+			"C",
+			"Swift",
+			"Dart",
+			"Shell",
+			"HTML",
+			"CSS",
+			"Vue",
+			"Svelte",
+			"Scala",
+			"Elixir",
+			"Clojure",
+			"Haskell",
+			"Lua",
+			"R",
+			"Julia",
+			"HCL",
+		}
+	}
+	cutoff := time.Now().UTC().AddDate(-2, 0, 0).Format("2006-01-02")
+	specs := make([]realWorldCandidateSearchSpec, 0, len(ecosystems))
+	seen := map[string]bool{}
+	for _, ecosystem := range ecosystems {
+		ecosystem = strings.TrimSpace(ecosystem)
+		if ecosystem == "" {
+			continue
+		}
+		key := strings.ToLower(ecosystem)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		specs = append(specs, realWorldCandidateSearchSpec{
+			Ecosystem: ecosystem,
+			Query:     fmt.Sprintf("language:%q stars:>=%d pushed:>%s archived:false fork:false", ecosystem, minStars, cutoff),
+		})
+	}
+	return specs
+}
+
+func realWorldSearchGitHubRepositories(ctx context.Context, root string, spec realWorldCandidateSearchSpec, limit int) ([]realWorldRepository, error) {
+	data, err := commandOutput(ctx, root, "gh", "api", "-X", "GET", "search/repositories",
+		"-f", "q="+spec.Query,
+		"-f", "per_page="+fmt.Sprint(limit),
+		"-f", "sort=updated",
+		"-f", "order=desc",
+	)
+	if err != nil {
+		return nil, err
+	}
+	var response githubRepositorySearchResponse
+	if err := json.Unmarshal(data, &response); err != nil {
+		return nil, fmt.Errorf("parse GitHub repository search response for %s: %w", spec.Ecosystem, err)
+	}
+	repositories := make([]realWorldRepository, 0, len(response.Items))
+	for _, item := range response.Items {
+		repo, ok := realWorldRepositoryFromGitHubSearch(item, spec.Ecosystem)
+		if !ok {
+			continue
+		}
+		repositories = append(repositories, repo)
+	}
+	return repositories, nil
+}
+
+func realWorldRepositoryFromGitHubSearch(item githubRepositorySearchItem, fallbackEcosystem string) (realWorldRepository, bool) {
+	if item.Archived || item.Fork || strings.TrimSpace(item.FullName) == "" {
+		return realWorldRepository{}, false
+	}
+	cloneURL := strings.TrimSpace(item.CloneURL)
+	if cloneURL == "" && strings.TrimSpace(item.HTMLURL) != "" {
+		cloneURL = strings.TrimRight(item.HTMLURL, "/") + ".git"
+	}
+	if cloneURL == "" {
+		return realWorldRepository{}, false
+	}
+	name := slugify(strings.ReplaceAll(item.FullName, "/", "-"))
+	if name == "" {
+		name = slugify(repoNameFromURL(cloneURL))
+	}
+	ecosystem := strings.TrimSpace(item.Language)
+	if ecosystem == "" {
+		ecosystem = fallbackEcosystem
+	}
+	return realWorldRepository{
+		Name:      name,
+		Ecosystem: ecosystem,
+		CloneURL:  cloneURL,
+	}, true
+}
+
+func realWorldSelectDiscoveredCandidates(history realWorldHistory, groups [][]realWorldRepository, targetCount int, allowPreviouslyTested bool) ([]realWorldRepository, []realWorldRepository, int) {
+	targetCount = boundedRealWorldCandidateTarget(targetCount)
+	indexes := make([]int, len(groups))
+	seen := map[string]bool{}
+	var selected []realWorldRepository
+	var omittedAlreadyTested []realWorldRepository
+	omittedCandidateDuplicates := 0
+	for len(selected) < targetCount {
+		progress := false
+		for groupIndex := range groups {
+			if len(selected) >= targetCount {
+				break
+			}
+			if indexes[groupIndex] >= len(groups[groupIndex]) {
+				continue
+			}
+			repo := realWorldCleanCandidateRepository(groups[groupIndex][indexes[groupIndex]])
+			indexes[groupIndex]++
+			progress = true
+			key := normalizedRepoKey(repo)
+			if key == "" || seen[key] {
+				omittedCandidateDuplicates++
+				continue
+			}
+			seen[key] = true
+			previous := realWorldPreviousEntries(history, repo)
+			if len(previous) > 0 {
+				repo.AlreadyTested = true
+				repo.PreviousEntries = previous
+				if !allowPreviouslyTested {
+					omittedAlreadyTested = append(omittedAlreadyTested, repo)
+					continue
+				}
+			}
+			selected = append(selected, repo)
+		}
+		if !progress {
+			break
+		}
+	}
+	return selected, omittedAlreadyTested, omittedCandidateDuplicates
+}
+
+func realWorldRepositoryPreview(repositories []realWorldRepository, limit int) []realWorldRepository {
+	if limit <= 0 || len(repositories) <= limit {
+		return realWorldPublicRepositories(repositories)
+	}
+	return realWorldPublicRepositories(repositories[:limit])
 }
 
 func newRealWorldCandidateSet(title string, allowPreviouslyTested bool, repositories []realWorldRepository) realWorldCandidateSet {

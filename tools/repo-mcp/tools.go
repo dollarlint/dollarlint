@@ -53,12 +53,21 @@ func (s *repoServer) addTools() {
 	s.addTool("real_world_start_testing", "Start a guided real-world validation sweep, check structured history and candidate duplicates, and return the next MCP tool to call.", schemaObject(map[string]any{
 		"title":                 map[string]any{"type": "string", "description": "Short sweep title."},
 		"repositories":          realWorldRepositoryArraySchema("Candidate repositories to check before preparing the corpus."),
+		"targetCount":           map[string]any{"type": "integer", "description": "Requested repository count when repositories are omitted. Defaults to 10; capped at 2000."},
 		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Allow intentional reruns of repositories already present in real-world history."},
 		"includeTestedRepos":    map[string]any{"type": "boolean", "description": "Include a capped tested repository list. Defaults to false to keep responses compact."},
 		"testedRepoLimit":       map[string]any{"type": "integer", "description": "Maximum tested repositories to include when includeTestedRepos=true. Defaults to 25; capped at 200."},
 	}), s.handleRealWorldStartTesting, true)
+	s.addToolWithHints("real_world_discover_candidates", "Mechanically discover a broad public real-world repository candidate set through GitHub search, de-duplicate it against structured history, and save it as a candidateSetID.", schemaObject(map[string]any{
+		"title":                 map[string]any{"type": "string", "description": "Short sweep title stored with the generated candidate set."},
+		"targetCount":           map[string]any{"type": "integer", "description": "Requested repository count. Defaults to 10; capped at 2000."},
+		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Allow intentional reruns of repositories already present in real-world history. Defaults to false."},
+		"ecosystems":            arrayStringSchema("Optional ecosystem/language names to search. Defaults to a broad, deterministic language plan."),
+		"minStars":              map[string]any{"type": "integer", "description": "Minimum GitHub stars for discovered repositories. Defaults to 25."},
+		"perQueryLimit":         map[string]any{"type": "integer", "description": "GitHub API result limit per ecosystem query. Defaults based on targetCount; capped at 100."},
+	}), s.handleRealWorldDiscoverCandidates, toolHints{ReadOnly: false, OpenWorld: true})
 	s.addTool("real_world_update_candidates", "Apply an add/remove/replace diff to a stored real-world candidate repository set, then recheck duplicate history.", schemaObject(map[string]any{
-		"candidateSetID":        map[string]any{"type": "string", "description": "Candidate set id returned by real_world_start_testing or real_world_update_candidates."},
+		"candidateSetID":        map[string]any{"type": "string", "description": "Candidate set id returned by real_world_start_testing, real_world_discover_candidates, or real_world_update_candidates."},
 		"diff":                  realWorldCandidateDiffSchema("Small repository-list edit to apply without resubmitting the full candidate set."),
 		"expectedCount":         map[string]any{"type": "integer", "description": "Optional guardrail: expected repository count after applying the diff."},
 		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Optionally update whether intentional reruns are allowed."},
@@ -67,7 +76,7 @@ func (s *repoServer) addTools() {
 	s.addToolWithHints("real_world_prepare_corpus", "Start managed real-world corpus preparation, flag previously tested repositories, optionally clone repos, and write an internal manifest.", schemaObject(map[string]any{
 		"title":                 map[string]any{"type": "string", "description": "Short sweep title used for the managed run."},
 		"repositories":          realWorldRepositoryArraySchema("Repositories planned for the corpus."),
-		"candidateSetID":        map[string]any{"type": "string", "description": "Candidate set id returned by real_world_start_testing or real_world_update_candidates. Prefer this over resubmitting repositories."},
+		"candidateSetID":        map[string]any{"type": "string", "description": "Candidate set id returned by real_world_start_testing, real_world_discover_candidates, or real_world_update_candidates. Prefer this over resubmitting repositories."},
 		"candidateDiff":         realWorldCandidateDiffSchema("Optional final small edit to apply to candidateSetID before preparing."),
 		"expectedCount":         map[string]any{"type": "integer", "description": "Optional guardrail: expected repository count before preparation starts."},
 		"clone":                 map[string]any{"type": "boolean", "description": "When true, start managed shallow git clones in the background and write incremental manifest updates. Defaults to false."},

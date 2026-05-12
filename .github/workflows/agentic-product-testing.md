@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       candidate_repos:
-        description: Optional JSON array of repositories with name, ecosystem, and cloneURL. Leave empty to choose a fresh diverse corpus.
+        description: Optional JSON array of repositories with name, ecosystem, and cloneURL. Leave empty for MCP-managed discovery.
         required: false
         type: string
       max_repos:
@@ -142,7 +142,7 @@ Manual dispatch inputs for this run:
 - max_repos: `${{ github.event.inputs.max_repos }}`
 - candidate_repos: `${{ github.event.inputs.candidate_repos }}`
 
-Before calling `real_world_start_testing`, derive the repository plan from those literal inputs. Treat a missing or empty `max_repos` as `10`. If `candidate_repos` is a non-empty JSON array, parse it and pass at most `max_repos` entries exactly to `real_world_start_testing.repositories`; do not substitute different repositories unless MCP history reports duplicates and `allowPreviouslyTested` is false. If `candidate_repos` is empty, choose up to `max_repos` diverse, well-known public repositories with conventional config files and let `real_world_start_testing` check them against MCP history; do not fetch the full tested-repository history first. If duplicates are reported, use the returned `candidateSetID` and call `real_world_update_candidates` with a small `diff.replace`, `diff.remove`, or `diff.add` instead of resubmitting the full repository list. When the candidate set is ready, prefer passing only `candidateSetID` and `expectedCount` to `real_world_prepare_corpus`.
+Before calling `real_world_start_testing`, derive only the numeric target and any literal repository list from those inputs. Treat a missing or empty `max_repos` as `10`. If `candidate_repos` is a non-empty JSON array, parse it and pass at most `max_repos` entries exactly to `real_world_start_testing.repositories`; do not substitute different repositories unless MCP history reports duplicates and `allowPreviouslyTested` is false. If `candidate_repos` is empty, call `real_world_start_testing` with `targetCount: max_repos` and no repositories, then follow its `nextStep` to `real_world_discover_candidates`; do not run `gh search`, `gh repo list`, web searches, local metadata mining, or hand-curated replacement lists for candidate selection. If duplicates are reported, use the returned `candidateSetID` and call `real_world_update_candidates` with a small `diff.replace`, `diff.remove`, or `diff.add` instead of resubmitting the full repository list. When the candidate set is ready, prefer passing only `candidateSetID` and `expectedCount` to `real_world_prepare_corpus`.
 
 The workflow pre-builds `bin/dollarlint`; when the MCP flow asks for validation arguments, use `build: false` so validation uses the prebuilt CLI. Keep long-running prep or validation MCP calls open for progress notifications, and do not poll with shell sleep loops.
 

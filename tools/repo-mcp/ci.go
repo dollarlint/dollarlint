@@ -383,6 +383,7 @@ func parseGitHubWorkflowPermissions(output string) (githubWorkflowPermissions, e
 func requiredAgenticRealWorldTools() []string {
 	return []string{
 		"real_world_start_testing",
+		"real_world_discover_candidates",
 		"real_world_update_candidates",
 		"real_world_history",
 		"real_world_artifact_query",

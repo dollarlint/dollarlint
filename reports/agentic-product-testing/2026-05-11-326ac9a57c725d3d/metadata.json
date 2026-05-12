@@ -1,7 +1,7 @@
 {
   "$schema": "../metadata.schema.json",
   "schemaVersion": 4,
-  "id": "2026-05-11-agentic-product-testing-sweep-b0d4808c37",
+  "id": "2026-05-11-326ac9a57c725d3d",
   "date": "2026-05-11",
   "title": "Agentic Product Testing sweep",
   "dollarlintRevision": "f8f8957",
@@ -10,7 +10,7 @@
   "cacheDir": "/tmp/dollarlint-cache.2386388576",
   "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.2936111712\" cacheDir=\"/tmp/dollarlint-cache.2386388576\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-sweep-529295193.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
   "outputArtifact": "/tmp/dollarlint-agentic-product-testing-sweep-529295193.json",
-  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-11-agentic-product-testing-sweep-b0d4808c37/dollarlint.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-11-326ac9a57c725d3d/dollarlint.json",
   "dependencyPrep": [
     {
       "repository": "freeCodeCamp",

@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
+	cryptorand "crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,6 +31,7 @@ const (
 	realWorldCandidateSetPrefix       = "dollarlint-candidate-set-"
 	realWorldDefaultHistoryLimit      = 25
 	realWorldMaxHistoryLimit          = 200
+	realWorldEntryRandomIDBytes       = 8
 	realWorldDefaultCandidateTarget   = 10
 	realWorldMaxCandidateTarget       = 2000
 	realWorldDefaultDiscoveryMinStars = 25
@@ -1046,7 +1047,11 @@ func (s *repoServer) realWorldEntryFromArgs(args realWorldRecordArgs) (realWorld
 	}
 	id := args.ID
 	if id == "" {
-		id = newRealWorldEntryID(date, args)
+		var err error
+		id, err = newRealWorldEntryID(date)
+		if err != nil {
+			return realWorldEntry{}, err
+		}
 	}
 	return realWorldEntry{
 		ID:                     id,
@@ -1910,27 +1915,30 @@ func realWorldArtifactRelPath(entry realWorldEntry) string {
 	return filepath.ToSlash(filepath.Join(realWorldRunsDirRelPath, name, realWorldRunArtifactFileName))
 }
 
-func newRealWorldEntryID(date string, args realWorldRecordArgs) string {
-	base := slugify(date + "-" + args.Title)
+var realWorldRandomBytes = cryptorand.Read
+
+func newRealWorldEntryID(date string) (string, error) {
+	base := slugify(date)
 	if base == "" {
-		base = "real-world-run"
+		base = time.Now().Format("2006-01-02")
 	}
-	return base + "-" + realWorldEntryIDFingerprint(args.RunID, args.OutputArtifact, args.Corpus, args.ManifestPath, args.Command)
+	suffix, err := realWorldRandomHexID(realWorldEntryRandomIDBytes)
+	if err != nil {
+		return "", fmt.Errorf("generate real-world entry id: %w", err)
+	}
+	return base + "-" + suffix, nil
 }
 
-func realWorldEntryIDFingerprint(values ...string) string {
-	var normalized []string
-	for _, value := range values {
-		value = strings.TrimSpace(value)
-		if value != "" {
-			normalized = append(normalized, value)
-		}
+func realWorldRandomHexID(byteCount int) (string, error) {
+	data := make([]byte, byteCount)
+	n, err := realWorldRandomBytes(data)
+	if err != nil {
+		return "", err
 	}
-	if len(normalized) == 0 {
-		normalized = append(normalized, fmt.Sprintf("generated:%d", time.Now().UTC().UnixNano()))
+	if n != len(data) {
+		return "", fmt.Errorf("random source returned %d bytes, want %d", n, len(data))
 	}
-	sum := sha256.Sum256([]byte(strings.Join(normalized, "\x00")))
-	return fmt.Sprintf("%x", sum[:])[:10]
+	return fmt.Sprintf("%x", data), nil
 }
 
 func persistRealWorldOutputArtifact(root string, entry realWorldEntry) (string, error) {

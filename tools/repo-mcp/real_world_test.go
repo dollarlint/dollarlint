@@ -1324,29 +1324,36 @@ func TestCreateRealWorldOutputPath(t *testing.T) {
 	}
 }
 
-func TestNewRealWorldEntryIDIncludesUniqueFingerprint(t *testing.T) {
-	args := realWorldRecordArgs{
-		Date:           "2026-05-11",
-		Title:          "Agentic Product Testing sweep",
-		Corpus:         "/tmp/dollarlint-corpus.111",
-		OutputArtifact: "/tmp/dollarlint-agentic-product-testing-sweep-111.json",
-		Command:        "real_world_start_validation outputArtifact=/tmp/dollarlint-agentic-product-testing-sweep-111.json",
+func TestNewRealWorldEntryIDUsesDateAndRandomID(t *testing.T) {
+	oldRandomBytes := realWorldRandomBytes
+	defer func() {
+		realWorldRandomBytes = oldRandomBytes
+	}()
+	calls := 0
+	realWorldRandomBytes = func(data []byte) (int, error) {
+		calls++
+		if calls == 1 {
+			copy(data, []byte{0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11})
+		} else {
+			copy(data, []byte{0xf0, 0xe0, 0xd0, 0xc0, 0xb0, 0xa0, 0x90, 0x80})
+		}
+		return len(data), nil
 	}
-	first := newRealWorldEntryID(args.Date, args)
-	args.Corpus = "/tmp/dollarlint-corpus.222"
-	args.OutputArtifact = "/tmp/dollarlint-agentic-product-testing-sweep-222.json"
-	args.Command = "real_world_start_validation outputArtifact=/tmp/dollarlint-agentic-product-testing-sweep-222.json"
-	second := newRealWorldEntryID(args.Date, args)
 
-	const prefix = "2026-05-11-agentic-product-testing-sweep-"
-	if !strings.HasPrefix(first, prefix) || !strings.HasPrefix(second, prefix) {
-		t.Fatalf("ids should keep readable prefix: first=%q second=%q", first, second)
+	first, err := newRealWorldEntryID("2026-05-11")
+	if err != nil {
+		t.Fatal(err)
 	}
-	if len(strings.TrimPrefix(first, prefix)) != 10 || len(strings.TrimPrefix(second, prefix)) != 10 {
-		t.Fatalf("ids should include a fingerprint: first=%q second=%q", first, second)
+	second, err := newRealWorldEntryID("2026-05-11")
+	if err != nil {
+		t.Fatal(err)
 	}
-	if first == second {
-		t.Fatalf("distinct run artifacts produced colliding ids: %q", first)
+
+	if first != "2026-05-11-0a0b0c0d0e0f1011" {
+		t.Fatalf("first id = %q", first)
+	}
+	if second != "2026-05-11-f0e0d0c0b0a09080" {
+		t.Fatalf("second id = %q", second)
 	}
 }
 

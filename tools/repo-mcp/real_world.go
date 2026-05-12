@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -821,10 +822,6 @@ func (s *repoServer) realWorldEntryFromArgs(args realWorldRecordArgs) (realWorld
 	if date == "" {
 		date = time.Now().Format("2006-01-02")
 	}
-	id := args.ID
-	if id == "" {
-		id = slugify(date + "-" + args.Title)
-	}
 	revision := args.DollarLintRevision
 	if revision == "" {
 		revision = strings.TrimSpace(s.output(context.Background(), "git rev-parse HEAD"))
@@ -915,6 +912,10 @@ func (s *repoServer) realWorldEntryFromArgs(args realWorldRecordArgs) (realWorld
 	command := args.Command
 	if command == "" && args.Corpus != "" && args.CacheDir != "" && args.OutputArtifact != "" {
 		command = realWorldValidationCommand(args.Corpus, args.CacheDir, args.OutputArtifact, true, "warn", 1, "1ms", "1ms", nil)
+	}
+	id := args.ID
+	if id == "" {
+		id = newRealWorldEntryID(date, args)
 	}
 	return realWorldEntry{
 		ID:                     id,
@@ -1752,6 +1753,29 @@ func realWorldArtifactRelPath(entry realWorldEntry) string {
 		name = "entry"
 	}
 	return filepath.ToSlash(filepath.Join(realWorldRunsDirRelPath, name, realWorldRunArtifactFileName))
+}
+
+func newRealWorldEntryID(date string, args realWorldRecordArgs) string {
+	base := slugify(date + "-" + args.Title)
+	if base == "" {
+		base = "real-world-run"
+	}
+	return base + "-" + realWorldEntryIDFingerprint(args.RunID, args.OutputArtifact, args.Corpus, args.ManifestPath, args.Command)
+}
+
+func realWorldEntryIDFingerprint(values ...string) string {
+	var normalized []string
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			normalized = append(normalized, value)
+		}
+	}
+	if len(normalized) == 0 {
+		normalized = append(normalized, fmt.Sprintf("generated:%d", time.Now().UTC().UnixNano()))
+	}
+	sum := sha256.Sum256([]byte(strings.Join(normalized, "\x00")))
+	return fmt.Sprintf("%x", sum[:])[:10]
 }
 
 func persistRealWorldOutputArtifact(root string, entry realWorldEntry) (string, error) {

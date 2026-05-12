@@ -105,7 +105,7 @@ func TestRealWorldStartTestingOmitsFullHistoryByDefault(t *testing.T) {
 	}
 }
 
-func TestRealWorldSearchGitHubRepositoriesUsesGitHubAPI(t *testing.T) {
+func TestRealWorldSearchGitHubRepositoriesUsesGitHubSDK(t *testing.T) {
 	var sawRequest bool
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sawRequest = true
@@ -125,10 +125,10 @@ func TestRealWorldSearchGitHubRepositoriesUsesGitHubAPI(t *testing.T) {
 			t.Errorf("Authorization = %q", got)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(githubRepositorySearchResponse{
-			Items: []githubRepositorySearchItem{
-				{FullName: "owner/project", CloneURL: "https://github.com/owner/project.git", Language: "Go"},
-				{FullName: "owner/fork", CloneURL: "https://github.com/owner/fork.git", Language: "Go", Fork: true},
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"items": []map[string]any{
+				{"full_name": "owner/project", "clone_url": "https://github.com/owner/project.git", "language": "Go"},
+				{"full_name": "owner/fork", "clone_url": "https://github.com/owner/fork.git", "language": "Go", "fork": true},
 			},
 		})
 	}))

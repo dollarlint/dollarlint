@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -18,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	githubapi "github.com/google/go-github/v72/github"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -296,21 +296,6 @@ type realWorldTestedRepo struct {
 type realWorldCandidateSearchSpec struct {
 	Ecosystem string `json:"ecosystem"`
 	Query     string `json:"query"`
-}
-
-type githubRepositorySearchResponse struct {
-	Items []githubRepositorySearchItem `json:"items"`
-}
-
-type githubRepositorySearchItem struct {
-	FullName        string `json:"full_name"`
-	HTMLURL         string `json:"html_url"`
-	CloneURL        string `json:"clone_url"`
-	Language        string `json:"language"`
-	Archived        bool   `json:"archived"`
-	Fork            bool   `json:"fork"`
-	StargazersCount int    `json:"stargazers_count"`
-	PushedAt        string `json:"pushed_at"`
 }
 
 type realWorldManifest struct {
@@ -2297,28 +2282,22 @@ func realWorldCandidateDiscoverySpecs(ecosystems []string, minStars int) []realW
 
 func realWorldSearchGitHubRepositories(ctx context.Context, root string, spec realWorldCandidateSearchSpec, limit int) ([]realWorldRepository, error) {
 	_ = root
-	request, err := realWorldGitHubSearchRequest(ctx, spec, limit)
+	client, err := realWorldGitHubClient()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("configure GitHub API client: %w", err)
 	}
-	httpResponse, err := realWorldGitHubHTTPClient.Do(request)
+	result, _, err := client.Search.Repositories(ctx, spec.Query, &githubapi.SearchOptions{
+		Sort:  "updated",
+		Order: "desc",
+		ListOptions: githubapi.ListOptions{
+			PerPage: limit,
+		},
+	})
 	if err != nil {
-		return nil, fmt.Errorf("call GitHub repository search API for %s: %w", spec.Ecosystem, err)
+		return nil, fmt.Errorf("search GitHub repositories for %s: %w", spec.Ecosystem, err)
 	}
-	defer httpResponse.Body.Close()
-	data, err := io.ReadAll(io.LimitReader(httpResponse.Body, 4*1024*1024))
-	if err != nil {
-		return nil, fmt.Errorf("read GitHub repository search response for %s: %w", spec.Ecosystem, err)
-	}
-	if httpResponse.StatusCode < 200 || httpResponse.StatusCode >= 300 {
-		return nil, fmt.Errorf("GitHub repository search API returned %s for %s: %s", httpResponse.Status, spec.Ecosystem, truncate(string(data), 4000))
-	}
-	var searchResponse githubRepositorySearchResponse
-	if err := json.Unmarshal(data, &searchResponse); err != nil {
-		return nil, fmt.Errorf("parse GitHub repository search response for %s: %w", spec.Ecosystem, err)
-	}
-	repositories := make([]realWorldRepository, 0, len(searchResponse.Items))
-	for _, item := range searchResponse.Items {
+	repositories := make([]realWorldRepository, 0, len(result.Repositories))
+	for _, item := range result.Repositories {
 		repo, ok := realWorldRepositoryFromGitHubSearch(item, spec.Ecosystem)
 		if !ok {
 			continue
@@ -2330,29 +2309,22 @@ func realWorldSearchGitHubRepositories(ctx context.Context, root string, spec re
 
 var realWorldGitHubHTTPClient = &http.Client{Timeout: 30 * time.Second}
 
-func realWorldGitHubSearchRequest(ctx context.Context, spec realWorldCandidateSearchSpec, limit int) (*http.Request, error) {
+func realWorldGitHubClient() (*githubapi.Client, error) {
 	baseURL := realWorldGitHubAPIBaseURL()
-	endpoint, err := url.Parse(strings.TrimRight(baseURL, "/") + "/search/repositories")
-	if err != nil {
-		return nil, fmt.Errorf("parse GitHub API URL %q: %w", baseURL, err)
+	client := githubapi.NewClient(realWorldGitHubHTTPClient)
+	client.UserAgent = "dollarlint-repo-mcp"
+	if strings.TrimRight(baseURL, "/") != realWorldGitHubAPIDefaultBaseURL {
+		parsed, err := url.Parse(strings.TrimRight(baseURL, "/") + "/")
+		if err != nil {
+			return nil, fmt.Errorf("parse GitHub API URL %q: %w", baseURL, err)
+		}
+		client.BaseURL = parsed
 	}
-	query := endpoint.Query()
-	query.Set("q", spec.Query)
-	query.Set("per_page", fmt.Sprint(limit))
-	query.Set("sort", "updated")
-	query.Set("order", "desc")
-	endpoint.RawQuery = query.Encode()
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-	request.Header.Set("Accept", "application/vnd.github+json")
-	request.Header.Set("User-Agent", "dollarlint-repo-mcp")
-	request.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	if token := realWorldGitHubToken(); token != "" {
-		request.Header.Set("Authorization", "Bearer "+token)
+		client = client.WithAuthToken(token)
+		client.UserAgent = "dollarlint-repo-mcp"
 	}
-	return request, nil
+	return client, nil
 }
 
 func realWorldGitHubAPIBaseURL() string {
@@ -2380,22 +2352,22 @@ func realWorldGitHubToken() string {
 	return ""
 }
 
-func realWorldRepositoryFromGitHubSearch(item githubRepositorySearchItem, fallbackEcosystem string) (realWorldRepository, bool) {
-	if item.Archived || item.Fork || strings.TrimSpace(item.FullName) == "" {
+func realWorldRepositoryFromGitHubSearch(item *githubapi.Repository, fallbackEcosystem string) (realWorldRepository, bool) {
+	if item == nil || item.GetArchived() || item.GetFork() || strings.TrimSpace(item.GetFullName()) == "" {
 		return realWorldRepository{}, false
 	}
-	cloneURL := strings.TrimSpace(item.CloneURL)
-	if cloneURL == "" && strings.TrimSpace(item.HTMLURL) != "" {
-		cloneURL = strings.TrimRight(item.HTMLURL, "/") + ".git"
+	cloneURL := strings.TrimSpace(item.GetCloneURL())
+	if cloneURL == "" && strings.TrimSpace(item.GetHTMLURL()) != "" {
+		cloneURL = strings.TrimRight(item.GetHTMLURL(), "/") + ".git"
 	}
 	if cloneURL == "" {
 		return realWorldRepository{}, false
 	}
-	name := slugify(strings.ReplaceAll(item.FullName, "/", "-"))
+	name := slugify(strings.ReplaceAll(item.GetFullName(), "/", "-"))
 	if name == "" {
 		name = slugify(repoNameFromURL(cloneURL))
 	}
-	ecosystem := strings.TrimSpace(item.Language)
+	ecosystem := strings.TrimSpace(item.GetLanguage())
 	if ecosystem == "" {
 		ecosystem = fallbackEcosystem
 	}

@@ -1324,7 +1324,50 @@ func TestCreateRealWorldOutputPath(t *testing.T) {
 	}
 }
 
-func TestNewRealWorldEntryIDUsesDateAndRandomID(t *testing.T) {
+func TestNewRealWorldEntryIDUsesStableRunFingerprint(t *testing.T) {
+	args := realWorldRecordArgs{
+		Date:           "2026-05-11",
+		Title:          "Agentic Product Testing sweep",
+		Corpus:         "/tmp/dollarlint-corpus.111",
+		CacheDir:       "/tmp/dollarlint-cache.111",
+		OutputArtifact: "/tmp/dollarlint-agentic-product-testing-sweep-111.json",
+		Command:        "real_world_start_validation outputArtifact=/tmp/dollarlint-agentic-product-testing-sweep-111.json",
+		Repositories: []realWorldRepository{
+			{Name: "example/repo", Ecosystem: "go", CloneURL: "https://github.com/example/repo.git"},
+		},
+	}
+
+	first, err := newRealWorldEntryID(args.Date, args)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := newRealWorldEntryID(args.Date, args)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	const prefix = "2026-05-11-"
+	if !strings.HasPrefix(first, prefix) {
+		t.Fatalf("id should keep date prefix: %q", first)
+	}
+	if len(strings.TrimPrefix(first, prefix)) != realWorldEntryIDSuffixBytes*2 {
+		t.Fatalf("id should include a fixed-width suffix: %q", first)
+	}
+	if first != second {
+		t.Fatalf("same run identity produced different ids: first=%q second=%q", first, second)
+	}
+
+	args.OutputArtifact = "/tmp/dollarlint-agentic-product-testing-sweep-222.json"
+	third, err := newRealWorldEntryID(args.Date, args)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if third == first {
+		t.Fatalf("distinct run identity produced colliding id: %q", third)
+	}
+}
+
+func TestNewRealWorldEntryIDFallsBackToRandomID(t *testing.T) {
 	oldRandomBytes := realWorldRandomBytes
 	defer func() {
 		realWorldRandomBytes = oldRandomBytes
@@ -1340,11 +1383,11 @@ func TestNewRealWorldEntryIDUsesDateAndRandomID(t *testing.T) {
 		return len(data), nil
 	}
 
-	first, err := newRealWorldEntryID("2026-05-11")
+	first, err := newRealWorldEntryID("2026-05-11", realWorldRecordArgs{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := newRealWorldEntryID("2026-05-11")
+	second, err := newRealWorldEntryID("2026-05-11", realWorldRecordArgs{})
 	if err != nil {
 		t.Fatal(err)
 	}

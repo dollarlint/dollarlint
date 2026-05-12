@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	cryptorand "crypto/rand"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,7 +32,7 @@ const (
 	realWorldCandidateSetPrefix       = "dollarlint-candidate-set-"
 	realWorldDefaultHistoryLimit      = 25
 	realWorldMaxHistoryLimit          = 200
-	realWorldEntryRandomIDBytes       = 8
+	realWorldEntryIDSuffixBytes       = 8
 	realWorldDefaultCandidateTarget   = 10
 	realWorldMaxCandidateTarget       = 2000
 	realWorldDefaultDiscoveryMinStars = 25
@@ -1048,7 +1049,7 @@ func (s *repoServer) realWorldEntryFromArgs(args realWorldRecordArgs) (realWorld
 	id := args.ID
 	if id == "" {
 		var err error
-		id, err = newRealWorldEntryID(date)
+		id, err = newRealWorldEntryID(date, args)
 		if err != nil {
 			return realWorldEntry{}, err
 		}
@@ -1917,16 +1918,46 @@ func realWorldArtifactRelPath(entry realWorldEntry) string {
 
 var realWorldRandomBytes = cryptorand.Read
 
-func newRealWorldEntryID(date string) (string, error) {
+func newRealWorldEntryID(date string, args realWorldRecordArgs) (string, error) {
 	base := slugify(date)
 	if base == "" {
 		base = time.Now().Format("2006-01-02")
 	}
-	suffix, err := realWorldRandomHexID(realWorldEntryRandomIDBytes)
-	if err != nil {
-		return "", fmt.Errorf("generate real-world entry id: %w", err)
+	suffix, ok := realWorldStableEntryIDSuffix(args)
+	if !ok {
+		var err error
+		suffix, err = realWorldRandomHexID(realWorldEntryIDSuffixBytes)
+		if err != nil {
+			return "", fmt.Errorf("generate real-world entry id: %w", err)
+		}
 	}
 	return base + "-" + suffix, nil
+}
+
+func realWorldStableEntryIDSuffix(args realWorldRecordArgs) (string, bool) {
+	var parts []string
+	appendPart := func(name, value string) {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			parts = append(parts, name+"="+value)
+		}
+	}
+	appendPart("outputArtifact", args.OutputArtifact)
+	appendPart("manifestPath", args.ManifestPath)
+	appendPart("corpus", args.Corpus)
+	appendPart("cacheDir", args.CacheDir)
+	appendPart("command", args.Command)
+	for _, repo := range args.Repositories {
+		appendPart("repository", strings.Join([]string{repo.Name, repo.Ecosystem, repo.CloneURL}, "|"))
+	}
+	if len(parts) == 0 {
+		appendPart("runID", args.RunID)
+	}
+	if len(parts) == 0 {
+		return "", false
+	}
+	sum := sha256.Sum256([]byte(strings.Join(parts, "\x00")))
+	return fmt.Sprintf("%x", sum[:])[:realWorldEntryIDSuffixBytes*2], true
 }
 
 func realWorldRandomHexID(byteCount int) (string, error) {

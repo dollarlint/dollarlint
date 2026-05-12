@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"sort"
@@ -100,6 +102,55 @@ func TestRealWorldStartTestingOmitsFullHistoryByDefault(t *testing.T) {
 	testedRepos := withRepos["testedRepos"].([]realWorldTestedRepo)
 	if len(testedRepos) != 3 || withRepos["testedReposTruncated"] != true {
 		t.Fatalf("tested repo sample len/truncated = %d/%v", len(testedRepos), withRepos["testedReposTruncated"])
+	}
+}
+
+func TestRealWorldSearchGitHubRepositoriesUsesGitHubSDK(t *testing.T) {
+	var sawRequest bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sawRequest = true
+		if r.URL.Path != "/search/repositories" {
+			t.Errorf("path = %q, want /search/repositories", r.URL.Path)
+		}
+		if got := r.URL.Query().Get("q"); got != "language:Go stars:>=10" {
+			t.Errorf("q = %q", got)
+		}
+		if got := r.URL.Query().Get("per_page"); got != "2" {
+			t.Errorf("per_page = %q", got)
+		}
+		if got := r.URL.Query().Get("sort"); got != "updated" {
+			t.Errorf("sort = %q", got)
+		}
+		if got := r.Header.Get("Authorization"); got != "Bearer test-token" {
+			t.Errorf("Authorization = %q", got)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"items": []map[string]any{
+				{"full_name": "owner/project", "clone_url": "https://github.com/owner/project.git", "language": "Go"},
+				{"full_name": "owner/fork", "clone_url": "https://github.com/owner/fork.git", "language": "Go", "fork": true},
+			},
+		})
+	}))
+	defer server.Close()
+	t.Setenv("DOLLARLINT_GITHUB_API_URL", server.URL)
+	t.Setenv("GITHUB_TOKEN", "test-token")
+
+	repositories, err := realWorldSearchGitHubRepositories(context.Background(), t.TempDir(), realWorldCandidateSearchSpec{
+		Ecosystem: "Go",
+		Query:     "language:Go stars:>=10",
+	}, 2)
+	if err != nil {
+		t.Fatalf("search repositories: %v", err)
+	}
+	if !sawRequest {
+		t.Fatal("server did not receive request")
+	}
+	if len(repositories) != 1 {
+		t.Fatalf("repositories = %+v", repositories)
+	}
+	if repositories[0].Name != "owner-project" || repositories[0].CloneURL != "https://github.com/owner/project.git" || repositories[0].Ecosystem != "Go" {
+		t.Fatalf("repository = %+v", repositories[0])
 	}
 }
 
@@ -1321,6 +1372,82 @@ func TestCreateRealWorldOutputPath(t *testing.T) {
 	}
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
 		t.Fatalf("output path should be reserved but not created, stat err=%v", err)
+	}
+}
+
+func TestNewRealWorldEntryIDUsesStableRunFingerprint(t *testing.T) {
+	args := realWorldRecordArgs{
+		Date:           "2026-05-11",
+		Title:          "Agentic Product Testing sweep",
+		Corpus:         "/tmp/dollarlint-corpus.111",
+		CacheDir:       "/tmp/dollarlint-cache.111",
+		OutputArtifact: "/tmp/dollarlint-agentic-product-testing-sweep-111.json",
+		Command:        "real_world_start_validation outputArtifact=/tmp/dollarlint-agentic-product-testing-sweep-111.json",
+		Repositories: []realWorldRepository{
+			{Name: "example/repo", Ecosystem: "go", CloneURL: "https://github.com/example/repo.git"},
+		},
+	}
+
+	first, err := newRealWorldEntryID(args.Date, args)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := newRealWorldEntryID(args.Date, args)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	const prefix = "2026-05-11-"
+	if !strings.HasPrefix(first, prefix) {
+		t.Fatalf("id should keep date prefix: %q", first)
+	}
+	if len(strings.TrimPrefix(first, prefix)) != realWorldEntryIDSuffixBytes*2 {
+		t.Fatalf("id should include a fixed-width suffix: %q", first)
+	}
+	if first != second {
+		t.Fatalf("same run identity produced different ids: first=%q second=%q", first, second)
+	}
+
+	args.OutputArtifact = "/tmp/dollarlint-agentic-product-testing-sweep-222.json"
+	third, err := newRealWorldEntryID(args.Date, args)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if third == first {
+		t.Fatalf("distinct run identity produced colliding id: %q", third)
+	}
+}
+
+func TestNewRealWorldEntryIDFallsBackToRandomID(t *testing.T) {
+	oldRandomBytes := realWorldRandomBytes
+	defer func() {
+		realWorldRandomBytes = oldRandomBytes
+	}()
+	calls := 0
+	realWorldRandomBytes = func(data []byte) (int, error) {
+		calls++
+		if calls == 1 {
+			copy(data, []byte{0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11})
+		} else {
+			copy(data, []byte{0xf0, 0xe0, 0xd0, 0xc0, 0xb0, 0xa0, 0x90, 0x80})
+		}
+		return len(data), nil
+	}
+
+	first, err := newRealWorldEntryID("2026-05-11", realWorldRecordArgs{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := newRealWorldEntryID("2026-05-11", realWorldRecordArgs{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if first != "2026-05-11-0a0b0c0d0e0f1011" {
+		t.Fatalf("first id = %q", first)
+	}
+	if second != "2026-05-11-f0e0d0c0b0a09080" {
+		t.Fatalf("second id = %q", second)
 	}
 }
 

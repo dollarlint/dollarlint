@@ -3,9 +3,13 @@ package main
 import (
 	"bytes"
 	"context"
+	cryptorand "crypto/rand"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	githubapi "github.com/google/go-github/v72/github"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -30,10 +35,12 @@ const (
 	realWorldCandidateSetPrefix       = "dollarlint-candidate-set-"
 	realWorldDefaultHistoryLimit      = 25
 	realWorldMaxHistoryLimit          = 200
+	realWorldEntryIDSuffixBytes       = 8
 	realWorldDefaultCandidateTarget   = 10
 	realWorldMaxCandidateTarget       = 2000
 	realWorldDefaultDiscoveryMinStars = 25
 	realWorldMaxDiscoveryPerQuery     = 100
+	realWorldGitHubAPIDefaultBaseURL  = "https://api.github.com"
 
 	realWorldFeedbackBehavedReasonably = "behaved-reasonably"
 	realWorldFeedbackProductSignal     = "product-signal"
@@ -291,21 +298,6 @@ type realWorldCandidateSearchSpec struct {
 	Query     string `json:"query"`
 }
 
-type githubRepositorySearchResponse struct {
-	Items []githubRepositorySearchItem `json:"items"`
-}
-
-type githubRepositorySearchItem struct {
-	FullName        string `json:"full_name"`
-	HTMLURL         string `json:"html_url"`
-	CloneURL        string `json:"clone_url"`
-	Language        string `json:"language"`
-	Archived        bool   `json:"archived"`
-	Fork            bool   `json:"fork"`
-	StargazersCount int    `json:"stargazers_count"`
-	PushedAt        string `json:"pushed_at"`
-}
-
 type realWorldManifest struct {
 	SchemaVersion             int                           `json:"schemaVersion"`
 	CreatedAt                 string                        `json:"createdAt"`
@@ -488,7 +480,7 @@ func (s *repoServer) realWorldDiscoverCandidates(ctx context.Context, request mc
 
 	selected, omittedAlreadyTested, omittedCandidateDuplicates := realWorldSelectDiscoveredCandidates(history, groups, targetCount, args.AllowPreviouslyTested)
 	if len(selected) == 0 && firstSearchErr != nil {
-		return nil, fmt.Errorf("discover real-world candidates with GitHub CLI: %w", firstSearchErr)
+		return nil, fmt.Errorf("discover real-world candidates through GitHub API: %w", firstSearchErr)
 	}
 	if len(selected) == 0 {
 		return nil, fmt.Errorf("discover real-world candidates: GitHub search returned no usable repositories")
@@ -952,10 +944,6 @@ func (s *repoServer) realWorldEntryFromArgs(args realWorldRecordArgs) (realWorld
 	if date == "" {
 		date = time.Now().Format("2006-01-02")
 	}
-	id := args.ID
-	if id == "" {
-		id = slugify(date + "-" + args.Title)
-	}
 	revision := args.DollarLintRevision
 	if revision == "" {
 		revision = strings.TrimSpace(s.output(context.Background(), "git rev-parse HEAD"))
@@ -1046,6 +1034,14 @@ func (s *repoServer) realWorldEntryFromArgs(args realWorldRecordArgs) (realWorld
 	command := args.Command
 	if command == "" && args.Corpus != "" && args.CacheDir != "" && args.OutputArtifact != "" {
 		command = realWorldValidationCommand(args.Corpus, args.CacheDir, args.OutputArtifact, true, "warn", 1, "1ms", "1ms", nil)
+	}
+	id := args.ID
+	if id == "" {
+		var err error
+		id, err = newRealWorldEntryID(date, args)
+		if err != nil {
+			return realWorldEntry{}, err
+		}
 	}
 	return realWorldEntry{
 		ID:                     id,
@@ -1909,6 +1905,62 @@ func realWorldArtifactRelPath(entry realWorldEntry) string {
 	return filepath.ToSlash(filepath.Join(realWorldRunsDirRelPath, name, realWorldRunArtifactFileName))
 }
 
+var realWorldRandomBytes = cryptorand.Read
+
+func newRealWorldEntryID(date string, args realWorldRecordArgs) (string, error) {
+	base := slugify(date)
+	if base == "" {
+		base = time.Now().Format("2006-01-02")
+	}
+	suffix, ok := realWorldStableEntryIDSuffix(args)
+	if !ok {
+		var err error
+		suffix, err = realWorldRandomHexID(realWorldEntryIDSuffixBytes)
+		if err != nil {
+			return "", fmt.Errorf("generate real-world entry id: %w", err)
+		}
+	}
+	return base + "-" + suffix, nil
+}
+
+func realWorldStableEntryIDSuffix(args realWorldRecordArgs) (string, bool) {
+	var parts []string
+	appendPart := func(name, value string) {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			parts = append(parts, name+"="+value)
+		}
+	}
+	appendPart("outputArtifact", args.OutputArtifact)
+	appendPart("manifestPath", args.ManifestPath)
+	appendPart("corpus", args.Corpus)
+	appendPart("cacheDir", args.CacheDir)
+	appendPart("command", args.Command)
+	for _, repo := range args.Repositories {
+		appendPart("repository", strings.Join([]string{repo.Name, repo.Ecosystem, repo.CloneURL}, "|"))
+	}
+	if len(parts) == 0 {
+		appendPart("runID", args.RunID)
+	}
+	if len(parts) == 0 {
+		return "", false
+	}
+	sum := sha256.Sum256([]byte(strings.Join(parts, "\x00")))
+	return fmt.Sprintf("%x", sum[:])[:realWorldEntryIDSuffixBytes*2], true
+}
+
+func realWorldRandomHexID(byteCount int) (string, error) {
+	data := make([]byte, byteCount)
+	n, err := realWorldRandomBytes(data)
+	if err != nil {
+		return "", err
+	}
+	if n != len(data) {
+		return "", fmt.Errorf("random source returned %d bytes, want %d", n, len(data))
+	}
+	return fmt.Sprintf("%x", data), nil
+}
+
 func persistRealWorldOutputArtifact(root string, entry realWorldEntry) (string, error) {
 	if entry.OutputArtifact == "" {
 		return "", nil
@@ -2229,21 +2281,23 @@ func realWorldCandidateDiscoverySpecs(ecosystems []string, minStars int) []realW
 }
 
 func realWorldSearchGitHubRepositories(ctx context.Context, root string, spec realWorldCandidateSearchSpec, limit int) ([]realWorldRepository, error) {
-	data, err := commandOutput(ctx, root, "gh", "api", "-X", "GET", "search/repositories",
-		"-f", "q="+spec.Query,
-		"-f", "per_page="+fmt.Sprint(limit),
-		"-f", "sort=updated",
-		"-f", "order=desc",
-	)
+	_ = root
+	client, err := realWorldGitHubClient()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("configure GitHub API client: %w", err)
 	}
-	var response githubRepositorySearchResponse
-	if err := json.Unmarshal(data, &response); err != nil {
-		return nil, fmt.Errorf("parse GitHub repository search response for %s: %w", spec.Ecosystem, err)
+	result, _, err := client.Search.Repositories(ctx, spec.Query, &githubapi.SearchOptions{
+		Sort:  "updated",
+		Order: "desc",
+		ListOptions: githubapi.ListOptions{
+			PerPage: limit,
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("search GitHub repositories for %s: %w", spec.Ecosystem, err)
 	}
-	repositories := make([]realWorldRepository, 0, len(response.Items))
-	for _, item := range response.Items {
+	repositories := make([]realWorldRepository, 0, len(result.Repositories))
+	for _, item := range result.Repositories {
 		repo, ok := realWorldRepositoryFromGitHubSearch(item, spec.Ecosystem)
 		if !ok {
 			continue
@@ -2253,22 +2307,67 @@ func realWorldSearchGitHubRepositories(ctx context.Context, root string, spec re
 	return repositories, nil
 }
 
-func realWorldRepositoryFromGitHubSearch(item githubRepositorySearchItem, fallbackEcosystem string) (realWorldRepository, bool) {
-	if item.Archived || item.Fork || strings.TrimSpace(item.FullName) == "" {
+var realWorldGitHubHTTPClient = &http.Client{Timeout: 30 * time.Second}
+
+func realWorldGitHubClient() (*githubapi.Client, error) {
+	baseURL := realWorldGitHubAPIBaseURL()
+	client := githubapi.NewClient(realWorldGitHubHTTPClient)
+	client.UserAgent = "dollarlint-repo-mcp"
+	if strings.TrimRight(baseURL, "/") != realWorldGitHubAPIDefaultBaseURL {
+		parsed, err := url.Parse(strings.TrimRight(baseURL, "/") + "/")
+		if err != nil {
+			return nil, fmt.Errorf("parse GitHub API URL %q: %w", baseURL, err)
+		}
+		client.BaseURL = parsed
+	}
+	if token := realWorldGitHubToken(); token != "" {
+		client = client.WithAuthToken(token)
+		client.UserAgent = "dollarlint-repo-mcp"
+	}
+	return client, nil
+}
+
+func realWorldGitHubAPIBaseURL() string {
+	for _, name := range []string{"DOLLARLINT_GITHUB_API_URL", "GITHUB_API_URL"} {
+		if value := strings.TrimSpace(os.Getenv(name)); value != "" {
+			return value
+		}
+	}
+	return realWorldGitHubAPIDefaultBaseURL
+}
+
+func realWorldGitHubToken() string {
+	for _, name := range []string{
+		"GITHUB_TOKEN",
+		"GH_TOKEN",
+		"GITHUB_PERSONAL_ACCESS_TOKEN",
+		"GITHUB_MCP_SERVER_TOKEN",
+		"GH_AW_GITHUB_MCP_SERVER_TOKEN",
+		"GH_AW_GITHUB_TOKEN",
+	} {
+		if value := strings.TrimSpace(os.Getenv(name)); value != "" {
+			return value
+		}
+	}
+	return ""
+}
+
+func realWorldRepositoryFromGitHubSearch(item *githubapi.Repository, fallbackEcosystem string) (realWorldRepository, bool) {
+	if item == nil || item.GetArchived() || item.GetFork() || strings.TrimSpace(item.GetFullName()) == "" {
 		return realWorldRepository{}, false
 	}
-	cloneURL := strings.TrimSpace(item.CloneURL)
-	if cloneURL == "" && strings.TrimSpace(item.HTMLURL) != "" {
-		cloneURL = strings.TrimRight(item.HTMLURL, "/") + ".git"
+	cloneURL := strings.TrimSpace(item.GetCloneURL())
+	if cloneURL == "" && strings.TrimSpace(item.GetHTMLURL()) != "" {
+		cloneURL = strings.TrimRight(item.GetHTMLURL(), "/") + ".git"
 	}
 	if cloneURL == "" {
 		return realWorldRepository{}, false
 	}
-	name := slugify(strings.ReplaceAll(item.FullName, "/", "-"))
+	name := slugify(strings.ReplaceAll(item.GetFullName(), "/", "-"))
 	if name == "" {
 		name = slugify(repoNameFromURL(cloneURL))
 	}
-	ecosystem := strings.TrimSpace(item.Language)
+	ecosystem := strings.TrimSpace(item.GetLanguage())
 	if ecosystem == "" {
 		ecosystem = fallbackEcosystem
 	}

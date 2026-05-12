@@ -127,6 +127,20 @@ func TestMissingWorkflowToolsRequiresToolInSourceAndLock(t *testing.T) {
 	}
 }
 
+func TestRealWorldGitHubDiscoveryEnvIssuesRequireTokenInSourceAndLock(t *testing.T) {
+	source := `GITHUB_TOKEN: "${GITHUB_MCP_SERVER_TOKEN}"`
+	lock := `"GITHUB_TOKEN": "\${GITHUB_MCP_SERVER_TOKEN}"`
+	if issues := realWorldGitHubDiscoveryEnvIssues(source, lock); len(issues) != 0 {
+		t.Fatalf("issues = %+v, want none", issues)
+	}
+	if issues := realWorldGitHubDiscoveryEnvIssues("", lock); len(issues) != 1 {
+		t.Fatalf("issues = %+v, want source token issue", issues)
+	}
+	if issues := realWorldGitHubDiscoveryEnvIssues(source, ""); len(issues) != 1 {
+		t.Fatalf("issues = %+v, want lock token issue", issues)
+	}
+}
+
 func TestRealWorldSafeOutputPolicyIssuesRequirePRAndLinker(t *testing.T) {
 	source := "tools:\n  bash:\n    - printf\nmentions:\n  allowed: [agorischek]\ncreate-discussion:\n  category: agentic-product-testing\ncreate-pull-request:\n  if-no-changes: error\n  allowed-files:\n    - reports/agentic-product-testing/**\n  max-patch-size: 8192\njobs:\n  link-outputs:\nFail incomplete Agentic Product Testing run\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n@agorischek\npatch artifact\nDo not call `report_incomplete`\n"
 	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]},"step":"Fail incomplete Agentic Product Testing run","jq":"report_incomplete"}`

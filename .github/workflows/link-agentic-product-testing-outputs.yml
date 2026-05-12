@@ -50,37 +50,6 @@ jobs:
               return `${text.trimEnd()}\n\n${block}`;
             };
 
-            const pullRequests = await github.paginate(github.rest.pulls.list, {
-              owner,
-              repo,
-              state: 'open',
-              sort: 'updated',
-              direction: 'desc',
-              per_page: 100,
-            });
-            let pullRequest = pullRequests.find((item) => {
-              const body = item.body || '';
-              return body.includes(runUrl) || body.includes(marker);
-            });
-
-            if (!pullRequest) {
-              const search = await github.rest.search.issuesAndPullRequests({
-                q: `repo:${owner}/${repo} is:pr "${runUrl}"`,
-                per_page: 5,
-              });
-              const found = search.data.items.find((item) => item.pull_request);
-              if (found) {
-                const prNumber = Number(found.number);
-                const pr = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
-                pullRequest = pr.data;
-              }
-            }
-
-            if (!pullRequest) {
-              core.setFailed(`Could not find an Agentic Product Testing PR for ${runUrl}.`);
-              return;
-            }
-
             const discussionData = await github.graphql(
               `query($owner: String!, $repo: String!) {
                 repository(owner: $owner, name: $repo) {
@@ -109,6 +78,65 @@ jobs:
 
             if (!discussion) {
               core.setFailed(`Could not find an Agentic Product Testing Discussion for ${runUrl}.`);
+              return;
+            }
+
+            const pullRequests = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'open',
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 100,
+            });
+            let pullRequest = pullRequests.find((item) => {
+              const body = item.body || '';
+              return body.includes(runUrl) || body.includes(marker);
+            });
+
+            if (!pullRequest) {
+              const search = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${owner}/${repo} is:pr "${runUrl}"`,
+                per_page: 5,
+              });
+              const found = search.data.items.find((item) => item.pull_request);
+              if (found) {
+                const prNumber = Number(found.number);
+                const pr = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+                pullRequest = pr.data;
+              }
+            }
+
+            if (!pullRequest) {
+              const discussionSource = discussion.body || '';
+              const entryMatch = discussionSource.match(/reports\/agentic-product-testing\/([^/`\s]+)\//);
+              const entryLine = entryMatch ? [`- Real-world entry: \`${entryMatch[1]}\``] : [];
+              const missingPrBlock = [
+                '<!-- real-world-output-missing-pr:start -->',
+                '### Durable memory PR missing',
+                '',
+                'No companion PR was created for this Agentic Product Testing run.',
+                '',
+                ...entryLine,
+                `- Workflow run: ${runUrl}`,
+                '- Durable memory: these results will not be retained for future MCP history queries until the structured artifacts are committed in a PR and merged.',
+                '<!-- real-world-output-missing-pr:end -->',
+              ].join('\n');
+              const existingComment = (discussion.comments?.nodes || []).find((comment) => {
+                const body = comment.body || '';
+                return body.includes('real-world-output-missing-pr:start') && body.includes(runUrl);
+              });
+              if (!existingComment) {
+                await github.graphql(
+                  `mutation($discussionId: ID!, $body: String!) {
+                    addDiscussionComment(input: {discussionId: $discussionId, body: $body}) {
+                      comment { url }
+                    }
+                  }`,
+                  { discussionId: discussion.id, body: missingPrBlock },
+                );
+              }
+              core.warning(`Could not find an Agentic Product Testing PR for ${runUrl}; noted the missing durable-memory PR on ${discussion.url}.`);
               return;
             }
 

@@ -76,6 +76,9 @@ mcp-servers:
       GITHUB_WORKSPACE: "${GITHUB_WORKSPACE}"
       DOLLARLINT_REPO_ROOT: "${GITHUB_WORKSPACE}"
       DOLLARLINT_MCP_TOOLS: "real_world_*"
+      GITHUB_TOKEN: "${GITHUB_MCP_SERVER_TOKEN}"
+      GH_TOKEN: "${GITHUB_MCP_SERVER_TOKEN}"
+      GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_MCP_SERVER_TOKEN}"
       PATH: /usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       GOCACHE: /tmp/go-cache
       GOMODCACHE: /tmp/go-mod-cache

@@ -29,7 +29,7 @@ file = "data/tasks.json"
 reason = "application data, not a tool config"`;
 ---
 
-<DocsLayout title="Catalogs" current="/guides/schemastore/">
+<DocsLayout title="Catalogs" current="/guides/catalogs/">
   <article class="doc">
     <header class="doc-header">
       <span class="eyebrow">Guide</span>
@@ -43,12 +43,12 @@ reason = "application data, not a tool config"`;
     </header>
 
     <h2>Enable catalog matching</h2>
-    <pre><code>dollarlint validate . --schema-store</code></pre>
+    <pre><code>dollarlint validate . --catalogs</code></pre>
     <p>
       Catalog matching is optional at runtime unless it is enabled in <code
         >.dollarlint.toml</code
       >. The starter config from <code>dollarlint init</code> enables the built-in
-      catalogs by default; pass <code>--schema-store=false</code> or set <code
+      catalogs by default; pass <code>--catalogs=false</code> or set <code
         >schemas.catalogs.enabled = false</code
       > when you want catalog matching off. Explicit in-file schemas, config associations,
       and DollarLint's built-in <code>.dollarlint.toml</code>
@@ -82,9 +82,9 @@ reason = "application data, not a tool config"`;
       schema that DollarLint can use. When DollarLint recognizes one of those
       known gaps, such as <code>netlify.toml</code>, <code
         >.cargo/config.toml</code
-      >, <code>.terraform-docs.yml</code>, or <code>.asf.yaml</code>, JSON output
-      includes <code>schemaGap</code> context and skipped-file text explains the
-      gap instead of treating the file as an unknown blob.
+      >, <code>.terraform-docs.yml</code>, or <code>.asf.yaml</code>, JSON
+      output includes <code>schemaGap</code> context and skipped-file text explains
+      the gap instead of treating the file as an unknown blob.
     </p>
 
     <h2>Understand and lock in matches</h2>
@@ -106,7 +106,7 @@ reason = "application data, not a tool config"`;
     <CodeBlock code={catalogIgnoreConfig} language="toml" />
 
     <h2>Use a custom catalog</h2>
-    <pre><code>dollarlint validate . --schema-store-url ./catalog.json</code></pre>
+    <pre><code>dollarlint validate . --catalog-source ./catalog.json</code></pre>
     <p>
       In config, use <code>schemas.catalogs</code> and one or more <code
         >schemas.catalogs.sources</code
@@ -156,7 +156,7 @@ reason = "application data, not a tool config"`;
       </tbody>
     </table>
 
-    <pre><code>dollarlint validate . --schema-store --schema-store-failure error</code></pre>
+    <pre><code>dollarlint validate . --catalogs --catalog-failure error</code></pre>
     <p>
       If <code>schemas.fetch.enabled = false</code>, remote catalogs are
       unavailable. With the default <code>warn</code> policy, DollarLint warns and

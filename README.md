@@ -81,8 +81,8 @@ Use `args` for additional validation flags, one argument per line:
   with:
     path: .
     args: |
-      --schema-store
-      --schema-store-failure=error
+      --catalogs
+      --catalog-failure=error
 ```
 
 ## Quick start
@@ -100,9 +100,9 @@ dollarlint validate .
 
 ```sh
 dollarlint init
-dollarlint init ./packages/api --schema-store
+dollarlint init ./packages/api --catalogs
 dollarlint init --output ./packages/api/.dollarlint.toml
-dollarlint init --defaults --schema-store
+dollarlint init --defaults --catalogs
 ```
 
 ### Validate files
@@ -114,8 +114,8 @@ dollarlint validate ./config --verbose
 dollarlint validate ./config --format json
 dollarlint validate ./config --format sarif --output dollarlint.sarif
 dollarlint validate . --include '**/*.yaml' --schema 'settings/*.toml=./schemas/settings.schema.json'
-dollarlint validate . --schema-store
-dollarlint validate . --schema-store --schema-store-failure error
+dollarlint validate . --catalogs
+dollarlint validate . --catalogs --catalog-failure error
 ```
 
 Use `dollarlint validate <path>` for all validation runs. Bare paths are not accepted.
@@ -124,7 +124,7 @@ Use `dollarlint validate <path>` for all validation runs. Bare paths are not acc
 
 ```sh
 dollarlint inspect .
-dollarlint inspect . --schema-store
+dollarlint inspect . --catalogs
 dollarlint inspect . --format json
 ```
 

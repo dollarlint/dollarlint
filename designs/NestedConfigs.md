@@ -219,7 +219,7 @@ Examples:
 - `--include` replaces discovery includes for all effective configs.
 - `--exclude` appends to all effective configs.
 - `--schema glob=uri` appends a global association to all effective configs.
-- `--schema-store`, `--schema-store-url`, and `--schema-store-failure` apply to
+- `--catalogs`, `--catalog-source`, and `--catalog-failure` apply to
   all effective configs.
 - `--max-depth`, fetch flags, compile timeout, and domain policy apply to all
   effective configs.

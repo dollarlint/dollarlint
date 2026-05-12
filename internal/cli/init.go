@@ -22,16 +22,16 @@ type initOptions struct {
 	defaults       bool
 	fetchRemote    bool
 	fetchRetries   int
-	schemaStore    bool
+	catalogs       bool
 	catalogFailure string
 }
 
 type initTemplateData struct {
-	SchemaStoreEnabled bool
-	CatalogFailure     string
-	SchemaStoreURL     string
-	FetchRemote        bool
-	FetchRetries       int
+	CatalogsEnabled bool
+	CatalogFailure  string
+	SchemaStoreURL  string
+	FetchRemote     bool
+	FetchRetries    int
 }
 
 func defaultInitOptions() initOptions {
@@ -39,7 +39,7 @@ func defaultInitOptions() initOptions {
 		output:         ".dollarlint.toml",
 		fetchRemote:    true,
 		fetchRetries:   defaultFetchRetries,
-		schemaStore:    true,
+		catalogs:       true,
 		catalogFailure: dollarlint.CatalogFailureWarn,
 	}
 }
@@ -60,8 +60,8 @@ func newInitCommand(stdin io.Reader, stdout io.Writer) *cobra.Command {
 	cmd.Flags().BoolVar(&opts.defaults, "defaults", false, "Skip prompts and use defaults plus provided flags")
 	cmd.Flags().BoolVar(&opts.fetchRemote, "fetch-remote", opts.fetchRemote, "Allow fetching http(s) schemas in the generated config")
 	cmd.Flags().IntVar(&opts.fetchRetries, "fetch-retries", opts.fetchRetries, "Retries for transient remote schema fetch failures in the generated config")
-	cmd.Flags().BoolVar(&opts.schemaStore, "schema-store", opts.schemaStore, "Enable built-in catalog filename matching in the generated config")
-	cmd.Flags().StringVar(&opts.catalogFailure, "schema-store-failure", opts.catalogFailure, "Catalog failure policy in the generated config: warn, error, or skip")
+	cmd.Flags().BoolVar(&opts.catalogs, "catalogs", opts.catalogs, "Enable catalog filename matching in the generated config")
+	cmd.Flags().StringVar(&opts.catalogFailure, "catalog-failure", opts.catalogFailure, "Catalog failure policy in the generated config: warn, error, or skip")
 	return cmd
 }
 
@@ -182,12 +182,12 @@ func interviewInitWithPrompter(prompter initPrompter, opts *initOptions) error {
 		return err
 	}
 	opts.fetchRetries = retries
-	schemaStore, err := prompter.Confirm("Enable catalog filename matching?", opts.schemaStore)
+	catalogs, err := prompter.Confirm("Enable catalog filename matching?", opts.catalogs)
 	if err != nil {
 		return err
 	}
-	opts.schemaStore = schemaStore
-	if opts.schemaStore {
+	opts.catalogs = catalogs
+	if opts.catalogs {
 		failure, err := prompter.CatalogFailure(opts.catalogFailure)
 		if err != nil {
 			return err
@@ -262,7 +262,7 @@ func normalizeInitOptions(opts *initOptions) error {
 	case dollarlint.CatalogFailureWarn, dollarlint.CatalogFailureError, dollarlint.CatalogFailureSkip:
 		return nil
 	default:
-		return fmt.Errorf("unsupported schema-store-failure %q; expected warn, error, or skip", opts.catalogFailure)
+		return fmt.Errorf("unsupported catalog-failure %q; expected warn, error, or skip", opts.catalogFailure)
 	}
 }
 
@@ -271,11 +271,11 @@ func renderStarterConfig(opts initOptions) ([]byte, error) {
 		return nil, err
 	}
 	data := initTemplateData{
-		SchemaStoreEnabled: opts.schemaStore,
-		CatalogFailure:     opts.catalogFailure,
-		SchemaStoreURL:     dollarlint.DefaultConfig().Schemas.Catalogs.Sources[0].URL,
-		FetchRemote:        opts.fetchRemote,
-		FetchRetries:       opts.fetchRetries,
+		CatalogsEnabled: opts.catalogs,
+		CatalogFailure:  opts.catalogFailure,
+		SchemaStoreURL:  dollarlint.DefaultConfig().Schemas.Catalogs.Sources[0].URL,
+		FetchRemote:     opts.fetchRemote,
+		FetchRetries:    opts.fetchRetries,
 	}
 	return executeInitTemplate(starterTOMLTemplate, data)
 }
@@ -333,7 +333,7 @@ blockedDomains = []
 timeout = "30s"
 
 [schemas.catalogs]
-enabled = {{ .SchemaStoreEnabled }}
+enabled = {{ .CatalogsEnabled }}
 failure = "{{ .CatalogFailure }}"
 match = "auto"
 

@@ -2181,10 +2181,10 @@ func normalizeRepoQuery(value string) string {
 func realWorldValidationArgs(corpusDir string, schemaStore bool, failure string, fetchRetries int, minWait, maxWait, outputArtifact string, extra []string) []string {
 	args := []string{"validate", corpusDir}
 	if schemaStore {
-		args = append(args, "--schema-store")
+		args = append(args, "--catalogs")
 	}
 	if failure != "" {
-		args = append(args, "--schema-store-failure", failure)
+		args = append(args, "--catalog-failure", failure)
 	}
 	args = append(args,
 		"--fetch-retries", fmt.Sprint(fetchRetries),

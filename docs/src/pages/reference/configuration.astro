@@ -413,19 +413,18 @@ extends = "../../.dollarlint.toml"</code></pre>
       The default config includes the SchemaStore and RubySchema sources but
       keeps catalog matching disabled until you enable <code
         >schemas.catalogs.enabled</code
-      > or pass <code>--schema-store</code>. The generated config from <code
+      > or pass <code>--catalogs</code>. The generated config from <code
         >dollarlint init</code
       > enables both sources by default.
     </p>
     <p>
       When the built-in SchemaStore source is enabled, DollarLint adds a small
       curated layer for known filename gaps and drift. The current curated
-      associations cover <code>rustfmt.toml</code> / <code
-        >.rustfmt.toml</code
-      >, <code>release-plz.toml</code> / <code>.release-plz.toml</code>, and
-      .NET's <code>launchSettings.json</code> / <code
-        >Properties/launchSettings.json</code
-      >.
+      associations cover <code>rustfmt.toml</code> / <code>.rustfmt.toml</code>, <code
+        >release-plz.toml</code
+      > / <code>.release-plz.toml</code>, and .NET's <code
+        >launchSettings.json</code
+      > / <code>Properties/launchSettings.json</code>.
     </p>
     <p>
       The built-in RubySchema source covers common Ruby and Rails project
@@ -445,8 +444,8 @@ extends = "../../.dollarlint.toml"</code></pre>
       Recognized config files without a usable built-in or catalog schema are
       reported with <code>schemaGap</code> metadata. This marks known high-signal
       gaps such as <code>netlify.toml</code>, <code>.cargo/config.toml</code>,
-      <code>.terraform-docs.yml</code>, and <code>.asf.yaml</code> without
-      pretending DollarLint has a schema for them.
+      <code>.terraform-docs.yml</code>, and <code>.asf.yaml</code> without pretending
+      DollarLint has a schema for them.
     </p>
     <table>
       <thead>

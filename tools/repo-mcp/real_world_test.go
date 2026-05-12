@@ -85,6 +85,13 @@ func TestRealWorldStartTestingOmitsFullHistoryByDefault(t *testing.T) {
 	if _, ok := out["testedReposOmitted"]; !ok {
 		t.Fatalf("missing testedReposOmitted hint: %+v", out)
 	}
+	if out["ok"].(bool) {
+		t.Fatalf("start without candidates should route to discovery before reporting ok: %+v", out)
+	}
+	next := out["nextStep"].(map[string]any)
+	if next["tool"] != "real_world_discover_candidates" {
+		t.Fatalf("start without candidates next step = %+v", next)
+	}
 
 	withRepos, err := server.realWorldStartTesting(context.Background(), realWorldStartTestingArgs{Title: "Compact", IncludeTestedRepos: true, TestedRepoLimit: 3})
 	if err != nil {
@@ -133,6 +140,62 @@ func TestRealWorldHistoryDefaultsToCompactQueries(t *testing.T) {
 	testedRepos := withRepos["testedRepos"].([]realWorldTestedRepo)
 	if len(testedRepos) != 1 || withRepos["testedReposTruncated"] != true {
 		t.Fatalf("tested repo sample len/truncated = %d/%v", len(testedRepos), withRepos["testedReposTruncated"])
+	}
+}
+
+func TestRealWorldSelectDiscoveredCandidatesSkipsHistoryAndBatchDuplicates(t *testing.T) {
+	history := realWorldHistory{Entries: []realWorldEntry{{
+		ID:    "old-run",
+		Date:  "2026-05-01",
+		Title: "Old",
+		Repositories: []realWorldRepository{{
+			Name:     "cargo",
+			CloneURL: "https://github.com/rust-lang/cargo.git",
+		}},
+	}}}
+	groups := [][]realWorldRepository{
+		{
+			{Name: "cargo", Ecosystem: "Rust", CloneURL: "https://github.com/rust-lang/cargo.git"},
+			{Name: "django", Ecosystem: "Python", CloneURL: "https://github.com/django/django.git"},
+		},
+		{
+			{Name: "django-copy", Ecosystem: "Python", CloneURL: "https://github.com/django/django.git"},
+			{Name: "pnpm", Ecosystem: "TypeScript", CloneURL: "https://github.com/pnpm/pnpm.git"},
+		},
+	}
+
+	selected, omittedHistory, omittedBatchDuplicates := realWorldSelectDiscoveredCandidates(history, groups, 2, false)
+	if len(selected) != 2 || normalizedRepoKey(selected[0]) != "django/django" || normalizedRepoKey(selected[1]) != "pnpm/pnpm" {
+		t.Fatalf("selected = %+v", selected)
+	}
+	if len(omittedHistory) != 1 || omittedHistory[0].Name != "cargo" || !omittedHistory[0].AlreadyTested {
+		t.Fatalf("omitted history = %+v", omittedHistory)
+	}
+	if omittedBatchDuplicates != 1 {
+		t.Fatalf("omitted batch duplicates = %d", omittedBatchDuplicates)
+	}
+}
+
+func TestRealWorldSelectDiscoveredCandidatesAllowsIntentionalReruns(t *testing.T) {
+	history := realWorldHistory{Entries: []realWorldEntry{{
+		ID:    "old-run",
+		Date:  "2026-05-01",
+		Title: "Old",
+		Repositories: []realWorldRepository{{
+			Name:     "cargo",
+			CloneURL: "https://github.com/rust-lang/cargo.git",
+		}},
+	}}}
+	groups := [][]realWorldRepository{{
+		{Name: "cargo", Ecosystem: "Rust", CloneURL: "https://github.com/rust-lang/cargo.git"},
+	}}
+
+	selected, omittedHistory, _ := realWorldSelectDiscoveredCandidates(history, groups, 1, true)
+	if len(selected) != 1 || selected[0].Name != "cargo" || !selected[0].AlreadyTested {
+		t.Fatalf("selected rerun = %+v", selected)
+	}
+	if len(omittedHistory) != 0 {
+		t.Fatalf("omitted history with reruns allowed = %+v", omittedHistory)
 	}
 }
 

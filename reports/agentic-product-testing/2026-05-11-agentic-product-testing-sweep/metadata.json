@@ -4,156 +4,163 @@
   "id": "2026-05-11-agentic-product-testing-sweep",
   "date": "2026-05-11",
   "title": "Agentic Product Testing sweep",
-  "dollarlintRevision": "f8f8957",
+  "dollarlintRevision": "f386ea1365889f2d3ecb65b0a0675f38e52b0d87",
   "workingTreeNote": "clean working tree",
-  "corpus": "/tmp/dollarlint-corpus.2936111712",
-  "cacheDir": "/tmp/dollarlint-cache.2386388576",
-  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.2936111712\" cacheDir=\"/tmp/dollarlint-cache.2386388576\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-sweep-529295193.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
-  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-sweep-529295193.json",
+  "corpus": "/tmp/dollarlint-corpus.462599715",
+  "cacheDir": "/tmp/dollarlint-cache.141551327",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.462599715\" cacheDir=\"/tmp/dollarlint-cache.141551327\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-sweep-2071544307.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-sweep-2071544307.json",
   "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-11-agentic-product-testing-sweep/dollarlint.json",
   "dependencyPrep": [
     {
-      "repository": "freeCodeCamp",
+      "repository": "astral-sh/ruff",
       "status": "not-needed",
-      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: pnpm-lock.yaml. Remote schema refs: 7."
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock, crates/ty_completion_eval/truth/auto-import-includes-modules/uv.lock, crates/ty_completion_eval/truth/auto-import-skips-current-module/uv.lock, and 9 more. Remote schema refs: 3."
     },
     {
-      "repository": "jesseduffield-lazygit",
+      "repository": "oven-sh/bun",
       "status": "not-needed",
-      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: go.sum. Remote schema refs: 4."
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: bench/bun.lock, bench/bundle/bun.lockb, bench/expect-to-equal/bun.lock, and 9 more. Remote schema refs: 9."
     },
     {
-      "repository": "public-apis",
+      "repository": "rust-lang/rustfmt",
       "status": "not-needed",
-      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock, check_diff/Cargo.lock, ci/Cargo.lock, and 1 more. Remote schema refs: 0."
     }
   ],
   "validationFeedback": [
     {
-      "repository": "freeCodeCamp",
+      "repository": "astral-sh/ruff",
       "outcome": "product-signal",
       "findings": [
-        "DollarLint completed successfully, but only 68 of 1277 discovered files were validated, leaving 1209 skipped files in this large real-world repository.",
-        "The extracted managed result did not preserve a compact CLI preview or grouped skipped examples in the final payload, which makes the coverage gap harder to interpret after the run.",
-        "For a developer testing a large monorepo, the dominant experience is uncertainty about what large portions of the repository were skipped and which skipped classes matter most."
+        "DollarLint usefully separated likely intentional invalid fixture files from hand-authored configs, but the same run mixed those expected fixture failures with a real-looking mkdocs.yml warning and many uncovered config files, leaving the user to sort test-fixture noise from actionable repo feedback.",
+        "The mkdocs.yml hint about inherited configuration was especially helpful and shows good domain-aware guidance, but it stands out because similarly high-signal uncovered files like .github/actionlint.yaml and .cargo/config.toml are only reported as unsupported or unknown with no next action beyond absence of schema support.",
+        "The repo had substantial skipped coverage across project configuration files, and the current output truncates the skipped list in plain CLI mode, which makes it harder to judge what important config surface DollarLint still misses in a large real repository."
       ],
       "productRecommendations": [
         {
           "strength": "high",
-          "recommendation": "Improve large-repository skipped coverage reporting so grouped skipped reasons and representative examples remain visible and easy to interpret in final triage output.",
-          "rationale": "On freeCodeCamp, 1209 of 1277 discovered files were skipped, and the compacted managed result did not retain enough grouped evidence for a developer to confidently assess coverage quality."
+          "recommendation": "Promote high-signal skipped configuration files into a compact coverage summary with explicit next-step messaging, instead of burying them inside a long truncated skipped-files list.",
+          "rationale": "On a large repo like ruff, users can quickly miss important unsupported configs such as .github/actionlint.yaml and .cargo/config.toml because the current plain output truncates and flattens many skipped files."
+        },
+        {
+          "strength": "low",
+          "recommendation": "Extend domain-aware hints beyond MkDocs-style inheritance to other known config families where a finding or skip often has a common explanation.",
+          "rationale": "The MkDocs hint was much more actionable than adjacent unsupported/skipped config output, showing that targeted guidance materially improves developer interpretation."
         }
       ],
-      "notes": "This is primarily a coverage-reporting ergonomics signal. The run was stable and produced no false validation noise, but the extremely high skipped share needs stronger grouped reporting so a developer can understand whether DollarLint provided useful coverage on a large monorepo."
+      "notes": "This repo reveals an ergonomics and coverage product signal rather than a core correctness failure. DollarLint already has some strong targeted hints, but the experience would be more actionable if high-signal unsupported/skipped config files were summarized with clearer product-facing coverage messaging instead of blending into a long truncated skipped-file section."
     },
     {
-      "repository": "jesseduffield-lazygit",
+      "repository": "oven-sh/bun",
       "outcome": "product-signal",
       "findings": [
-        "DollarLint stayed stable and readable, but half of the discovered files were skipped, including hand-authored project configuration like .vscode/settings.json, .vscode/debugger_config.yml, and demo/config.yml.",
-        "The skipped output usefully separates low-value locale and test data from higher-signal unknown config, which made the coverage caveat understandable.",
-        "The remaining high-signal unknown skips leave a developer without validation on common config-shaped files even though the tool clearly recognized them as config-like inputs."
+        "DollarLint did a good job grouping repeated catalog-backed findings by schema family, which kept a noisy repo somewhat readable even with many files involved.",
+        "The run still mixed intentionally malformed fixture files and likely catalog-schema mismatches with actionable-looking hand-authored config findings, and the plain CLI preview leaves the user to manually distinguish those categories across many files.",
+        "Several findings point at real ecosystem drift between SchemaStore schemas and current tool conventions, such as GitHub Action input typing and bunfig/package.json fields, so the tool needs stronger confidence cues than repeated 'confirm the external catalog schema' hints when many results in a repo share that root cause."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Add repository-level grouping that separates likely fixture/test-data failures from hand-authored configuration findings in the default output.",
+          "rationale": "Bun contains many intentionally malformed fixtures, and mixing them with normal config findings makes the default result harder to interpret quickly."
+        },
+        {
+          "strength": "high",
+          "recommendation": "Collapse repeated catalog-backed mismatches into a stronger root-cause summary with confidence wording when many findings stem from the same external schema family.",
+          "rationale": "This repo produced repeated package.json, GitHub Action, GitHub Workflow, bunfig, and tsconfig catalog-driven findings; users need clearer guidance that these may reflect schema drift rather than many unrelated repo bugs."
+        }
+      ],
+      "notes": "This repo suggests a meaningful ergonomics product change. DollarLint is technically informative, but on a large config-heavy repository the user still has to mentally de-duplicate likely catalog mismatch noise and fixture noise from truly actionable repo errors. Better root-cause grouping and confidence framing would make the output much easier to trust."
+    },
+    {
+      "repository": "rust-lang/rustfmt",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint surfaced the GitHub Workflow catalog context clearly, but the primary output still reads like six raw type errors without explaining that numeric workflow_dispatch choice values may be accepted by GitHub in practice and are a common false-positive edge for the catalog schema.",
+        "The CLI preview usefully grouped the six repeated validation errors into one file and one catalog context, which kept the result readable even with additional skipped-file coverage.",
+        "Skipped-file coverage was visible, but the repo still leaves a developer to manually infer whether the GitHub Workflow issues are likely actionable or just schema-catalog mismatch noise."
       ],
       "productRecommendations": [
         {
           "strength": "med",
-          "recommendation": "Improve coverage or guidance for high-signal schema-less configuration files that DollarLint already classifies as likely project config.",
-          "rationale": "The repo produced no validation issues, but 5 high/medium-signal config files were skipped as unknown, leaving a meaningful coverage gap in otherwise ordinary developer-owned configuration."
+          "recommendation": "Add stronger result framing for catalog-backed findings when the suggested action is to confirm the external schema/tooling version, so users can quickly distinguish likely repo bugs from likely catalog-schema mismatches.",
+          "rationale": "This repo produced only catalog-backed GitHub Workflow errors, and the current output still leaves the user to infer whether the issue is actionable or likely schema fidelity noise."
         }
       ],
-      "notes": "This result exposed a coverage ergonomics signal rather than a correctness failure. DollarLint explained the skipped files well, but a developer would still want better handling or more actionable guidance for common config-shaped files that are recognized as important yet left unvalidated."
-    },
-    {
-      "repository": "public-apis",
-      "outcome": "behaved-reasonably",
-      "findings": [
-        "DollarLint produced a concise zero-issue CLI summary that a developer could understand immediately.",
-        "All 3 discovered files were validated with no skipped coverage or warnings, so this repository did not expose confusing coverage gaps.",
-        "The result stayed quiet and actionable instead of surfacing noisy schema or parser output for this lightweight repository."
-      ],
-      "productRecommendations": [
-        {
-          "strength": "low",
-          "recommendation": "No product change recommended from this repository result.",
-          "rationale": "DollarLint validated the discovered files cleanly, with clear output and no warning or coverage ambiguity."
-        }
-      ],
-      "notes": "For this small repository, DollarLint behaved sensibly and transparently. The developer experience was straightforward: no noise, no hidden skipped coverage, and no obvious product gap surfaced from the result."
+      "notes": "DollarLint behaved mostly clearly on this repo, but the developer experience still suggests a product improvement: when a finding is driven by a SchemaStore catalog association that commonly disagrees with real-world GitHub workflow behavior, the tool should give stronger guidance that the issue may be a catalog/schema fidelity mismatch rather than only a repository bug. The grouping was good; the missing confidence framing is the product signal."
     }
   ],
   "repositories": [
     {
-      "name": "freeCodeCamp",
-      "ecosystem": "typescript",
-      "cloneURL": "https://github.com/freeCodeCamp/freeCodeCamp",
-      "commit": "0ae076e2d80d7be48754c8f31fe9446dbf86a530",
-      "notes": "Large TypeScript monorepo with package.json, tsconfig, and assorted JSON/YAML configs.",
-      "path": "/tmp/dollarlint-corpus.2936111712/freecodecamp",
-      "status": "cloned"
-    },
-    {
-      "name": "jesseduffield-lazygit",
-      "ecosystem": "go",
-      "cloneURL": "https://github.com/jesseduffield/lazygit",
-      "commit": "353e3a1e4a30365b3e7dd061633043d1072cf3db",
-      "notes": "Go CLI project with YAML and JSON config surfaces.",
-      "path": "/tmp/dollarlint-corpus.2936111712/jesseduffield-lazygit",
-      "status": "cloned"
-    },
-    {
-      "name": "public-apis",
+      "name": "astral-sh/ruff",
       "ecosystem": "python",
-      "cloneURL": "https://github.com/public-apis/public-apis",
-      "commit": "d48b9b9502e3d597b28c01820a7cb1a38a90c860",
-      "notes": "Repository with conventional CI and metadata files for schema discovery despite lightweight code footprint.",
-      "path": "/tmp/dollarlint-corpus.2936111712/public-apis",
+      "cloneURL": "https://github.com/astral-sh/ruff.git",
+      "commit": "766e2a13bf5df09ecf0518a70bd1f1d4e9109185",
+      "path": "/tmp/dollarlint-corpus.462599715/astral-sh-ruff",
+      "status": "cloned"
+    },
+    {
+      "name": "oven-sh/bun",
+      "ecosystem": "javascript",
+      "cloneURL": "https://github.com/oven-sh/bun.git",
+      "commit": "03ebdf8ff3abb1c06fc2d6bba3bcd158830e3765",
+      "path": "/tmp/dollarlint-corpus.462599715/oven-sh-bun",
+      "status": "cloned"
+    },
+    {
+      "name": "rust-lang/rustfmt",
+      "ecosystem": "rust",
+      "cloneURL": "https://github.com/rust-lang/rustfmt.git",
+      "commit": "ef22670aa4859d8dfd2d7a005bbf18450c9de798",
+      "path": "/tmp/dollarlint-corpus.462599715/rust-lang-rustfmt",
       "status": "cloned"
     }
   ],
   "result": {
-    "discovered": 1308,
-    "validated": 85,
-    "skipped": 1223,
-    "failed": 0,
+    "discovered": 1027,
+    "validated": 697,
+    "skipped": 319,
+    "failed": 11,
     "issues": {
-      "total": 0,
-      "parsing": 0,
-      "validation": 0,
+      "total": 57,
+      "parsing": 11,
+      "validation": 46,
       "schema": 0,
       "coverage": 0
     },
     "warnings": 0,
     "duration": {
-      "nanos": 7275558181
+      "nanos": 11148087536
     }
   },
   "findings": [
-    "freeCodeCamp completed without validation issues but skipped 1209 of 1277 discovered files, making large-repo coverage difficult to interpret from the managed output alone.",
-    "jesseduffield-lazygit showed a smaller but clearer coverage gap: hand-authored config files such as .vscode/settings.json, .vscode/debugger_config.yml, and demo/config.yml were classified as likely config yet skipped as schema-less unknowns.",
-    "public-apis behaved reasonably: all discovered files validated cleanly with no warnings or skipped coverage."
+    "All 3 tested repositories produced product-signal feedback rather than blocked or behaved-reasonably outcomes.",
+    "Large repositories with many fixtures or unsupported configs were understandable enough to inspect, but default output still makes developers manually separate test-fixture noise, skipped coverage, and catalog-schema mismatch noise from actionable hand-authored config issues.",
+    "DollarLint's strongest current behavior in this sweep was grouping repeated findings by catalog context and offering targeted hints like MkDocs inheritance guidance; the main remaining gaps are confidence framing and compact coverage summaries."
   ],
   "productRecommendations": [
     {
       "strength": "high",
-      "recommendation": "Improve large-repository skipped coverage reporting so grouped skipped reasons and representative examples remain visible and easy to interpret in final triage output.",
-      "rationale": "On freeCodeCamp, 1209 of 1277 discovered files were skipped, and the managed result no longer exposed enough grouped evidence for a developer to judge coverage quality confidently."
+      "recommendation": "Add repository-level grouping that separates likely fixture/test-data failures from hand-authored configuration findings in the default output.",
+      "rationale": "Bun and Ruff both mixed intentional invalid fixtures with real-looking config findings, forcing the user to manually classify what matters."
     },
     {
-      "strength": "med",
-      "recommendation": "Improve coverage or guidance for high-signal schema-less configuration files that DollarLint already classifies as likely project config.",
-      "rationale": "On lazygit, DollarLint identified config-like files such as .vscode/settings.json and demo/config.yml but still left them unvalidated as unknowns, which is a meaningful real-world coverage gap."
+      "strength": "high",
+      "recommendation": "Collapse repeated catalog-backed mismatches into a stronger root-cause summary with confidence wording when many findings stem from the same external schema family.",
+      "rationale": "Bun and rustfmt both produced findings that look actionable at first glance but are likely driven by SchemaStore or ecosystem drift, so users need a clearer root-cause summary."
     },
     {
-      "strength": "low",
-      "recommendation": "No product change recommended from lightweight repositories when DollarLint validates all discovered files clearly and quietly.",
-      "rationale": "The public-apis result showed that DollarLint can already provide a concise, low-noise experience when coverage is complete."
+      "strength": "high",
+      "recommendation": "Promote high-signal skipped configuration files into a compact coverage summary with explicit next-step messaging.",
+      "rationale": "Ruff skipped important project config surfaces like .github/actionlint.yaml and .cargo/config.toml, but that signal is easy to miss in truncated skipped-file output."
     }
   ],
   "productDecisions": [
-    "Prioritize coverage-reporting ergonomics over parser correctness work for the next iteration of real-world product testing, because the strongest signals in this sweep were skipped-coverage clarity and actionability."
+    "Treat this sweep as product-signal evidence focused on output ergonomics and confidence framing, not as evidence of a parsing or crash regression."
   ],
   "followUp": [
-    "Investigate preserving grouped skipped-file summaries and representative examples for very large repositories in compacted triage output.",
-    "Review whether high-signal unknown config skips can surface stronger next-step guidance or broader schema coverage without adding noisy false positives."
+    "Prioritize UX work around catalog-backed confidence framing and fixture-versus-hand-authored grouping in the default output.",
+    "Re-run a future sweep after those UX changes to check whether high-signal skipped config summaries reduce interpretation cost on large repositories."
   ]
 }

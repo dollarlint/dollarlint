@@ -382,6 +382,48 @@ func TestRealWorldValidationEvidenceIncludesBundleUXCollateral(t *testing.T) {
 	}
 }
 
+func TestRealWorldValidationEvidenceCapsSkippedSignals(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "bundle.json")
+	files := make([]map[string]any, 0, 30)
+	for i := 0; i < 30; i++ {
+		files = append(files, map[string]any{
+			"path":   fmt.Sprintf("config-%02d.yml", i),
+			"format": "yaml",
+			"status": "skipped",
+		})
+	}
+	bundle := map[string]any{
+		"json": map[string]any{
+			"summary": map[string]any{
+				"discovered": 30,
+				"validated":  0,
+				"skipped":    30,
+				"failed":     0,
+				"issues":     map[string]any{"total": 0, "parsing": 0, "validation": 0, "schema": 0, "coverage": 0},
+				"ignored":    0,
+				"warnings":   0,
+			},
+			"files":    files,
+			"issues":   []map[string]any{},
+			"warnings": []map[string]any{},
+		},
+		"sarif":  map[string]any{"version": "2.1.0", "runs": []any{}},
+		"styled": map[string]any{"plain": "dollarlint skipped 30 files\n"},
+	}
+	if err := writeJSONFile(path, bundle); err != nil {
+		t.Fatal(err)
+	}
+	evidence, err := realWorldValidationEvidence("repo", path)
+	if err != nil {
+		t.Fatalf("validation evidence: %v", err)
+	}
+	signals := evidence["skippedSignals"].([]realWorldSkippedFileSignal)
+	if len(signals) != 20 || evidence["skippedSignalsTotal"].(int) != 30 || evidence["skippedSignalsTruncated"].(bool) != true {
+		t.Fatalf("skipped signal cap = len %d total %+v truncated %+v", len(signals), evidence["skippedSignalsTotal"], evidence["skippedSignalsTruncated"])
+	}
+}
+
 func TestTriageRealWorldOutputGroupsIssuesAndWarnings(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "result.json")
@@ -1370,5 +1412,58 @@ func TestRealWorldMergeValidationArtifactsPrefixesRepoPaths(t *testing.T) {
 		if paths[i] != want[i] {
 			t.Fatalf("paths = %+v, want %+v", paths, want)
 		}
+	}
+}
+
+func TestRealWorldEnsureManagedOutputArtifactRegeneratesMissingMerge(t *testing.T) {
+	root := t.TempDir()
+	repo := filepath.Join(root, "repo-a")
+	if err := os.MkdirAll(repo, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	perRepoOutput := filepath.Join(root, "repo-a.json")
+	if err := writeJSONFile(perRepoOutput, realWorldMergedOutput{
+		Schema:        "https://example.test/result.schema.json",
+		FormatVersion: 1,
+		Root:          repo,
+		Summary: realWorldMergedSummary{
+			Discovered: 1,
+			Validated:  1,
+			Issues:     realWorldIssueSummary{},
+		},
+		Files: []map[string]any{{"path": "dollarlint.json", "format": "json", "status": "validated"}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	now := time.Now()
+	mergedPath := filepath.Join(root, "missing-merged.json")
+	result := realWorldRepoValidationResult{Repository: "repo-a", Path: repo, OutputArtifact: perRepoOutput, Accepted: true}
+	run := &realWorldValidationRun{
+		ID:             "run",
+		CorpusDir:      root,
+		OutputArtifact: mergedPath,
+		Repositories:   []realWorldRepository{{Name: "repo-a", Path: repo}},
+		StartedAt:      now,
+		completedAt:    &now,
+		completed:      1,
+		results:        make(chan realWorldRepoValidationResult, 1),
+		resultsByID:    map[string]realWorldRepoValidationResult{"repo-a": result},
+		deliveredByID:  map[string]realWorldRepoValidationResult{"repo-a": result},
+		feedbackByID: map[string]realWorldValidationFeedback{"repo-a": {
+			Repository: "repo-a",
+			Outcome:    realWorldFeedbackBehavedReasonably,
+			Findings:   []string{"Validated cleanly with clear output."},
+		}},
+	}
+	if err := realWorldEnsureManagedOutputArtifact(run); err != nil {
+		t.Fatalf("ensure managed output artifact: %v", err)
+	}
+	summary, _, err := readRealWorldOutputSummary(mergedPath)
+	if err != nil {
+		t.Fatalf("read regenerated artifact: %v", err)
+	}
+	if summary.Discovered != 1 || summary.Validated != 1 {
+		t.Fatalf("summary = %+v", summary)
 	}
 }

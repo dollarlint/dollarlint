@@ -695,7 +695,7 @@ func TestCuratedDefaultSchemaStoreAssociations(t *testing.T) {
 	}
 
 	addCuratedDefaultSchemaStoreAssociations(catalog, CatalogSource{}, defaultSchemaStoreCatalogURL)
-	if len(catalog.Schemas) != 3 {
+	if len(catalog.Schemas) != 4 {
 		t.Fatalf("curated associations = %+v", catalog.Schemas)
 	}
 
@@ -716,6 +716,40 @@ func TestCuratedDefaultSchemaStoreAssociations(t *testing.T) {
 	match, ok = catalog.match(".release-plz.toml", CatalogConfig{})
 	if !ok || match.entry.Name != "release-plz.toml" || !strings.Contains(match.entry.URL, "release-plz/main/.schema/latest.json") {
 		t.Fatalf("curated release-plz match = %+v ok=%v", match, ok)
+	}
+
+	match, ok = catalog.match("src/App/Properties/launchSettings.json", CatalogConfig{})
+	if !ok || match.entry.Name != "launchSettings.json" || match.entry.URL != "https://www.schemastore.org/launchsettings.json" || match.matchType != SchemaMatchTypePathGlob || match.confidence != SchemaMatchConfidenceHigh {
+		t.Fatalf("curated launchSettings path match = %+v ok=%v", match, ok)
+	}
+	schemaMatch = match.schemaMatch("src/App/Properties/launchSettings.json")
+	if schemaMatch.Action != SchemaMatchActionMatched || !strings.Contains(schemaMatch.SuggestedAssociation, `file = "src/App/Properties/launchSettings.json"`) {
+		t.Fatalf("curated launchSettings schemaMatch = %+v", schemaMatch)
+	}
+
+	match, ok = catalog.match("launchSettings.json", CatalogConfig{})
+	if !ok || match.entry.Name != "launchSettings.json" || match.matchType != SchemaMatchTypeExactBasename {
+		t.Fatalf("curated launchSettings basename match = %+v ok=%v", match, ok)
+	}
+}
+
+func TestSchemaStoreNetlifyCMSCatalogDoesNotMatchNetlifyToml(t *testing.T) {
+	catalog := &schemaStoreCatalog{
+		Schemas: []schemaStoreEntry{
+			{
+				Name:      "Netlify config",
+				Source:    "schemastore",
+				FileMatch: []string{"**/admin/config*.yml"},
+				URL:       "https://www.schemastore.org/netlify.json",
+			},
+		},
+	}
+
+	if match, ok := catalog.match("netlify.toml", CatalogConfig{}); ok {
+		t.Fatalf("Netlify CMS schema should not match netlify.toml: %+v", match)
+	}
+	if match, ok := catalog.match("admin/config.yml", CatalogConfig{}); !ok || match.entry.Name != "Netlify config" {
+		t.Fatalf("Netlify CMS catalog fixture should still match admin config: %+v ok=%v", match, ok)
 	}
 }
 

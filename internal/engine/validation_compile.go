@@ -2,8 +2,9 @@ package engine
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"net/url"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -76,7 +77,7 @@ func validateLineDelimitedDocument(ctx context.Context, cache *SchemaCache, cfg 
 }
 
 func validationForSchemaFailure(document *Document, cfg Config, phase string, err error) documentValidation {
-	message := fmt.Sprintf("schema %s failed for %s: %v", phase, document.Schema, err)
+	message := schemaFailureMessage(document, phase, err)
 	if !isCatalogSchemaSource(document.SchemaSource) {
 		if phase == "compile" && isRemoteURI(document.Schema) {
 			return documentValidation{
@@ -101,7 +102,7 @@ func validationForSchemaFailure(document *Document, cfg Config, phase string, er
 			Keyword:      issueKeywordSchema,
 			Message:      message,
 		}
-		applySchemaFailureIssueHint(document, &issue, cfg.Output)
+		applySchemaFailureIssueHint(document, &issue, err, cfg.Output)
 		return documentValidation{issues: []Issue{issue}}
 	}
 	mode, modeErr := catalogFailureMode(cfg.Schemas)
@@ -153,6 +154,20 @@ func schemaFailureSource(document *Document) string {
 
 func schemaSourceFailureDetail(label, phase, schema string, err error) string {
 	return fmt.Sprintf("%s %s failed for %s: %v", label, phase, schema, err)
+}
+
+func schemaFailureMessage(document *Document, phase string, err error) string {
+	if info, ok := classifyLocalSchemaFailure(document, err); ok {
+		if errors.Is(err, os.ErrNotExist) {
+			return fmt.Sprintf("schema %s failed: local schema file not found at %s", phase, info.DisplayPath)
+		}
+		return fmt.Sprintf("schema %s failed: local schema file could not be read at %s", phase, info.DisplayPath)
+	}
+	schema := ""
+	if document != nil {
+		schema = document.Schema
+	}
+	return fmt.Sprintf("schema %s failed for %s: %v", phase, schema, err)
 }
 
 type schemaSourceFailureWarning struct {
@@ -281,24 +296,17 @@ func limitedPathList(paths []string, limit int) string {
 	return fmt.Sprintf("%s, and %d more", strings.Join(paths[:limit], ", "), len(paths)-limit)
 }
 
-func hintForSchemaFailure(document *Document, message string) string {
-	if hint, ok := schemaFailureIssueHint(document, message); ok {
-		return issueHintText(hint, false)
-	}
-	return legacyHintForSchemaFailure(document, message)
-}
-
-func applySchemaFailureIssueHint(document *Document, issue *Issue, output OutputConfig) {
+func applySchemaFailureIssueHint(document *Document, issue *Issue, err error, output OutputConfig) {
 	if issue == nil || issue.Hint != "" {
 		return
 	}
 	if issueHintsEnabled(output) {
-		if hint, ok := schemaFailureIssueHint(document, issue.Message); ok {
+		if hint, ok := schemaFailureIssueHint(document, err); ok {
 			applyIssueHint(issue, hint)
 			return
 		}
 	}
-	issue.Hint = legacyHintForSchemaFailure(document, issue.Message)
+	issue.Hint = legacyHintForSchemaFailure(document, err)
 }
 
 type localSchemaFailureInfo struct {
@@ -307,8 +315,8 @@ type localSchemaFailureInfo struct {
 	Dependency  bool
 }
 
-func schemaFailureIssueHint(document *Document, message string) (IssueHint, bool) {
-	info, ok := classifyLocalSchemaFailure(document, message)
+func schemaFailureIssueHint(document *Document, err error) (IssueHint, bool) {
+	info, ok := classifyLocalSchemaFailure(document, err)
 	if !ok {
 		return IssueHint{}, false
 	}
@@ -332,31 +340,25 @@ func schemaFailureIssueHint(document *Document, message string) (IssueHint, bool
 	}, true
 }
 
-func classifyLocalSchemaFailure(document *Document, message string) (localSchemaFailureInfo, bool) {
-	lowerMessage := strings.ToLower(message)
-	if !strings.Contains(lowerMessage, "no such file or directory") ||
-		!strings.Contains(lowerMessage, "read schema ") {
+func classifyLocalSchemaFailure(document *Document, err error) (localSchemaFailureInfo, bool) {
+	if !errors.Is(err, os.ErrNotExist) {
 		return localSchemaFailureInfo{}, false
 	}
-	schema := ""
 	documentPath := ""
 	if document != nil {
-		schema = document.Schema
 		documentPath = document.Path
 	}
-	schemaPath, ok := localSchemaPath(schema)
-	if !ok {
-		schemaPath, ok = schemaPathFromLoadMessage(message)
-	}
+	var readErr *schemaFileReadError
+	ok := errors.As(err, &readErr)
 	if !ok {
 		return localSchemaFailureInfo{}, false
 	}
-	displayPath, groupPath, dependency := displayLocalSchemaPath(schemaPath, documentPath)
+	displayPath, groupPath, dependency := displayLocalSchemaPath(readErr.Path, documentPath)
 	return localSchemaFailureInfo{DisplayPath: displayPath, GroupPath: groupPath, Dependency: dependency}, true
 }
 
-func legacyHintForSchemaFailure(document *Document, message string) string {
-	info, ok := classifyLocalSchemaFailure(document, message)
+func legacyHintForSchemaFailure(document *Document, err error) string {
+	info, ok := classifyLocalSchemaFailure(document, err)
 	if !ok {
 		return ""
 	}
@@ -364,38 +366,6 @@ func legacyHintForSchemaFailure(document *Document, message string) string {
 		return "The referenced local schema file is missing. If a project dependency provides it, install dependencies before validating, or exclude files whose tool schemas are unavailable."
 	}
 	return "The referenced local schema file is missing. Check the $schema path, install the dependency that provides it, or exclude files whose local schemas are unavailable."
-}
-
-func localSchemaPath(raw string) (string, bool) {
-	parsed, err := url.Parse(raw)
-	if err != nil || parsed.Scheme != "file" || parsed.Path == "" {
-		return "", false
-	}
-	unescaped, err := url.PathUnescape(parsed.Path)
-	if err != nil {
-		return "", false
-	}
-	return filepath.Clean(filepath.FromSlash(unescaped)), true
-}
-
-func schemaPathFromLoadMessage(message string) (string, bool) {
-	const marker = "read schema "
-	start := strings.Index(strings.ToLower(message), marker)
-	if start < 0 {
-		return "", false
-	}
-	rest := message[start+len(marker):]
-	if end := strings.Index(rest, ": "); end >= 0 {
-		rest = rest[:end]
-	}
-	rest = strings.TrimSpace(rest)
-	if rest == "" {
-		return "", false
-	}
-	if path, ok := localSchemaPath(rest); ok {
-		return path, true
-	}
-	return filepath.Clean(filepath.FromSlash(rest)), true
 }
 
 func displayLocalSchemaPath(schemaPath, documentPath string) (string, string, bool) {

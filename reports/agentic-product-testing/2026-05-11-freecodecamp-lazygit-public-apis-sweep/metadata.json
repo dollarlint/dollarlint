@@ -1,0 +1,159 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-05-11-freecodecamp-lazygit-public-apis-sweep",
+  "date": "2026-05-11",
+  "title": "freeCodeCamp, lazygit, and public-apis agentic product testing sweep",
+  "dollarlintRevision": "f8f8957",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.2936111712",
+  "cacheDir": "/tmp/dollarlint-cache.2386388576",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.2936111712\" cacheDir=\"/tmp/dollarlint-cache.2386388576\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-sweep-529295193.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-sweep-529295193.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-11-freecodecamp-lazygit-public-apis-sweep/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "freeCodeCamp",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: pnpm-lock.yaml. Remote schema refs: 7."
+    },
+    {
+      "repository": "jesseduffield-lazygit",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: go.sum. Remote schema refs: 4."
+    },
+    {
+      "repository": "public-apis",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "freeCodeCamp",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint completed successfully, but only 68 of 1277 discovered files were validated, leaving 1209 skipped files in this large real-world repository.",
+        "The extracted managed result did not preserve a compact CLI preview or grouped skipped examples in the final payload, which makes the coverage gap harder to interpret after the run.",
+        "For a developer testing a large monorepo, the dominant experience is uncertainty about what large portions of the repository were skipped and which skipped classes matter most."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Improve large-repository skipped coverage reporting so grouped skipped reasons and representative examples remain visible and easy to interpret in final triage output.",
+          "rationale": "On freeCodeCamp, 1209 of 1277 discovered files were skipped, and the compacted managed result did not retain enough grouped evidence for a developer to confidently assess coverage quality."
+        }
+      ],
+      "notes": "This is primarily a coverage-reporting ergonomics signal. The run was stable and produced no false validation noise, but the extremely high skipped share needs stronger grouped reporting so a developer can understand whether DollarLint provided useful coverage on a large monorepo."
+    },
+    {
+      "repository": "jesseduffield-lazygit",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint stayed stable and readable, but half of the discovered files were skipped, including hand-authored project configuration like .vscode/settings.json, .vscode/debugger_config.yml, and demo/config.yml.",
+        "The skipped output usefully separates low-value locale and test data from higher-signal unknown config, which made the coverage caveat understandable.",
+        "The remaining high-signal unknown skips leave a developer without validation on common config-shaped files even though the tool clearly recognized them as config-like inputs."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve coverage or guidance for high-signal schema-less configuration files that DollarLint already classifies as likely project config.",
+          "rationale": "The repo produced no validation issues, but 5 high/medium-signal config files were skipped as unknown, leaving a meaningful coverage gap in otherwise ordinary developer-owned configuration."
+        }
+      ],
+      "notes": "This result exposed a coverage ergonomics signal rather than a correctness failure. DollarLint explained the skipped files well, but a developer would still want better handling or more actionable guidance for common config-shaped files that are recognized as important yet left unvalidated."
+    },
+    {
+      "repository": "public-apis",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint produced a concise zero-issue CLI summary that a developer could understand immediately.",
+        "All 3 discovered files were validated with no skipped coverage or warnings, so this repository did not expose confusing coverage gaps.",
+        "The result stayed quiet and actionable instead of surfacing noisy schema or parser output for this lightweight repository."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "No product change recommended from this repository result.",
+          "rationale": "DollarLint validated the discovered files cleanly, with clear output and no warning or coverage ambiguity."
+        }
+      ],
+      "notes": "For this small repository, DollarLint behaved sensibly and transparently. The developer experience was straightforward: no noise, no hidden skipped coverage, and no obvious product gap surfaced from the result."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "freeCodeCamp",
+      "ecosystem": "typescript",
+      "cloneURL": "https://github.com/freeCodeCamp/freeCodeCamp",
+      "commit": "0ae076e2d80d7be48754c8f31fe9446dbf86a530",
+      "notes": "Large TypeScript monorepo with package.json, tsconfig, and assorted JSON/YAML configs.",
+      "path": "/tmp/dollarlint-corpus.2936111712/freecodecamp",
+      "status": "cloned"
+    },
+    {
+      "name": "jesseduffield-lazygit",
+      "ecosystem": "go",
+      "cloneURL": "https://github.com/jesseduffield/lazygit",
+      "commit": "353e3a1e4a30365b3e7dd061633043d1072cf3db",
+      "notes": "Go CLI project with YAML and JSON config surfaces.",
+      "path": "/tmp/dollarlint-corpus.2936111712/jesseduffield-lazygit",
+      "status": "cloned"
+    },
+    {
+      "name": "public-apis",
+      "ecosystem": "python",
+      "cloneURL": "https://github.com/public-apis/public-apis",
+      "commit": "d48b9b9502e3d597b28c01820a7cb1a38a90c860",
+      "notes": "Repository with conventional CI and metadata files for schema discovery despite lightweight code footprint.",
+      "path": "/tmp/dollarlint-corpus.2936111712/public-apis",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 1308,
+    "validated": 85,
+    "skipped": 1223,
+    "failed": 0,
+    "issues": {
+      "total": 0,
+      "parsing": 0,
+      "validation": 0,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 7275558181
+    }
+  },
+  "findings": [
+    "freeCodeCamp completed without validation issues but skipped 1209 of 1277 discovered files, making large-repo coverage difficult to interpret from the managed output alone.",
+    "jesseduffield-lazygit showed a smaller but clearer coverage gap: hand-authored config files such as .vscode/settings.json, .vscode/debugger_config.yml, and demo/config.yml were classified as likely config yet skipped as schema-less unknowns.",
+    "public-apis behaved reasonably: all discovered files validated cleanly with no warnings or skipped coverage."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "high",
+      "recommendation": "Improve large-repository skipped coverage reporting so grouped skipped reasons and representative examples remain visible and easy to interpret in final triage output.",
+      "rationale": "On freeCodeCamp, 1209 of 1277 discovered files were skipped, and the managed result no longer exposed enough grouped evidence for a developer to judge coverage quality confidently."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Improve coverage or guidance for high-signal schema-less configuration files that DollarLint already classifies as likely project config.",
+      "rationale": "On lazygit, DollarLint identified config-like files such as .vscode/settings.json and demo/config.yml but still left them unvalidated as unknowns, which is a meaningful real-world coverage gap."
+    },
+    {
+      "strength": "low",
+      "recommendation": "No product change recommended from lightweight repositories when DollarLint validates all discovered files clearly and quietly.",
+      "rationale": "The public-apis result showed that DollarLint can already provide a concise, low-noise experience when coverage is complete."
+    }
+  ],
+  "productDecisions": [
+    "Prioritize coverage-reporting ergonomics over parser correctness work for the next iteration of real-world product testing, because the strongest signals in this sweep were skipped-coverage clarity and actionability."
+  ],
+  "followUp": [
+    "Investigate preserving grouped skipped-file summaries and representative examples for very large repositories in compacted triage output.",
+    "Review whether high-signal unknown config skips can surface stronger next-step guidance or broader schema coverage without adding noisy false positives."
+  ]
+}

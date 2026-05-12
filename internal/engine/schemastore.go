@@ -36,6 +36,11 @@ var curatedDefaultSchemaStoreAssociations = []schemaStoreEntry{
 		FileMatch: []string{"release-plz.toml", ".release-plz.toml"},
 		URL:       "https://raw.githubusercontent.com/MarcoIeni/release-plz/main/.schema/latest.json",
 	},
+	{
+		Name:      "launchSettings.json",
+		FileMatch: []string{"launchSettings.json", "Properties/launchSettings.json", "**/Properties/launchSettings.json"},
+		URL:       "https://www.schemastore.org/launchsettings.json",
+	},
 }
 
 var rubySchemaCatalogEntries = []schemaStoreEntry{

@@ -153,9 +153,14 @@ func inspectDocumentAssociation(out *InspectFile, document *Document, cfg Config
 		if document.SchemaMatch != nil {
 			reason = document.SchemaMatch.Reason
 		}
+		applyKnownSchemaGap(document)
+		if reason == "" && document.SchemaGap != nil {
+			reason = document.SchemaGap.Reason
+		}
 	}
 	out.SchemaSource = document.SchemaSource
 	out.SchemaMatch = document.SchemaMatch
+	out.SchemaGap = document.SchemaGap
 	if document.SchemaMatch != nil {
 		out.SuggestedAssociation = document.SchemaMatch.SuggestedAssociation
 		out.SuggestedCatalogIgnore = document.SchemaMatch.SuggestedCatalogIgnore
@@ -267,6 +272,9 @@ func FormatInspectText(result InspectResult) string {
 		}
 		if file.Reason != "" {
 			writeIndentedValue(&builder, "why:", file.Reason)
+		}
+		if file.SchemaGap != nil && file.SchemaGap.DocsURL != "" {
+			writeIndentedValue(&builder, "docs:", file.SchemaGap.DocsURL)
 		}
 		if file.Message != "" {
 			writeIndentedValue(&builder, "message:", file.Message)

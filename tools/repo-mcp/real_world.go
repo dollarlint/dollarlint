@@ -22,7 +22,7 @@ const (
 	realWorldRunArtifactFileName  = "dollarlint.json"
 	realWorldEntrySchema          = "../metadata.schema.json"
 	realWorldHistorySchemaVersion = 4
-	realWorldMCPContractVersion   = 9
+	realWorldMCPContractVersion   = 10
 	realWorldManifestName         = "real-world-manifest.json"
 	realWorldCorpusTempPrefix     = "dollarlint-corpus."
 	realWorldCacheTempPrefix      = "dollarlint-cache."
@@ -875,6 +875,10 @@ func (s *repoServer) realWorldEntryFromArgs(args realWorldRecordArgs) (realWorld
 		if len(args.ValidationFeedback) == 0 {
 			args.ValidationFeedback = run.validationFeedback()
 		}
+		if err := realWorldEnsureManagedOutputArtifact(run); err != nil {
+			return realWorldEntry{}, err
+		}
+		args.OutputArtifact = run.OutputArtifact
 	}
 	manifestPath := args.ManifestPath
 	if manifestPath == "" && args.Corpus != "" {
@@ -2177,10 +2181,10 @@ func normalizeRepoQuery(value string) string {
 func realWorldValidationArgs(corpusDir string, schemaStore bool, failure string, fetchRetries int, minWait, maxWait, outputArtifact string, extra []string) []string {
 	args := []string{"validate", corpusDir}
 	if schemaStore {
-		args = append(args, "--schema-store")
+		args = append(args, "--catalogs")
 	}
 	if failure != "" {
-		args = append(args, "--schema-store-failure", failure)
+		args = append(args, "--catalog-failure", failure)
 	}
 	args = append(args,
 		"--fetch-retries", fmt.Sprint(fetchRetries),

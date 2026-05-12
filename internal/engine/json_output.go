@@ -35,6 +35,7 @@ type jsonFileResult struct {
 	Schema         string       `json:"schema,omitempty"`
 	SchemaSource   string       `json:"schemaSource,omitempty"`
 	SchemaMatch    *SchemaMatch `json:"schemaMatch,omitempty"`
+	SchemaGap      *SchemaGap   `json:"schemaGap,omitempty"`
 	Status         string       `json:"status"`
 	Issues         int          `json:"issues"`
 	Ignored        int          `json:"ignored"`
@@ -50,6 +51,7 @@ type jsonIssue struct {
 	Schema           string       `json:"schema,omitempty"`
 	SchemaSource     string       `json:"schemaSource,omitempty"`
 	SchemaMatch      *SchemaMatch `json:"schemaMatch,omitempty"`
+	SchemaGap        *SchemaGap   `json:"schemaGap,omitempty"`
 	Category         string       `json:"category"`
 	Keyword          string       `json:"keyword,omitempty"`
 	KeywordLocation  string       `json:"keywordLocation,omitempty"`
@@ -82,6 +84,7 @@ func newJSONResult(result Result) jsonResult {
 	files := make([]jsonFileResult, 0, len(result.Files))
 	schemaSources := map[string]string{}
 	schemaMatches := map[string]*SchemaMatch{}
+	schemaGaps := map[string]*SchemaGap{}
 	for _, file := range result.Files {
 		path := resultPath(file.RelativePath, file.Path)
 		if file.SchemaSource != "" {
@@ -90,12 +93,16 @@ func newJSONResult(result Result) jsonResult {
 		if file.SchemaMatch != nil {
 			schemaMatches[path] = file.SchemaMatch
 		}
+		if file.SchemaGap != nil {
+			schemaGaps[path] = file.SchemaGap
+		}
 		files = append(files, jsonFileResult{
 			Path:           path,
 			Format:         file.Format,
 			Schema:         displaySchema(file.Schema, root),
 			SchemaSource:   file.SchemaSource,
 			SchemaMatch:    file.SchemaMatch,
+			SchemaGap:      file.SchemaGap,
 			Status:         file.Status,
 			Issues:         file.Issues,
 			Ignored:        file.Ignored,
@@ -110,7 +117,7 @@ func newJSONResult(result Result) jsonResult {
 	issues := make([]jsonIssue, 0, len(result.Issues))
 	ignoredIssues := make([]jsonIssue, 0)
 	for _, issue := range result.Issues {
-		out := newJSONIssue(issue, schemaSources, schemaMatches, root)
+		out := newJSONIssue(issue, schemaSources, schemaMatches, schemaGaps, root)
 		if issue.Ignored {
 			ignoredIssues = append(ignoredIssues, out)
 			continue
@@ -156,7 +163,7 @@ func newJSONSummary(summary Summary) jsonSummary {
 	}
 }
 
-func newJSONIssue(issue Issue, schemaSources map[string]string, schemaMatches map[string]*SchemaMatch, root string) jsonIssue {
+func newJSONIssue(issue Issue, schemaSources map[string]string, schemaMatches map[string]*SchemaMatch, schemaGaps map[string]*SchemaGap, root string) jsonIssue {
 	path := resultPath(issue.RelativePath, issue.File)
 	schemaSource := issue.SchemaSource
 	if schemaSource == "" {
@@ -166,11 +173,16 @@ func newJSONIssue(issue Issue, schemaSources map[string]string, schemaMatches ma
 	if schemaMatch == nil {
 		schemaMatch = schemaMatches[path]
 	}
+	schemaGap := issue.SchemaGap
+	if schemaGap == nil {
+		schemaGap = schemaGaps[path]
+	}
 	return jsonIssue{
 		Path:             path,
 		Schema:           displaySchema(issue.Schema, root),
 		SchemaSource:     schemaSource,
 		SchemaMatch:      schemaMatch,
+		SchemaGap:        schemaGap,
 		Category:         issueCategory(issue),
 		Keyword:          issue.Keyword,
 		KeywordLocation:  issue.KeywordLocation,

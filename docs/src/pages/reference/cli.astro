@@ -190,20 +190,20 @@ const mcpConfig = `{
           ></tr
         >
         <tr
-          ><td><code>--schema-store</code></td><td
+          ><td><code>--catalogs</code></td><td
             >Enable catalog matching for conventional filenames using the
-            built-in catalog sources. Pass <code>--schema-store=false</code> to disable
+            configured catalog sources. Pass <code>--catalogs=false</code> to disable
             catalog matching for one run.</td
           ></tr
         >
         <tr
-          ><td><code>--schema-store-url</code></td><td
+          ><td><code>--catalog-source</code></td><td
             >Use a SchemaStore-format catalog URL or local path and enable
             catalog matching.</td
           ></tr
         >
         <tr
-          ><td><code>--schema-store-failure</code></td><td
+          ><td><code>--catalog-failure</code></td><td
             >Set catalog failure policy to <code>warn</code>, <code>error</code
             >, or <code>skip</code>.</td
           ></tr
@@ -347,14 +347,14 @@ const mcpConfig = `{
           ></tr
         >
         <tr
-          ><td><code>--schema-store</code></td><td
-            >Enable the built-in catalog sources in the generated config.
-            Defaults to enabled; pass <code>--schema-store=false</code> to write catalog
-            matching disabled.</td
+          ><td><code>--catalogs</code></td><td
+            >Enable catalog matching in the generated config. Defaults to
+            enabled; pass <code>--catalogs=false</code> to write catalog matching
+            disabled.</td
           ></tr
         >
         <tr
-          ><td><code>--schema-store-failure</code></td><td
+          ><td><code>--catalog-failure</code></td><td
             >Set generated catalog failure policy to <code>warn</code>, <code
               >error</code
             >, or <code>skip</code>.</td

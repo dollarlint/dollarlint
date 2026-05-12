@@ -425,10 +425,26 @@ func issueForMissingSchemaCoverage(document *Document, output OutputConfig) Issu
 		File:         document.Path,
 		RelativePath: document.RelativePath,
 		SchemaMatch:  document.SchemaMatch,
+		SchemaGap:    document.SchemaGap,
 		Keyword:      "schemaCoverage",
 		Message:      "file must declare a schema or match a configured schema association, built-in association, or catalog entry",
 	}
-	if issueHintsEnabled(output) && document.SchemaMatch != nil && document.SchemaMatch.Reason != "" {
+	if !issueHintsEnabled(output) {
+		return issue
+	}
+	if document.SchemaGap != nil {
+		hint := IssueHint{
+			ID:         "schema-gap.known-unavailable",
+			Title:      document.SchemaGap.Reason,
+			Suggestion: "Check the tool documentation manually, or add a [[schemas.associations]] entry if this project maintains a schema.",
+			Confidence: IssueHintConfidenceHigh,
+			Source:     document.SchemaGap.DocsURL,
+			GroupKey:   "schema-gap:" + document.SchemaGap.Name,
+		}
+		applyIssueHint(&issue, hint)
+		return issue
+	}
+	if document.SchemaMatch != nil && document.SchemaMatch.Reason != "" {
 		issue.Hint = document.SchemaMatch.Reason
 		if document.SchemaMatch.SuggestedAssociation != "" {
 			issue.Hint += "\nSuggested explicit association:\n" + document.SchemaMatch.SuggestedAssociation

@@ -42,6 +42,32 @@ func TestToolNameFilterSplitsCommaAndWhitespace(t *testing.T) {
 	}
 }
 
+func TestToolNameFilterSupportsExclusionPatterns(t *testing.T) {
+	filter := parseToolNameFilter("real_world_* !real_world_remote_*")
+	allowed := []string{"real_world_start_testing", "real_world_record_result"}
+	for _, name := range allowed {
+		if !filter.Allows(name) {
+			t.Fatalf("filter should allow %s", name)
+		}
+	}
+	disallowed := []string{"real_world_remote_runs", "real_world_remote_run", "repo_status"}
+	for _, name := range disallowed {
+		if filter.Allows(name) {
+			t.Fatalf("filter should not allow %s", name)
+		}
+	}
+}
+
+func TestToolNameFilterExclusionsApplyWhenIncludesAreUnset(t *testing.T) {
+	filter := parseToolNameFilter("!real_world_remote_*")
+	if !filter.Allows("repo_status") {
+		t.Fatalf("filter should allow repo_status")
+	}
+	if filter.Allows("real_world_remote_runs") {
+		t.Fatalf("filter should not allow real_world_remote_runs")
+	}
+}
+
 func TestRepoServerToolFilterRegistersOnlyMatchingTools(t *testing.T) {
 	rs := &repoServer{toolFilter: parseToolNameFilter("real_world_*")}
 	rs.mcp = server.NewMCPServer(serverName, "test")
@@ -60,6 +86,35 @@ func TestRepoServerToolFilterRegistersOnlyMatchingTools(t *testing.T) {
 	}
 	if _, ok := tools["repo_status"]; ok {
 		t.Fatalf("repo_status should not be registered")
+	}
+}
+
+func TestRepoServerRegistersRemoteRealWorldToolsByDefault(t *testing.T) {
+	rs := &repoServer{}
+	rs.mcp = server.NewMCPServer(serverName, "test")
+	rs.addTools()
+	tools := rs.mcp.ListTools()
+	if _, ok := tools["real_world_remote_runs"]; !ok {
+		t.Fatalf("missing real_world_remote_runs")
+	}
+	if _, ok := tools["real_world_remote_run"]; !ok {
+		t.Fatalf("missing real_world_remote_run")
+	}
+}
+
+func TestRepoServerToolFilterCanExcludeRemoteRealWorldTools(t *testing.T) {
+	rs := &repoServer{toolFilter: parseToolNameFilter("real_world_* !real_world_remote_*")}
+	rs.mcp = server.NewMCPServer(serverName, "test")
+	rs.addTools()
+	tools := rs.mcp.ListTools()
+	if _, ok := tools["real_world_start_testing"]; !ok {
+		t.Fatalf("missing real_world_start_testing")
+	}
+	if _, ok := tools["real_world_remote_runs"]; ok {
+		t.Fatalf("real_world_remote_runs should not be registered")
+	}
+	if _, ok := tools["real_world_remote_run"]; ok {
+		t.Fatalf("real_world_remote_run should not be registered")
 	}
 }
 

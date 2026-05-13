@@ -102,7 +102,7 @@ func TestMissingWorkflowToolsAcceptsServerSideRealWorldFilter(t *testing.T) {
 mcp-servers:
   dollarlint-repo:
     env:
-      DOLLARLINT_MCP_TOOLS: "real_world_*"
+      DOLLARLINT_MCP_TOOLS: "real_world_* !real_world_remote_*"
     allowed:
       - "*"
 `
@@ -110,11 +110,22 @@ mcp-servers:
 "tools": [
                   "*"
                 ],
-"env": {"DOLLARLINT_MCP_TOOLS": "real_world_*"}
+"env": {"DOLLARLINT_MCP_TOOLS": "real_world_* !real_world_remote_*"}
 --allow-tool dollarlint-repo --allow-tool github
 `
 	if missing := missingWorkflowTools(source, lock, required); len(missing) != 0 {
 		t.Fatalf("missing = %v, want none", missing)
+	}
+	if !hasServerSideRealWorldRemoteToolExclusion(source, lock) {
+		t.Fatalf("expected remote real-world tool exclusion")
+	}
+}
+
+func TestServerSideRealWorldRemoteToolExclusionRequiresSourceAndLock(t *testing.T) {
+	source := `DOLLARLINT_MCP_TOOLS: "real_world_* !real_world_remote_*"`
+	lock := `"env": {"DOLLARLINT_MCP_TOOLS": "real_world_*"}`
+	if hasServerSideRealWorldRemoteToolExclusion(source, lock) {
+		t.Fatalf("remote tool exclusion should require source and lock")
 	}
 }
 
@@ -136,8 +147,8 @@ func TestRealWorldSafeOutputPolicyIssuesRequirePRAndLinker(t *testing.T) {
 
 	source = "create-pull-request:\n"
 	lock = `{"create_pull_request":{}}`
-	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 10 {
-		t.Fatalf("issues = %+v, want missing PR policy, linker, async PR guidance, incomplete-failure job, dispatch inputs, Discussion retention text, Discussion category, owner mention, allowed files, and patch limit", issues)
+	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 7 {
+		t.Fatalf("issues = %+v, want missing PR policy, linker, incomplete-failure job, Discussion category, owner mention, allowed files, and patch limit", issues)
 	}
 }
 

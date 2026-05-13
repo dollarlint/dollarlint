@@ -236,9 +236,14 @@ func (s *repoServer) handleAgenticWorkflowReadiness(ctx context.Context, request
 	requiredTools := requiredAgenticRealWorldTools()
 	missing := missingWorkflowTools(string(source), string(lock), requiredTools)
 	if len(missing) > 0 {
-		issues = append(issues, readinessIssue{Severity: "error", Message: "Agentic Product Testing workflow is missing real-world MCP tools: " + strings.Join(missing, ", "), Recommendation: "Add the missing tools to the workflow MCP server allowlist, or set " + toolFilterEnv + `: "real_world_*"` + ` and allow "*" for the filtered server, then regenerate the lock file.`})
+		issues = append(issues, readinessIssue{Severity: "error", Message: "Agentic Product Testing workflow is missing real-world MCP tools: " + strings.Join(missing, ", "), Recommendation: "Add the missing tools to the workflow MCP server allowlist, or set " + toolFilterEnv + `: "real_world_* !real_world_remote_*"` + ` and allow "*" for the filtered server, then regenerate the lock file.`})
 	}
 	checks = append(checks, map[string]any{"name": "real-world MCP allowlist", "ok": len(missing) == 0, "requiredTools": requiredTools, "missing": missing})
+	remoteToolsExcluded := hasServerSideRealWorldRemoteToolExclusion(string(source), string(lock))
+	if !remoteToolsExcluded {
+		issues = append(issues, readinessIssue{Severity: "error", Message: "Agentic Product Testing workflow does not exclude remote real-world connection tools from its MCP surface", Recommendation: "Set " + toolFilterEnv + `: "real_world_* !real_world_remote_*"` + ` in the workflow MCP server env and regenerate the lock file.`})
+	}
+	checks = append(checks, map[string]any{"name": "remote real-world MCP tool exclusion", "ok": remoteToolsExcluded, "requiredPattern": "!real_world_remote_*"})
 
 	p.step("Checking real-world safe outputs")
 	safeOutputIssues := realWorldSafeOutputPolicyIssues(string(source), string(lock), string(linker))
@@ -427,6 +432,10 @@ func hasServerSideRealWorldToolFilter(source, lock string) bool {
 	return sourceHasFilter && lockHasFilter && sourceAllowsAll && lockAllowsAll
 }
 
+func hasServerSideRealWorldRemoteToolExclusion(source, lock string) bool {
+	return strings.Contains(source, "!real_world_remote_*") && strings.Contains(lock, "!real_world_remote_*")
+}
+
 func realWorldSafeOutputPolicyIssues(source, lock string, linkerSources ...string) []readinessIssue {
 	var issues []readinessIssue
 	linker := ""
@@ -453,20 +462,6 @@ func realWorldSafeOutputPolicyIssues(source, lock string, linkerSources ...strin
 			Recommendation: "Configure the deterministic link-agentic-product-testing-outputs workflow, or restore a safe-outputs linker job and regenerate the lock file.",
 		})
 	}
-	if hasFollowupLinker && (!strings.Contains(source, "PR body") || !strings.Contains(source, "workflow run URL")) {
-		issues = append(issues, readinessIssue{
-			Severity:       "error",
-			Message:        "Agentic Product Testing workflow does not require enough linking metadata in the PR body",
-			Recommendation: "Require the agent to include the workflow run URL in the durable-memory PR body so the deterministic linker can find it.",
-		})
-	}
-	if !strings.Contains(source, "patch artifact") || !strings.Contains(source, "Do not call `report_incomplete`") {
-		issues = append(issues, readinessIssue{
-			Severity:       "error",
-			Message:        "Agentic Product Testing workflow does not explain asynchronous safe-output PR creation",
-			Recommendation: "Tell the agent that create_pull_request may return a patch artifact first, that this is expected, and that report_incomplete is not appropriate when the later safe_outputs job will create the PR.",
-		})
-	}
 	if !strings.Contains(source, "Fail incomplete Agentic Product Testing run") || !strings.Contains(source, "report_incomplete") ||
 		!strings.Contains(lock, "Fail incomplete Agentic Product Testing run") || !strings.Contains(lock, "report_incomplete") {
 		issues = append(issues, readinessIssue{
@@ -487,20 +482,6 @@ func realWorldSafeOutputPolicyIssues(source, lock string, linkerSources ...strin
 			Severity:       "error",
 			Message:        "Agentic Product Testing workflow exposes the safeoutputs CLI but printf is not allowed",
 			Recommendation: "Add printf to tools.bash so the agent can pipe inline JSON payloads to safeoutputs, then regenerate the lock file.",
-		})
-	}
-	if !strings.Contains(source, "github.event.inputs.max_repos") || !strings.Contains(source, "github.event.inputs.candidate_repos") {
-		issues = append(issues, readinessIssue{
-			Severity:       "error",
-			Message:        "Agentic Product Testing workflow prompt does not include rendered manual dispatch inputs",
-			Recommendation: "Mention github.event.inputs.max_repos and github.event.inputs.candidate_repos in the markdown prompt so manual dispatch controls the MCP repository plan.",
-		})
-	}
-	if !strings.Contains(source, "should be merged in order to retain") {
-		issues = append(issues, readinessIssue{
-			Severity:       "error",
-			Message:        "Agentic Product Testing workflow does not require the Discussion to explain that the PR retains the results",
-			Recommendation: `Ask the agent to include a "Durable memory PR" Discussion section saying that the PR should be merged in order to retain the results, then regenerate the lock file.`,
 		})
 	}
 	if !strings.Contains(source, "category: agentic-product-testing") || !strings.Contains(lock, `"category":"agentic-product-testing"`) {
@@ -673,6 +654,7 @@ type ghWorkflowRun struct {
 	CreatedAt    string `json:"createdAt"`
 	DatabaseID   int64  `json:"databaseId"`
 	DisplayTitle string `json:"displayTitle"`
+	Event        string `json:"event"`
 	HeadBranch   string `json:"headBranch"`
 	HeadSHA      string `json:"headSha"`
 	Status       string `json:"status"`

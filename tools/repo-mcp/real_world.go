@@ -22,7 +22,7 @@ const (
 	realWorldRunArtifactFileName      = "dollarlint.json"
 	realWorldEntrySchema              = "../metadata.schema.json"
 	realWorldHistorySchemaVersion     = 4
-	realWorldMCPContractVersion       = 11
+	realWorldMCPContractVersion       = 12
 	realWorldManifestName             = "real-world-manifest.json"
 	realWorldCorpusTempPrefix         = "dollarlint-corpus."
 	realWorldCacheTempPrefix          = "dollarlint-cache."
@@ -80,6 +80,8 @@ func (s *repoServer) realWorldMCPContract(ctx context.Context) map[string]any {
 		"analysisTools": []string{
 			"real_world_artifact_query",
 			"real_world_recommendation_backlog",
+			"real_world_remote_runs",
+			"real_world_remote_run",
 		},
 	}
 }
@@ -1787,13 +1789,28 @@ func realWorldNextAfterRecord(entry realWorldEntry) map[string]any {
 		"finalResponseContract": realWorldFinalResponseContract(),
 	}
 	if inGitHubAgenticWorkflow() {
+		workflowRunURL := githubActionsRunURL()
 		next["githubAgenticWorkflow"] = true
 		next["discussion"] = "Publish a GitHub Discussion summary from the recorded MCP entry, including a Durable memory PR section that says the PR should be merged in order to retain the results."
 		next["pullRequest"] = "Request create_pull_request when recorded result files changed; include the workflow run URL in the PR body because a deterministic follow-up workflow uses it to cross-link the PR and Discussion."
+		if workflowRunURL != "" {
+			next["workflowRunURL"] = workflowRunURL
+			next["pullRequest"] = "Request create_pull_request when recorded result files changed; include this workflow run URL in the PR body because a deterministic follow-up workflow uses it to cross-link the PR and Discussion: " + workflowRunURL
+		}
 		next["safeOutputs"] = "If safe outputs are exposed through the safeoutputs CLI wrapper, pipe inline JSON with printf instead of writing temporary payload files; temp-file payload writes may be denied by the agent sandbox."
 		next["outputLinking"] = "No extra linker tool call is needed. The follow-up GitHub workflow cross-links the PR and Discussion after this run completes."
 	}
 	return next
+}
+
+func githubActionsRunURL() string {
+	serverURL := strings.TrimRight(os.Getenv("GITHUB_SERVER_URL"), "/")
+	repository := strings.Trim(os.Getenv("GITHUB_REPOSITORY"), "/")
+	runID := strings.TrimSpace(os.Getenv("GITHUB_RUN_ID"))
+	if serverURL == "" || repository == "" || runID == "" {
+		return ""
+	}
+	return serverURL + "/" + repository + "/actions/runs/" + runID
 }
 
 func inGitHubAgenticWorkflow() bool {

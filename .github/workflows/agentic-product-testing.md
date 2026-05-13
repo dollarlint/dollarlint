@@ -2,10 +2,6 @@
 on:
   workflow_dispatch:
     inputs:
-      candidate_repos:
-        description: Optional JSON array of repositories with name, ecosystem, and cloneURL. Leave empty for MCP-managed discovery.
-        required: false
-        type: string
       max_repos:
         description: Maximum number of fresh repositories to test.
         required: false
@@ -57,7 +53,7 @@ tools:
     - tail
     - wc
     # The repo MCP CLI wrapper is broad here, but the server exposes only
-    # real_world_* tools via DOLLARLINT_MCP_TOOLS below.
+    # non-remote real_world_* tools via DOLLARLINT_MCP_TOOLS below.
     - dollarlint-repo:*
   github:
     toolsets: [repos]
@@ -75,7 +71,7 @@ mcp-servers:
     env:
       GITHUB_WORKSPACE: "${GITHUB_WORKSPACE}"
       DOLLARLINT_REPO_ROOT: "${GITHUB_WORKSPACE}"
-      DOLLARLINT_MCP_TOOLS: "real_world_*"
+      DOLLARLINT_MCP_TOOLS: "real_world_* !real_world_remote_*"
       PATH: /usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       GOCACHE: /tmp/go-cache
       GOMODCACHE: /tmp/go-mod-cache
@@ -85,7 +81,6 @@ mcp-servers:
       - "*"
 
 env:
-  CANDIDATE_REPOS: ${{ inputs.candidate_repos || '' }}
   MAX_REPOS: ${{ inputs.max_repos || '10' }}
 
 pre-agent-steps:
@@ -134,28 +129,9 @@ timeout-minutes: 90
 
 # Agentic Product Testing
 
-Run an Agentic Product Testing sweep for DollarLint, record the structured result, and open one GitHub Discussion with the results.
+Run real-world testing for `${{ env.MAX_REPOS }}` repos.
 
-Use the `dollarlint-repo` MCP server as the workflow source of truth. Start with `real_world_start_testing`, then follow the `nextStep` guidance returned by the `real_world_*` tools until the run is recorded. Prefer the MCP wizard over shell commands and hand-written reports. If the MCP capabilities are missing or stale, stop and publish a blocker summary instead of improvising.
-
-Manual dispatch inputs for this run:
-- max_repos: `${{ github.event.inputs.max_repos }}`
-- candidate_repos: `${{ github.event.inputs.candidate_repos }}`
-
-Before calling `real_world_start_testing`, derive only the numeric target and any literal repository list from those inputs. Treat a missing or empty `max_repos` as `10`. If `candidate_repos` is a non-empty JSON array, parse it and pass at most `max_repos` entries exactly to `real_world_start_testing.repositories`; do not substitute different repositories unless MCP history reports duplicates and `allowPreviouslyTested` is false. If `candidate_repos` is empty, call `real_world_start_testing` with `targetCount: max_repos` and no repositories, then follow its `nextStep` to `real_world_discover_candidates`; do not run `gh search`, `gh repo list`, web searches, local metadata mining, or hand-curated replacement lists for candidate selection. If duplicates are reported, use the returned `candidateSetID` and call `real_world_update_candidates` with a small `diff.replace`, `diff.remove`, or `diff.add` instead of resubmitting the full repository list. When the candidate set is ready, prefer passing only `candidateSetID` and `expectedCount` to `real_world_prepare_corpus`.
-
-The workflow pre-builds `bin/dollarlint`; when the MCP flow asks for validation arguments, use `build: false` so validation uses the prebuilt CLI. Keep long-running prep or validation MCP calls open for progress notifications, and do not poll with shell sleep loops.
-
-Dependency prep is controlled structurally, not by judgment alone: this workflow does not expose package-manager commands through `tools.bash`, the agent job has read-only GitHub permissions, and `create_pull_request` is restricted to `reports/agentic-product-testing/**`. Use only the `real_world_*` MCP tools for cloning, inspection, validation, and result recording. Treat MCP `suggestedCommands` as audit guidance for dependency-prep notes; do not execute package-manager install/fetch commands from the agent shell. If schema fidelity would require dependency materialization that the MCP server cannot perform safely, record dependency prep as skipped or needs-review with the reason.
-
-Durable repository memory must be written through `real_world_record_result` and the structured JSON run directory it manages under `reports/agentic-product-testing/<run-id>/`. Do not create Markdown report files or a shared summary index. Product recommendations are mandatory: include a `high`, `med`, or `low` strength with rationale, or record an explicit no-change recommendation when DollarLint behaved reasonably. If `real_world_record_result` changes repository files, `create_pull_request` is mandatory because merging that PR is how the repo remembers tested repositories. The PR body must say that it should be merged in order to retain the results in Agentic Product Testing memory and must include this workflow run URL: `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`.
-
-After recording, create exactly one GitHub Discussion through the configured safe output in the `Agentic Product Testing` category. Keep it concise: result counts, tested repositories, notable findings, product recommendations with strength labels, persisted artifact path, DollarLint commit, and workflow run URL. Format tested repositories as Markdown links using `discussionPacket.repositories[].markdown` when available; avoid a plain comma-separated repository list when URLs are known. Include `@agorischek` near the top of the Discussion body so the owner is notified. Put verbose examples or raw warnings inside `<details>` blocks. The Discussion body must include a "Durable memory PR" section saying that a companion PR will be opened and that the PR should be merged in order to retain the results for future sweeps. If the Discussion falls back to an issue, say that the intended destination was a Discussion.
-
-The workflow may expose safe outputs either as direct tools or through a `safeoutputs` CLI wrapper. Use the available safe-output interface, but do not stop after committing locally. If using the CLI wrapper, send inline JSON on stdin with `printf '%s' '<json>' | safeoutputs create_pull_request .` and `printf '%s' '<json>' | safeoutputs create_discussion .`; do not rely on temporary payload files. A successful `create_pull_request` request may return only a patch artifact path during the agent job. Treat that as expected and successful; the later `safe_outputs` job turns the patch artifact into the actual PR, and the deterministic follow-up workflow links the final PR and Discussion URLs. Do not call `report_incomplete` merely because `create_pull_request` returned a patch artifact instead of an immediate PR URL.
-
-After requesting both `create_pull_request` and `create_discussion`, no extra linking tool call is needed. A deterministic follow-up workflow cross-links the final PR and Discussion URLs after the run completes.
-
-Do not fabricate results. If cloning, preparation, validation, triage, or recording blocks before a meaningful sweep completes, publish a short blocker summary with any partial artifacts and the next concrete fix.
-
-Final response: choose exactly one outcome. Either recommend product changes to consider with strength and rationale grounded in the MCP record, or state that the product behaved reasonably and no product change is recommended. Do not finish with only raw counts or run mechanics.
+Use `real_world_start_testing` and follow MCP `nextStep` guidance until recorded.
+If files changed, create the results PR.
+Open one Discussion with counts, linked repos, findings, recommendations, artifact path, commit, run URL, and `@agorischek`.
+If blocked, publish a concise blocker.

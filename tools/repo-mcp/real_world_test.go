@@ -1326,9 +1326,15 @@ func TestRealWorldNextAfterRecordOnlyMentionsDiscussionInAgenticWorkflow(t *test
 	}
 
 	t.Setenv("GH_AW_WORKFLOW_ID", "agentic-product-testing")
+	t.Setenv("GITHUB_SERVER_URL", "https://github.example")
+	t.Setenv("GITHUB_REPOSITORY", "dollarlint/dollarlint")
+	t.Setenv("GITHUB_RUN_ID", "12345")
 	next = realWorldNextAfterRecord(realWorldEntry{ID: "sample"})
 	if _, ok := next["discussion"]; !ok {
 		t.Fatalf("GitHub Agentic Workflow run should include discussion guidance: %+v", next)
+	}
+	if next["workflowRunURL"] != "https://github.example/dollarlint/dollarlint/actions/runs/12345" {
+		t.Fatalf("workflowRunURL = %v", next["workflowRunURL"])
 	}
 }
 

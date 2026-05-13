@@ -50,6 +50,17 @@ func (s *repoServer) addTools() {
 		"includeNoChange": map[string]any{"type": "boolean", "description": "Include explicit no-product-change recommendations. Defaults to false."},
 		"topic":           map[string]any{"type": "string", "description": "Optional exact cluster key or title substring to filter."},
 	}), s.handleRealWorldRecommendationBacklog, true)
+	s.addToolWithHints("real_world_remote_runs", "List recent remote GitHub Agentic Product Testing workflow runs and optionally correlate them with durable-memory PRs, Discussions, and recorded entries.", schemaObject(map[string]any{
+		"limit":        map[string]any{"type": "integer", "description": "Maximum workflow runs to return. Defaults to 10; capped at 50."},
+		"branch":       map[string]any{"type": "string", "description": "Optional branch filter passed to gh run list."},
+		"status":       map[string]any{"type": "string", "description": "Optional GitHub Actions status or conclusion filter accepted by gh run list, such as success, failure, or in_progress."},
+		"event":        map[string]any{"type": "string", "description": "Optional event filter passed to gh run list, such as workflow_dispatch or schedule."},
+		"includeLinks": map[string]any{"type": "boolean", "description": "When true, query GitHub PRs and Discussions for durable-memory links for each listed run. Defaults to false."},
+	}), s.handleRealWorldRemoteRuns, toolHints{ReadOnly: true, OpenWorld: true})
+	s.addToolWithHints("real_world_remote_run", "Inspect one remote GitHub Agentic Product Testing workflow run, including job status, artifacts, durable-memory links, and recorded entry hints.", schemaObject(map[string]any{
+		"runID":        map[string]any{"type": "string", "description": "GitHub Actions numeric run id, or a run URL containing /actions/runs/<id>."},
+		"includeSteps": map[string]any{"type": "boolean", "description": "Include per-step job details. Defaults to false to keep responses compact."},
+	}), s.handleRealWorldRemoteRun, toolHints{ReadOnly: true, OpenWorld: true})
 	s.addTool("real_world_start_testing", "Start a guided real-world validation sweep, check structured history and candidate duplicates, and return the next MCP tool to call.", schemaObject(map[string]any{
 		"title":                 map[string]any{"type": "string", "description": "Short sweep title."},
 		"repositories":          realWorldRepositoryArraySchema("Candidate repositories to check before preparing the corpus."),

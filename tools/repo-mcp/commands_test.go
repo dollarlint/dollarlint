@@ -18,8 +18,8 @@ func TestRepoCommandShellFallsBackToSh(t *testing.T) {
 	}
 }
 
-func TestRepoCommandShellPreservesLoginShellForZshAndBash(t *testing.T) {
-	for _, shell := range []string{"/bin/zsh", "/bin/bash"} {
+func TestRepoCommandShellPreservesLoginShellForZshOnly(t *testing.T) {
+	for _, shell := range []string{"/bin/zsh"} {
 		t.Run(filepath.Base(shell), func(t *testing.T) {
 			gotShell, args := repoCommandShellWith(shell, func(name string) bool {
 				return name == shell
@@ -31,6 +31,18 @@ func TestRepoCommandShellPreservesLoginShellForZshAndBash(t *testing.T) {
 				t.Fatalf("args = %v, want [-lc]", args)
 			}
 		})
+	}
+}
+
+func TestRepoCommandShellUsesNonLoginBash(t *testing.T) {
+	shell, args := repoCommandShellWith("/bin/bash", func(name string) bool {
+		return name == "/bin/bash"
+	})
+	if shell != "/bin/bash" {
+		t.Fatalf("shell = %q, want /bin/bash", shell)
+	}
+	if len(args) != 1 || args[0] != "-c" {
+		t.Fatalf("args = %v, want [-c]", args)
 	}
 }
 

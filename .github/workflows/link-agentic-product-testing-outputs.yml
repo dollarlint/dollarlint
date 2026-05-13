@@ -76,11 +76,6 @@ jobs:
               }
             }
 
-            if (!pullRequest) {
-              core.setFailed(`Could not find an Agentic Product Testing PR for ${runUrl}.`);
-              return;
-            }
-
             const discussionData = await github.graphql(
               `query($owner: String!, $repo: String!) {
                 repository(owner: $owner, name: $repo) {
@@ -106,6 +101,15 @@ jobs:
               const body = item.body || '';
               return body.includes(runUrl) || body.includes(marker);
             });
+
+            if (!pullRequest) {
+              if (discussion) {
+                core.info(`No Agentic Product Testing PR found for ${runUrl}; treating ${discussion.url} as a blocker-only run.`);
+                return;
+              }
+              core.setFailed(`Could not find an Agentic Product Testing PR or Discussion for ${runUrl}.`);
+              return;
+            }
 
             if (!discussion) {
               core.setFailed(`Could not find an Agentic Product Testing Discussion for ${runUrl}.`);

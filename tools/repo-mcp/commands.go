@@ -197,10 +197,12 @@ func repoCommandShellWith(preferred string, exists func(string) bool) (string, [
 }
 
 func repoCommandShellArgs(shell string) []string {
-	if filepath.Base(shell) == "sh" {
+	switch filepath.Base(shell) {
+	case "zsh":
+		return []string{"-lc"}
+	default:
 		return []string{"-c"}
 	}
-	return []string{"-lc"}
 }
 
 func commandExists(name string) bool {

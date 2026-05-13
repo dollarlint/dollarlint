@@ -60,7 +60,7 @@ func hasTrailingPathSeparator(path, goos string) bool {
 	if goos == "windows" {
 		return strings.HasSuffix(path, `\`) || strings.HasSuffix(path, "/")
 	}
-	return strings.HasSuffix(path, string(filepath.Separator))
+	return strings.HasSuffix(path, "/")
 }
 
 func isLocalAbsolutePath(path, goos string) bool {

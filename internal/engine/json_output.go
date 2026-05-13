@@ -230,7 +230,7 @@ func displaySchema(schema, root string) string {
 	if err != nil || parsed.Scheme != "file" {
 		return schema
 	}
-	path, err := url.PathUnescape(parsed.Path)
+	path, err := filePathFromURL(parsed)
 	if err != nil {
 		return schema
 	}

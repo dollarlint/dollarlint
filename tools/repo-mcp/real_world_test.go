@@ -896,13 +896,14 @@ exit 1
 	if runtime.GOOS == "windows" {
 		fakeGit = filepath.Join(fakeBin, "git.cmd")
 		fakeGitScript = `@echo off
+setlocal enabledelayedexpansion
 if "%1"=="clone" (
   set "target="
   for %%A in (%*) do set "target=%%~A"
-  mkdir "%target%\config"
-  > "%target%\package.json" echo {"name":"fake"}
-  > "%target%\config\tool.json" echo {"$schema":"./schema.json"}
-  > "%target%\config\schema.json" echo {"type":"object"}
+  mkdir "!target!\config"
+  > "!target!\package.json" echo {"name":"fake"}
+  > "!target!\config\tool.json" echo {"$schema":"./schema.json"}
+  > "!target!\config\schema.json" echo {"type":"object"}
   exit /b 0
 )
 if "%1"=="rev-parse" (

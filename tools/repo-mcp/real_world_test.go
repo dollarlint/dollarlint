@@ -1389,6 +1389,23 @@ func TestRealWorldNextAfterRecordOnlyMentionsDiscussionInAgenticWorkflow(t *test
 	}
 }
 
+func TestRealWorldNextFixBuildMentionsSafeOutputsInAgenticWorkflow(t *testing.T) {
+	t.Setenv("GITHUB_ACTIONS", "true")
+	next := realWorldNextFixBuild()
+	if _, ok := next["safeOutputs"]; ok {
+		t.Fatalf("generic GitHub Actions run should not include safe output guidance: %+v", next)
+	}
+
+	t.Setenv("GH_AW_WORKFLOW_ID", "agentic-product-testing")
+	next = realWorldNextFixBuild()
+	if _, ok := next["safeOutputs"]; !ok {
+		t.Fatalf("GitHub Agentic Workflow run should include safe output guidance: %+v", next)
+	}
+	if _, ok := next["blockedRun"]; !ok {
+		t.Fatalf("GitHub Agentic Workflow run should include blocker guidance: %+v", next)
+	}
+}
+
 func TestCreateRealWorldOutputPath(t *testing.T) {
 	path, err := createRealWorldOutputPath("My Sweep", "")
 	if err != nil {

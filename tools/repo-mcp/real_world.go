@@ -1732,13 +1732,19 @@ func realWorldNextRunCorpus(runID, corpusDir, cacheDir, outputArtifact, manifest
 }
 
 func realWorldNextFixBuild() map[string]any {
-	return map[string]any{
+	next := map[string]any{
 		"tool": "verify",
 		"why":  "The CLI build failed before validation; inspect the build output and fix or report the blocker before recording a sweep.",
 		"suggestedArgs": map[string]any{
 			"profile": "quick",
 		},
 	}
+	if inGitHubAgenticWorkflow() {
+		next["githubAgenticWorkflow"] = true
+		next["blockedRun"] = "Publish a concise blocker Discussion and report the run incomplete; do not invent validation results or record a sweep."
+		next["safeOutputs"] = "If safe outputs are exposed through the safeoutputs CLI wrapper, pipe inline JSON with printf instead of writing temporary payload files; temp-file payload writes may be denied by the agent sandbox."
+	}
+	return next
 }
 
 func realWorldNextTriageRun(runID string) map[string]any {

@@ -142,18 +142,24 @@ func (s *repoServer) run(ctx context.Context, command namedCommand) commandResul
 	if command.Dir != "" {
 		dir = filepath.Join(s.root, command.Dir)
 	}
-	cmd := exec.CommandContext(ctx, "/bin/zsh", "-lc", command.Cmd)
+	shell, shellArgs := repoCommandShell()
+	cmdArgs := append(append([]string{}, shellArgs...), command.Cmd)
+	cmd := exec.CommandContext(ctx, shell, cmdArgs...)
 	cmd.Dir = dir
 	var output bytes.Buffer
 	cmd.Stdout = &output
 	cmd.Stderr = &output
 	err := cmd.Run()
+	outputText := output.String()
 	exitCode := 0
 	if err != nil {
 		exitCode = 1
 		var exitErr *exec.ExitError
 		if errors.As(err, &exitErr) {
 			exitCode = exitErr.ExitCode()
+		}
+		if strings.TrimSpace(outputText) == "" {
+			outputText = err.Error()
 		}
 	}
 	return commandResult{
@@ -162,7 +168,7 @@ func (s *repoServer) run(ctx context.Context, command namedCommand) commandResul
 		Command:     command.Cmd,
 		ExitCode:    exitCode,
 		Duration:    time.Since(start).Round(time.Millisecond).String(),
-		Output:      truncate(output.String(), 12000),
+		Output:      truncate(outputText, 12000),
 		Succeeded:   err == nil,
 		FailureHint: command.FailureHint,
 	}
@@ -170,6 +176,40 @@ func (s *repoServer) run(ctx context.Context, command namedCommand) commandResul
 
 func (s *repoServer) output(ctx context.Context, cmd string) string {
 	return s.run(ctx, namedCommand{Name: cmd, Cmd: cmd}).Output
+}
+
+func repoCommandShell() (string, []string) {
+	return repoCommandShellWith(strings.TrimSpace(os.Getenv("DOLLARLINT_MCP_SHELL")), commandExists)
+}
+
+func repoCommandShellWith(preferred string, exists func(string) bool) (string, []string) {
+	candidates := []string{}
+	if preferred != "" {
+		candidates = append(candidates, preferred)
+	}
+	candidates = append(candidates, "/bin/zsh", "/bin/bash", "/bin/sh")
+	for _, candidate := range candidates {
+		if exists(candidate) {
+			return candidate, repoCommandShellArgs(candidate)
+		}
+	}
+	return "/bin/sh", []string{"-c"}
+}
+
+func repoCommandShellArgs(shell string) []string {
+	if filepath.Base(shell) == "sh" {
+		return []string{"-c"}
+	}
+	return []string{"-lc"}
+}
+
+func commandExists(name string) bool {
+	if filepath.IsAbs(name) {
+		info, err := os.Stat(name)
+		return err == nil && !info.IsDir()
+	}
+	_, err := exec.LookPath(name)
+	return err == nil
 }
 
 type progress struct {

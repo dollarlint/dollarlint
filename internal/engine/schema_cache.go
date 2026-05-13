@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -360,12 +361,29 @@ func defaultPersistentSchemaCacheDir() string {
 }
 
 func filePathFromURL(parsed *url.URL) (string, error) {
+	return filePathFromURLForOS(parsed, runtime.GOOS)
+}
+
+func filePathFromURLForOS(parsed *url.URL, goos string) (string, error) {
 	path, err := url.PathUnescape(parsed.Path)
 	if err != nil {
 		return "", err
 	}
 	if path == "" {
 		return "", fmt.Errorf("empty file URL path")
+	}
+	if goos == "windows" {
+		switch host := parsed.Host; {
+		case host == "" || strings.EqualFold(host, "localhost"):
+			if strings.HasPrefix(path, "/") && isWindowsDriveAbsolutePath(path[1:]) {
+				path = path[1:]
+			}
+		case isWindowsDrive(host):
+			path = host + path
+		default:
+			path = `\\` + host + path
+		}
+		return strings.ReplaceAll(path, "/", `\`), nil
 	}
 	return filepath.FromSlash(path), nil
 }

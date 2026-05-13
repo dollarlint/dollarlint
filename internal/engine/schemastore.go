@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -366,6 +367,10 @@ func resolveCatalogEntryURL(baseURL *url.URL, raw string) string {
 }
 
 func resolveCatalogURI(raw string) (string, error) {
+	if isLocalAbsolutePath(raw, runtime.GOOS) {
+		file, _ := fileURL(raw)
+		return file.String(), nil
+	}
 	parsed, err := url.Parse(raw)
 	if err != nil {
 		return "", fmt.Errorf("parse catalog URL %q: %w", raw, err)

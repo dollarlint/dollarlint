@@ -3,7 +3,6 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -333,7 +332,11 @@ func validateResultSchema(t *testing.T, data []byte) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	schemaURI := (&url.URL{Scheme: "file", Path: filepath.ToSlash(schemaPath)}).String()
+	schemaURL, err := fileURL(schemaPath)
+	if err != nil {
+		t.Fatalf("schema file URL: %v", err)
+	}
+	schemaURI := schemaURL.String()
 	schema, err := jsonschema.NewCompiler().Compile(schemaURI)
 	if err != nil {
 		t.Fatalf("compile result schema: %v", err)

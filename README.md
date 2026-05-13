@@ -103,6 +103,7 @@ dollarlint init
 dollarlint init ./packages/api --catalogs
 dollarlint init --output ./packages/api/.dollarlint.toml
 dollarlint init --defaults --catalogs
+dollarlint init --defaults --comments
 ```
 
 ### Validate files

@@ -500,6 +500,41 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 	}
 }
 
+func TestInitCommandCreatesCommentedStarterConfigWithDefaults(t *testing.T) {
+	dir := t.TempDir()
+	var stdout, stderr bytes.Buffer
+	if code := Execute([]string{"init", dir, "--defaults", "--comments", "--catalogs=false", "--fetch-retries", "4"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("commented defaults init exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if strings.Contains(stdout.String(), "No interactive terminal detected") {
+		t.Fatalf("--defaults should silence noninteractive explanation with comments: %s", stdout.String())
+	}
+	configPath := filepath.Join(dir, ".dollarlint.toml")
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatalf("read commented config: %v", err)
+	}
+	config := string(data)
+	for _, expected := range []string{
+		"version = 1 # Config schema version.",
+		`mode = "auto" # Parse .json as strict JSON first, then allow JSONC-style comments and trailing commas when needed.`,
+		"retries = 4 # Retry transient remote fetch failures this many times.",
+		"enabled = false # Infer schemas for conventional config filenames from configured catalogs.",
+		`# file = "settings/*.toml" # File glob to match.`,
+	} {
+		if !strings.Contains(config, expected) {
+			t.Fatalf("commented config missing %q:\n%s", expected, config)
+		}
+	}
+	loaded, _, err := dollarlint.LoadConfig(dir, "")
+	if err != nil {
+		t.Fatalf("load commented config: %v\n%s", err, config)
+	}
+	if loaded.Schemas.Fetch.Retries == nil || *loaded.Schemas.Fetch.Retries != 4 || loaded.Schemas.Catalogs.Enabled {
+		t.Fatalf("loaded commented config = %+v", loaded)
+	}
+}
+
 func TestInitCommandRequiresTOML(t *testing.T) {
 	dir := t.TempDir()
 	var stdout, stderr bytes.Buffer
@@ -580,6 +615,9 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 	}
 	if strings.Contains(config, "fetchRemote") || strings.Contains(config, "strict =") || strings.Contains(config, "[timeouts]") || strings.Contains(config, "include = [") {
 		t.Fatalf("default config contains removed keys:\n%s", config)
+	}
+	if strings.Contains(config, "Config schema version.") || strings.Contains(config, "Retry transient remote fetch failures") {
+		t.Fatalf("default config should not include explanatory comments without --comments:\n%s", config)
 	}
 }
 

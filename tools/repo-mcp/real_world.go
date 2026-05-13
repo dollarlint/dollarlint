@@ -1786,13 +1786,13 @@ func realWorldNextAfterRecord(entry realWorldEntry) map[string]any {
 	if inGitHubAgenticWorkflow() {
 		workflowRunURL := githubActionsRunURL()
 		next["githubAgenticWorkflow"] = true
-		next["discussion"] = "Publish a GitHub Discussion summary from the recorded MCP entry, including a Durable memory PR section that says the PR should be merged in order to retain the results."
-		next["pullRequest"] = "Request create_pull_request when recorded result files changed; include the workflow run URL in the PR body because a deterministic follow-up workflow uses it to cross-link the PR and Discussion."
+		next["discussion"] = "Use the safeoutputs MCP create_discussion tool to publish a GitHub Discussion summary from the recorded MCP entry, including a Durable memory PR section that says the PR should be merged in order to retain the results."
+		next["pullRequest"] = "Use the safeoutputs MCP create_pull_request tool after every successful recorded run; real_world_record_result writes reports/agentic-product-testing artifacts, so do not rely on a git status captured before recording. Include the workflow run URL in the PR body because a deterministic follow-up workflow uses it to cross-link the PR and Discussion."
 		if workflowRunURL != "" {
 			next["workflowRunURL"] = workflowRunURL
-			next["pullRequest"] = "Request create_pull_request when recorded result files changed; include this workflow run URL in the PR body because a deterministic follow-up workflow uses it to cross-link the PR and Discussion: " + workflowRunURL
+			next["pullRequest"] = "Use the safeoutputs MCP create_pull_request tool after every successful recorded run; real_world_record_result writes reports/agentic-product-testing artifacts, so do not rely on a git status captured before recording. Include this workflow run URL in the PR body because a deterministic follow-up workflow uses it to cross-link the PR and Discussion: " + workflowRunURL
 		}
-		next["safeOutputs"] = "If safe outputs are exposed through the safeoutputs CLI wrapper, pipe inline JSON with printf instead of writing temporary payload files; temp-file payload writes may be denied by the agent sandbox."
+		next["safeOutputs"] = "Prefer safeoutputs MCP tools over shell. Do not invoke safeoutputs through shell, cat, temp files, or commands prefixed with cd; shell safeoutput payload writes may be denied by the agent sandbox."
 		next["outputLinking"] = "No extra linker tool call is needed. The follow-up GitHub workflow cross-links the PR and Discussion after this run completes."
 	}
 	return next

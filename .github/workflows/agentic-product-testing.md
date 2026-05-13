@@ -132,6 +132,7 @@ timeout-minutes: 90
 Run real-world testing for `${{ env.MAX_REPOS }}` repos.
 
 Use `real_world_start_testing` and follow MCP `nextStep` guidance until recorded.
-If files changed, create the results PR.
+Use safeoutputs MCP tools, not shell, for the PR and Discussion.
+After a successful recorded run, create the results PR.
 Open one Discussion with counts, linked repos, findings, recommendations, artifact path, commit, run URL, and `@agorischek`.
 If blocked, publish a concise blocker.

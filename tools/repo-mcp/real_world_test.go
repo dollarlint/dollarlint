@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -101,6 +103,55 @@ func TestRealWorldStartTestingOmitsFullHistoryByDefault(t *testing.T) {
 	testedRepos := withRepos["testedRepos"].([]realWorldTestedRepo)
 	if len(testedRepos) != 3 || withRepos["testedReposTruncated"] != true {
 		t.Fatalf("tested repo sample len/truncated = %d/%v", len(testedRepos), withRepos["testedReposTruncated"])
+	}
+}
+
+func TestRealWorldSearchGitHubRepositoriesUsesGitHubSDK(t *testing.T) {
+	var sawRequest bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sawRequest = true
+		if r.URL.Path != "/search/repositories" {
+			t.Errorf("path = %q, want /search/repositories", r.URL.Path)
+		}
+		if got := r.URL.Query().Get("q"); got != "language:Go stars:>=10" {
+			t.Errorf("q = %q", got)
+		}
+		if got := r.URL.Query().Get("per_page"); got != "2" {
+			t.Errorf("per_page = %q", got)
+		}
+		if got := r.URL.Query().Get("sort"); got != "updated" {
+			t.Errorf("sort = %q", got)
+		}
+		if got := r.Header.Get("Authorization"); got != "Bearer test-token" {
+			t.Errorf("Authorization = %q", got)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"items": []map[string]any{
+				{"full_name": "owner/project", "clone_url": "https://github.com/owner/project.git", "language": "Go"},
+				{"full_name": "owner/fork", "clone_url": "https://github.com/owner/fork.git", "language": "Go", "fork": true},
+			},
+		})
+	}))
+	defer server.Close()
+	t.Setenv("DOLLARLINT_GITHUB_API_URL", server.URL)
+	t.Setenv("GITHUB_TOKEN", "test-token")
+
+	repositories, err := realWorldSearchGitHubRepositories(context.Background(), t.TempDir(), realWorldCandidateSearchSpec{
+		Ecosystem: "Go",
+		Query:     "language:Go stars:>=10",
+	}, 2)
+	if err != nil {
+		t.Fatalf("search repositories: %v", err)
+	}
+	if !sawRequest {
+		t.Fatal("server did not receive request")
+	}
+	if len(repositories) != 1 {
+		t.Fatalf("repositories = %+v", repositories)
+	}
+	if repositories[0].Name != "owner-project" || repositories[0].CloneURL != "https://github.com/owner/project.git" || repositories[0].Ecosystem != "Go" {
+		t.Fatalf("repository = %+v", repositories[0])
 	}
 }
 

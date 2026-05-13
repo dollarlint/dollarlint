@@ -39,6 +39,23 @@ jobs:
             }
           }'
 
+  test-windows:
+    name: Test Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify modules
+        run: go mod verify
+
+      - name: Test
+        run: go test ./...
+
   quality:
     runs-on: ubuntu-latest
     steps:

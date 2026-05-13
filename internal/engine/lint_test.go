@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -90,6 +91,31 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	var decoded Result
 	if err := json.Unmarshal(data, &decoded); err != nil {
 		t.Fatalf("json output invalid: %v", err)
+	}
+}
+
+func TestLintResolvesRelativeInlineSchemaPathOnWindows(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("exercises Windows file URL to filesystem path conversion")
+	}
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Schemas", "x.json"), `{
+  "type": "object",
+  "required": ["name"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {"type": "string"},
+    "name": {"type": "string"}
+  }
+}`)
+	writeFile(t, filepath.Join(dir, "fixture.json"), `{"$schema":"./Schemas/x.json","name":"ok"}`)
+
+	result, err := Lint(context.Background(), Options{Root: dir, Config: configWithoutSchemaStore()})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if result.Summary.Validated != 1 || result.Summary.Failed != 0 || result.HasIssues() {
+		t.Fatalf("relative Windows schema should validate cleanly: summary=%+v issues=%+v files=%+v", result.Summary, result.Issues, result.Files)
 	}
 }
 

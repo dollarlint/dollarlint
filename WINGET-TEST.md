@@ -10,7 +10,7 @@ To keep the validation script useful in the meantime, `scripts/test-winget-manif
 
 ## CI automation
 
-`.github/workflows/release.yml` owns the normal release path in one Actions run: GoReleaser publishes the release outputs and opens the draft WinGet PR branch, then the `winget-manifest-validation` job waits for `dollarlint/winget-pkgs@dollarlint-x.y.z` and runs `scripts/test-winget-manifest.ps1 -PackageVersion x.y.z -Branch dollarlint-x.y.z -AllowManualFallback -UninstallAfter` on `windows-latest`.
+`.github/workflows/release.yml` owns the normal release path in one Actions run: GoReleaser publishes the release outputs and opens the draft WinGet PR branch, then the `winget-manifest-validation` job waits for `dollarlint/winget-pkgs@dollarlint-x.y.z` and runs `scripts/test-winget-manifest.ps1 -PackageVersion x.y.z -Branch dollarlint-x.y.z -AllowManualFallback -UninstallAfter` on `windows-latest`. After validation passes, the same job replaces the WinGet PR body with a checked Microsoft-template description, adds the validation run URL, and marks the draft PR ready for review.
 
 `.github/workflows/winget-validation.yml` is manual-only for ad hoc checks. Use `manifest-branch` for pre-Microsoft validation of a generated `dollarlint/winget-pkgs` branch, and `official-source` only when checking the package that Microsoft has already merged into the public WinGet source.
 

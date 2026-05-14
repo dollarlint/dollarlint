@@ -200,8 +200,10 @@ function Invoke-Checked {
 
                     if ($lastLogLine -like "*IAttachmentExecute*") {
                         Write-Host "Hint: WinGet failed while applying Mark-of-the-Web with IAttachmentExecute after the installer hash was verified." -ForegroundColor Yellow
-                        Write-Host "      This is the upstream WinGet MOTW bug (microsoft/winget-cli#4046)," -ForegroundColor Yellow
-                        Write-Host "      not a DollarLint manifest, archive, or binary issue." -ForegroundColor Yellow
+                        Write-Host "      This resembles the WinGet MOTW behavior discussed in microsoft/winget-cli#4046," -ForegroundColor Yellow
+                        Write-Host "      but local-manifest installs may be a separate variant. The failure happens" -ForegroundColor Yellow
+                        Write-Host "      after hash verification and before archive extraction, which points away from" -ForegroundColor Yellow
+                        Write-Host "      the DollarLint manifest, archive layout, or binary." -ForegroundColor Yellow
                         Write-Host "      Re-run with -AllowManualFallback to skip WinGet's install and verify the portable layout manually." -ForegroundColor Yellow
                     }
                 }
@@ -474,7 +476,7 @@ catch {
     }
 
     Write-Host ""
-    Write-Step "Falling back to manual portable install (WinGet MOTW bug, microsoft/winget-cli#4046)"
+    Write-Step "Falling back to manual portable install (WinGet MOTW local-manifest failure)"
     Invoke-ManualPortableFallback -ManifestPath $ManifestPath -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
     $script:UsedManualFallback = $true
 }

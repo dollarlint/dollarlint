@@ -1,0 +1,125 @@
+name: WinGet Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Which WinGet path to test"
+        required: true
+        default: official-source
+        type: choice
+        options:
+          - official-source
+          - manifest-branch
+          - both
+      package_version:
+        description: "Expected/tested DollarLint version, e.g. 0.1.5. Leave empty for manifest auto-discovery."
+        required: false
+        default: ""
+      branch:
+        description: "dollarlint/winget-pkgs branch for manifest testing, e.g. dollarlint-0.1.9. Leave empty to derive from package_version or auto-discover."
+        required: false
+        default: ""
+      allow_manual_fallback:
+        description: "Allow manual portable fallback if local-manifest install hits the WinGet MOTW failure"
+        required: true
+        default: true
+        type: boolean
+      runner:
+        description: "Windows runner label"
+        required: true
+        default: windows-latest
+        type: choice
+        options:
+          - windows-latest
+          - windows-11-arm
+
+permissions:
+  contents: read
+
+jobs:
+  winget-validation:
+    name: ${{ inputs.mode }} on ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Inspect Windows and WinGet
+        run: |
+          $ErrorActionPreference = "Stop"
+          Write-Host "Runner OS: $env:ImageOS"
+          Write-Host "Processor architecture: $env:PROCESSOR_ARCHITECTURE"
+          if ($env:PROCESSOR_ARCHITEW6432) {
+            Write-Host "Native processor architecture: $env:PROCESSOR_ARCHITEW6432"
+          }
+          Get-ComputerInfo -Property OsName, OsVersion, OsBuildNumber, WindowsVersion | Format-List
+          Get-Command winget | Format-List Source, Version
+          winget --version
+          winget source list
+
+      - name: Test Microsoft WinGet source package
+        if: ${{ inputs.mode == 'official-source' || inputs.mode == 'both' }}
+        env:
+          EXPECTED_VERSION: ${{ inputs.package_version }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          winget source update
+          winget install `
+            --id DollarLint.DollarLint `
+            --exact `
+            --source winget `
+            --accept-source-agreements `
+            --accept-package-agreements `
+            --disable-interactivity `
+            --verbose-logs
+
+          $command = Get-Command dollarlint -ErrorAction SilentlyContinue
+          if (-not $command) {
+            $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+            $command = Get-Command dollarlint -ErrorAction Stop
+          }
+          Write-Host "dollarlint: $($command.Source)"
+
+          $versionOutput = (& dollarlint version) | Out-String
+          $versionOutput = $versionOutput.Trim()
+          Write-Host $versionOutput
+
+          if ($env:EXPECTED_VERSION -ne "" -and $versionOutput -notmatch [regex]::Escape($env:EXPECTED_VERSION)) {
+            throw "Expected dollarlint version '$env:EXPECTED_VERSION', got '$versionOutput'."
+          }
+
+          winget list --id DollarLint.DollarLint
+
+      - name: Uninstall Microsoft WinGet source package
+        if: ${{ always() && (inputs.mode == 'official-source' || inputs.mode == 'both') }}
+        run: |
+          winget uninstall --id DollarLint.DollarLint --disable-interactivity
+          if ($LASTEXITCODE -ne 0) {
+            Write-Warning "winget uninstall returned $LASTEXITCODE; package may not have been installed."
+          }
+
+      - name: Test manifest branch
+        if: ${{ inputs.mode == 'manifest-branch' || inputs.mode == 'both' }}
+        env:
+          PACKAGE_VERSION: ${{ inputs.package_version }}
+          BRANCH: ${{ inputs.branch }}
+          ALLOW_MANUAL_FALLBACK: ${{ inputs.allow_manual_fallback }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $args = @("-UninstallAfter")
+
+          if ($env:PACKAGE_VERSION -ne "") {
+            $args += @("-PackageVersion", $env:PACKAGE_VERSION)
+          }
+          if ($env:BRANCH -ne "") {
+            $args += @("-Branch", $env:BRANCH)
+          }
+          if ($env:ALLOW_MANUAL_FALLBACK -eq "true") {
+            $args += "-AllowManualFallback"
+          }
+
+          Write-Host ".\scripts\test-winget-manifest.ps1 $($args -join ' ')"
+          .\scripts\test-winget-manifest.ps1 @args

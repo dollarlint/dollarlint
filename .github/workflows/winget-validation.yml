@@ -165,17 +165,23 @@ jobs:
           ALLOW_MANUAL_FALLBACK: ${{ steps.resolve.outputs.allow_manual_fallback }}
         run: |
           $ErrorActionPreference = "Stop"
-          $scriptArgs = @("-UninstallAfter")
+          $scriptParams = @{
+            UninstallAfter = $true
+          }
+          $displayArgs = @("-UninstallAfter")
 
           if ($env:PACKAGE_VERSION -ne "") {
-            $scriptArgs += @("-PackageVersion", $env:PACKAGE_VERSION)
+            $scriptParams.PackageVersion = $env:PACKAGE_VERSION
+            $displayArgs += @("-PackageVersion", $env:PACKAGE_VERSION)
           }
           if ($env:BRANCH -ne "") {
-            $scriptArgs += @("-Branch", $env:BRANCH)
+            $scriptParams.Branch = $env:BRANCH
+            $displayArgs += @("-Branch", $env:BRANCH)
           }
           if ($env:ALLOW_MANUAL_FALLBACK -eq "true") {
-            $scriptArgs += "-AllowManualFallback"
+            $scriptParams.AllowManualFallback = $true
+            $displayArgs += "-AllowManualFallback"
           }
 
-          Write-Host ".\scripts\test-winget-manifest.ps1 $($scriptArgs -join ' ')"
-          .\scripts\test-winget-manifest.ps1 @scriptArgs
+          Write-Host ".\scripts\test-winget-manifest.ps1 $($displayArgs -join ' ')"
+          .\scripts\test-winget-manifest.ps1 @scriptParams

@@ -8,6 +8,12 @@ The failure resembles the MOTW behavior discussed in [microsoft/winget-cli#4046]
 
 To keep the validation script useful in the meantime, `scripts/test-winget-manifest.ps1` now supports a `-AllowManualFallback` switch that reproduces WinGet's portable layout (Packages directory + Links alias + ARP registry entry) when WinGet aborts at the MOTW step. After the fallback runs, `winget list --id DollarLint.DollarLint` reports the package and `dollarlint --version` runs through the WinGet command alias.
 
+## CI automation
+
+`.github/workflows/winget-validation.yml` runs automatically after the `Release` workflow completes successfully. For release tags like `v0.1.9`, it derives `PackageVersion=0.1.9` and `Branch=dollarlint-0.1.9`, then runs `scripts/test-winget-manifest.ps1 -PackageVersion 0.1.9 -Branch dollarlint-0.1.9 -AllowManualFallback -UninstallAfter` on `windows-latest`.
+
+The same workflow can still be run manually with `workflow_dispatch` for ad hoc checks. Use `manifest-branch` for pre-Microsoft validation of a generated `dollarlint/winget-pkgs` branch, and `official-source` only when checking the package that Microsoft has already merged into the public WinGet source.
+
 ## Environment
 
 - OS: Windows Desktop `10.0.26200.8246`

@@ -1,6 +1,11 @@
 name: WinGet Validation
 
 on:
+  workflow_run:
+    workflows:
+      - Release
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       mode:
@@ -39,13 +44,54 @@ permissions:
 
 jobs:
   winget-validation:
-    name: ${{ inputs.mode }} on ${{ inputs.runner }}
-    runs-on: ${{ inputs.runner }}
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    name: ${{ github.event_name == 'workflow_dispatch' && format('{0} on {1}', inputs.mode, inputs.runner) || 'manifest-branch on windows-latest' }}
+    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.runner || 'windows-latest' }}
     defaults:
       run:
         shell: pwsh
     steps:
       - uses: actions/checkout@v6
+
+      - name: Resolve validation inputs
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_MODE: ${{ inputs.mode || '' }}
+          INPUT_PACKAGE_VERSION: ${{ inputs.package_version || '' }}
+          INPUT_BRANCH: ${{ inputs.branch || '' }}
+          INPUT_ALLOW_MANUAL_FALLBACK: ${{ inputs.allow_manual_fallback || 'true' }}
+          RELEASE_REF: ${{ github.event.workflow_run.head_branch || '' }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          if ($env:EVENT_NAME -eq "workflow_dispatch") {
+            $mode = $env:INPUT_MODE
+            $packageVersion = $env:INPUT_PACKAGE_VERSION
+            $branch = $env:INPUT_BRANCH
+            $allowManualFallback = $env:INPUT_ALLOW_MANUAL_FALLBACK
+          } elseif ($env:EVENT_NAME -eq "workflow_run") {
+            if ($env:RELEASE_REF -notmatch "^v(?<version>\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$") {
+              throw "Release workflow ref '$env:RELEASE_REF' does not look like a DollarLint release tag."
+            }
+
+            $packageVersion = $Matches.version
+            $branch = "dollarlint-$packageVersion"
+            $mode = "manifest-branch"
+            $allowManualFallback = "true"
+          } else {
+            throw "Unsupported event '$env:EVENT_NAME'."
+          }
+
+          "mode=$mode" >> $env:GITHUB_OUTPUT
+          "package_version=$packageVersion" >> $env:GITHUB_OUTPUT
+          "branch=$branch" >> $env:GITHUB_OUTPUT
+          "allow_manual_fallback=$allowManualFallback" >> $env:GITHUB_OUTPUT
+
+          Write-Host "mode=$mode"
+          Write-Host "package_version=$packageVersion"
+          Write-Host "branch=$branch"
+          Write-Host "allow_manual_fallback=$allowManualFallback"
 
       - name: Inspect Windows and WinGet
         run: |
@@ -61,9 +107,9 @@ jobs:
           winget source list
 
       - name: Test Microsoft WinGet source package
-        if: ${{ inputs.mode == 'official-source' || inputs.mode == 'both' }}
+        if: ${{ steps.resolve.outputs.mode == 'official-source' || steps.resolve.outputs.mode == 'both' }}
         env:
-          EXPECTED_VERSION: ${{ inputs.package_version }}
+          EXPECTED_VERSION: ${{ steps.resolve.outputs.package_version }}
         run: |
           $ErrorActionPreference = "Stop"
           winget source update
@@ -97,7 +143,7 @@ jobs:
             --accept-source-agreements
 
       - name: Uninstall Microsoft WinGet source package
-        if: ${{ always() && (inputs.mode == 'official-source' || inputs.mode == 'both') }}
+        if: ${{ always() && (steps.resolve.outputs.mode == 'official-source' || steps.resolve.outputs.mode == 'both') }}
         run: |
           winget uninstall `
             --id DollarLint.DollarLint `
@@ -112,11 +158,11 @@ jobs:
           }
 
       - name: Test manifest branch
-        if: ${{ inputs.mode == 'manifest-branch' || inputs.mode == 'both' }}
+        if: ${{ steps.resolve.outputs.mode == 'manifest-branch' || steps.resolve.outputs.mode == 'both' }}
         env:
-          PACKAGE_VERSION: ${{ inputs.package_version }}
-          BRANCH: ${{ inputs.branch }}
-          ALLOW_MANUAL_FALLBACK: ${{ inputs.allow_manual_fallback }}
+          PACKAGE_VERSION: ${{ steps.resolve.outputs.package_version }}
+          BRANCH: ${{ steps.resolve.outputs.branch }}
+          ALLOW_MANUAL_FALLBACK: ${{ steps.resolve.outputs.allow_manual_fallback }}
         run: |
           $ErrorActionPreference = "Stop"
           $args = @("-UninstallAfter")

@@ -43,3 +43,96 @@ jobs:
           WINGET_GITHUB_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+  winget-manifest-validation:
+    name: WinGet manifest validation
+    needs: goreleaser
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Resolve WinGet release branch
+        id: release
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          if ($env:TAG -notmatch "^v(?<version>\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$") {
+            throw "Release tag '$env:TAG' does not look like a DollarLint release tag."
+          }
+
+          $packageVersion = $Matches.version
+          $branch = "dollarlint-$packageVersion"
+
+          "package_version=$packageVersion" >> $env:GITHUB_OUTPUT
+          "branch=$branch" >> $env:GITHUB_OUTPUT
+
+          Write-Host "package_version=$packageVersion"
+          Write-Host "branch=$branch"
+
+      - name: Wait for GoReleaser WinGet branch
+        env:
+          BRANCH: ${{ steps.release.outputs.branch }}
+          GH_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $headers = @{
+            Accept = "application/vnd.github+json"
+            "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          if ($env:GH_TOKEN) {
+            $headers.Authorization = "Bearer $env:GH_TOKEN"
+          }
+
+          $uri = "https://api.github.com/repos/dollarlint/winget-pkgs/branches/$env:BRANCH"
+          for ($attempt = 1; $attempt -le 30; $attempt++) {
+            try {
+              $branch = Invoke-RestMethod -Uri $uri -Headers $headers
+              Write-Host "Found $($branch.name) at $($branch.commit.sha)"
+              exit 0
+            }
+            catch {
+              $statusCode = $null
+              if ($_.Exception.Response) {
+                $statusCode = [int]$_.Exception.Response.StatusCode
+              }
+              if ($statusCode -and $statusCode -ne 404) {
+                throw
+              }
+
+              Write-Host "Waiting for dollarlint/winget-pkgs@$env:BRANCH ($attempt/30)"
+              Start-Sleep -Seconds 10
+            }
+          }
+
+          throw "Timed out waiting for dollarlint/winget-pkgs@$env:BRANCH."
+
+      - name: Inspect Windows and WinGet
+        run: |
+          $ErrorActionPreference = "Stop"
+          Write-Host "Runner OS: $env:ImageOS"
+          Write-Host "Processor architecture: $env:PROCESSOR_ARCHITECTURE"
+          if ($env:PROCESSOR_ARCHITEW6432) {
+            Write-Host "Native processor architecture: $env:PROCESSOR_ARCHITEW6432"
+          }
+          Get-ComputerInfo -Property OsName, OsVersion, OsBuildNumber, WindowsVersion | Format-List
+          Get-Command winget | Format-List Source, Version
+          winget --version
+          winget source list
+
+      - name: Test generated WinGet manifest branch
+        env:
+          PACKAGE_VERSION: ${{ steps.release.outputs.package_version }}
+          BRANCH: ${{ steps.release.outputs.branch }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          Write-Host ".\scripts\test-winget-manifest.ps1 -PackageVersion $env:PACKAGE_VERSION -Branch $env:BRANCH -AllowManualFallback -UninstallAfter"
+          .\scripts\test-winget-manifest.ps1 `
+            -PackageVersion $env:PACKAGE_VERSION `
+            -Branch $env:BRANCH `
+            -AllowManualFallback `
+            -UninstallAfter

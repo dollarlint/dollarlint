@@ -1,11 +1,6 @@
 name: WinGet Validation
 
 on:
-  workflow_run:
-    workflows:
-      - Release
-    types:
-      - completed
   workflow_dispatch:
     inputs:
       mode:
@@ -44,9 +39,8 @@ permissions:
 
 jobs:
   winget-validation:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
-    name: ${{ github.event_name == 'workflow_dispatch' && format('{0} on {1}', inputs.mode, inputs.runner) || 'manifest-branch on windows-latest' }}
-    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.runner || 'windows-latest' }}
+    name: ${{ format('{0} on {1}', inputs.mode, inputs.runner) }}
+    runs-on: ${{ inputs.runner }}
     defaults:
       run:
         shell: pwsh
@@ -56,32 +50,17 @@ jobs:
       - name: Resolve validation inputs
         id: resolve
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          INPUT_MODE: ${{ inputs.mode || '' }}
-          INPUT_PACKAGE_VERSION: ${{ inputs.package_version || '' }}
-          INPUT_BRANCH: ${{ inputs.branch || '' }}
-          INPUT_ALLOW_MANUAL_FALLBACK: ${{ inputs.allow_manual_fallback || 'true' }}
-          RELEASE_REF: ${{ github.event.workflow_run.head_branch || '' }}
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_PACKAGE_VERSION: ${{ inputs.package_version }}
+          INPUT_BRANCH: ${{ inputs.branch }}
+          INPUT_ALLOW_MANUAL_FALLBACK: ${{ inputs.allow_manual_fallback }}
         run: |
           $ErrorActionPreference = "Stop"
 
-          if ($env:EVENT_NAME -eq "workflow_dispatch") {
-            $mode = $env:INPUT_MODE
-            $packageVersion = $env:INPUT_PACKAGE_VERSION
-            $branch = $env:INPUT_BRANCH
-            $allowManualFallback = $env:INPUT_ALLOW_MANUAL_FALLBACK
-          } elseif ($env:EVENT_NAME -eq "workflow_run") {
-            if ($env:RELEASE_REF -notmatch "^v(?<version>\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$") {
-              throw "Release workflow ref '$env:RELEASE_REF' does not look like a DollarLint release tag."
-            }
-
-            $packageVersion = $Matches.version
-            $branch = "dollarlint-$packageVersion"
-            $mode = "manifest-branch"
-            $allowManualFallback = "true"
-          } else {
-            throw "Unsupported event '$env:EVENT_NAME'."
-          }
+          $mode = $env:INPUT_MODE
+          $packageVersion = $env:INPUT_PACKAGE_VERSION
+          $branch = $env:INPUT_BRANCH
+          $allowManualFallback = $env:INPUT_ALLOW_MANUAL_FALLBACK
 
           "mode=$mode" >> $env:GITHUB_OUTPUT
           "package_version=$packageVersion" >> $env:GITHUB_OUTPUT

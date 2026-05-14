@@ -47,6 +47,9 @@ func TestRepoCommandShellUsesNonLoginBash(t *testing.T) {
 }
 
 func TestRunUsesConfiguredPOSIXShell(t *testing.T) {
+	if !commandExists("/bin/sh") {
+		t.Skip("/bin/sh is not available on this platform")
+	}
 	t.Setenv("DOLLARLINT_MCP_SHELL", "/bin/sh")
 	server := &repoServer{root: t.TempDir()}
 	result := server.run(context.Background(), namedCommand{Name: "printf", Cmd: "printf ok"})

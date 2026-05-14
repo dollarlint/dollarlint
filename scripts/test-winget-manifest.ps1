@@ -62,6 +62,7 @@ $WinGetErrors = @{
     "8A15002B" = "Portable package already exists"
     "8A15002F" = "Portable install failed"
     "8A150035" = "Archive malware scan failed - rerun as admin or pass --ignore-local-archive-malware-scan"
+    "8A150028" = "Manifest validation completed with warnings"
 }
 $script:FailureReported = $false
 
@@ -182,6 +183,12 @@ function Invoke-Checked {
         $hexCode = Get-ExitCodeHex $LASTEXITCODE
         $hint = $WinGetErrors[$hexCode]
         $detail = if ($hint) { "$hint (0x$hexCode)" } else { "exit code $LASTEXITCODE (0x$hexCode)" }
+
+        if ($FilePath -eq "winget" -and $Arguments.Count -gt 0 -and $Arguments[0] -eq "validate" -and $hexCode -eq "8A150028") {
+            Write-Host ""
+            Write-Host "Command completed with accepted warning: $detail" -ForegroundColor Yellow
+            return
+        }
 
         Write-Host ""
         Write-Host "Command failed: $detail" -ForegroundColor Red

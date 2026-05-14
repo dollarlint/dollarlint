@@ -91,14 +91,24 @@ jobs:
             throw "Expected dollarlint version '$env:EXPECTED_VERSION', got '$versionOutput'."
           }
 
-          winget list --id DollarLint.DollarLint
+          winget list `
+            --id DollarLint.DollarLint `
+            --source winget `
+            --accept-source-agreements
 
       - name: Uninstall Microsoft WinGet source package
         if: ${{ always() && (inputs.mode == 'official-source' || inputs.mode == 'both') }}
         run: |
-          winget uninstall --id DollarLint.DollarLint --disable-interactivity
-          if ($LASTEXITCODE -ne 0) {
-            Write-Warning "winget uninstall returned $LASTEXITCODE; package may not have been installed."
+          winget uninstall `
+            --id DollarLint.DollarLint `
+            --source winget `
+            --accept-source-agreements `
+            --disable-interactivity
+
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -ne 0) {
+            Write-Warning "winget uninstall returned $exitCode; package may not have been installed."
+            exit 0
           }
 
       - name: Test manifest branch

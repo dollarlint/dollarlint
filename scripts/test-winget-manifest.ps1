@@ -489,7 +489,7 @@ catch {
 }
 
 Write-Step "Checking installed package"
-Invoke-Checked winget list --id $PackageIdentifier
+Invoke-Checked winget list --id $PackageIdentifier --source winget --accept-source-agreements
 
 if (-not $SkipCommandCheck) {
     Write-Step "Checking dollarlint command"
@@ -509,7 +509,7 @@ if ($UninstallAfter) {
         Remove-ManualPortableInstall -PackageIdentifier $PackageIdentifier
     }
     else {
-        Invoke-Checked winget uninstall --id $PackageIdentifier --disable-interactivity
+        Invoke-Checked winget uninstall --id $PackageIdentifier --source winget --accept-source-agreements --disable-interactivity
     }
 }
 

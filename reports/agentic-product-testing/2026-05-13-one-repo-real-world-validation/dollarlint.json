@@ -1,0 +1,606 @@
+{
+  "formatVersion": 1,
+  "json": {
+    "$schema": "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json",
+    "formatVersion": 1,
+    "root": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.720366690",
+    "summary": {
+      "discovered": 8,
+      "validated": 5,
+      "skipped": 3,
+      "failed": 0,
+      "issues": {
+        "total": 10,
+        "parsing": 0,
+        "validation": 10,
+        "schema": 0,
+        "coverage": 0
+      },
+      "ignored": 0,
+      "warnings": 1,
+      "durationNanos": 877937208
+    },
+    "files": [
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "status": "validated",
+        "issues": 10,
+        "ignored": 0
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/workflows/greetings.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/workflows/node.js.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/app.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/package-lock.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "lockfile",
+        "skipImportance": "low",
+        "skipDetail": "dependency lockfile without schema coverage"
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/tsconfig.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/tsconfig.json",
+        "schemaSource": "catalog:schemastore:tsconfig.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/vercel.json",
+        "format": "json",
+        "schema": "https://openapi.vercel.sh/vercel.json",
+        "schemaSource": "catalog:schemastore:Vercel",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "message": "catalog schema could not be used; skipped catalog-inferred validation after schema compile failure",
+        "skipReason": "catalogSchemaUnavailable",
+        "skipClass": "external-catalog",
+        "skipImportance": "medium",
+        "skipDetail": "catalog schema could not be used; skipped catalog-inferred validation after schema compile failure"
+      }
+    ],
+    "issues": [
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "patreon",
+        "instanceLocation": "/patreon",
+        "line": 4,
+        "column": 9,
+        "message": "expected string, received null",
+        "hint": "GitHub Funding provider entries cannot be blank.\nThe \"patreon\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "tidelift",
+        "instanceLocation": "/tidelift",
+        "line": 7,
+        "column": 10,
+        "message": "expected string, received null",
+        "hint": "GitHub Funding provider entries cannot be blank.\nThe \"tidelift\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "issuehunt",
+        "instanceLocation": "/issuehunt",
+        "line": 10,
+        "column": 11,
+        "message": "expected string, received null",
+        "hint": "GitHub Funding provider entries cannot be blank.\nThe \"issuehunt\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "ko_fi",
+        "instanceLocation": "/ko_fi",
+        "line": 6,
+        "column": 7,
+        "message": "expected string, received null",
+        "hint": "GitHub Funding provider entries cannot be blank.\nThe \"ko_fi\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "liberapay",
+        "instanceLocation": "/liberapay",
+        "line": 9,
+        "column": 11,
+        "message": "expected string, received null",
+        "hint": "GitHub Funding provider entries cannot be blank.\nThe \"liberapay\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "community_bridge",
+        "instanceLocation": "/community_bridge",
+        "line": 8,
+        "column": 18,
+        "message": "expected string, received null",
+        "hint": "GitHub Funding provider entries cannot be blank.\nThe \"community_bridge\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "custom",
+        "instanceLocation": "/custom",
+        "line": 13,
+        "column": 8,
+        "message": "expected string, received null",
+        "hint": "GitHub Funding provider entries cannot be blank.\nThe \"custom\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "github",
+        "instanceLocation": "/github",
+        "line": 3,
+        "column": 8,
+        "message": "expected string, received null",
+        "hint": "GitHub Funding provider entries cannot be blank.\nThe \"github\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "category": "validation",
+        "keyword": "additionalProperties",
+        "keywordLocation": "/additionalProperties",
+        "property": "otechie",
+        "instanceLocation": "/otechie",
+        "line": 11,
+        "column": 9,
+        "message": "must not have additional property \"otechie\"",
+        "hint": "This issue came from catalog:schemastore:GitHub Funding.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because path \".github/FUNDING.yml\" matched catalog fileMatch \"**/.github/FUNDING.yml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \".github/FUNDING.yml\"\nschema = \"https://www.schemastore.org/github-funding.json\""
+      },
+      {
+        "path": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "category": "validation",
+        "keyword": "additionalProperties",
+        "keywordLocation": "/additionalProperties",
+        "property": "lfx_crowdfunding",
+        "instanceLocation": "/lfx_crowdfunding",
+        "line": 12,
+        "column": 18,
+        "message": "must not have additional property \"lfx_crowdfunding\"",
+        "hint": "This issue came from catalog:schemastore:GitHub Funding.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because path \".github/FUNDING.yml\" matched catalog fileMatch \"**/.github/FUNDING.yml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \".github/FUNDING.yml\"\nschema = \"https://www.schemastore.org/github-funding.json\""
+      }
+    ],
+    "ignoredIssues": [],
+    "warnings": [
+      {
+        "kind": "schemaCatalogSchemaUnavailable",
+        "source": "catalog:schemastore:Vercel",
+        "schema": "https://openapi.vercel.sh/vercel.json",
+        "schemaSource": "catalog:schemastore:Vercel",
+        "message": "Catalog schema could not be used for vercel.json. The schema https://openapi.vercel.sh/vercel.json failed to compile, so DollarLint skipped catalog-inferred validation for files that use it; this is not a finding in those files.",
+        "hint": "Affected files: vercel.json. Technical details: catalog schema compile failed for https://openapi.vercel.sh/vercel.json: \"https://openapi.vercel.sh/vercel.json#\" is not valid against metaschema: jsonschema validation failed with 'http://json-schema.org/draft-04/schema#'\n- at '/properties/functions/patternProperties/^.{1,256}$/properties/experimentalTriggers/items': 'anyOf' failed\n  - at '/properties/functions/patternProperties/^.{1,256}$/properties/experimentalTriggers/items/oneOf/1/properties/retryAfterSeconds': validation failed\n    - at '/properties/functions/patternProperties/^.{1,256}$/properties/experimentalTriggers/items/oneOf/1/properties/retryAfterSeconds': properties 'minimum' required, if 'exclusiveMinimum' exists\n    - at '/properties/functions/patternProperties/^.{1,256}$/properties/experimentalTriggers/items/oneOf/1/properties/retryAfterSeconds/exclusiveMinimum': got number, want boolean\n  - at '/properties/functions/patternProperties/^.{1,256}$/properties/experimentalTriggers/items': got object, want array"
+      }
+    ]
+  },
+  "sarif": {
+    "version": "2.1.0",
+    "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+    "runs": [
+      {
+        "tool": {
+          "driver": {
+            "name": "dollarlint",
+            "informationUri": "https://github.com/dollarlint/dollarlint",
+            "rules": [
+              {
+                "id": "additionalProperties",
+                "name": "additionalProperties",
+                "shortDescription": {
+                  "text": "JSON Schema additionalProperties validation"
+                },
+                "properties": {
+                  "keyword": "additionalProperties"
+                }
+              },
+              {
+                "id": "dollarlint.warning.schemaCatalogSchemaUnavailable",
+                "name": "dollarlint.warning.schemaCatalogSchemaUnavailable",
+                "shortDescription": {
+                  "text": "dollarlint catalog:schemastore:Vercel warning"
+                },
+                "properties": {}
+              },
+              {
+                "id": "type",
+                "name": "type",
+                "shortDescription": {
+                  "text": "JSON Schema type validation"
+                },
+                "properties": {
+                  "keyword": "type"
+                }
+              }
+            ]
+          }
+        },
+        "results": [
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected string, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml"
+                  },
+                  "region": {
+                    "startLine": 4,
+                    "startColumn": 9
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-funding.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "patreon",
+              "instanceLocation": "/patreon",
+              "issueHint": "GitHub Funding provider entries cannot be blank.\nThe \"patreon\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+            }
+          },
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected string, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml"
+                  },
+                  "region": {
+                    "startLine": 7,
+                    "startColumn": 10
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-funding.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "tidelift",
+              "instanceLocation": "/tidelift",
+              "issueHint": "GitHub Funding provider entries cannot be blank.\nThe \"tidelift\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+            }
+          },
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected string, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml"
+                  },
+                  "region": {
+                    "startLine": 10,
+                    "startColumn": 11
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-funding.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "issuehunt",
+              "instanceLocation": "/issuehunt",
+              "issueHint": "GitHub Funding provider entries cannot be blank.\nThe \"issuehunt\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+            }
+          },
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected string, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml"
+                  },
+                  "region": {
+                    "startLine": 6,
+                    "startColumn": 7
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-funding.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "ko_fi",
+              "instanceLocation": "/ko_fi",
+              "issueHint": "GitHub Funding provider entries cannot be blank.\nThe \"ko_fi\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+            }
+          },
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected string, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml"
+                  },
+                  "region": {
+                    "startLine": 9,
+                    "startColumn": 11
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-funding.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "liberapay",
+              "instanceLocation": "/liberapay",
+              "issueHint": "GitHub Funding provider entries cannot be blank.\nThe \"liberapay\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+            }
+          },
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected string, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml"
+                  },
+                  "region": {
+                    "startLine": 8,
+                    "startColumn": 18
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-funding.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "community_bridge",
+              "instanceLocation": "/community_bridge",
+              "issueHint": "GitHub Funding provider entries cannot be blank.\nThe \"community_bridge\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+            }
+          },
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected string, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml"
+                  },
+                  "region": {
+                    "startLine": 13,
+                    "startColumn": 8
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-funding.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "custom",
+              "instanceLocation": "/custom",
+              "issueHint": "GitHub Funding provider entries cannot be blank.\nThe \"custom\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+            }
+          },
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected string, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml"
+                  },
+                  "region": {
+                    "startLine": 3,
+                    "startColumn": 8
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-funding.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "github",
+              "instanceLocation": "/github",
+              "issueHint": "GitHub Funding provider entries cannot be blank.\nThe \"github\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\nRemove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects."
+            }
+          },
+          {
+            "ruleId": "additionalProperties",
+            "level": "error",
+            "message": {
+              "text": "must not have additional property \"otechie\""
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml"
+                  },
+                  "region": {
+                    "startLine": 11,
+                    "startColumn": 9
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-funding.json",
+              "keyword": "additionalProperties",
+              "keywordLocation": "/additionalProperties",
+              "property": "otechie",
+              "instanceLocation": "/otechie",
+              "issueHint": "This issue came from catalog:schemastore:GitHub Funding.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because path \".github/FUNDING.yml\" matched catalog fileMatch \"**/.github/FUNDING.yml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \".github/FUNDING.yml\"\nschema = \"https://www.schemastore.org/github-funding.json\""
+            }
+          },
+          {
+            "ruleId": "additionalProperties",
+            "level": "error",
+            "message": {
+              "text": "must not have additional property \"lfx_crowdfunding\""
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ashutosh00710-github-readme-activity-graph/.github/FUNDING.yml"
+                  },
+                  "region": {
+                    "startLine": 12,
+                    "startColumn": 18
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/github-funding.json",
+              "keyword": "additionalProperties",
+              "keywordLocation": "/additionalProperties",
+              "property": "lfx_crowdfunding",
+              "instanceLocation": "/lfx_crowdfunding",
+              "issueHint": "This issue came from catalog:schemastore:GitHub Funding.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because path \".github/FUNDING.yml\" matched catalog fileMatch \"**/.github/FUNDING.yml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \".github/FUNDING.yml\"\nschema = \"https://www.schemastore.org/github-funding.json\""
+            }
+          },
+          {
+            "ruleId": "dollarlint.warning.schemaCatalogSchemaUnavailable",
+            "level": "warning",
+            "message": {
+              "text": "Catalog schema could not be used for vercel.json. The schema https://openapi.vercel.sh/vercel.json failed to compile, so DollarLint skipped catalog-inferred validation for files that use it; this is not a finding in those files."
+            },
+            "properties": {
+              "warningKind": "schemaCatalogSchemaUnavailable",
+              "warningSource": "catalog:schemastore:Vercel"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "styled": {
+    "plain": "dollarlint found 10 validation issues in 1 file after 0s (1 warning)\n\nashutosh00710-github-readme-activity-graph/.github/FUNDING.yml\n  3:8       type                  expected string, received null                        /github\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"github\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  4:9       type                  expected string, received null                        /patreon\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"patreon\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  6:7       type                  expected string, received null                        /ko_fi\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"ko_fi\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  7:10      type                  expected string, received null                        /tidelift\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"tidelift\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  8:18      type                  expected string, received null                        /community_bridge\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"community_bridge\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  9:11      type                  expected string, received null                        /liberapay\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"liberapay\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  10:11     type                  expected string, received null                        /issuehunt\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"issuehunt\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  11:9      additionalProperties  must not have additional property \"otechie\"           /otechie\n    hint: This issue came from catalog:schemastore:GitHub Funding.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because path \".github/FUNDING.yml\" matched catalog fileMatch \"**/.github/FUNDING.yml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \".github/FUNDING.yml\"\n      schema = \"https://www.schemastore.org/github-funding.json\"\n  12:18     additionalProperties  must not have additional property \"lfx_crowdfunding\"  /lfx_crowdfunding\n    hint: This issue came from catalog:schemastore:GitHub Funding.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because path \".github/FUNDING.yml\" matched catalog fileMatch \"**/.github/FUNDING.yml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \".github/FUNDING.yml\"\n      schema = \"https://www.schemastore.org/github-funding.json\"\n  13:8      type                  expected string, received null                        /custom\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"custom\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n\nwarnings\n  catalog:schemastore:Vercel  Catalog schema could not be used for vercel.json. The schema https://openapi.vercel.sh/vercel.json failed to compile, so DollarLint skipped catalog-inferred validation for files that use it; this is not a finding in those files.\n\nskipped files\n  medium signal: external catalog (catalog schema unavailable)\n    why: catalog schema could not be used; skipped catalog-inferred validation after schema compile failure\n    ashutosh00710-github-readme-activity-graph/vercel.json\n  medium signal: unknown/custom file (no schema)\n    why: schema-less JSON/YAML/TOML file\n    ashutosh00710-github-readme-activity-graph/app.json\n  low signal: dependency lockfile (no schema)\n    why: dependency lockfile without schema coverage\n    ashutosh00710-github-readme-activity-graph/package-lock.json\n\nSummary: 8 discovered, 5 validated, 3 skipped, 10 validation issues, 1 warning in 0s\n",
+    "ansi": "dollarlint found 10 validation issues in 1 file after 0s (1 warning)\n\nashutosh00710-github-readme-activity-graph/.github/FUNDING.yml\n  3:8       type                  expected string, received null                        /github\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"github\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  4:9       type                  expected string, received null                        /patreon\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"patreon\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  6:7       type                  expected string, received null                        /ko_fi\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"ko_fi\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  7:10      type                  expected string, received null                        /tidelift\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"tidelift\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  8:18      type                  expected string, received null                        /community_bridge\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"community_bridge\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  9:11      type                  expected string, received null                        /liberapay\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"liberapay\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  10:11     type                  expected string, received null                        /issuehunt\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"issuehunt\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n  11:9      additionalProperties  must not have additional property \"otechie\"           /otechie\n    hint: This issue came from catalog:schemastore:GitHub Funding.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because path \".github/FUNDING.yml\" matched catalog fileMatch \"**/.github/FUNDING.yml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \".github/FUNDING.yml\"\n      schema = \"https://www.schemastore.org/github-funding.json\"\n  12:18     additionalProperties  must not have additional property \"lfx_crowdfunding\"  /lfx_crowdfunding\n    hint: This issue came from catalog:schemastore:GitHub Funding.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because path \".github/FUNDING.yml\" matched catalog fileMatch \"**/.github/FUNDING.yml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \".github/FUNDING.yml\"\n      schema = \"https://www.schemastore.org/github-funding.json\"\n  13:8      type                  expected string, received null                        /custom\n    hint: GitHub Funding provider entries cannot be blank.\n      The \"custom\" provider key is present but has an empty/null value. This often comes from leaving unused template keys in .github/FUNDING.yml.\n      Remove unused provider keys, or fill them with the username, project name, package name, or URL GitHub expects.\n\nwarnings\n  catalog:schemastore:Vercel  Catalog schema could not be used for vercel.json. The schema https://openapi.vercel.sh/vercel.json failed to compile, so DollarLint skipped catalog-inferred validation for files that use it; this is not a finding in those files.\n\nskipped files\n  medium signal: external catalog (catalog schema unavailable)\n    why: catalog schema could not be used; skipped catalog-inferred validation after schema compile failure\n    ashutosh00710-github-readme-activity-graph/vercel.json\n  medium signal: unknown/custom file (no schema)\n    why: schema-less JSON/YAML/TOML file\n    ashutosh00710-github-readme-activity-graph/app.json\n  low signal: dependency lockfile (no schema)\n    why: dependency lockfile without schema coverage\n    ashutosh00710-github-readme-activity-graph/package-lock.json\n\nSummary: 8 discovered, 5 validated, 3 skipped, 10 validation issues, 1 warning in 0s\n",
+    "options": {
+      "showSkipped": true,
+      "locations": true
+    },
+    "truncated": false
+  }
+}

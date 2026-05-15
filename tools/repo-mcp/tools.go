@@ -179,9 +179,34 @@ func (s *repoServer) addTools() {
 	s.addTool("release_readiness", "Run release-readiness checks without publishing anything.", schemaObject(map[string]any{
 		"snapshot": map[string]any{"type": "boolean", "description": "Deprecated; GoReleaser snapshot validation always runs for the Pro config."},
 	}), s.handleReleaseReadiness, false)
-	s.addTool("release_status", "Inspect recent release-related workflow runs and tags.", schemaObject(nil), s.handleReleaseStatus, true)
+	s.addToolWithHints("release_status", "Inspect structured release state: suggested next tag, tag/release existence, recent workflow runs, and the matching WinGet PR.", schemaObject(map[string]any{
+		"version": map[string]any{"type": "string", "description": "Optional release tag to inspect, such as v0.1.10. Defaults to the next patch tag when no release is in progress."},
+	}), s.handleReleaseStatus, toolHints{ReadOnly: true, OpenWorld: true})
+	s.addToolWithHints("release_start", "Start the guided release flow. Infers the next patch tag when version is omitted; dryRun defaults to true. With dryRun=false, triggers Prepare Release when the tag is missing or Release when the tag already exists.", schemaObject(map[string]any{
+		"version": map[string]any{"type": "string", "description": "Optional release tag, such as v0.1.10. Defaults to the next patch tag."},
+		"dryRun":  map[string]any{"type": "boolean", "description": "When true, inspect what would happen without triggering GitHub Actions. Defaults to true."},
+	}), s.handleReleaseStart, toolHints{ReadOnly: false, OpenWorld: true})
+	s.addToolWithHints("release_watch", "Wait with MCP progress notifications for a release to finish. It can dispatch the Release workflow after Prepare Release creates the tag, then inspect the final GitHub release and WinGet PR.", schemaObject(map[string]any{
+		"version":             map[string]any{"type": "string", "description": "Release tag to watch, such as v0.1.10. Defaults to the next patch tag."},
+		"runID":               map[string]any{"type": "string", "description": "Optional GitHub Actions run id returned by release_start."},
+		"autoDispatchRelease": map[string]any{"type": "boolean", "description": "When true, dispatch Release manually once the tag exists and no release exists yet. Defaults to true."},
+		"timeoutSeconds":      map[string]any{"type": "integer", "description": "Maximum wait time. Defaults to 1800; capped at 7200."},
+	}), s.handleReleaseWatch, toolHints{ReadOnly: false, OpenWorld: true})
+	s.addToolWithHints("release_winget_pr", "Inspect the Microsoft winget-pkgs PR for a DollarLint release and sanity-check the filled PR body and draft state.", schemaObject(map[string]any{
+		"version":     map[string]any{"type": "string", "description": "Release tag to inspect, such as v0.1.10. Defaults to the latest local release tag."},
+		"includeBody": map[string]any{"type": "boolean", "description": "Include PR body text and check for required body signals. Defaults to false."},
+	}), s.handleReleaseWingetPR, toolHints{ReadOnly: true, OpenWorld: true})
+	s.addToolWithHints("release_winget_watch", "Wait with MCP progress notifications for Microsoft winget-pkgs Azure validation. Infers the build from wingetbot PR comments and returns timeline status plus failed logs.", schemaObject(map[string]any{
+		"version":        map[string]any{"type": "string", "description": "Release tag to watch, such as v0.1.10. Defaults to the latest local release tag."},
+		"prNumber":       map[string]any{"type": "integer", "description": "Optional Microsoft winget-pkgs PR number. If omitted, the tool finds the PR from the release branch."},
+		"buildID":        map[string]any{"type": "string", "description": "Optional Azure build id to watch directly."},
+		"buildURL":       map[string]any{"type": "string", "description": "Optional Azure build URL to watch directly."},
+		"timeoutSeconds": map[string]any{"type": "integer", "description": "Maximum wait time. Defaults to 5400; capped at 14400."},
+		"pollSeconds":    map[string]any{"type": "integer", "description": "Polling interval. Defaults to 30; clamped between 5 and 120."},
+		"includeLogs":    map[string]any{"type": "boolean", "description": "Include relevant Azure logs even when validation succeeds. Failed logs are always included on failure."},
+	}), s.handleReleaseWingetWatch, toolHints{ReadOnly: true, OpenWorld: true})
 	s.addTool("prepare_release", "Dry-run or trigger the Prepare Release workflow. dryRun defaults to true; dryRun=false triggers an externally visible GitHub workflow.", schemaObject(map[string]any{
-		"version": map[string]any{"type": "string", "description": "Release tag to create, for example v0.1.2."},
+		"version": map[string]any{"type": "string", "description": "Release tag to create, for example v0.1.2. Defaults to the next patch tag."},
 		"dryRun":  map[string]any{"type": "boolean", "description": "When true, validate readiness without triggering GitHub Actions. Defaults to true."},
 	}), s.handlePrepareRelease, false)
 }

@@ -1,0 +1,108 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-05-13-one-repo-real-world-validation",
+  "date": "2026-05-13",
+  "title": "one-repo real-world validation",
+  "dollarlintRevision": "4c5c2df3816342f7a0d6583b2e9ff8855eebc7ea",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.720366690",
+  "cacheDir": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.2353607637",
+  "command": "real_world_start_validation corpusDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.720366690\" cacheDir=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-cache.2353607637\" outputArtifact=\"/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-one-repo-real-world-validation-16424008.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-one-repo-real-world-validation-16424008.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-13-one-repo-real-world-validation/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "ashutosh00710-github-readme-activity-graph",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: package-lock.json. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "ashutosh00710-github-readme-activity-graph",
+      "outcome": "product-signal",
+      "findings": [
+        "CLI output was understandable for .github/FUNDING.yml: it grouped 8 blank-provider issues and 2 catalog validation-context issues, showed exact lines/properties, and suggested removing unused provider keys or adding valid provider values.",
+        "The FUNDING.yml source excerpts show template-style blank keys such as patreon, ko_fi, tidelift, and custom being parsed as null, so the validation findings look correct and actionable for a developer cleaning up that file.",
+        "Coverage was partly limited: vercel.json matched the SchemaStore Vercel catalog entry but was skipped because https://openapi.vercel.sh/vercel.json failed to compile. The warning explains this is not a finding in the file, but the developer still loses validation for a common hand-authored config file.",
+        "Skipped coverage was visible and grouped by reason, including vercel.json as medium-signal external catalog unavailable, app.json as schema-less custom file, and package-lock.json as low-signal lockfile."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve handling of catalog schemas that fail to compile, starting with the SchemaStore Vercel schema.",
+          "rationale": "In this repo, vercel.json was discovered as a common config file but skipped because the catalog schema failed to compile. The warning was clear, yet the developer loses useful validation coverage for a file DollarLint can identify."
+        }
+      ],
+      "productDecisions": [
+        "No product change made during this one-repo sweep; recorded Vercel catalog schema compilation as a coverage signal for follow-up."
+      ],
+      "followUp": [
+        "Investigate why the catalog Vercel schema at https://openapi.vercel.sh/vercel.json fails to compile and whether DollarLint can support, patch, or suppress unsupported schema features more gracefully."
+      ],
+      "notes": "DollarLint mostly behaved well on the actionable FUNDING.yml findings and was transparent about skipped files, but the external Vercel schema compile failure is a product/coverage signal because it prevents validation of a common config file inferred from the catalog."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "ashutosh00710-github-readme-activity-graph",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/Ashutosh00710/github-readme-activity-graph.git",
+      "commit": "81f24f91f1083ac68c31194758db7b0ae4e1c04e",
+      "path": "/var/folders/dg/0y8q_bz169jbjnv14dwmw0dc0000gn/T/dollarlint-corpus.720366690/ashutosh00710-github-readme-activity-graph",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 8,
+    "validated": 5,
+    "skipped": 3,
+    "failed": 0,
+    "issues": {
+      "total": 10,
+      "parsing": 0,
+      "validation": 10,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 1,
+    "duration": {
+      "nanos": 877937208
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 0 repo(s) behaved reasonably, 1 repo(s) produced product signals, and 0 repo(s) were blocked or uninterpretable.",
+    "DollarLint discovered 8 files, validated 5, skipped 3, failed 0, reported 10 issues, and emitted 1 warning.",
+    "Repository concentration: ashutosh00710-github-readme-activity-graph: 10 issues, 0 warnings, 3 skipped; unknown: 0 issues, 1 warning, 0 skipped.",
+    "Issue groups: ashutosh00710-github-readme-activity-graph catalog-schema-validation/type: 8; ashutosh00710-github-readme-activity-graph catalog-schema-validation/additionalProperties: 2.",
+    "Warning groups: schemaCatalogSchemaUnavailable catalog:schemastore:Vercel: 1.",
+    "Skipped coverage: 3 of 8 discovered files were skipped (37.5%)."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider summarizing repeated catalog schema compile warnings by schema/source in real-world output and workflow summaries.",
+      "rationale": "The sweep emitted schema catalog warnings that are not file findings; grouping them keeps the user focused on product signals without hiding schema availability problems."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "This sweep skipped 3 of 8 discovered files (37.5%), which is useful context when judging corpus coverage."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Improve handling of catalog schemas that fail to compile, starting with the SchemaStore Vercel schema.",
+      "rationale": "In this repo, vercel.json was discovered as a common config file but skipped because the catalog schema failed to compile. The warning was clear, yet the developer loses useful validation coverage for a file DollarLint can identify."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; record the triage and decide follow-up from the structured result.",
+    "No product change made during this one-repo sweep; recorded Vercel catalog schema compilation as a coverage signal for follow-up."
+  ],
+  "followUp": [
+    "Review the structured productRecommendations and decide whether to open implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting the same corpus by default.",
+    "Investigate why the catalog Vercel schema at https://openapi.vercel.sh/vercel.json fails to compile and whether DollarLint can support, patch, or suppress unsupported schema features more gracefully."
+  ]
+}

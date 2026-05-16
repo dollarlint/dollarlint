@@ -782,7 +782,7 @@ func azureBuildRefFromText(text string) (azureBuildRef, bool) {
 func azureBuildRefFromInput(input string) (azureBuildRef, error) {
 	input = strings.TrimSpace(input)
 	if input == "" {
-		return azureBuildRef{}, fmt.Errorf("Azure build id or URL is required")
+		return azureBuildRef{}, fmt.Errorf("azure build id or URL is required")
 	}
 	if regexp.MustCompile(`^\d+$`).MatchString(input) {
 		return azureBuildRef{
@@ -797,12 +797,12 @@ func azureBuildRefFromInput(input string) (azureBuildRef, error) {
 	}
 	buildID := parsed.Query().Get("buildId")
 	if buildID == "" {
-		return azureBuildRef{}, fmt.Errorf("Azure build URL is missing buildId")
+		return azureBuildRef{}, fmt.Errorf("azure build URL is missing buildId")
 	}
 	marker := "/_build/"
 	idx := strings.Index(parsed.Path, marker)
 	if idx == -1 {
-		return azureBuildRef{}, fmt.Errorf("Azure build URL must contain /_build/")
+		return azureBuildRef{}, fmt.Errorf("azure build URL must contain /_build/")
 	}
 	base := parsed.Scheme + "://" + parsed.Host + parsed.Path[:idx]
 	return azureBuildRef{BuildID: buildID, APIBase: base, WebURL: input}, nil

@@ -1,0 +1,413 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-05-18-agentic-product-testing-2026-05-18",
+  "date": "2026-05-18",
+  "title": "Agentic Product Testing 2026-05-18",
+  "dollarlintRevision": "5bb81a884f41468f8c9702dd7836311093bcfbf2",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.2543500411",
+  "cacheDir": "/tmp/dollarlint-cache.3548529967",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.2543500411\" cacheDir=\"/tmp/dollarlint-cache.3548529967\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-2026-05-18-3467858290.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-2026-05-18-3467858290.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-18-agentic-product-testing-2026-05-18/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "atmosphere-atmosphere",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: atmosphere.js/package-lock.json, e2e/package-lock.json, modules/integration-tests/package-lock.json, and 9 more. Remote schema refs: 0."
+    },
+    {
+      "repository": "forem-forem",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Gemfile.lock, yarn.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "livewire-livewire",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: package-lock.json. Remote schema refs: 0."
+    },
+    {
+      "repository": "nuonco-nuon",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: actions/tf-output/package-lock.json, bins/lsp/nuon-lsp-vscode/package-lock.json, docs/package-lock.json, and 6 more. Remote schema refs: 1."
+    },
+    {
+      "repository": "overturemaps-explore-site",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: package-lock.json. Remote schema refs: 0."
+    },
+    {
+      "repository": "potato-os-core",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: package-lock.json. Remote schema refs: 0."
+    },
+    {
+      "repository": "thebytearray-convertit",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "tracel-ai-burn-onnx",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock, examples/raspberry-pi-pico/Cargo.lock, scoreboard/runner/Cargo.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "uholeschak-ediabaslib",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 1."
+    },
+    {
+      "repository": "vinikjkkj-zapo",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: package-lock.json, proto/package-lock.json. Remote schema refs: 2."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "atmosphere-atmosphere",
+      "outcome": "product-signal",
+      "findings": [
+        "The JReleaser errors are presented with helpful context and explicit schema provenance, but DollarLint itself warns that catalog-backed schemas may not match the repo's tool version, so a developer is left unsure whether the three validation errors are true config bugs or version skew from SchemaStore.",
+        "Coverage is also weak for this repo: roughly half of discovered files were skipped, including many hand-authored project and sample configuration files such as application.yml, quarkus-extension.yaml, dependency-graph config, and additional Spring metadata.",
+        "The CLI preview is readable, but the combination of version-sensitive catalog validation plus a long list of skipped custom configs makes the overall experience more cautionary than actionable."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Make catalog-backed validation results easier to qualify when schema/version mismatch is plausible, especially for tools like JReleaser whose config shape changes across releases.",
+          "rationale": "The current hint is useful, but the output still leaves developers unsure how much to trust the reported errors versus the inferred external schema version."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Provide stronger family-level summaries for large skipped sets of application and framework config files.",
+          "rationale": "This repo skips many related Spring, Quarkus, and project metadata files; higher-level grouping would make the coverage gap easier to understand and act on."
+        }
+      ],
+      "notes": "This suggests product work rather than a clean success. DollarLint is transparent and gives good issue context, but a developer would still need to second-guess the catalog-based JReleaser findings and accept that many important repo configs were not analyzed at all."
+    },
+    {
+      "repository": "forem-forem",
+      "outcome": "product-signal",
+      "findings": [
+        "This repo surfaces many schema-driven findings across Ruby/Rails config files plus three YAML parse failures in locale files, but as a developer it is hard to tell how many are true repo problems versus catalog or parser behavior that is too strict for common Ruby ecosystem conventions.",
+        "Coverage is also poor: more than half of discovered files were skipped, including a large number of hand-authored JSON/YAML configs and at least one explicitly recognized but unsupported config family (netlify.toml), so the failing run still leaves huge uncertainty about what was actually checked.",
+        "The top issue groups are helpful for triage, but the overall experience is noisy and cautionary rather than confidence-building because validation, parser-compatibility, and unsupported-config signals are all mixed together."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Invest in better support and messaging for Ruby/Rails ecosystem config and locale file conventions, including duplicate-key parser behavior and common schema variants.",
+          "rationale": "Forem produced many product-relevant findings concentrated in mainstream Ruby config families, suggesting this is a meaningful ecosystem UX gap rather than an isolated odd repo."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Highlight recognized-but-unsupported config families more clearly and summarize them separately from generic unknown skips.",
+          "rationale": "The explicit netlify.toml unsupported-config signal is useful, and surfacing these cases distinctly would help developers understand when DollarLint knows the file type but lacks schema coverage."
+        }
+      ],
+      "notes": "This is a clear product-signal. DollarLint is finding real-looking problems, but the combination of broad skipped coverage, unsupported recognized config, and Ruby/Rails ecosystem schema friction means a developer would need significant manual interpretation before trusting the output."
+    },
+    {
+      "repository": "livewire-livewire",
+      "outcome": "product-signal",
+      "findings": [
+        "The run is dominated by skipped coverage rather than validated feedback: many hand-authored repo configs under docs/.obsidian plus .styleci.yml and other project files were left as schema-less unknowns, so the pass result only covers a minority of discovered files.",
+        "The warning for vercel.json is honest but still weakens developer confidence because DollarLint says the catalog schema could not compile, then skips the file with no direct next step beyond the warning text.",
+        "Low-confidence manifest.json skips are safer than misvalidation, but in combination with the large skipped set they leave the user unsure which common configuration families DollarLint intentionally supports versus merely cannot analyze today."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Group and summarize skipped hand-authored project config files by family so a pass with majority skipped coverage does not read like an unstructured path dump.",
+          "rationale": "This repo mixes multiple related Obsidian and repo-config files; developers need a higher-level explanation of what configuration families are unsupported."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Improve the UX around external catalog schema compile failures by explaining likely cause and what validation confidence remains for the affected file.",
+          "rationale": "The vercel.json warning is technically clear but still leaves users uncertain whether the problem is remote schema quality, DollarLint compatibility, or transient fetch/compile behavior."
+        }
+      ],
+      "notes": "As a developer this would not feel like a clean pass. DollarLint is safely conservative, but the repo experience is mostly coverage caveats and one external-catalog failure, so the result suggests product work on both skipped-file synthesis and catalog-schema failure explanation rather than a correctness bug."
+    },
+    {
+      "repository": "nuonco-nuon",
+      "outcome": "product-signal",
+      "findings": [
+        "Several reported issues are plausible real file problems, but multiple top findings come from catalog-inferred schemas for golangci-lint and GitHub Actions, and the hints themselves tell the developer to verify version compatibility before trusting them as repo bugs.",
+        "The parsing failures are at least clearly explained: one file is empty JSON and another appears to contain non-JSON content despite a .json extension, which is actionable and does not look like a DollarLint crash.",
+        "Coverage remains a concern because many hand-authored YAML/JSON project files were skipped, including build configs, Helm values, service manifests, and custom rule definitions, so the overall result mixes actionable checks with substantial uncovered configuration surface."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Further distinguish likely-real syntax/parsing problems from catalog-version-sensitive validation findings in the main output.",
+          "rationale": "This repo combines obvious malformed .json fixtures with external-schema-driven validation complaints; clearer separation would help developers know which findings to trust immediately."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Improve summaries for skipped hand-authored config families such as Helm values, service manifests, and custom rule YAML files.",
+          "rationale": "The repo has many important project configs outside current coverage, and the current path-heavy skipped list makes that gap harder to interpret."
+        }
+      ],
+      "notes": "This is a product-signal because the developer experience is mixed: DollarLint provides useful, specific findings, but trust is diluted by version-sensitive catalog validation and broad skipped coverage across important config families. The tool is informative, yet not cleanly decisive enough to count as behaved-reasonably."
+    },
+    {
+      "repository": "overturemaps-explore-site",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint reported a clean run but only validated 7 of 157 discovered files, leaving 150 skipped unknown/custom files in a repo full of hand-authored map layer JSON and YAML config.",
+        "The CLI preview is dominated by long skipped-file listings, so a developer sees very low effective coverage without a concise explanation of what kinds of project JSON are unsupported or what to do next.",
+        "Low-confidence manifest.json catalog matches were skipped rather than misclassified, which is safer, but the result still leaves unclear whether common style/map configuration JSON is intentionally out of scope or missing coverage."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Group large skipped unknown/custom file sets by directory or structural family and summarize likely unsupported configuration types instead of listing dozens of paths first.",
+          "rationale": "The repo contains many related map-style JSON files; grouping them would make the coverage gap understandable and actionable faster."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Explain when low-confidence auto catalog matches such as manifest.json are intentionally withheld and how users can interpret those skips.",
+          "rationale": "The current wording is safe but leaves developers uncertain whether DollarLint lacks support, needs hints, or is correctly declining ambiguous matches."
+        }
+      ],
+      "followUp": [
+        "Check more repos with large hand-authored JSON families to see whether skipped unknown/custom files are a recurring product pattern."
+      ],
+      "notes": "This result looks technically safe but not developer-complete. The tool avoided false positives and surfaced skips honestly, yet the repo experience is mostly 'we skipped your custom config files' with little synthesis about unsupported file families or likely next actions. That makes this a product-signal on coverage clarity and skipped-output ergonomics rather than a correctness failure."
+    },
+    {
+      "repository": "potato-os-core",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint was transparent about partial coverage: it validated the supported files, separately identified a lockfile skip, and called out apps/chat/app.json as an uncovered schema-less project file rather than pretending it had been checked.",
+        "Even with notable skipped coverage, the output stays readable because the skipped reasons are grouped and the uncovered app.json file is named directly, so a developer can understand what was and was not evaluated.",
+        "There were no warnings or misleading issue reports, and the uncovered custom JSON did not appear in enough volume here to suggest the broader unsupported-file-family problem seen in overturemaps-explore-site."
+      ],
+      "notes": "This is borderline because half the discovered files were skipped, but the repository is tiny and the coverage gap is explicit rather than confusing. As a developer I would understand the limitation and still trust the pass result for the validated files, so I am recording this as behaved-reasonably rather than product-signal."
+    },
+    {
+      "repository": "thebytearray-convertit",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint gave a compact, easy-to-trust pass result: the supported files validated cleanly and the single skipped file was explicitly identified as a schema-less TOML file rather than being silently ignored.",
+        "The one uncovered file, gradle/libs.versions.toml, is understandable as uncovered configuration rather than a misleading false positive, and the tool did not overstate confidence about it.",
+        "With no warnings, no repeated issue groups, and only one medium-signal skip, the result remains easy for a developer to interpret without suggesting an immediate product gap."
+      ],
+      "notes": "This run behaved sensibly. Coverage is not total, but the only skipped file is clearly explained and does not overwhelm the output or create uncertainty about the rest of the repository. I would treat this as normal good behavior, not a product-signal."
+    },
+    {
+      "repository": "tracel-ai-burn-onnx",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "The repo-level result was understandable: DollarLint focused on a small set of concrete JSON/YAML validation problems instead of flooding the output with noisy repeats.",
+        "The skipped coverage did not dominate the developer experience here; the reported findings remained interpretable and there was no sign that most relevant files were silently omitted.",
+        "Warnings and issue examples were specific enough to understand what file families were being validated and why the reported problems mattered."
+      ],
+      "notes": "From a developer perspective this looked like a sensible run: the output was actionable, coverage caveats did not overwhelm the result, and nothing in the result suggested a clear correctness or UX change beyond normal future polish."
+    },
+    {
+      "repository": "uholeschak-ediabaslib",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint covered almost the entire repo and surfaced the only uncovered file as a clearly named schema-less local JSON config, which is a believable and understandable limitation.",
+        "The pass output is concise and low-noise: no warnings, no repeated issue groups, and no confusing schema claims, so a developer can quickly conclude that supported files are clean.",
+        "Because the skipped file is a local serviceDependencies override rather than a core project manifest family, the remaining coverage gap does not materially undermine trust in the result."
+      ],
+      "notes": "This feels like normal good behavior. DollarLint was honest about the one unsupported local configuration file and otherwise provided a quiet, readable pass with no indication of a broader correctness or ergonomics problem."
+    },
+    {
+      "repository": "vinikjkkj-zapo",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "The CLI preview is clear and concise: DollarLint validated nearly all discovered files, reported zero issues, and isolated the only skips to package-lock files that developers generally do not expect schema linting coverage for.",
+        "Skipped coverage was honest but low-noise, with the two skipped files grouped under an understandable lockfile reason instead of cluttering the run with ambiguous unsupported-file messaging.",
+        "There were no warnings, repeated issue groups, or confusing classifications, so the result reads like a trustworthy 'nothing to fix' pass rather than an underexplained silent success."
+      ],
+      "notes": "This is a good developer experience. DollarLint appears appropriately quiet on a repo where the supported files are clean, and the limited skipped coverage is both expected and clearly explained. I do not see a correctness or ergonomics signal here that justifies a product change."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "vinikjkkj-zapo",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/vinikjkkj/zapo.git",
+      "commit": "dd94d8a7650ae4ecfd8e45b9d22338d6bc182a5d",
+      "path": "/tmp/dollarlint-corpus.2543500411/vinikjkkj-zapo",
+      "status": "cloned"
+    },
+    {
+      "name": "overturemaps-explore-site",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/OvertureMaps/explore-site.git",
+      "commit": "05772b25dc1f862132c55ea2839af68a71f989e2",
+      "path": "/tmp/dollarlint-corpus.2543500411/overturemaps-explore-site",
+      "status": "cloned"
+    },
+    {
+      "name": "potato-os-core",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/potato-os/core.git",
+      "commit": "d4d8e687191fec955552a0c44895de25b3292457",
+      "path": "/tmp/dollarlint-corpus.2543500411/potato-os-core",
+      "status": "cloned"
+    },
+    {
+      "name": "nuonco-nuon",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/nuonco/nuon.git",
+      "commit": "32c11a1458e222fd764ce64ac4c446ee1b10ea83",
+      "path": "/tmp/dollarlint-corpus.2543500411/nuonco-nuon",
+      "status": "cloned"
+    },
+    {
+      "name": "tracel-ai-burn-onnx",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/tracel-ai/burn-onnx.git",
+      "commit": "a38ea94420446138e7ee724a19224c6ede5a9550",
+      "path": "/tmp/dollarlint-corpus.2543500411/tracel-ai-burn-onnx",
+      "status": "cloned"
+    },
+    {
+      "name": "atmosphere-atmosphere",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/Atmosphere/atmosphere.git",
+      "commit": "63e34f11a4ae1d1ae954d6690b7c0208e324b5c3",
+      "path": "/tmp/dollarlint-corpus.2543500411/atmosphere-atmosphere",
+      "status": "cloned"
+    },
+    {
+      "name": "thebytearray-convertit",
+      "ecosystem": "Kotlin",
+      "cloneURL": "https://github.com/thebytearray/Convertit.git",
+      "commit": "e6cc4e9b823a63630750833ec169ad3ad2b75c2a",
+      "path": "/tmp/dollarlint-corpus.2543500411/thebytearray-convertit",
+      "status": "cloned"
+    },
+    {
+      "name": "forem-forem",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/forem/forem.git",
+      "commit": "1bb5da2bdb7d426518b2561a3e47a94dee45e9bc",
+      "path": "/tmp/dollarlint-corpus.2543500411/forem-forem",
+      "status": "cloned"
+    },
+    {
+      "name": "livewire-livewire",
+      "ecosystem": "PHP",
+      "cloneURL": "https://github.com/livewire/livewire.git",
+      "commit": "f817ba5156ab1fc1fead6939b578be50376859a9",
+      "path": "/tmp/dollarlint-corpus.2543500411/livewire-livewire",
+      "status": "cloned"
+    },
+    {
+      "name": "uholeschak-ediabaslib",
+      "ecosystem": "C#",
+      "cloneURL": "https://github.com/uholeschak/ediabaslib.git",
+      "commit": "b3fc14de6f3b065f9831eb9107e7c844e38ef3f1",
+      "path": "/tmp/dollarlint-corpus.2543500411/uholeschak-ediabaslib",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 948,
+    "validated": 420,
+    "skipped": 523,
+    "failed": 5,
+    "issues": {
+      "total": 28,
+      "parsing": 5,
+      "validation": 23,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 1,
+    "duration": {
+      "nanos": 19358504565
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 5 repo(s) behaved reasonably, 5 repo(s) produced product signals, and 0 repo(s) were blocked or uninterpretable.",
+    "DollarLint discovered 948 files, validated 420, skipped 523, failed 5, reported 28 issues, and emitted 1 warnings.",
+    "Repository concentration: forem-forem: 18 issues, 0 warnings, 229 skipped; nuonco-nuon: 7 issues, 0 warnings, 55 skipped; atmosphere-atmosphere: 3 issues, 0 warnings, 63 skipped; unknown: 0 issues, 1 warnings, 0 skipped.",
+    "Issue groups: forem-forem product-behavior/type: 8; atmosphere-atmosphere catalog-schema-validation/additionalProperties: 3; forem-forem parser-compatibility/parse: 3; forem-forem catalog-schema-validation/type: 2.",
+    "Warning groups: schemaCatalogSchemaUnavailable catalog:schemastore:Vercel: 1.",
+    "Skipped coverage: 523 of 948 discovered files were skipped (55.2%)."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider summarizing repeated catalog schema compile warnings by schema/source in real-world output and workflow summaries.",
+      "rationale": "The sweep emitted schema catalog warnings that are not file findings; grouping them keeps the user focused on product signals without hiding schema availability problems."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "This sweep skipped 523 of 948 discovered files (55.2%), which is useful context when judging corpus coverage."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Investigate non-fixture parser compatibility failures from the real-world corpus.",
+      "rationale": "A parse failure outside fixture/test data is likely to affect normal users validating repository configuration files."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Make catalog-backed validation results easier to qualify when schema/version mismatch is plausible, especially for tools like JReleaser whose config shape changes across releases.",
+      "rationale": "The current hint is useful, but the output still leaves developers unsure how much to trust the reported errors versus the inferred external schema version."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Provide stronger family-level summaries for large skipped sets of application and framework config files.",
+      "rationale": "This repo skips many related Spring, Quarkus, and project metadata files; higher-level grouping would make the coverage gap easier to understand and act on."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Invest in better support and messaging for Ruby/Rails ecosystem config and locale file conventions, including duplicate-key parser behavior and common schema variants.",
+      "rationale": "Forem produced many product-relevant findings concentrated in mainstream Ruby config families, suggesting this is a meaningful ecosystem UX gap rather than an isolated odd repo."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Highlight recognized-but-unsupported config families more clearly and summarize them separately from generic unknown skips.",
+      "rationale": "The explicit netlify.toml unsupported-config signal is useful, and surfacing these cases distinctly would help developers understand when DollarLint knows the file type but lacks schema coverage."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Group and summarize skipped hand-authored project config files by family so a pass with majority skipped coverage does not read like an unstructured path dump.",
+      "rationale": "This repo mixes multiple related Obsidian and repo-config files; developers need a higher-level explanation of what configuration families are unsupported."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Improve the UX around external catalog schema compile failures by explaining likely cause and what validation confidence remains for the affected file.",
+      "rationale": "The vercel.json warning is technically clear but still leaves users uncertain whether the problem is remote schema quality, DollarLint compatibility, or transient fetch/compile behavior."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Further distinguish likely-real syntax/parsing problems from catalog-version-sensitive validation findings in the main output.",
+      "rationale": "This repo combines obvious malformed .json fixtures with external-schema-driven validation complaints; clearer separation would help developers know which findings to trust immediately."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Improve summaries for skipped hand-authored config families such as Helm values, service manifests, and custom rule YAML files.",
+      "rationale": "The repo has many important project configs outside current coverage, and the current path-heavy skipped list makes that gap harder to interpret."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Group large skipped unknown/custom file sets by directory or structural family and summarize likely unsupported configuration types instead of listing dozens of paths first.",
+      "rationale": "The repo contains many related map-style JSON files; grouping them would make the coverage gap understandable and actionable faster."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Explain when low-confidence auto catalog matches such as manifest.json are intentionally withheld and how users can interpret those skips.",
+      "rationale": "The current wording is safe but leaves developers uncertain whether DollarLint lacks support, needs hints, or is correctly declining ambiguous matches."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; record the triage and decide follow-up from the structured result."
+  ],
+  "followUp": [
+    "Review the structured productRecommendations and decide whether to open implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting the same corpus by default.",
+    "Check more repos with large hand-authored JSON families to see whether skipped unknown/custom files are a recurring product pattern."
+  ]
+}

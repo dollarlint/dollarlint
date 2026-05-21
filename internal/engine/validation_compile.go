@@ -423,6 +423,9 @@ func compileSchemaUncached(ctx context.Context, cache *SchemaCache, cfg Config, 
 	compiler.UseLoader(loaderFunc(func(u string) (any, error) {
 		return cache.LoadContext(compileCtx, u)
 	}))
+	if err := addPrunedAzureARMDeploymentParametersTemplate(compileCtx, compiler, cache, cfg, schemaURI); err != nil {
+		return nil, err
+	}
 	if err := addPrunedAzureARMResourcesWithRefs(compileCtx, compiler, cache, cfg, schemaURI, refs); err != nil {
 		return nil, err
 	}

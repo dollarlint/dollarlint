@@ -389,11 +389,13 @@ extends = "../../.dollarlint.toml"</code></pre>
           ><td><code>schemas.optimizations.azure.pruneResources</code></td><td
             >For Azure Resource Manager deployment schemas from <code
               >schema.management.azure.com</code
-            >, compile only the resource provider schemas referenced by the
-            template instead of the full Azure provider catalog. This keeps
-            ordinary ARM template validation much faster. Set it to <code
+            >, compile only the resource provider schemas referenced by ARM
+            templates instead of the full Azure provider catalog. For deployment
+            parameter files, compile only the template definitions needed for
+            parameter values and Key Vault references. This keeps ordinary ARM
+            template and parameter validation much faster. Set it to <code
               >false</code
-            > if you need to inspect or debug the unpruned schema.</td
+            > if you need to inspect or debug the unpruned Azure schema.</td
           ></tr
         >
       </tbody>

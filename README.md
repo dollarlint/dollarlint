@@ -325,7 +325,7 @@ Known JSON Schema metaschemas are handled by the validator and are not pre-fetch
 
 ### Azure optimization
 
-Azure Resource Manager deployment schemas from `schema.management.azure.com` are pruned to the resource provider schemas used by the template before compilation. This avoids compiling the full Azure provider catalog for typical ARM templates.
+Azure Resource Manager deployment schemas from `schema.management.azure.com` are pruned before compilation. ARM templates compile only the resource provider schemas used by the template instead of the full Azure provider catalog. Deployment parameter files compile only the template definitions needed for parameter values and Key Vault references.
 
 - Set `schemas.optimizations.azure.pruneResources = false` to disable Azure pruning.
 - Set `schemas.optimizations.enabled = false` to disable all schema optimizations.

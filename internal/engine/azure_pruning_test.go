@@ -149,6 +149,67 @@ func TestAzureARMResourcePruningDoesNotKeepPrefixedChildDefinitions(t *testing.T
 	}
 }
 
+func TestAzureARMDeploymentParametersPruningSkipsTemplateResources(t *testing.T) {
+	server, badRequests := newAzureARMParametersFixtureServer(t)
+	defer server.Close()
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "parameters.json"), azureARMParametersFixture(server.URL))
+
+	cfg := DefaultConfig()
+	cfg.Schemas.Compile.Timeout = NewDuration(testTimeout)
+	cfg.Schemas.Fetch.Timeout = NewDuration(testTimeout)
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint parameters with pruning: %v", err)
+	}
+	if result.HasIssues() || result.Summary.Validated != 1 || result.Summary.Skipped != 0 {
+		t.Fatalf("pruned ARM parameters result = %+v issues=%+v warnings=%+v", result.Summary, result.Issues, result.Warnings)
+	}
+	if *badRequests != 0 {
+		t.Fatalf("template resource schemas were fetched %d times", *badRequests)
+	}
+}
+
+func TestAzureARMDeploymentParametersPruningStillValidatesReferences(t *testing.T) {
+	server, badRequests := newAzureARMParametersFixtureServer(t)
+	defer server.Close()
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "parameters.json"), fmt.Sprintf(`{
+  "$schema": %q,
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "secret": {
+      "reference": {
+        "keyVault": {"id": "/subscriptions/example/resourceGroups/rg/providers/Microsoft.KeyVault/vaults/vault"}
+      }
+    }
+  }
+}`, server.URL+"/schemas/2015-01-01/deploymentParameters.json#"))
+
+	cfg := DefaultConfig()
+	cfg.Schemas.Compile.Timeout = NewDuration(testTimeout)
+	cfg.Schemas.Fetch.Timeout = NewDuration(testTimeout)
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint invalid parameters with pruning: %v", err)
+	}
+	if !result.HasIssues() {
+		t.Fatalf("expected missing secretName issue")
+	}
+	if *badRequests != 0 {
+		t.Fatalf("template resource schemas were fetched %d times", *badRequests)
+	}
+	var sawSecretName bool
+	for _, issue := range result.Issues {
+		if issue.Keyword == "required" && issue.Property == "secretName" {
+			sawSecretName = true
+		}
+	}
+	if !sawSecretName {
+		t.Fatalf("expected keyVaultReference validation issue, got %+v", result.Issues)
+	}
+}
+
 func TestAzureARMPruningHelperEdges(t *testing.T) {
 	cfg := DefaultConfig()
 	doc := map[string]any{
@@ -487,6 +548,27 @@ func newAzureARMPrefixFixtureServer(t *testing.T) *httptest.Server {
 	return server
 }
 
+func newAzureARMParametersFixtureServer(t *testing.T) (*httptest.Server, *int) {
+	t.Helper()
+	badRequests := 0
+	var server *httptest.Server
+	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/schemas/2015-01-01/deploymentParameters.json":
+			fmt.Fprint(w, azureARMParametersRootSchema(server.URL))
+		case "/schemas/2015-01-01/deploymentTemplate.json":
+			fmt.Fprint(w, azureARMParametersTemplateSchema(server.URL))
+		case "/schemas/2023-01-01/Microsoft.Bad.json":
+			badRequests++
+			fmt.Fprint(w, `{"$schema":"http://json-schema.org/draft-04/schema#","resourceDefinitions":{"things":{"type":42}}}`)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	return server, &badRequests
+}
+
 func azureARMFixtureTemplate(baseURL string) string {
 	return fmt.Sprintf(`{
   "$schema": %q,
@@ -532,6 +614,97 @@ func azureARMPrefixFixtureTemplate(baseURL string) string {
     }
   ]
 }`, baseURL+"/schemas/2019-04-01/deploymentTemplate.json#")
+}
+
+func azureARMParametersFixture(baseURL string) string {
+	return fmt.Sprintf(`{
+  "$schema": %q,
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {"value": "example"},
+    "count": {"value": 3},
+    "secret": {
+      "reference": {
+        "keyVault": {"id": "/subscriptions/example/resourceGroups/rg/providers/Microsoft.KeyVault/vaults/vault"},
+        "secretName": "name"
+      }
+    }
+  }
+}`, baseURL+"/schemas/2015-01-01/deploymentParameters.json#")
+}
+
+func azureARMParametersRootSchema(baseURL string) string {
+	return fmt.Sprintf(`{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": %q,
+  "type": "object",
+  "required": ["$schema", "contentVersion", "parameters"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {"type": "string"},
+    "contentVersion": {"type": "string"},
+    "parameters": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/definitions/parameter"}
+    }
+  },
+  "definitions": {
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value": {"$ref": %q},
+        "reference": {"$ref": %q}
+      },
+      "oneOf": [
+        {"required": ["value"]},
+        {"required": ["reference"]}
+      ]
+    }
+  }
+}`, baseURL+"/schemas/2015-01-01/deploymentParameters.json#",
+		baseURL+"/schemas/2015-01-01/deploymentTemplate.json#/definitions/parameterValueTypes",
+		baseURL+"/schemas/2015-01-01/deploymentTemplate.json#/definitions/keyVaultReference")
+}
+
+func azureARMParametersTemplateSchema(baseURL string) string {
+	return fmt.Sprintf(`{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": %q,
+  "type": "object",
+  "properties": {
+    "resources": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/resource"}
+    }
+  },
+  "definitions": {
+    "parameterValueTypes": {
+      "type": ["string", "boolean", "integer", "number", "object", "array", "null"]
+    },
+    "keyVaultReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["keyVault", "secretName"],
+      "properties": {
+        "keyVault": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id"],
+          "properties": {"id": {"type": "string", "minLength": 1}}
+        },
+        "secretName": {"type": "string", "minLength": 1},
+        "secretVersion": {"type": "string", "minLength": 1}
+      }
+    },
+    "resource": {
+      "oneOf": [
+        {"$ref": %q}
+      ]
+    }
+  }
+}`, baseURL+"/schemas/2015-01-01/deploymentTemplate.json#",
+		baseURL+"/schemas/2023-01-01/Microsoft.Bad.json#/resourceDefinitions/things")
 }
 
 func azureARMFixtureRootSchema(baseURL string) string {

@@ -110,6 +110,11 @@ npms:
     license: MIT
     repository: https://github.com/dollarlint/dollarlint
     bugs: https://github.com/dollarlint/dollarlint/issues
+    extra:
+      dependencies:
+        jszip: 3.10.1
+        proxy-agent: 8.0.2
+        tar: 7.5.22
     files:
       - glob: npm/README.md
         name_template: README.md

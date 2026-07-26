@@ -156,11 +156,16 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Check GoReleaser config
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Build release snapshot
         uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser-pro
           version: "~> v2"
-          args: check
-        env:
-          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+          args: release --snapshot --clean --skip=winget,homebrew
+
+      - name: Audit generated npm wrapper
+        run: npm audit --audit-level=high --prefix dist/npm/dollarlint

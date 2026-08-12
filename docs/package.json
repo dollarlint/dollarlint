@@ -25,6 +25,7 @@
     "typescript": "6.0.3"
   },
   "overrides": {
-    "yaml": "2.8.4"
+    "yaml": "2.8.4",
+    "nanoid": "3.3.17"
   }
 }

@@ -1,6 +1,6 @@
 module github.com/dollarlint/dollarlint
 
-go 1.26.5
+go 1.26.6
 
 require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0
@@ -8,15 +8,15 @@ require (
 	github.com/dlclark/regexp2 v1.12.0
 	github.com/google/go-github/v72 v72.0.0
 	github.com/hashicorp/go-retryablehttp v0.7.8
-	github.com/mark3labs/mcp-go v0.57.0
+	github.com/mark3labs/mcp-go v0.58.0
 	github.com/muesli/termenv v0.16.0
 	github.com/orochaa/go-clack v0.1.21
 	github.com/pelletier/go-toml/v2 v2.4.3
-	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/spf13/cobra v1.10.2
 	github.com/tailscale/hujson v0.0.0-20260302212456-ecc657c15afd
 	github.com/titanous/json5 v1.0.0
-	golang.org/x/text v0.40.0
+	golang.org/x/text v0.41.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

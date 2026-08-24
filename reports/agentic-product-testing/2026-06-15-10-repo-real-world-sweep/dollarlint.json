@@ -1,0 +1,2966 @@
+{
+  "formatVersion": 1,
+  "json": {
+    "$schema": "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json",
+    "formatVersion": 1,
+    "root": "/tmp/dollarlint-corpus.1921115342",
+    "summary": {
+      "discovered": 255,
+      "validated": 138,
+      "skipped": 112,
+      "failed": 5,
+      "issues": {
+        "total": 10,
+        "parsing": 5,
+        "validation": 5,
+        "schema": 0,
+        "coverage": 0
+      },
+      "ignored": 0,
+      "warnings": 0,
+      "durationNanos": 7537677024
+    },
+    "files": [
+      {
+        "path": "aleksey-saenko-musicrecognizer/app/src/main/res/raw/aboutlibraries.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/1.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/10.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/11.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/2.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/3.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/4.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/5.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/6.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/7.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/8.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/9.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/recognition/native/songrecfp/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/recognition/native/songrecfp/rust-toolchain.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/rust-toolchain.json",
+        "schemaSource": "catalog:schemastore:Rust toolchain",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_auth_error.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_no_matches.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_recording_error.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_success.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aleksey-saenko-musicrecognizer/gradle/libs.versions.toml",
+        "format": "toml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/.claude/settings.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/claude-code-settings.json",
+        "schemaSource": "catalog:schemastore:Claude Code Settings",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/DISCUSSION_TEMPLATE/deprecated-bug-report.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-discussion.json",
+        "schemaSource": "catalog:schemastore:GitHub Discussion",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/DISCUSSION_TEMPLATE/deprecated-feature-request.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-discussion.json",
+        "schemaSource": "catalog:schemastore:GitHub Discussion",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/DISCUSSION_TEMPLATE/deprecated-general.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-discussion.json",
+        "schemaSource": "catalog:schemastore:GitHub Discussion",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/DISCUSSION_TEMPLATE/deprecated-proposal.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-discussion.json",
+        "schemaSource": "catalog:schemastore:GitHub Discussion",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/DISCUSSION_TEMPLATE/deprecated-question-and-answer.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-discussion.json",
+        "schemaSource": "catalog:schemastore:GitHub Discussion",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/DISCUSSION_TEMPLATE/deprecated-support-request.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-discussion.json",
+        "schemaSource": "catalog:schemastore:GitHub Discussion",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/FUNDING.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-funding.json",
+        "schemaSource": "catalog:schemastore:GitHub Funding",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/ISSUE_TEMPLATE/bug-report.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/.github/ISSUE_TEMPLATE/config.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-issue-config.json",
+        "schemaSource": "catalog:schemastore:GitHub Issue Template configuration",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/ISSUE_TEMPLATE/feature-request.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/.github/ISSUE_TEMPLATE/general.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/.github/ISSUE_TEMPLATE/question.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/.github/ISSUE_TEMPLATE/support-request.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/actionlint.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/autofix.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/check-commit-signing.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/close-discussion.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/debug-with-action-tmate.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/macos-test.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/push-main.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/release.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/test-goreleaser.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/test.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/watch-star.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/wc-integration-test.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/wc-test-docker.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/windows-test.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/workflow_call_deploy_doc.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/workflow_call_test.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.github/workflows/workflow_call_typos.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.golangci.yml",
+        "format": "yaml",
+        "schema": "https://golangci-lint.run/jsonschema/golangci.jsonschema.json",
+        "schemaSource": "catalog:schemastore:Golangci-lint Configuration",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/.goreleaser.yml",
+        "format": "yaml",
+        "schema": "https://goreleaser.com/static/schema.json",
+        "schemaSource": "catalog:schemastore:Goreleaser",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/_typos.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/crate-ci/typos/master/config.schema.json",
+        "schemaSource": "catalog:schemastore:typos.toml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/aqua/aqua-checksums.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/aqua-policy.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/policy.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/aqua/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/actionlint.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/cmdx.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json",
+        "schemaSource": "catalog:schemastore:cmdx.yaml",
+        "status": "validated",
+        "issues": 2,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/cosign.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/ghalint.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/ghcp.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/go-licenses.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/gofumpt.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/golangci-lint.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/goreleser.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/nllint.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/node.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/pinact.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/reviewdog.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/syft.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/typos.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/cmdx.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/v2.0.2/json-schema/cmdx.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/ghalint.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "aquaproj-aqua/json-schema/aqua-generate-registry.json",
+        "format": "json",
+        "schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/json-schema/aqua-yaml.json",
+        "format": "json",
+        "schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/json-schema/policy.json",
+        "format": "json",
+        "schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/json-schema/registry.json",
+        "format": "json",
+        "schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/package-lock.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "lockfile",
+        "skipImportance": "low",
+        "skipDetail": "dependency lockfile without schema coverage"
+      },
+      {
+        "path": "aquaproj-aqua/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/pkg/cosign/aqua-checksums.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/pkg/cosign/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/pkg/ghattestation/aqua-checksums.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aquaproj-aqua/pkg/ghattestation/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/pkg/minisign/aqua-checksums.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/pkg/minisign/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/pkg/slsa/aqua-checksums.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/pkg/slsa/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/renovate.json5",
+        "format": "json5",
+        "schema": "https://docs.renovatebot.com/renovate-schema.json",
+        "schemaSource": "catalog:schemastore:Renovate",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/3064/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/aliases/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/cargo/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/cosign/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/gr-config/aqua-generate-registry.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-generate-registry.json",
+        "schemaSource": "catalog:schemastore:aqua-generate-registry.yaml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/insert/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "catalog:schemastore:aqua.yaml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/insert/expect.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aquaproj-aqua/tests/libc/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/libc/registry.yaml",
+        "format": "yaml",
+        "schema": "json-schema/registry.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/macos/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "catalog:schemastore:aqua.yaml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/macos/registry.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aquaproj-aqua/tests/main/aqua-global-2.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aquaproj-aqua/tests/main/aqua-global.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aquaproj-aqua/tests/main/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "catalog:schemastore:aqua.yaml",
+        "status": "validated",
+        "issues": 2,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/main/registry.yaml",
+        "format": "yaml",
+        "status": "error",
+        "issues": 0,
+        "ignored": 0,
+        "message": "parse /tmp/dollarlint-corpus.1921115342/aquaproj-aqua/tests/main/registry.yaml: yaml: unmarshal errors:\n  line 45: mapping key \"name\" already defined at line 44"
+      },
+      {
+        "path": "aquaproj-aqua/tests/minisign/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "catalog:schemastore:aqua.yaml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/pnpm/aqua-checksums.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aquaproj-aqua/tests/pnpm/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/pnpm/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/tag/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "catalog:schemastore:aqua.yaml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/unarchive/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/update/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "catalog:schemastore:aqua.yaml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/update/ci-info.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aquaproj-aqua/tests/update/imports/github-comment.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aquaproj-aqua/tests/update2/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "catalog:schemastore:aqua.yaml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/update3/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "catalog:schemastore:aqua.yaml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/version_expr_file/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/version_expr_json/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/version_expr_json/version.json",
+        "format": "json",
+        "schema": "https://raw.githubusercontent.com/dotnet/Nerdbank.GitVersioning/master/src/NerdBank.GitVersioning/version.schema.json",
+        "schemaSource": "catalog:schemastore:version.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/version_expr_yaml/aqua.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/tests/version_expr_yaml/version.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "aquaproj-aqua/website/cmdx.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/v2.0.2/json-schema/cmdx.json",
+        "schemaSource": "yaml-language-server",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/develop-registry/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/guides/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/products/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/products/aqua-installer/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/reference/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/reference/codes/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/reference/config/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/reference/registry-config/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/reference/security/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/reference/security/policy-as-code/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/reference/upgrade-guide/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/reference/upgrade-guide/v2/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/docs/tutorial/_category_.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/lychee.toml",
+        "format": "toml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "aquaproj-aqua/website/package-lock.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "lockfile",
+        "skipImportance": "low",
+        "skipDetail": "dependency lockfile without schema coverage"
+      },
+      {
+        "path": "aquaproj-aqua/website/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/.github/dependabot.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/dependabot-2.0.json",
+        "schemaSource": "catalog:schemastore:dependabot-v2.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/.github/workflows/benchmarks.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/.github/workflows/ci.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/.github/workflows/docs.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/.rubocop.yml",
+        "format": "yaml",
+        "schema": "https://www.rubyschema.org/rubocop.json",
+        "schemaSource": "catalog:rubyschema:RuboCop",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/docs/_config.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/jekyll.json",
+        "schemaSource": "catalog:schemastore:Jekyll",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/test/dummy/config/cable.yml",
+        "format": "yaml",
+        "schema": "https://www.rubyschema.org/rails/cable.json",
+        "schemaSource": "catalog:rubyschema:Rails cable.yml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/test/dummy/config/database.yml",
+        "format": "yaml",
+        "schema": "https://www.rubyschema.org/rails/database.json",
+        "schemaSource": "catalog:rubyschema:Rails database.yml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/test/dummy/config/locales/en.yml",
+        "format": "yaml",
+        "schema": "https://www.rubyschema.org/i18n/locale.json",
+        "schemaSource": "catalog:rubyschema:Rails I18n locale",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/test/dummy/config/storage.yml",
+        "format": "yaml",
+        "schema": "https://www.rubyschema.org/rails/storage.json",
+        "schemaSource": "catalog:rubyschema:Rails storage.yml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "basecamp-lexxy/test/dummy/test/fixtures/action_text/rich_texts.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "basecamp-lexxy/test/fixtures/action_text/rich_texts.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "basecamp-lexxy/test/fixtures/people.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "basecamp-lexxy/test/fixtures/posts.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "casey-just/.github/workflows/ci.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "casey-just/.github/workflows/release.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "casey-just/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "casey-just/book/en/book.toml",
+        "format": "toml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "casey-just/book/zh/book.toml",
+        "format": "toml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "casey-just/clippy.toml",
+        "format": "toml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "casey-just/crates/action-versions/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "casey-just/crates/generate-book/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "casey-just/crates/update-contributors/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "casey-just/fuzz/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "casey-just/rustfmt.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/rustfmt.json",
+        "schemaSource": "catalog:schemastore:rustfmt",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/.github/dependabot.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/dependabot-2.0.json",
+        "schemaSource": "catalog:schemastore:dependabot-v2.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/.github/workflows/maven.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/browseruse.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/camelcase.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/common.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/commonparam.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/deep_inheritance.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/dictionary.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/externalfile.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/externaltype.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/multipart.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/nullableparent.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/oneofsupport.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/required_nullable.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/required_nullable_objects.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/sample1.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/sample2.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/sample3.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "courseorchestra-hurdy-gurdy/src/test/resources/twoparams.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "ivancraft623-mobplugin/.github/dependabot.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/dependabot-2.0.json",
+        "schemaSource": "catalog:schemastore:dependabot-v2.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ivancraft623-mobplugin/.github/workflows/phpstan.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ivancraft623-mobplugin/.poggit.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "ivancraft623-mobplugin/composer.json",
+        "format": "json",
+        "schema": "https://getcomposer.org/schema.json",
+        "schemaSource": "catalog:schemastore:composer.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "ivancraft623-mobplugin/plugin.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/bukkit-plugin.json",
+        "schemaSource": "catalog:schemastore:Bukkit plugin.yml",
+        "status": "validated",
+        "issues": 1,
+        "ignored": 0
+      },
+      {
+        "path": "ivancraft623-mobplugin/resources/global-settings.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "nix-community-nixhelm/.github/dependabot.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/dependabot-2.0.json",
+        "schemaSource": "catalog:schemastore:dependabot-v2.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "nix-community-nixhelm/.github/workflows/cache-updated.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "nix-community-nixhelm/.github/workflows/rebuild-cache.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "nix-community-nixhelm/.github/workflows/update-chart.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "nix-community-nixhelm/.github/workflows/update-charts.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "nix-community-nixhelm/pyproject.toml",
+        "format": "toml",
+        "schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/pyproject.json",
+        "schemaSource": "catalog:schemastore:PyProject",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/nginx/Chart.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/chart.json",
+        "schemaSource": "catalog:schemastore:Helm Chart.yaml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/nginx/templates/deployment.yaml",
+        "format": "yaml",
+        "status": "error",
+        "issues": 0,
+        "ignored": 0,
+        "message": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/nginx/templates/deployment.yaml: yaml: line 3: did not find expected key"
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/nginx/templates/service.yaml",
+        "format": "yaml",
+        "status": "error",
+        "issues": 0,
+        "ignored": 0,
+        "message": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/nginx/templates/service.yaml: yaml: line 3: did not find expected key"
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/nginx/values.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/podinfo/Chart.yaml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/chart.json",
+        "schemaSource": "catalog:schemastore:Helm Chart.yaml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/podinfo/templates/deployment.yaml",
+        "format": "yaml",
+        "status": "error",
+        "issues": 0,
+        "ignored": 0,
+        "message": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/podinfo/templates/deployment.yaml: yaml: line 3: did not find expected key"
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/podinfo/templates/service.yaml",
+        "format": "yaml",
+        "status": "error",
+        "issues": 0,
+        "ignored": 0,
+        "message": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/podinfo/templates/service.yaml: yaml: line 3: did not find expected key"
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/podinfo/values.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/docker-compose.yaml",
+        "format": "yaml",
+        "schema": "https://raw.githubusercontent.com/compose-spec/compose-go/master/schema/compose-spec.json",
+        "schemaSource": "catalog:schemastore:docker-compose.yml",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/oauth2-server/auth-config.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "test-data",
+        "skipImportance": "low",
+        "skipDetail": "test, fixture, or benchmark data without schema coverage"
+      },
+      {
+        "path": "sous-chefs-lvm/.github/workflows/ci.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sous-chefs-lvm/.github/workflows/conventional-commits.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sous-chefs-lvm/.github/workflows/copilot-setup-steps.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sous-chefs-lvm/.github/workflows/prevent-file-change.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sous-chefs-lvm/.github/workflows/release.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sous-chefs-lvm/.github/workflows/stale.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sous-chefs-lvm/.markdownlint-cli2.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "sous-chefs-lvm/.overcommit.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "high",
+        "skipDetail": "schema-less file looks like project configuration"
+      },
+      {
+        "path": "sous-chefs-lvm/.release-please-manifest.json",
+        "format": "json",
+        "schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/manifest.json",
+        "schemaSource": "catalog:schemastore:release-please-manifest.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sous-chefs-lvm/.rubocop.yml",
+        "format": "yaml",
+        "schema": "https://www.rubyschema.org/rubocop.json",
+        "schemaSource": "catalog:rubyschema:RuboCop",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sous-chefs-lvm/.rubocop_todo.yml",
+        "format": "yaml",
+        "schema": "https://www.rubyschema.org/rubocop.json",
+        "schemaSource": "catalog:rubyschema:RuboCop",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sous-chefs-lvm/.vscode/extensions.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "sous-chefs-lvm/kitchen.dokken.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "sous-chefs-lvm/kitchen.exec.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "sous-chefs-lvm/kitchen.global.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "sous-chefs-lvm/kitchen.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "sous-chefs-lvm/release-please-config.json",
+        "format": "json",
+        "schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sous-chefs-lvm/renovate.json",
+        "format": "json",
+        "schema": "https://docs.renovatebot.com/renovate-schema.json",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/.config/dotnet-tools.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/dotnet-tools.json",
+        "schemaSource": "catalog:schemastore:dotnet-tools.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/.github/ISSUE_TEMPLATE/bug_report.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/.github/ISSUE_TEMPLATE/config.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-issue-config.json",
+        "schemaSource": "catalog:schemastore:GitHub Issue Template configuration",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/.github/ISSUE_TEMPLATE/feature_request.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/.github/dependabot.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/dependabot-2.0.json",
+        "schemaSource": "catalog:schemastore:dependabot-v2.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/.github/workflows/ci.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/.github/workflows/release.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/global.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/global.json",
+        "schemaSource": "catalog:schemastore:global.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/release-artifacts.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/schemas/compat.schema.json",
+        "format": "json",
+        "schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/schemas/config.schema.json",
+        "format": "json",
+        "schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/schemas/drive_scope.schema.json",
+        "format": "json",
+        "schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/schemas/maintenance_window.schema.json",
+        "format": "json",
+        "schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/schemas/telemetry_payload.schema.json",
+        "format": "json",
+        "schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/schemas/watchdog.schema.json",
+        "format": "json",
+        "schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/schemas/windows_build_rules.schema.json",
+        "format": "json",
+        "schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaSource": "$schema",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/scoop/nvme-driver-patcher.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/telemetry-receiver/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/telemetry-receiver/wrangler.toml",
+        "format": "toml",
+        "schema": "https://www.unpkg.com/wrangler/config-schema.json",
+        "schemaSource": "catalog:schemastore:Wrangler CLI",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/packaging/winget/SysAdminDoc.NVMeDriverPatcher.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/src/NVMeDriverPatcher/compat.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "sysadmindoc-win11-nvme-driver-patcher/src/NVMeDriverPatcher/windows_build_rules.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "xevrion-v2-agent-playground/.github/labels.yml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "xevrion-v2-agent-playground/.github/workflows/auto-process.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "xevrion-v2-agent-playground/.github/workflows/create-labels.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "xevrion-v2-agent-playground/.github/workflows/seed-issues.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "xevrion-v2-agent-playground/.github/workflows/seed-meta-issue.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "xevrion-v2-agent-playground/apps/api/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "xevrion-v2-agent-playground/apps/web/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "xevrion-v2-agent-playground/contributors/agents.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "xevrion-v2-agent-playground/leaderboard.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "xevrion-v2-agent-playground/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "xevrion-v2-agent-playground/packages/db/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "xevrion-v2-agent-playground/packages/ui/package.json",
+        "format": "json",
+        "schema": "https://www.schemastore.org/package.json",
+        "schemaSource": "catalog:schemastore:package.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      }
+    ],
+    "issues": [
+      {
+        "path": "aquaproj-aqua/tests/main/registry.yaml",
+        "category": "parsing",
+        "keyword": "parse",
+        "message": "parse /tmp/dollarlint-corpus.1921115342/aquaproj-aqua/tests/main/registry.yaml: yaml: unmarshal errors:\n  line 45: mapping key \"name\" already defined at line 44",
+        "hint": "This YAML file appears to contain template tags.\nExclude it or validate the rendered YAML instead."
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/cmdx.yaml",
+        "schema": "https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json",
+        "schemaSource": "catalog:schemastore:cmdx.yaml",
+        "category": "validation",
+        "keyword": "required",
+        "keywordLocation": "/required",
+        "property": "tasks",
+        "instanceLocation": "/",
+        "line": 1,
+        "column": 1,
+        "message": "must have required property \"tasks\"",
+        "hint": "This issue came from catalog:schemastore:cmdx.yaml.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because basename \"cmdx.yaml\" matched catalog fileMatch \"cmdx.yaml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"aqua/imports/cmdx.yaml\"\nschema = \"https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json\""
+      },
+      {
+        "path": "aquaproj-aqua/aqua/imports/cmdx.yaml",
+        "schema": "https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json",
+        "schemaSource": "catalog:schemastore:cmdx.yaml",
+        "category": "validation",
+        "keyword": "additionalProperties",
+        "keywordLocation": "/additionalProperties",
+        "property": "packages",
+        "instanceLocation": "/packages",
+        "line": 2,
+        "column": 3,
+        "message": "must not have additional property \"packages\"",
+        "hint": "This issue came from catalog:schemastore:cmdx.yaml.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because basename \"cmdx.yaml\" matched catalog fileMatch \"cmdx.yaml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"aqua/imports/cmdx.yaml\"\nschema = \"https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json\""
+      },
+      {
+        "path": "aquaproj-aqua/tests/main/aqua.yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "catalog:schemastore:aqua.yaml",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "1",
+        "instanceLocation": "/packages/1",
+        "line": 13,
+        "column": 3,
+        "message": "expected object, received null",
+        "hint": "This issue came from catalog:schemastore:aqua.yaml.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because basename \"aqua.yaml\" matched catalog fileMatch \"aqua.yaml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"tests/main/aqua.yaml\"\nschema = \"https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json\""
+      },
+      {
+        "path": "aquaproj-aqua/tests/main/aqua.yaml",
+        "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+        "schemaSource": "catalog:schemastore:aqua.yaml",
+        "category": "validation",
+        "keyword": "type",
+        "keywordLocation": "/type",
+        "property": "1",
+        "instanceLocation": "/registries/1",
+        "line": 7,
+        "column": 3,
+        "message": "expected object, received null",
+        "hint": "This issue came from catalog:schemastore:aqua.yaml.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because basename \"aqua.yaml\" matched catalog fileMatch \"aqua.yaml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"tests/main/aqua.yaml\"\nschema = \"https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json\""
+      },
+      {
+        "path": "ivancraft623-mobplugin/plugin.yml",
+        "schema": "https://www.schemastore.org/bukkit-plugin.json",
+        "schemaSource": "catalog:schemastore:Bukkit plugin.yml",
+        "category": "validation",
+        "keyword": "pattern",
+        "keywordLocation": "/pattern",
+        "property": "main",
+        "instanceLocation": "/main",
+        "line": 4,
+        "column": 7,
+        "message": "'IvanCraft623\\\\MobPlugin\\\\MobPlugin' does not match pattern '^(?!org\\\\.bukkit\\\\.)([a-zA-Z_$][a-zA-Z\\\\d_$]*\\\\.)*[a-zA-Z_$][a-zA-Z\\\\d_$]*$'",
+        "hint": "This issue came from catalog:schemastore:Bukkit plugin.yml.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because basename \"plugin.yml\" matched catalog fileMatch \"plugin.yml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"plugin.yml\"\nschema = \"https://www.schemastore.org/bukkit-plugin.json\""
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/nginx/templates/deployment.yaml",
+        "category": "parsing",
+        "keyword": "parse",
+        "message": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/nginx/templates/deployment.yaml: yaml: line 3: did not find expected key",
+        "hint": "This YAML file appears to contain template tags.\nExclude it or validate the rendered YAML instead."
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/nginx/templates/service.yaml",
+        "category": "parsing",
+        "keyword": "parse",
+        "message": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/nginx/templates/service.yaml: yaml: line 3: did not find expected key",
+        "hint": "This YAML file appears to contain template tags.\nExclude it or validate the rendered YAML instead."
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/podinfo/templates/deployment.yaml",
+        "category": "parsing",
+        "keyword": "parse",
+        "message": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/podinfo/templates/deployment.yaml: yaml: line 3: did not find expected key",
+        "hint": "This YAML file appears to contain template tags.\nExclude it or validate the rendered YAML instead."
+      },
+      {
+        "path": "nix-community-nixhelm/tests/_infra/charts/podinfo/templates/service.yaml",
+        "category": "parsing",
+        "keyword": "parse",
+        "message": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/podinfo/templates/service.yaml: yaml: line 3: did not find expected key",
+        "hint": "This YAML file appears to contain template tags.\nExclude it or validate the rendered YAML instead."
+      }
+    ],
+    "ignoredIssues": [],
+    "warnings": []
+  },
+  "sarif": {
+    "version": "2.1.0",
+    "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+    "runs": [
+      {
+        "tool": {
+          "driver": {
+            "name": "dollarlint",
+            "informationUri": "https://github.com/dollarlint/dollarlint",
+            "rules": [
+              {
+                "id": "additionalProperties",
+                "name": "additionalProperties",
+                "shortDescription": {
+                  "text": "JSON Schema additionalProperties validation"
+                },
+                "properties": {
+                  "keyword": "additionalProperties"
+                }
+              },
+              {
+                "id": "parse",
+                "name": "parse",
+                "shortDescription": {
+                  "text": "Document parse issue"
+                },
+                "properties": {
+                  "keyword": "parse"
+                }
+              },
+              {
+                "id": "pattern",
+                "name": "pattern",
+                "shortDescription": {
+                  "text": "JSON Schema pattern validation"
+                },
+                "properties": {
+                  "keyword": "pattern"
+                }
+              },
+              {
+                "id": "required",
+                "name": "required",
+                "shortDescription": {
+                  "text": "JSON Schema required validation"
+                },
+                "properties": {
+                  "keyword": "required"
+                }
+              },
+              {
+                "id": "type",
+                "name": "type",
+                "shortDescription": {
+                  "text": "JSON Schema type validation"
+                },
+                "properties": {
+                  "keyword": "type"
+                }
+              }
+            ]
+          }
+        },
+        "results": [
+          {
+            "ruleId": "parse",
+            "level": "error",
+            "message": {
+              "text": "parse /tmp/dollarlint-corpus.1921115342/aquaproj-aqua/tests/main/registry.yaml: yaml: unmarshal errors:\n  line 45: mapping key \"name\" already defined at line 44"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "aquaproj-aqua/tests/main/registry.yaml"
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "keyword": "parse",
+              "issueHint": "This YAML file appears to contain template tags.\nExclude it or validate the rendered YAML instead."
+            }
+          },
+          {
+            "ruleId": "required",
+            "level": "error",
+            "message": {
+              "text": "must have required property \"tasks\""
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "aquaproj-aqua/aqua/imports/cmdx.yaml"
+                  },
+                  "region": {
+                    "startLine": 1,
+                    "startColumn": 1
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json",
+              "keyword": "required",
+              "keywordLocation": "/required",
+              "property": "tasks",
+              "instanceLocation": "/",
+              "issueHint": "This issue came from catalog:schemastore:cmdx.yaml.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because basename \"cmdx.yaml\" matched catalog fileMatch \"cmdx.yaml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"aqua/imports/cmdx.yaml\"\nschema = \"https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json\""
+            }
+          },
+          {
+            "ruleId": "additionalProperties",
+            "level": "error",
+            "message": {
+              "text": "must not have additional property \"packages\""
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "aquaproj-aqua/aqua/imports/cmdx.yaml"
+                  },
+                  "region": {
+                    "startLine": 2,
+                    "startColumn": 3
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json",
+              "keyword": "additionalProperties",
+              "keywordLocation": "/additionalProperties",
+              "property": "packages",
+              "instanceLocation": "/packages",
+              "issueHint": "This issue came from catalog:schemastore:cmdx.yaml.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because basename \"cmdx.yaml\" matched catalog fileMatch \"cmdx.yaml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"aqua/imports/cmdx.yaml\"\nschema = \"https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json\""
+            }
+          },
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected object, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "aquaproj-aqua/tests/main/aqua.yaml"
+                  },
+                  "region": {
+                    "startLine": 13,
+                    "startColumn": 3
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "1",
+              "instanceLocation": "/packages/1",
+              "issueHint": "This issue came from catalog:schemastore:aqua.yaml.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because basename \"aqua.yaml\" matched catalog fileMatch \"aqua.yaml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"tests/main/aqua.yaml\"\nschema = \"https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json\""
+            }
+          },
+          {
+            "ruleId": "type",
+            "level": "error",
+            "message": {
+              "text": "expected object, received null"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "aquaproj-aqua/tests/main/aqua.yaml"
+                  },
+                  "region": {
+                    "startLine": 7,
+                    "startColumn": 3
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json",
+              "keyword": "type",
+              "keywordLocation": "/type",
+              "property": "1",
+              "instanceLocation": "/registries/1",
+              "issueHint": "This issue came from catalog:schemastore:aqua.yaml.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because basename \"aqua.yaml\" matched catalog fileMatch \"aqua.yaml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"tests/main/aqua.yaml\"\nschema = \"https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json\""
+            }
+          },
+          {
+            "ruleId": "pattern",
+            "level": "error",
+            "message": {
+              "text": "'IvanCraft623\\\\MobPlugin\\\\MobPlugin' does not match pattern '^(?!org\\\\.bukkit\\\\.)([a-zA-Z_$][a-zA-Z\\\\d_$]*\\\\.)*[a-zA-Z_$][a-zA-Z\\\\d_$]*$'"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "ivancraft623-mobplugin/plugin.yml"
+                  },
+                  "region": {
+                    "startLine": 4,
+                    "startColumn": 7
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "schema": "https://www.schemastore.org/bukkit-plugin.json",
+              "keyword": "pattern",
+              "keywordLocation": "/pattern",
+              "property": "main",
+              "instanceLocation": "/main",
+              "issueHint": "This issue came from catalog:schemastore:Bukkit plugin.yml.\nCatalog-backed schemas are inferred from file names and third-party schema metadata.\nMatched because basename \"plugin.yml\" matched catalog fileMatch \"plugin.yml\".\nConfirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\nSuggested explicit association:\n[[schemas.associations]]\nfile = \"plugin.yml\"\nschema = \"https://www.schemastore.org/bukkit-plugin.json\""
+            }
+          },
+          {
+            "ruleId": "parse",
+            "level": "error",
+            "message": {
+              "text": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/nginx/templates/deployment.yaml: yaml: line 3: did not find expected key"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "nix-community-nixhelm/tests/_infra/charts/nginx/templates/deployment.yaml"
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "keyword": "parse",
+              "issueHint": "This YAML file appears to contain template tags.\nExclude it or validate the rendered YAML instead."
+            }
+          },
+          {
+            "ruleId": "parse",
+            "level": "error",
+            "message": {
+              "text": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/nginx/templates/service.yaml: yaml: line 3: did not find expected key"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "nix-community-nixhelm/tests/_infra/charts/nginx/templates/service.yaml"
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "keyword": "parse",
+              "issueHint": "This YAML file appears to contain template tags.\nExclude it or validate the rendered YAML instead."
+            }
+          },
+          {
+            "ruleId": "parse",
+            "level": "error",
+            "message": {
+              "text": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/podinfo/templates/deployment.yaml: yaml: line 3: did not find expected key"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "nix-community-nixhelm/tests/_infra/charts/podinfo/templates/deployment.yaml"
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "keyword": "parse",
+              "issueHint": "This YAML file appears to contain template tags.\nExclude it or validate the rendered YAML instead."
+            }
+          },
+          {
+            "ruleId": "parse",
+            "level": "error",
+            "message": {
+              "text": "parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/podinfo/templates/service.yaml: yaml: line 3: did not find expected key"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "nix-community-nixhelm/tests/_infra/charts/podinfo/templates/service.yaml"
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "keyword": "parse",
+              "issueHint": "This YAML file appears to contain template tags.\nExclude it or validate the rendered YAML instead."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "styled": {
+    "plain": "dollarlint found 10 issues (5 parsing, 5 validation) in 8 files after 0s\n\naquaproj-aqua/aqua/imports/cmdx.yaml\n  1:1       required              must have required property \"tasks\"           /\n    hint: This issue came from catalog:schemastore:cmdx.yaml.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because basename \"cmdx.yaml\" matched catalog fileMatch \"cmdx.yaml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"aqua/imports/cmdx.yaml\"\n      schema = \"https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json\"\n  2:3       additionalProperties  must not have additional property \"packages\"  /packages\n    hint: This issue came from catalog:schemastore:cmdx.yaml.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because basename \"cmdx.yaml\" matched catalog fileMatch \"cmdx.yaml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"aqua/imports/cmdx.yaml\"\n      schema = \"https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json\"\n\naquaproj-aqua/tests/main/aqua.yaml\n  7:3       type     expected object, received null  /registries/1\n    hint: This issue came from catalog:schemastore:aqua.yaml.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because basename \"aqua.yaml\" matched catalog fileMatch \"aqua.yaml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"tests/main/aqua.yaml\"\n      schema = \"https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json\"\n  13:3      type     expected object, received null  /packages/1\n    hint: This issue came from catalog:schemastore:aqua.yaml.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because basename \"aqua.yaml\" matched catalog fileMatch \"aqua.yaml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"tests/main/aqua.yaml\"\n      schema = \"https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json\"\n\naquaproj-aqua/tests/main/registry.yaml\n  /         parse    parse /tmp/dollarlint-corpus.1921115342/aquaproj-aqua/tests/main/registry.yaml: yaml: unmarshal errors:\n  line 45: mapping key \"name\" already defined at line 44\n    hint: This YAML file appears to contain template tags.\n      Exclude it or validate the rendered YAML instead.\n\nivancraft623-mobplugin/plugin.yml\n  4:7       pattern  'IvanCraft623\\\\MobPlugin\\\\MobPlugin' does not match pattern '^(?!org\\\\.bukkit\\\\.)([a-zA-Z_$][a-zA-Z\\\\d_$]*\\\\.)*[a-zA-Z_$][a-zA-Z\\\\d_$]*$'  /main\n    hint: This issue came from catalog:schemastore:Bukkit plugin.yml.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because basename \"plugin.yml\" matched catalog fileMatch \"plugin.yml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"plugin.yml\"\n      schema = \"https://www.schemastore.org/bukkit-plugin.json\"\n\nnix-community-nixhelm/tests/_infra/charts/nginx/templates/deployment.yaml\n  /         parse    parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/nginx/templates/deployment.yaml: yaml: line 3: did not find expected key\n    hint: This YAML file appears to contain template tags.\n      Exclude it or validate the rendered YAML instead.\n\nnix-community-nixhelm/tests/_infra/charts/nginx/templates/service.yaml\n  /         parse    parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/nginx/templates/service.yaml: yaml: line 3: did not find expected key\n    hint: This YAML file appears to contain template tags.\n      Exclude it or validate the rendered YAML instead.\n\nnix-community-nixhelm/tests/_infra/charts/podinfo/templates/deployment.yaml\n  /         parse    parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/podinfo/templates/deployment.yaml: yaml: line 3: did not find expected key\n    hint: This YAML file appears to contain template tags.\n      Exclude it or validate the rendered YAML instead.\n\nnix-community-nixhelm/tests/_infra/charts/podinfo/templates/service.yaml\n  /         parse    parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/podinfo/templates/service.yaml: yaml: line 3: did not find expected key\n    hint: This YAML file appears to contain template tags.\n      Exclude it or validate the rendered YAML instead.\n\nskipped files\n  high signal: unknown/custom file (no schema)\n    why: schema-less file looks like project configuration\n    aquaproj-aqua/aqua/imports/actionlint.yaml\n    aquaproj-aqua/aqua/imports/ghalint.yaml\n    aquaproj-aqua/aqua/imports/golangci-lint.yaml\n    aquaproj-aqua/aqua/imports/nllint.yaml\n    aquaproj-aqua/ghalint.yaml\n    ivancraft623-mobplugin/.poggit.yml\n    ivancraft623-mobplugin/resources/global-settings.yml\n    sous-chefs-lvm/.markdownlint-cli2.yaml\n    sous-chefs-lvm/.overcommit.yml\n  medium signal: unknown/custom file (no schema)\n    why: schema-less JSON/YAML/TOML file\n    aleksey-saenko-musicrecognizer/app/src/main/res/raw/aboutlibraries.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/1.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/10.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/11.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/2.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/3.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/4.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/5.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/6.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/7.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/8.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/9.json\n    aleksey-saenko-musicrecognizer/gradle/libs.versions.toml\n    aquaproj-aqua/.github/ISSUE_TEMPLATE/bug-report.yml\n    aquaproj-aqua/.github/ISSUE_TEMPLATE/feature-request.yml\n    aquaproj-aqua/.github/ISSUE_TEMPLATE/general.yml\n    aquaproj-aqua/.github/ISSUE_TEMPLATE/question.yml\n    aquaproj-aqua/.github/ISSUE_TEMPLATE/support-request.yml\n    aquaproj-aqua/aqua/aqua-checksums.json\n    aquaproj-aqua/aqua/imports/cosign.yaml\n    aquaproj-aqua/aqua/imports/ghcp.yaml\n    aquaproj-aqua/aqua/imports/go-licenses.yaml\n    aquaproj-aqua/aqua/imports/gofumpt.yaml\n    aquaproj-aqua/aqua/imports/goreleser.yaml\n    aquaproj-aqua/aqua/imports/node.yaml\n    aquaproj-aqua/aqua/imports/pinact.yaml\n    aquaproj-aqua/aqua/imports/reviewdog.yaml\n    aquaproj-aqua/aqua/imports/syft.yaml\n    aquaproj-aqua/aqua/imports/typos.yaml\n    aquaproj-aqua/pkg/cosign/aqua-checksums.json\n    aquaproj-aqua/pkg/minisign/aqua-checksums.json\n    aquaproj-aqua/pkg/slsa/aqua-checksums.json\n    aquaproj-aqua/website/docs/develop-registry/_category_.json\n    aquaproj-aqua/website/docs/guides/_category_.json\n    aquaproj-aqua/website/docs/products/_category_.json\n    aquaproj-aqua/website/docs/products/aqua-installer/_category_.json\n    aquaproj-aqua/website/docs/reference/_category_.json\n    aquaproj-aqua/website/docs/reference/codes/_category_.json\n    aquaproj-aqua/website/docs/reference/config/_category_.json\n    aquaproj-aqua/website/docs/reference/registry-config/_category_.json\n    aquaproj-aqua/website/docs/reference/security/_category_.json\n    aquaproj-aqua/website/docs/reference/security/policy-as-code/_category_.json\n    aquaproj-aqua/website/docs/reference/upgrade-guide/_category_.json\n    aquaproj-aqua/website/docs/reference/upgrade-guide/v2/_category_.json\n    aquaproj-aqua/website/docs/tutorial/_category_.json\n    aquaproj-aqua/website/lychee.toml\n    casey-just/book/en/book.toml\n    casey-just/book/zh/book.toml\n    casey-just/clippy.toml\n    sous-chefs-lvm/.vscode/extensions.json\n    sous-chefs-lvm/kitchen.dokken.yml\n    sous-chefs-lvm/kitchen.exec.yml\n    sous-chefs-lvm/kitchen.global.yml\n    sous-chefs-lvm/kitchen.yml\n    sysadmindoc-win11-nvme-driver-patcher/.github/ISSUE_TEMPLATE/bug_report.yml\n    sysadmindoc-win11-nvme-driver-patcher/.github/ISSUE_TEMPLATE/feature_request.yml\n    sysadmindoc-win11-nvme-driver-patcher/packaging/release-artifacts.json\n    sysadmindoc-win11-nvme-driver-patcher/packaging/scoop/nvme-driver-patcher.json\n    sysadmindoc-win11-nvme-driver-patcher/packaging/winget/SysAdminDoc.NVMeDriverPatcher.yaml\n    sysadmindoc-win11-nvme-driver-patcher/src/NVMeDriverPatcher/compat.json\n    sysadmindoc-win11-nvme-driver-patcher/src/NVMeDriverPatcher/windows_build_rules.json\n    xevrion-v2-agent-playground/.github/labels.yml\n    xevrion-v2-agent-playground/contributors/agents.json\n    xevrion-v2-agent-playground/leaderboard.json\n  low signal: dependency lockfile (no schema)\n    why: dependency lockfile without schema coverage\n    aquaproj-aqua/package-lock.json\n    aquaproj-aqua/website/package-lock.json\n  low signal: test or fixture data (no schema)\n    why: test, fixture, or benchmark data without schema coverage\n    aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_auth_error.json\n    aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_no_matches.json\n    aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_recording_error.json\n    aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_success.json\n    aquaproj-aqua/pkg/ghattestation/aqua-checksums.json\n    aquaproj-aqua/tests/insert/expect.yaml\n    aquaproj-aqua/tests/macos/registry.yaml\n    aquaproj-aqua/tests/main/aqua-global-2.yaml\n    ... 29 more skipped files omitted from text output; use --format json for the full list\n\nSummary: 255 discovered, 138 validated, 112 skipped, 10 issues (5 parsing, 5 validation) in 0s\n",
+    "ansi": "dollarlint found 10 issues (5 parsing, 5 validation) in 8 files after 0s\n\naquaproj-aqua/aqua/imports/cmdx.yaml\n  1:1       required              must have required property \"tasks\"           /\n    hint: This issue came from catalog:schemastore:cmdx.yaml.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because basename \"cmdx.yaml\" matched catalog fileMatch \"cmdx.yaml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"aqua/imports/cmdx.yaml\"\n      schema = \"https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json\"\n  2:3       additionalProperties  must not have additional property \"packages\"  /packages\n    hint: This issue came from catalog:schemastore:cmdx.yaml.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because basename \"cmdx.yaml\" matched catalog fileMatch \"cmdx.yaml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"aqua/imports/cmdx.yaml\"\n      schema = \"https://raw.githubusercontent.com/suzuki-shunsuke/cmdx/refs/heads/main/json-schema/cmdx.json\"\n\naquaproj-aqua/tests/main/aqua.yaml\n  7:3       type     expected object, received null  /registries/1\n    hint: This issue came from catalog:schemastore:aqua.yaml.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because basename \"aqua.yaml\" matched catalog fileMatch \"aqua.yaml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"tests/main/aqua.yaml\"\n      schema = \"https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json\"\n  13:3      type     expected object, received null  /packages/1\n    hint: This issue came from catalog:schemastore:aqua.yaml.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because basename \"aqua.yaml\" matched catalog fileMatch \"aqua.yaml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"tests/main/aqua.yaml\"\n      schema = \"https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json\"\n\naquaproj-aqua/tests/main/registry.yaml\n  /         parse    parse /tmp/dollarlint-corpus.1921115342/aquaproj-aqua/tests/main/registry.yaml: yaml: unmarshal errors:\n  line 45: mapping key \"name\" already defined at line 44\n    hint: This YAML file appears to contain template tags.\n      Exclude it or validate the rendered YAML instead.\n\nivancraft623-mobplugin/plugin.yml\n  4:7       pattern  'IvanCraft623\\\\MobPlugin\\\\MobPlugin' does not match pattern '^(?!org\\\\.bukkit\\\\.)([a-zA-Z_$][a-zA-Z\\\\d_$]*\\\\.)*[a-zA-Z_$][a-zA-Z\\\\d_$]*$'  /main\n    hint: This issue came from catalog:schemastore:Bukkit plugin.yml.\n      Catalog-backed schemas are inferred from file names and third-party schema metadata.\n      Matched because basename \"plugin.yml\" matched catalog fileMatch \"plugin.yml\".\n      Confirm the external catalog schema matches this repo's tool version and conventions before treating this as a config bug.\n      Suggested explicit association:\n      [[schemas.associations]]\n      file = \"plugin.yml\"\n      schema = \"https://www.schemastore.org/bukkit-plugin.json\"\n\nnix-community-nixhelm/tests/_infra/charts/nginx/templates/deployment.yaml\n  /         parse    parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/nginx/templates/deployment.yaml: yaml: line 3: did not find expected key\n    hint: This YAML file appears to contain template tags.\n      Exclude it or validate the rendered YAML instead.\n\nnix-community-nixhelm/tests/_infra/charts/nginx/templates/service.yaml\n  /         parse    parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/nginx/templates/service.yaml: yaml: line 3: did not find expected key\n    hint: This YAML file appears to contain template tags.\n      Exclude it or validate the rendered YAML instead.\n\nnix-community-nixhelm/tests/_infra/charts/podinfo/templates/deployment.yaml\n  /         parse    parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/podinfo/templates/deployment.yaml: yaml: line 3: did not find expected key\n    hint: This YAML file appears to contain template tags.\n      Exclude it or validate the rendered YAML instead.\n\nnix-community-nixhelm/tests/_infra/charts/podinfo/templates/service.yaml\n  /         parse    parse /tmp/dollarlint-corpus.1921115342/nix-community-nixhelm/tests/_infra/charts/podinfo/templates/service.yaml: yaml: line 3: did not find expected key\n    hint: This YAML file appears to contain template tags.\n      Exclude it or validate the rendered YAML instead.\n\nskipped files\n  high signal: unknown/custom file (no schema)\n    why: schema-less file looks like project configuration\n    aquaproj-aqua/aqua/imports/actionlint.yaml\n    aquaproj-aqua/aqua/imports/ghalint.yaml\n    aquaproj-aqua/aqua/imports/golangci-lint.yaml\n    aquaproj-aqua/aqua/imports/nllint.yaml\n    aquaproj-aqua/ghalint.yaml\n    ivancraft623-mobplugin/.poggit.yml\n    ivancraft623-mobplugin/resources/global-settings.yml\n    sous-chefs-lvm/.markdownlint-cli2.yaml\n    sous-chefs-lvm/.overcommit.yml\n  medium signal: unknown/custom file (no schema)\n    why: schema-less JSON/YAML/TOML file\n    aleksey-saenko-musicrecognizer/app/src/main/res/raw/aboutlibraries.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/1.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/10.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/11.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/2.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/3.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/4.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/5.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/6.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/7.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/8.json\n    aleksey-saenko-musicrecognizer/core/database/schemas/com.mrsep.musicrecognizer.core.database.ApplicationDatabase/9.json\n    aleksey-saenko-musicrecognizer/gradle/libs.versions.toml\n    aquaproj-aqua/.github/ISSUE_TEMPLATE/bug-report.yml\n    aquaproj-aqua/.github/ISSUE_TEMPLATE/feature-request.yml\n    aquaproj-aqua/.github/ISSUE_TEMPLATE/general.yml\n    aquaproj-aqua/.github/ISSUE_TEMPLATE/question.yml\n    aquaproj-aqua/.github/ISSUE_TEMPLATE/support-request.yml\n    aquaproj-aqua/aqua/aqua-checksums.json\n    aquaproj-aqua/aqua/imports/cosign.yaml\n    aquaproj-aqua/aqua/imports/ghcp.yaml\n    aquaproj-aqua/aqua/imports/go-licenses.yaml\n    aquaproj-aqua/aqua/imports/gofumpt.yaml\n    aquaproj-aqua/aqua/imports/goreleser.yaml\n    aquaproj-aqua/aqua/imports/node.yaml\n    aquaproj-aqua/aqua/imports/pinact.yaml\n    aquaproj-aqua/aqua/imports/reviewdog.yaml\n    aquaproj-aqua/aqua/imports/syft.yaml\n    aquaproj-aqua/aqua/imports/typos.yaml\n    aquaproj-aqua/pkg/cosign/aqua-checksums.json\n    aquaproj-aqua/pkg/minisign/aqua-checksums.json\n    aquaproj-aqua/pkg/slsa/aqua-checksums.json\n    aquaproj-aqua/website/docs/develop-registry/_category_.json\n    aquaproj-aqua/website/docs/guides/_category_.json\n    aquaproj-aqua/website/docs/products/_category_.json\n    aquaproj-aqua/website/docs/products/aqua-installer/_category_.json\n    aquaproj-aqua/website/docs/reference/_category_.json\n    aquaproj-aqua/website/docs/reference/codes/_category_.json\n    aquaproj-aqua/website/docs/reference/config/_category_.json\n    aquaproj-aqua/website/docs/reference/registry-config/_category_.json\n    aquaproj-aqua/website/docs/reference/security/_category_.json\n    aquaproj-aqua/website/docs/reference/security/policy-as-code/_category_.json\n    aquaproj-aqua/website/docs/reference/upgrade-guide/_category_.json\n    aquaproj-aqua/website/docs/reference/upgrade-guide/v2/_category_.json\n    aquaproj-aqua/website/docs/tutorial/_category_.json\n    aquaproj-aqua/website/lychee.toml\n    casey-just/book/en/book.toml\n    casey-just/book/zh/book.toml\n    casey-just/clippy.toml\n    sous-chefs-lvm/.vscode/extensions.json\n    sous-chefs-lvm/kitchen.dokken.yml\n    sous-chefs-lvm/kitchen.exec.yml\n    sous-chefs-lvm/kitchen.global.yml\n    sous-chefs-lvm/kitchen.yml\n    sysadmindoc-win11-nvme-driver-patcher/.github/ISSUE_TEMPLATE/bug_report.yml\n    sysadmindoc-win11-nvme-driver-patcher/.github/ISSUE_TEMPLATE/feature_request.yml\n    sysadmindoc-win11-nvme-driver-patcher/packaging/release-artifacts.json\n    sysadmindoc-win11-nvme-driver-patcher/packaging/scoop/nvme-driver-patcher.json\n    sysadmindoc-win11-nvme-driver-patcher/packaging/winget/SysAdminDoc.NVMeDriverPatcher.yaml\n    sysadmindoc-win11-nvme-driver-patcher/src/NVMeDriverPatcher/compat.json\n    sysadmindoc-win11-nvme-driver-patcher/src/NVMeDriverPatcher/windows_build_rules.json\n    xevrion-v2-agent-playground/.github/labels.yml\n    xevrion-v2-agent-playground/contributors/agents.json\n    xevrion-v2-agent-playground/leaderboard.json\n  low signal: dependency lockfile (no schema)\n    why: dependency lockfile without schema coverage\n    aquaproj-aqua/package-lock.json\n    aquaproj-aqua/website/package-lock.json\n  low signal: test or fixture data (no schema)\n    why: test, fixture, or benchmark data without schema coverage\n    aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_auth_error.json\n    aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_no_matches.json\n    aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_recording_error.json\n    aleksey-saenko-musicrecognizer/core/recognition/src/test/resources/audd_response_success.json\n    aquaproj-aqua/pkg/ghattestation/aqua-checksums.json\n    aquaproj-aqua/tests/insert/expect.yaml\n    aquaproj-aqua/tests/macos/registry.yaml\n    aquaproj-aqua/tests/main/aqua-global-2.yaml\n    ... 29 more skipped files omitted from text output; use --format json for the full list\n\nSummary: 255 discovered, 138 validated, 112 skipped, 10 issues (5 parsing, 5 validation) in 0s\n",
+    "options": {
+      "showSkipped": true,
+      "locations": true
+    },
+    "truncated": true
+  }
+}

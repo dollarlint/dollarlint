@@ -1,0 +1,367 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-06-15-10-repo-real-world-sweep",
+  "date": "2026-06-15",
+  "title": "10 repo real-world sweep",
+  "dollarlintRevision": "9775b2ec8f53e5284ce584df37ea66f5e3f0a4ff",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.1921115342",
+  "cacheDir": "/tmp/dollarlint-cache.4075229857",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.1921115342\" cacheDir=\"/tmp/dollarlint-cache.4075229857\" outputArtifact=\"/tmp/dollarlint-10-repo-real-world-sweep-4192815108.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-10-repo-real-world-sweep-4192815108.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-06-15-10-repo-real-world-sweep/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "aleksey-saenko-musicrecognizer",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: core/recognition/native/songrecfp/Cargo.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "aquaproj-aqua",
+      "status": "needs-review",
+      "notes": "MCP first-pass scan found 1 local $schema refs, including tests/libc/registry.yaml:1 -\u003e ../../json-schema/registry.json. Validation completed without additional dependency prep; keep this as a caveat rather than running unsafe installs during this sweep."
+    },
+    {
+      "repository": "basecamp-lexxy",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: yarn.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "casey-just",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock, fuzz/Cargo.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "courseorchestra-hurdy-gurdy",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "ivancraft623-mobplugin",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: composer.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "nix-community-nixhelm",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: uv.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "sous-chefs-lvm",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 2."
+    },
+    {
+      "repository": "sysadmindoc-win11-nvme-driver-patcher",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 7."
+    },
+    {
+      "repository": "xevrion-v2-agent-playground",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "aleksey-saenko-musicrecognizer",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint cleanly separated low-signal test fixtures from medium-signal schema-less files and avoided emitting noisy false errors on generated Room database schema snapshots.",
+        "The two validated files passed and the skipped output was grouped clearly enough for a developer to understand that most uncovered files were data snapshots or metadata rather than obviously supported config."
+      ],
+      "caveats": [
+        "Coverage was still narrow because 17 of 19 discovered files were skipped, including generated database schema JSON and a Gradle version catalog TOML file."
+      ],
+      "notes": "This repo had high skipped coverage, but the skipped classes were understandable and largely unsurprising for generated or schema-less data files. I do not see a concrete product change from this result alone, though it is another reminder that coverage remains narrow on repos with many JSON/TOML assets."
+    },
+    {
+      "repository": "aquaproj-aqua",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint found concrete validation issues in aqua/imports/cmdx.yaml and tests/main/aqua.yaml with strong schema provenance and instance locations, which is useful, but both findings depend on catalog-backed schemas that still require the user to judge schema fit.",
+        "The repo also had a large tail of skipped YAML/JSON/TOML files, including several high-signal config-like import files such as aqua/imports/actionlint.yaml and ghalint.yaml, so coverage remained incomplete in an otherwise configuration-heavy repository.",
+        "The templated registry.yaml parse failure again showed templated-YAML hints, but still presented as a parser error in the main issue list."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Improve first-class handling of templated YAML so template-driven files are classified more clearly than as ordinary parse failures.",
+          "rationale": "tests/main/registry.yaml was recognized as templated YAML, but it still appeared as a parse error in the main issue list."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Provide stronger guidance or suggestions for uncovered config-like import files when many hand-authored YAML files are skipped as unknown.",
+          "rationale": "Aqua had multiple high-signal config-like YAML files skipped, which reduces confidence in coverage on a repo centered around configuration files."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Continue refining catalog-backed issue messaging so users can more quickly distinguish likely real config bugs from possible schema-version mismatches.",
+          "rationale": "The cmdx.yaml and aqua.yaml findings were actionable, but the output still requires user interpretation about whether the catalog schema exactly matches project conventions."
+        }
+      ],
+      "notes": "This result shows DollarLint can produce valuable issues, but the overall developer experience still asks the user to reason through catalog-schema trust, templated YAML parsing, and broad skipped-config coverage at the same time. That combination makes the output less decisive than it could be."
+    },
+    {
+      "repository": "basecamp-lexxy",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated 11 discovered files without issues or warnings, and the CLI output was concise and easy to interpret.",
+        "The only skipped files were obvious low-signal Rails fixture YAML files under test paths, so the uncovered portion did not look like an important product gap."
+      ],
+      "notes": "This is the kind of result a developer would want: clean validated configuration, clear skip reasoning, and no distracting noise. I do not see a product change signal from this repository."
+    },
+    {
+      "repository": "casey-just",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated 8 of 11 discovered files with no issues or warnings, and the CLI preview was concise and easy to act on.",
+        "The three skipped TOML files were clearly classified as schema-less unknown/custom files rather than being misreported as failures."
+      ],
+      "caveats": [
+        "A few medium-signal TOML files remained uncovered, so this result still has modest coverage limits even though the output stayed clear."
+      ],
+      "notes": "This looked like a healthy developer experience: mostly validated config files, clear skip reasoning for the remaining TOML files, and no noisy or misleading output. I do not see a concrete product change from this repository alone."
+    },
+    {
+      "repository": "courseorchestra-hurdy-gurdy",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "The CLI preview clearly showed 17 skipped files as low-signal test or fixture data without schema coverage and surfaced no confusing validation errors.",
+        "The only validated files passed, with no warnings or issue noise, so the result was easy to interpret as limited but sane coverage."
+      ],
+      "caveats": [
+        "Coverage was narrow because 17 of 19 discovered files were skipped test resources, so this repo is weak evidence for broader schema coverage."
+      ],
+      "notes": "DollarLint behaved sensibly for a developer here: it avoided noisy false positives on fixture data and explained the skip class clearly. The high skipped ratio is a caveat, but not a product problem in this repository because the skipped files were obviously test fixtures."
+    },
+    {
+      "repository": "ivancraft623-mobplugin",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint raised a catalog-backed schema validation issue in plugin.yml and did provide useful provenance and association hints, but the message still leaves the developer to decide whether the external Bukkit schema matches this ecosystem variant.",
+        "Two hand-authored YAML files that look like project configuration, .poggit.yml and resources/global-settings.yml, were skipped as unknown schema-less files, which limits coverage on a small config-heavy repo."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Make catalog-backed issue output more explicit when a matched third-party schema may be ecosystem-variant or potentially mismatched, so developers can quickly judge whether to trust the finding.",
+          "rationale": "The plugin.yml issue came from a catalog match and included caveats, but the user still has to interpret whether the schema is correct for this project variant."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Improve surfacing for skipped hand-authored configuration files that look important, possibly with stronger coverage guidance or association suggestions for adjacent YAML files.",
+          "rationale": "In a small repository, skipping .poggit.yml and resources/global-settings.yml leaves a meaningful portion of likely user-managed configuration outside coverage."
+        }
+      ],
+      "notes": "This result is actionable but not fully satisfying as developer UX. The catalog hint helps, yet the user still has to manually reason about whether the Schemas Store Bukkit schema is appropriate, and skipped config-like YAML means important project settings remain uncovered."
+    },
+    {
+      "repository": "nix-community-nixhelm",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint already detected the four YAML parse failures as templated YAML and emitted a grouped issue hint explaining that the files likely need rendering or exclusion.",
+        "Even with that hint, the main output still lists each template file as a raw parse error, which is noisy and leaves Helm-style infrastructure fixtures looking more broken than they really are."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Promote templated-YAML detection from a secondary issue hint into a clearer primary classification so Helm-style template files do not read like ordinary parse failures.",
+          "rationale": "The repo produced four parse errors, but DollarLint also knew they were templated YAML. Surfacing that classification more prominently would make the output easier to trust and act on."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Consider grouping templated YAML parse failures into a single summarized result with representative examples instead of listing each file as a full parse error.",
+          "rationale": "The current output repeats near-identical parser messages across multiple template files, which adds noise without improving developer understanding."
+        }
+      ],
+      "notes": "This is a good example of partial product fit: the tool recognizes the pattern, but the user experience still foregrounds parser failures over the more helpful classification. The skipped values/auth config files were low-signal fixtures, so the main product opportunity is how templated YAML results are presented."
+    },
+    {
+      "repository": "sous-chefs-lvm",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint validated 11 files cleanly with no issue noise, so the core output was easy to trust.",
+        "At the same time, several hand-authored configuration files were skipped as schema-less unknowns, including .markdownlint-cli2.yaml, .overcommit.yml, and multiple kitchen*.yml files that look relevant to day-to-day repo configuration."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "Improve guidance for skipped hand-authored YAML config files so users can more quickly tell when important repo settings are outside current schema coverage.",
+          "rationale": "This repo had several common configuration files skipped with no schema, which limits confidence even though the validated files were clean."
+        }
+      ],
+      "notes": "The tool behaved well on what it covered, but the uncovered files are common enough that a developer may still wonder whether meaningful repo configuration was missed. This is a softer product signal than the schema-mismatch and templated-YAML cases, but it still points to coverage gaps for real config files."
+    },
+    {
+      "repository": "sysadmindoc-win11-nvme-driver-patcher",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated most discovered files cleanly with no issues or warnings, and the skipped files were grouped clearly under one schema-less unknown reason.",
+        "The uncovered files were moderate-signal packaging, issue-template, and project JSON/YAML metadata rather than obviously broken validations or parser failures."
+      ],
+      "caveats": [
+        "Seven medium-signal files remained uncovered, so the result is not complete coverage even though the output stayed clear and low-noise."
+      ],
+      "notes": "This looks acceptable from a developer perspective: the tool handled the repo calmly and explained the uncovered files without overclaiming. I do not see a strong enough signal here to recommend a product change on its own."
+    },
+    {
+      "repository": "xevrion-v2-agent-playground",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated 9 discovered files cleanly and kept the terminal output concise, with skipped files grouped under a single understandable reason.",
+        "The remaining skipped files were ordinary schema-less custom metadata files, not confusing parser or validation failures."
+      ],
+      "caveats": [
+        "Three medium-signal custom JSON/YAML files remained uncovered, so the repo still had some schema blind spots."
+      ],
+      "notes": "The tool behaved well here: it separated uncovered custom files from validated configuration and avoided noisy false positives. This result suggests reasonable default UX rather than a product change."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "xevrion-v2-agent-playground",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/xevrion-v2/agent-playground.git",
+      "commit": "19d4424e453984f218fe6a8580c4ff9b1cd5f883",
+      "path": "/tmp/dollarlint-corpus.1921115342/xevrion-v2-agent-playground",
+      "status": "cloned"
+    },
+    {
+      "name": "basecamp-lexxy",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/basecamp/lexxy.git",
+      "commit": "e28e45cc680b381bb93de074fe5f1e901fb69af0",
+      "path": "/tmp/dollarlint-corpus.1921115342/basecamp-lexxy",
+      "status": "cloned"
+    },
+    {
+      "name": "nix-community-nixhelm",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/nix-community/nixhelm.git",
+      "commit": "a3512303f226393e966861bbcdd624234ec951dc",
+      "path": "/tmp/dollarlint-corpus.1921115342/nix-community-nixhelm",
+      "status": "cloned"
+    },
+    {
+      "name": "aquaproj-aqua",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/aquaproj/aqua.git",
+      "commit": "96af948e3a0f4f53b7b3cf3b43e34a5369c895dd",
+      "path": "/tmp/dollarlint-corpus.1921115342/aquaproj-aqua",
+      "status": "cloned"
+    },
+    {
+      "name": "casey-just",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/casey/just.git",
+      "commit": "9d77745b91107c21081518b3c0a27843c649024e",
+      "path": "/tmp/dollarlint-corpus.1921115342/casey-just",
+      "status": "cloned"
+    },
+    {
+      "name": "courseorchestra-hurdy-gurdy",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/CourseOrchestra/hurdy-gurdy.git",
+      "commit": "1ab56901bff8bc8786ece6dfa069b432548a0301",
+      "path": "/tmp/dollarlint-corpus.1921115342/courseorchestra-hurdy-gurdy",
+      "status": "cloned"
+    },
+    {
+      "name": "aleksey-saenko-musicrecognizer",
+      "ecosystem": "Kotlin",
+      "cloneURL": "https://github.com/aleksey-saenko/MusicRecognizer.git",
+      "commit": "2ac544857b4b0f4023cf3768f51d5cacacca34ce",
+      "path": "/tmp/dollarlint-corpus.1921115342/aleksey-saenko-musicrecognizer",
+      "status": "cloned"
+    },
+    {
+      "name": "sous-chefs-lvm",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/sous-chefs/lvm.git",
+      "commit": "902aed0d6cd150e4dfb6a38e33911f2b589b8add",
+      "path": "/tmp/dollarlint-corpus.1921115342/sous-chefs-lvm",
+      "status": "cloned"
+    },
+    {
+      "name": "ivancraft623-mobplugin",
+      "ecosystem": "PHP",
+      "cloneURL": "https://github.com/IvanCraft623/MobPlugin.git",
+      "commit": "cf428e31fb4d7e1da109a028f217c98e471190a2",
+      "path": "/tmp/dollarlint-corpus.1921115342/ivancraft623-mobplugin",
+      "status": "cloned"
+    },
+    {
+      "name": "sysadmindoc-win11-nvme-driver-patcher",
+      "ecosystem": "C#",
+      "cloneURL": "https://github.com/SysAdminDoc/win11-nvme-driver-patcher.git",
+      "commit": "14269470b8e1ea799c23666148ec36660a7a1950",
+      "path": "/tmp/dollarlint-corpus.1921115342/sysadmindoc-win11-nvme-driver-patcher",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 255,
+    "validated": 138,
+    "skipped": 112,
+    "failed": 5,
+    "issues": {
+      "total": 10,
+      "parsing": 5,
+      "validation": 5,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 7537677024
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 6 repos behaved reasonably, 4 repos produced product signals, and 0 repos were blocked.",
+    "DollarLint discovered 255 files, validated 138, skipped 112, failed 5, reported 10 issues, and emitted 0 warnings across the 10-repo sweep.",
+    "Issue concentration was highest in aquaproj-aqua (5 issues), nix-community-nixhelm (4 issues), and ivancraft623-mobplugin (1 issue).",
+    "The strongest recurring ergonomics signal was templated YAML: DollarLint detected it, but still foregrounded raw parse errors in aqua and nixhelm.",
+    "A second recurring signal was partial coverage on hand-authored config-like YAML/JSON/TOML files that were skipped as unknown schema-less files."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "This sweep skipped 112 of 255 discovered files (43.9%), which is useful context when judging corpus coverage."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Improve first-class handling of templated YAML so template-driven files are classified more clearly than as ordinary parse failures.",
+      "rationale": "Templated YAML was detected in aquaproj-aqua and nix-community-nixhelm, but still appeared as parser failures in the main issue list."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Provide stronger guidance or suggestions for uncovered config-like import files when many hand-authored YAML files are skipped as unknown.",
+      "rationale": "aquaproj-aqua and ivancraft623-mobplugin both exposed meaningful skipped config coverage gaps."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Continue refining catalog-backed issue messaging so users can more quickly distinguish likely real config bugs from possible schema-version mismatches.",
+      "rationale": "Catalog-backed findings in aqua and plugin.yml were useful, but still required significant user trust calibration."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Consider grouping templated YAML parse failures into a single summarized result with representative examples instead of listing each file as a full parse error.",
+      "rationale": "nix-community-nixhelm repeated near-identical parse errors across four template files, which added noise without improving clarity."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Improve guidance for skipped hand-authored YAML config files so users can more quickly tell when important repo settings are outside current schema coverage.",
+      "rationale": "sous-chefs-lvm and other repos had common configuration files skipped with no schema, limiting confidence even when validated files were clean."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; the recorded recommendations should drive any follow-up changes."
+  ],
+  "followUp": [
+    "Review the structured product recommendations and decide which should become implementation work.",
+    "Use a fresh candidate set for the next sweep rather than retesting this same 10-repo corpus by default."
+  ]
+}

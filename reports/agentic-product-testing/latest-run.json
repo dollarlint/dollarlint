@@ -1,0 +1,19 @@
+{
+  "entryID": "2026-06-01-agentic-product-testing-2026-06-01",
+  "metadataPath": "reports/agentic-product-testing/2026-06-01-agentic-product-testing-2026-06-01/metadata.json",
+  "artifactPath": "reports/agentic-product-testing/2026-06-01-agentic-product-testing-2026-06-01/dollarlint.json",
+  "title": "Agentic Product Testing 2026-06-01",
+  "dollarlintRevision": "9775b2ec8f53e5284ce584df37ea66f5e3f0a4ff",
+  "summary": {
+    "repositories": 10,
+    "behavedReasonably": 1,
+    "productSignals": 8,
+    "blocked": 1,
+    "discovered": 2209,
+    "validated": 225,
+    "skipped": 1970,
+    "failed": 14,
+    "issues": 44,
+    "warnings": 0
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "formatVersion": 1,
+  "json": {
+    "$schema": "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json",
+    "formatVersion": 1,
+    "root": "/tmp/dollarlint-corpus.3949612389",
+    "summary": {
+      "discovered": 12,
+      "validated": 7,
+      "skipped": 5,
+      "failed": 0,
+      "issues": {
+        "total": 0,
+        "parsing": 0,
+        "validation": 0,
+        "schema": 0,
+        "coverage": 0
+      },
+      "ignored": 0,
+      "warnings": 0,
+      "durationNanos": 385969932
+    },
+    "files": [
+      {
+        "path": "dandavison-delta/.cargo/audit.toml",
+        "format": "toml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "dandavison-delta/.github/dependabot.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/dependabot-2.0.json",
+        "schemaSource": "catalog:schemastore:dependabot-v2.json",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "dandavison-delta/.github/workflows/audit.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "dandavison-delta/.github/workflows/cd.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "dandavison-delta/.github/workflows/ci.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "dandavison-delta/.github/workflows/manual.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "dandavison-delta/.github/workflows/verify-release.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "dandavison-delta/Cargo.toml",
+        "format": "toml",
+        "schema": "https://www.schemastore.org/cargo.json",
+        "schemaSource": "catalog:schemastore:Cargo Manifest",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "dandavison-delta/etc/performance/chronologer.yaml",
+        "format": "yaml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      },
+      {
+        "path": "dandavison-delta/etc/performance/data/hyperfine-output.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "application-data",
+        "skipImportance": "low",
+        "skipDetail": "application data without schema coverage"
+      },
+      {
+        "path": "dandavison-delta/etc/performance/data/hyperfine-processed-output.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "application-data",
+        "skipImportance": "low",
+        "skipDetail": "application data without schema coverage"
+      },
+      {
+        "path": "dandavison-delta/manual/book.toml",
+        "format": "toml",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      }
+    ],
+    "issues": [],
+    "ignoredIssues": [],
+    "warnings": []
+  },
+  "sarif": {
+    "version": "2.1.0",
+    "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+    "runs": [
+      {
+        "tool": {
+          "driver": {
+            "name": "dollarlint",
+            "informationUri": "https://github.com/dollarlint/dollarlint"
+          }
+        },
+        "results": []
+      }
+    ]
+  },
+  "styled": {
+    "plain": "dollarlint passed in 0s: 12 discovered, 7 validated, 5 skipped\n\nskipped files\n  medium signal: unknown/custom file (no schema)\n    why: schema-less JSON/YAML/TOML file\n    dandavison-delta/.cargo/audit.toml\n    dandavison-delta/etc/performance/chronologer.yaml\n    dandavison-delta/manual/book.toml\n  low signal: application data (no schema)\n    why: application data without schema coverage\n    dandavison-delta/etc/performance/data/hyperfine-output.json\n    dandavison-delta/etc/performance/data/hyperfine-processed-output.json\n\nSummary: 12 discovered, 7 validated, 5 skipped, 0 issues in 0s\n",
+    "ansi": "dollarlint passed in 0s: 12 discovered, 7 validated, 5 skipped\n\nskipped files\n  medium signal: unknown/custom file (no schema)\n    why: schema-less JSON/YAML/TOML file\n    dandavison-delta/.cargo/audit.toml\n    dandavison-delta/etc/performance/chronologer.yaml\n    dandavison-delta/manual/book.toml\n  low signal: application data (no schema)\n    why: application data without schema coverage\n    dandavison-delta/etc/performance/data/hyperfine-output.json\n    dandavison-delta/etc/performance/data/hyperfine-processed-output.json\n\nSummary: 12 discovered, 7 validated, 5 skipped, 0 issues in 0s\n",
+    "options": {
+      "showSkipped": true,
+      "locations": true
+    },
+    "truncated": false
+  }
+}

@@ -271,14 +271,12 @@ const slogans = [
             <span>
               <span class="brand-title">DollarLint</span>
               <span class="brand-subtitle">
-                {
-                  slogans.map((slogan, index) => (
-                    <span class="brand-slogan" data-slogan-option={index}>
-                      <span>{slogan[0]}</span>
-                      <span>{slogan[1]}</span>
-                    </span>
-                  ))
-                }
+                {slogans.map((slogan, index) => (
+                  <span class="brand-slogan" data-slogan-option={index}>
+                    <span>{slogan[0]}</span>
+                    <span>{slogan[1]}</span>
+                  </span>
+                ))}
               </span>
             </span>
           </a>
@@ -292,9 +290,11 @@ const slogans = [
               data-mobile-menu-button
             >
               <span class="sr-only">Menu</span>
-              <span class="menu-icon" aria-hidden="true"
-                ><span></span><span></span><span></span></span
-              >
+              <span class="menu-icon" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
             </button>
             <div
               class="mobile-menu-panel"
@@ -304,31 +304,29 @@ const slogans = [
             >
               <div class="mobile-menu-current">{currentPageLabel}</div>
               <div class="mobile-menu-scroll">
-                {
-                  nav.map((section) => (
-                    <nav
-                      class="mobile-nav-section"
-                      aria-label={`${section.heading} mobile`}
-                    >
-                      <div class="nav-heading">{section.heading}</div>
-                      <ul class="nav-list">
-                        {section.links.map((link) => (
-                          <li>
-                            <a
-                              class="nav-link"
-                              href={link.href}
-                              aria-current={
-                                current === link.href ? "page" : undefined
-                              }
-                            >
-                              {link.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </nav>
-                  ))
-                }
+                {nav.map((section) => (
+                  <nav
+                    class="mobile-nav-section"
+                    aria-label={`${section.heading} mobile`}
+                  >
+                    <div class="nav-heading">{section.heading}</div>
+                    <ul class="nav-list">
+                      {section.links.map((link) => (
+                        <li>
+                          <a
+                            class="nav-link"
+                            href={link.href}
+                            aria-current={
+                              current === link.href ? "page" : undefined
+                            }
+                          >
+                            {link.label}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                ))}
               </div>
               <div class="mobile-theme">
                 <div class="theme-switch" role="group" aria-label="Theme">
@@ -336,104 +334,116 @@ const slogans = [
                     class="theme-button"
                     type="button"
                     data-theme-option="light"
-                    aria-pressed="false">Light</button
+                    aria-pressed="false"
                   >
+                    Light
+                  </button>
                   <button
                     class="theme-button"
                     type="button"
                     data-theme-option="dark"
-                    aria-pressed="false">Dark</button
+                    aria-pressed="false"
                   >
+                    Dark
+                  </button>
                   <button
                     class="theme-button"
                     type="button"
                     data-theme-option="system"
-                    aria-pressed="true">System</button
+                    aria-pressed="true"
                   >
+                    System
+                  </button>
                 </div>
                 <a
                   class="utility-link"
-                  href="https://github.com/dollarlint/dollarlint">GitHub</a
+                  href="https://github.com/dollarlint/dollarlint"
                 >
+                  GitHub
+                </a>
               </div>
             </div>
           </div>
         </div>
-        {
-          nav.map((section) => (
-            <nav class="nav-section" aria-label={section.heading}>
-              <div class="nav-heading">{section.heading}</div>
-              <ul class="nav-list">
-                {section.links.map((link) => (
-                  <li>
-                    <a
-                      class="nav-link"
-                      href={link.href}
-                      aria-current={current === link.href ? "page" : undefined}
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ))
-        }
+        {nav.map((section) => (
+          <nav class="nav-section" aria-label={section.heading}>
+            <div class="nav-heading">{section.heading}</div>
+            <ul class="nav-list">
+              {section.links.map((link) => (
+                <li>
+                  <a
+                    class="nav-link"
+                    href={link.href}
+                    aria-current={current === link.href ? "page" : undefined}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
         <div class="sidebar-theme">
           <div class="theme-switch" role="group" aria-label="Theme">
             <button
               class="theme-button"
               type="button"
               data-theme-option="light"
-              aria-pressed="false">Light</button
+              aria-pressed="false"
             >
+              Light
+            </button>
             <button
               class="theme-button"
               type="button"
               data-theme-option="dark"
-              aria-pressed="false">Dark</button
+              aria-pressed="false"
             >
+              Dark
+            </button>
             <button
               class="theme-button"
               type="button"
               data-theme-option="system"
-              aria-pressed="true">System</button
+              aria-pressed="true"
             >
+              System
+            </button>
           </div>
           <a
             class="utility-link"
-            href="https://github.com/dollarlint/dollarlint">GitHub</a
+            href="https://github.com/dollarlint/dollarlint"
           >
+            GitHub
+          </a>
         </div>
       </aside>
       <main class="content">
         <div class="page">
           <slot />
-          {
-            (previousPage || nextPage) && (
-              <nav class="doc-pagination" aria-label="Previous and next pages">
-                {previousPage ? (
-                  <a
-                    class="doc-pagination-card previous"
-                    href={previousPage.href}
-                  >
-                    <span>Previous</span>
-                    <strong>{previousPage.label}</strong>
-                  </a>
-                ) : (
-                  <span />
-                )}
-                {nextPage ? (
-                  <a class="doc-pagination-card next" href={nextPage.href}>
-                    <span>Next</span>
-                    <strong>{nextPage.label}</strong>
-                  </a>
-                ) : (
-                  <span />
-                )}
-              </nav>
-            )
-          }
+          {(previousPage || nextPage) && (
+            <nav class="doc-pagination" aria-label="Previous and next pages">
+              {previousPage ? (
+                <a
+                  class="doc-pagination-card previous"
+                  href={previousPage.href}
+                >
+                  <span>Previous</span>
+                  <strong>{previousPage.label}</strong>
+                </a>
+              ) : (
+                <span />
+              )}
+              {nextPage ? (
+                <a class="doc-pagination-card next" href={nextPage.href}>
+                  <span>Next</span>
+                  <strong>{nextPage.label}</strong>
+                </a>
+              ) : (
+                <span />
+              )}
+            </nav>
+          )}
         </div>
       </main>
     </div>

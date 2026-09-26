@@ -3,7 +3,7 @@ module github.com/dollarlint/dollarlint
 go 1.26.6
 
 require (
-	github.com/bmatcuk/doublestar/v4 v4.10.0
+	github.com/bmatcuk/doublestar/v4 v4.10.2
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/dlclark/regexp2 v1.12.0
 	github.com/google/go-github/v72 v72.0.0

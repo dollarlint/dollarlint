@@ -98,22 +98,21 @@ reason = "legacy fixture kept for compatibility"`;
       <span class="eyebrow">Reference</span>
       <h1>Configuration</h1>
       <p class="lead">
-        A <code>.dollarlint.toml</code> config is recommended for projects, but not
-        required. Directory validation searches the target root; explicit file validation
-        searches beside the file. Each run uses one config by default; set <code
-          >configs.mode = "nearest"</code
-        > to let nested <code>.dollarlint.toml</code> files apply to their subtrees.
-        Use <code>--config</code> to point at one explicit config for the whole run.
+        A <code>.dollarlint.toml</code> config is recommended for projects, but
+        not required. Directory validation searches the target root; explicit
+        file validation searches beside the file. Each run uses one config by
+        default; set <code>configs.mode = "nearest"</code> to let nested{" "}
+        <code>.dollarlint.toml</code> files apply to their subtrees. Use{" "}
+        <code>--config</code> to point at one explicit config for the whole run.
       </p>
     </header>
 
     <h2>Starter config</h2>
     <CodeBlock code={starterConfig} language="toml" />
     <p>
-      Format and output file are per-run choices — use <code>--format</code> and <code
-        >--output</code
-      > on <code>dollarlint validate</code> whenever you need JSON, SARIF, or a file
-      artifact.
+      Format and output file are per-run choices — use <code>--format</code> and{" "}
+      <code>--output</code> on <code>dollarlint validate</code> whenever you
+      need JSON, SARIF, or a file artifact.
     </p>
 
     <h2>Config selection</h2>
@@ -125,28 +124,34 @@ reason = "legacy fixture kept for compatibility"`;
         </tr>
       </thead>
       <tbody>
-        <tr
-          ><td><code>extends</code></td><td
-            >Optional path to another <code>.dollarlint.toml</code> to inherit from.
-            Relative paths resolve from the current config file.</td
-          ></tr
-        >
-        <tr
-          ><td><code>configs.mode</code></td><td
-            >Use <code>single</code> for one config per run, or <code
-              >nearest</code
-            >
-            to apply nested configs to their subtrees during a parent-directory run.</td
-          ></tr
-        >
+        <tr>
+          <td>
+            <code>extends</code>
+          </td>
+          <td>
+            Optional path to another <code>.dollarlint.toml</code> to inherit
+            from. Relative paths resolve from the current config file.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>configs.mode</code>
+          </td>
+          <td>
+            Use <code>single</code> for one config per run, or{" "}
+            <code>nearest</code>
+            to apply nested configs to their subtrees during a parent-directory
+            run.
+          </td>
+        </tr>
       </tbody>
     </table>
 
     <h2>Discovery</h2>
     <p>
-      Leave <code>include</code> unset to use the built-in JSON, JSONC, JSON5, JSON
-      Lines, YAML, YML, and TOML discovery defaults. Set it only when you want to
-      replace that default set with custom discovery globs.
+      Leave <code>include</code> unset to use the built-in JSON, JSONC, JSON5,
+      JSON Lines, YAML, YML, and TOML discovery defaults. Set it only when you
+      want to replace that default set with custom discovery globs.
     </p>
     <p>
       Discovery, exclude, association, and ignore-file globs in config are
@@ -164,48 +169,64 @@ reason = "legacy fixture kept for compatibility"`;
         </tr>
       </thead>
       <tbody>
-        <tr
-          ><td><code>include</code></td><td
-            >Optional replacement discovery globs to consider. Leave unset for
+        <tr>
+          <td>
+            <code>include</code>
+          </td>
+          <td>
+            Optional replacement discovery globs to consider. Leave unset for
             built-in defaults; set to an empty list only to discover no files.
-            Repeatable CLI includes replace config includes for that run.</td
-          ></tr
-        >
-        <tr
-          ><td><code>exclude</code></td><td
-            >Additional discovery globs to ignore, on top of the built-in
-            default excludes.</td
-          ></tr
-        >
-        <tr
-          ><td><code>useDefaultExcludes</code></td><td
-            >Skip common VCS, dependency, generated, cache, and virtual
-            environment directories.</td
-          ></tr
-        >
-        <tr
-          ><td><code>respectGitIgnore</code></td><td
-            >Apply <code>.gitignore</code> patterns during directory discovery, including
-            nested <code>.gitignore</code> files as the walk descends.</td
-          ></tr
-        >
-        <tr
-          ><td><code>forceExclude</code></td><td
-            >Apply excludes even to explicitly passed files. By default,
-            explicit file targets bypass excludes.</td
-          ></tr
-        >
-        <tr
-          ><td><code>followSymlinks</code></td><td
-            >Follow symbolic links during discovery.</td
-          ></tr
-        >
+            Repeatable CLI includes replace config includes for that run.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>exclude</code>
+          </td>
+          <td>
+            Additional discovery globs to ignore, on top of the built-in default
+            excludes.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>useDefaultExcludes</code>
+          </td>
+          <td>
+            Skip common VCS, dependency, generated, cache, and virtual
+            environment directories.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>respectGitIgnore</code>
+          </td>
+          <td>
+            Apply <code>.gitignore</code> patterns during directory discovery,
+            including nested <code>.gitignore</code> files as the walk descends.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>forceExclude</code>
+          </td>
+          <td>
+            Apply excludes even to explicitly passed files. By default, explicit
+            file targets bypass excludes.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>followSymlinks</code>
+          </td>
+          <td>Follow symbolic links during discovery.</td>
+        </tr>
       </tbody>
     </table>
     <p>
-      Default excludes are intentionally not written out by <code
-        >dollarlint init</code
-      >. Keep project-specific ignores in <code>exclude</code>.
+      Default excludes are intentionally not written out by{" "}
+      <code>dollarlint init</code>. Keep project-specific ignores in{" "}
+      <code>exclude</code>.
     </p>
     <p>
       Relative schema paths in associations and local catalog source paths are
@@ -214,12 +235,11 @@ reason = "legacy fixture kept for compatibility"`;
 
     <h2>Nested configs</h2>
     <p>
-      Set <code>configs.mode = "nearest"</code> in the run root config when a parent-directory
-      run should apply nested <code>.dollarlint.toml</code>
-      files. Each file uses the closest config at or above its directory. A nested
-      config does not inherit parent settings unless it declares <code
-        >extends</code
-      >.
+      Set <code>configs.mode = "nearest"</code> in the run root config when a
+      parent-directory run should apply nested <code>.dollarlint.toml</code>
+      files. Each file uses the closest config at or above its directory. A
+      nested config does not inherit parent settings unless it declares{" "}
+      <code>extends</code>.
     </p>
     <pre><code>[configs]
 mode = "nearest"
@@ -227,16 +247,17 @@ mode = "nearest"
 # in packages/api/.dollarlint.toml
 extends = "../../.dollarlint.toml"</code></pre>
     <p>
-      Passing <code>--config</code> keeps single-config behavior for that run and
-      suppresses nested config discovery.
+      Passing <code>--config</code> keeps single-config behavior for that run
+      and suppresses nested config discovery.
     </p>
 
     <h2>Parsing</h2>
     <p>
-      JSON parsing defaults to <code>auto</code>: <code>.json</code> files are parsed
-      as strict JSON first, then retried as JSONC when strict parsing fails, so comments
-      and trailing commas work in projects whose existing tools accept them. Files
-      ending in <code>.jsonc</code> always use JSONC parsing.
+      JSON parsing defaults to <code>auto</code>: <code>.json</code> files are
+      parsed as strict JSON first, then retried as JSONC when strict parsing
+      fails, so comments and trailing commas work in projects whose existing
+      tools accept them. Files ending in <code>.jsonc</code> always use JSONC
+      parsing.
     </p>
     <table>
       <thead>
@@ -246,13 +267,15 @@ extends = "../../.dollarlint.toml"</code></pre>
         </tr>
       </thead>
       <tbody>
-        <tr
-          ><td><code>parsing.json.mode</code></td><td
-            >Choose <code>auto</code>, <code>strict</code>, or <code>jsonc</code
-            >
-            for files ending in <code>.json</code>.</td
-          ></tr
-        >
+        <tr>
+          <td>
+            <code>parsing.json.mode</code>
+          </td>
+          <td>
+            Choose <code>auto</code>, <code>strict</code>, or <code>jsonc</code>
+            for files ending in <code>.json</code>.
+          </td>
+        </tr>
       </tbody>
     </table>
 
@@ -265,34 +288,39 @@ extends = "../../.dollarlint.toml"</code></pre>
         </tr>
       </thead>
       <tbody>
-        <tr
-          ><td><code>maxDepth</code></td><td
-            >Maximum external schema reference depth.</td
-          ></tr
-        >
-        <tr
-          ><td><code>concurrency</code></td><td
-            >Number of concurrent validation workers. Defaults to <code
-              >GOMAXPROCS</code
-            >.</td
-          ></tr
-        >
-        <tr
-          ><td><code>requireCoverage</code></td><td
-            >Fail when a discovered included file has no in-file schema, config
-            association, built-in association, or catalog match.</td
-          ></tr
-        >
+        <tr>
+          <td>
+            <code>maxDepth</code>
+          </td>
+          <td>Maximum external schema reference depth.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>concurrency</code>
+          </td>
+          <td>
+            Number of concurrent validation workers. Defaults to{" "}
+            <code>GOMAXPROCS</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>requireCoverage</code>
+          </td>
+          <td>
+            Fail when a discovered included file has no in-file schema, config
+            association, built-in association, or catalog match.
+          </td>
+        </tr>
       </tbody>
     </table>
 
     <h2>Associations</h2>
     <p>
       Associations map discovered files to schemas when the file does not
-      declare one itself. DollarLint also has a built-in association for <code
-        >.dollarlint.toml</code
-      >, backed by the embedded config schema; explicit in-file declarations and
-      user associations still win.
+      declare one itself. DollarLint also has a built-in association for{" "}
+      <code>.dollarlint.toml</code>, backed by the embedded config schema;
+      explicit in-file declarations and user associations still win.
     </p>
     <CodeBlock code={associationConfig} language="toml" />
     <p>
@@ -310,58 +338,74 @@ extends = "../../.dollarlint.toml"</code></pre>
         </tr>
       </thead>
       <tbody>
-        <tr
-          ><td><code>schemas.fetch.enabled</code></td><td
-            >Allow fetching HTTP schemas and catalogs.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.fetch.cache</code></td><td
-            >Cache successful remote schemas and catalogs on disk for repeat
-            runs.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.fetch.timeout</code></td><td
-            >Timeout for each schema fetch.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.fetch.retries</code></td><td
-            >Retries for transient remote schema fetch failures. <code>408</code
-            >, <code>425</code>, <code>429</code>, and retryable <code>5xx</code
-            > responses are retried.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.fetch.retryMinWait</code></td><td
-            >Minimum retry backoff.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.fetch.retryMaxWait</code></td><td
-            >Maximum retry backoff.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.fetch.allowedDomains</code></td><td
-            >Restrict remote schemas to exact or wildcard hosts. For
-            SchemaStore, use <code>*.schemastore.org</code> or include both <code
-              >www.schemastore.org</code
-            > and <code>json.schemastore.org</code>. For RubySchema, include
-            <code>www.rubyschema.org</code>.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.fetch.blockedDomains</code></td><td
-            >Deny hosts even when they match the allowlist.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.compile.timeout</code></td><td
-            >Timeout for compiling each schema.</td
-          ></tr
-        >
+        <tr>
+          <td>
+            <code>schemas.fetch.enabled</code>
+          </td>
+          <td>Allow fetching HTTP schemas and catalogs.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.fetch.cache</code>
+          </td>
+          <td>
+            Cache successful remote schemas and catalogs on disk for repeat
+            runs.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.fetch.timeout</code>
+          </td>
+          <td>Timeout for each schema fetch.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.fetch.retries</code>
+          </td>
+          <td>
+            Retries for transient remote schema fetch failures. <code>408</code>
+            {", "}
+            <code>425</code>, <code>429</code>, and retryable <code>5xx</code>{" "}
+            responses are retried.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.fetch.retryMinWait</code>
+          </td>
+          <td>Minimum retry backoff.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.fetch.retryMaxWait</code>
+          </td>
+          <td>Maximum retry backoff.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.fetch.allowedDomains</code>
+          </td>
+          <td>
+            Restrict remote schemas to exact or wildcard hosts. For SchemaStore,
+            use <code>*.schemastore.org</code> or include both{" "}
+            <code>www.schemastore.org</code> and{" "}
+            <code>json.schemastore.org</code>. For RubySchema, include
+            <code>www.rubyschema.org</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.fetch.blockedDomains</code>
+          </td>
+          <td>Deny hosts even when they match the allowlist.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.compile.timeout</code>
+          </td>
+          <td>Timeout for compiling each schema.</td>
+        </tr>
       </tbody>
     </table>
 
@@ -380,53 +424,54 @@ extends = "../../.dollarlint.toml"</code></pre>
         </tr>
       </thead>
       <tbody>
-        <tr
-          ><td><code>schemas.optimizations.enabled</code></td><td
-            >Enable or disable schema-specific optimizations as a group.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.optimizations.azure.pruneResources</code></td><td
-            >For Azure Resource Manager deployment schemas from <code
-              >schema.management.azure.com</code
-            >, compile only the resource provider schemas referenced by ARM
-            templates instead of the full Azure provider catalog. For deployment
-            parameter files, compile only the template definitions needed for
-            parameter values and Key Vault references. This keeps ordinary ARM
-            template and parameter validation much faster. Set it to <code
-              >false</code
-            > if you need to inspect or debug the unpruned Azure schema.</td
-          ></tr
-        >
+        <tr>
+          <td>
+            <code>schemas.optimizations.enabled</code>
+          </td>
+          <td>Enable or disable schema-specific optimizations as a group.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.optimizations.azure.pruneResources</code>
+          </td>
+          <td>
+            For Azure Resource Manager deployment schemas from{" "}
+            <code>schema.management.azure.com</code>, compile only the resource
+            provider schemas referenced by ARM templates instead of the full
+            Azure provider catalog. For deployment parameter files, compile only
+            the template definitions needed for parameter values and Key Vault
+            references. This keeps ordinary ARM template and parameter
+            validation much faster. Set it to <code>false</code> if you need to
+            inspect or debug the unpruned Azure schema.
+          </td>
+        </tr>
       </tbody>
     </table>
 
     <h2>Catalogs</h2>
     <p>
-      Catalogs map well-known filenames to schemas when a file doesn't declare <code
-        >$schema</code
-      > and no explicit or built-in association matches. SchemaStore and RubySchema
-      are built-in catalog sources, and custom sources can use the same catalog shape
-      as SchemaStore. Explicit in-file schemas still report schema load or compile
-      failures as issues; the catalog failure policy only applies to catalog loading
-      and catalog-inferred schemas.
+      Catalogs map well-known filenames to schemas when a file doesn't declare{" "}
+      <code>$schema</code> and no explicit or built-in association matches.
+      SchemaStore and RubySchema are built-in catalog sources, and custom
+      sources can use the same catalog shape as SchemaStore. Explicit in-file
+      schemas still report schema load or compile failures as issues; the
+      catalog failure policy only applies to catalog loading and
+      catalog-inferred schemas.
     </p>
     <p>
       The default config includes the SchemaStore and RubySchema sources but
-      keeps catalog matching disabled until you enable <code
-        >schemas.catalogs.enabled</code
-      > or pass <code>--catalogs</code>. The generated config from <code
-        >dollarlint init</code
-      > enables both sources by default.
+      keeps catalog matching disabled until you enable{" "}
+      <code>schemas.catalogs.enabled</code> or pass <code>--catalogs</code>. The
+      generated config from <code>dollarlint init</code> enables both sources by
+      default.
     </p>
     <p>
       When the built-in SchemaStore source is enabled, DollarLint adds a small
       curated layer for known filename gaps and drift. The current curated
-      associations cover <code>rustfmt.toml</code> / <code>.rustfmt.toml</code>, <code
-        >release-plz.toml</code
-      > / <code>.release-plz.toml</code>, and .NET's <code
-        >launchSettings.json</code
-      > / <code>Properties/launchSettings.json</code>.
+      associations cover <code>rustfmt.toml</code> / <code>.rustfmt.toml</code>,{" "}
+      <code>release-plz.toml</code> / <code>.release-plz.toml</code>, and .NET's{" "}
+      <code>launchSettings.json</code> /{" "}
+      <code>Properties/launchSettings.json</code>.
     </p>
     <p>
       The built-in RubySchema source covers common Ruby and Rails project
@@ -435,19 +480,20 @@ extends = "../../.dollarlint.toml"</code></pre>
       guessed blindly.
     </p>
     <p>
-      Catalog matches are reported with <code>schemaMatch</code> metadata in JSON
-      output and with explanatory text hints for catalog-sourced issues. When the
-      inferred schema is correct, add the suggested <code
-        >[[schemas.associations]]</code
-      > rule to make it explicit. When a file should never be inferred from a catalog,
-      use <code>schemas.catalogs.ignore</code>.
+      Catalog matches are reported with <code>schemaMatch</code> metadata in
+      JSON output and with explanatory text hints for catalog-sourced issues.
+      When the inferred schema is correct, add the suggested{" "}
+      <code>[[schemas.associations]]</code> rule to make it explicit. When a
+      file should never be inferred from a catalog, use{" "}
+      <code>schemas.catalogs.ignore</code>.
     </p>
     <p>
       Recognized config files without a usable built-in or catalog schema are
-      reported with <code>schemaGap</code> metadata. This marks known high-signal
-      gaps such as <code>netlify.toml</code>, <code>.cargo/config.toml</code>,
-      <code>.terraform-docs.yml</code>, and <code>.asf.yaml</code> without pretending
-      DollarLint has a schema for them.
+      reported with <code>schemaGap</code> metadata. This marks known
+      high-signal gaps such as <code>netlify.toml</code>,{" "}
+      <code>.cargo/config.toml</code>, <code>.terraform-docs.yml</code>, and{" "}
+      <code>.asf.yaml</code> without pretending DollarLint has a schema for
+      them.
     </p>
     <table>
       <thead>
@@ -457,76 +503,103 @@ extends = "../../.dollarlint.toml"</code></pre>
         </tr>
       </thead>
       <tbody>
-        <tr
-          ><td><code>schemas.catalogs.enabled</code></td><td
-            >Enable catalog filename matching.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.catalogs.failure</code></td><td
-            >Choose <code>warn</code>, <code>error</code>, or <code>skip</code> when
-            a catalog cannot be loaded or a catalog-inferred schema cannot be loaded
-            or compiled.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.catalogs.match</code></td><td
-            >Choose <code>auto</code> to skip low-confidence generic bare filenames
-            like <code>tasks.json</code>, or <code>all</code> to apply every catalog
-            filename match.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.catalogs.sources</code></td><td
-            >List built-in and SchemaStore-format catalog sources.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.catalogs.sources[].name</code></td><td
-            >Human-readable source name used in schema source metadata and
-            warnings.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.catalogs.sources[].format</code></td><td
-            >Catalog format. Use <code>schemastore</code> for SchemaStore-shaped JSON
-            catalogs or <code>rubyschema</code> for the built-in RubySchema source.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.catalogs.sources[].url</code></td><td
-            >Remote catalog URL for <code>schemastore</code> sources. Mutually exclusive
-            with <code>path</code>.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.catalogs.sources[].path</code></td><td
-            >Local catalog path for <code>schemastore</code> sources. Mutually exclusive
-            with <code>url</code>.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.catalogs.sources[].enabled</code></td><td
-            >Disable one source without deleting it.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.catalogs.ignore</code></td><td
-            >List file globs that should not receive catalog-inferred schemas.
+        <tr>
+          <td>
+            <code>schemas.catalogs.enabled</code>
+          </td>
+          <td>Enable catalog filename matching.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.catalogs.failure</code>
+          </td>
+          <td>
+            Choose <code>warn</code>, <code>error</code>, or <code>skip</code>{" "}
+            when a catalog cannot be loaded or a catalog-inferred schema cannot
+            be loaded or compiled.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.catalogs.match</code>
+          </td>
+          <td>
+            Choose <code>auto</code> to skip low-confidence generic bare
+            filenames like <code>tasks.json</code>, or <code>all</code> to apply
+            every catalog filename match.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.catalogs.sources</code>
+          </td>
+          <td>List built-in and SchemaStore-format catalog sources.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.catalogs.sources[].name</code>
+          </td>
+          <td>
+            Human-readable source name used in schema source metadata and
+            warnings.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.catalogs.sources[].format</code>
+          </td>
+          <td>
+            Catalog format. Use <code>schemastore</code> for SchemaStore-shaped
+            JSON catalogs or <code>rubyschema</code> for the built-in RubySchema
+            source.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.catalogs.sources[].url</code>
+          </td>
+          <td>
+            Remote catalog URL for <code>schemastore</code> sources. Mutually
+            exclusive with <code>path</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.catalogs.sources[].path</code>
+          </td>
+          <td>
+            Local catalog path for <code>schemastore</code> sources. Mutually
+            exclusive with <code>url</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.catalogs.sources[].enabled</code>
+          </td>
+          <td>Disable one source without deleting it.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.catalogs.ignore</code>
+          </td>
+          <td>
+            List file globs that should not receive catalog-inferred schemas.
             Explicit in-file schemas and configured associations still take
-            precedence.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.catalogs.ignore[].file</code></td><td
-            >File glob for a catalog inference opt-out.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemas.catalogs.ignore[].reason</code></td><td
-            >Optional explanation shown with the skipped catalog decision.</td
-          ></tr
-        >
+            precedence.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.catalogs.ignore[].file</code>
+          </td>
+          <td>File glob for a catalog inference opt-out.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemas.catalogs.ignore[].reason</code>
+          </td>
+          <td>Optional explanation shown with the skipped catalog decision.</td>
+        </tr>
       </tbody>
     </table>
 
@@ -553,45 +626,60 @@ extends = "../../.dollarlint.toml"</code></pre>
         </tr>
       </thead>
       <tbody>
-        <tr
-          ><td><code>output.showSkipped</code></td><td
-            >Show skipped files in text output, grouped by reason, class, and
+        <tr>
+          <td>
+            <code>output.showSkipped</code>
+          </td>
+          <td>
+            Show skipped files in text output, grouped by reason, class, and
             coverage signal. Large low-signal groups are summarized in text;
-            JSON output keeps every skipped file.</td
-          ></tr
-        >
-        <tr
-          ><td><code>output.verbose</code></td><td
-            >Show expanded issue metadata in text output.</td
-          ></tr
-        >
-        <tr
-          ><td><code>output.quiet</code></td><td
-            >Use terse success output and omit warnings, skipped-file listings,
-            and summary details from failing text output.</td
-          ></tr
-        >
-        <tr
-          ><td><code>output.locations</code></td><td
-            >Include line and column positions in text output. JSON and SARIF
-            request source locations automatically.</td
-          ></tr
-        >
-        <tr
-          ><td><code>output.branchErrors</code></td><td
-            >Choose <code>best</code> to report the closest matching <code
-              >oneOf</code
-            >/<code>anyOf</code> branch, or <code>all</code> to show every failed
-            branch leaf when debugging complex schemas.</td
-          ></tr
-        >
-        <tr
-          ><td><code>output.issueHints</code></td><td
-            >Choose <code>auto</code> for curated hints, <code>off</code> for raw
-            issues only, or <code>verbose</code> to include hint rule IDs, confidence,
-            and source links in text output.</td
-          ></tr
-        >
+            JSON output keeps every skipped file.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>output.verbose</code>
+          </td>
+          <td>Show expanded issue metadata in text output.</td>
+        </tr>
+        <tr>
+          <td>
+            <code>output.quiet</code>
+          </td>
+          <td>
+            Use terse success output and omit warnings, skipped-file listings,
+            and summary details from failing text output.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>output.locations</code>
+          </td>
+          <td>
+            Include line and column positions in text output. JSON and SARIF
+            request source locations automatically.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>output.branchErrors</code>
+          </td>
+          <td>
+            Choose <code>best</code> to report the closest matching{" "}
+            <code>oneOf</code>/<code>anyOf</code> branch, or <code>all</code> to
+            show every failed branch leaf when debugging complex schemas.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>output.issueHints</code>
+          </td>
+          <td>
+            Choose <code>auto</code> for curated hints, <code>off</code> for raw
+            issues only, or <code>verbose</code> to include hint rule IDs,
+            confidence, and source links in text output.
+          </td>
+        </tr>
       </tbody>
     </table>
   </article>

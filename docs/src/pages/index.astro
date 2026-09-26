@@ -3,6 +3,8 @@ import DocsLayout from "../layouts/DocsLayout.astro";
 import LogoOutline from "../components/LogoOutline.astro";
 
 const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
+const goInstallCommand =
+  "go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest";
 ---
 
 <DocsLayout
@@ -12,18 +14,16 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
 >
   <section class="hero">
     <div class="hero-marks" aria-hidden="true">
-      {
-        Array.from({ length: 4 }).map(() => (
-          <span class="hero-mark" data-hero-mark>
-            <LogoOutline class="hero-mark-logo" />
-          </span>
-        ))
-      }
+      {Array.from({ length: 4 }).map(() => (
+        <span class="hero-mark" data-hero-mark>
+          <LogoOutline class="hero-mark-logo" />
+        </span>
+      ))}
     </div>
     <h1>DollarLint</h1>
     <p class="hero-copy">
-      <code>$schema</code> validation for every JSON, YAML, &amp; TOML file you've
-      got
+      <code>$schema</code> validation for every JSON, YAML, &amp; TOML file
+      you've got
     </p>
     <div class="install-tabs" data-install-tabs>
       <div class="install-tabs-list" role="tablist" aria-label="Install method">
@@ -86,10 +86,12 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
           </div>
         </div>
         <div class="install-actions">
-          <a class="install-copy" href="/install/agent/">Open</a>
-          <button class="install-copy" type="button" data-install-copy
-            >Copy</button
-          >
+          <a class="install-copy" href="/install/agent/">
+            Open
+          </a>
+          <button class="install-copy" type="button" data-install-copy>
+            Copy
+          </button>
         </div>
       </div>
       <div
@@ -100,12 +102,11 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
         data-install-panel="homebrew"
         hidden
       >
-        <span aria-hidden="true">$</span><code
-          >brew install --cask dollarlint/tap/dollarlint</code
-        >
-        <button class="install-copy" type="button" data-install-copy
-          >Copy</button
-        >
+        <span aria-hidden="true">$</span>{" "}
+        <code>brew install --cask dollarlint/tap/dollarlint</code>
+        <button class="install-copy" type="button" data-install-copy>
+          Copy
+        </button>
       </div>
       <div
         class="install-panel"
@@ -115,10 +116,10 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
         data-install-panel="npm"
         hidden
       >
-        <span aria-hidden="true">$</span><code>npm install -g dollarlint</code>
-        <button class="install-copy" type="button" data-install-copy
-          >Copy</button
-        >
+        <span aria-hidden="true">$</span> <code>npm install -g dollarlint</code>
+        <button class="install-copy" type="button" data-install-copy>
+          Copy
+        </button>
       </div>
       <div
         class="install-panel"
@@ -128,19 +129,19 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
         data-install-panel="go"
         hidden
       >
-        <span aria-hidden="true">$</span><code
-          >go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest</code
-        >
-        <button class="install-copy" type="button" data-install-copy
-          >Copy</button
-        >
+        <span aria-hidden="true">$</span> <code>{goInstallCommand}</code>
+        <button class="install-copy" type="button" data-install-copy>
+          Copy
+        </button>
       </div>
     </div>
     <div class="hero-actions">
-      <a class="button primary" href="/guides/installation/">Get started</a>
-      <a class="button secondary" href="/reference/configuration/"
-        >Config reference</a
-      >
+      <a class="button primary" href="/guides/installation/">
+        Get started
+      </a>
+      <a class="button secondary" href="/reference/configuration/">
+        Config reference
+      </a>
     </div>
   </section>
   <script is:inline>
@@ -208,7 +209,6 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
       });
     })();
   </script>
-
   <section class="grid" aria-label="Highlights">
     <article class="card">
       <h3>Repo-wide discovery</h3>
@@ -271,21 +271,19 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
         </p>
       </div>
       <div class="command">
-        <code
-          >dollarlint validate ./config <span class="no-break">--locations</span
-          ></code
-        >
+        <code>
+          dollarlint validate ./config <span class="no-break">--locations</span>
+        </code>
         <p>
           Show the line, column, and pointer for each issue so fixes start in
           the right place.
         </p>
       </div>
       <div class="command">
-        <code
-          >dollarlint validate . <span class="no-break">--format</span> sarif <span
-            class="no-break">--output</span
-          > dollarlint.sarif</code
-        >
+        <code>
+          dollarlint validate . <span class="no-break">--format</span> sarif{" "}
+          <span class="no-break">--output</span> dollarlint.sarif
+        </code>
         <p>Generate a CI-friendly code scanning artifact.</p>
       </div>
     </div>

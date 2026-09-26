@@ -3,6 +3,8 @@ import DocsLayout from "../layouts/DocsLayout.astro";
 import LogoOutline from "../components/LogoOutline.astro";
 
 const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
+const goInstallCommand =
+  "go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest";
 ---
 
 <DocsLayout
@@ -100,7 +102,7 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
         data-install-panel="homebrew"
         hidden
       >
-        <span aria-hidden="true">$</span>
+        <span aria-hidden="true">$</span>{" "}
         <code>brew install --cask dollarlint/tap/dollarlint</code>
         <button class="install-copy" type="button" data-install-copy>
           Copy
@@ -114,8 +116,7 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
         data-install-panel="npm"
         hidden
       >
-        <span aria-hidden="true">$</span>
-        <code>npm install -g dollarlint</code>
+        <span aria-hidden="true">$</span> <code>npm install -g dollarlint</code>
         <button class="install-copy" type="button" data-install-copy>
           Copy
         </button>
@@ -128,10 +129,7 @@ const agentInstallUrl = new URL("/install/agent/", Astro.site).toString();
         data-install-panel="go"
         hidden
       >
-        <span aria-hidden="true">$</span>
-        <code>
-          go install github.com/dollarlint/dollarlint/cmd/dollarlint@latest
-        </code>
+        <span aria-hidden="true">$</span> <code>{goInstallCommand}</code>
         <button class="install-copy" type="button" data-install-copy>
           Copy
         </button>

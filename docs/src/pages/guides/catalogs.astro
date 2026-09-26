@@ -37,38 +37,37 @@ reason = "application data, not a tool config"`;
       <p class="lead">
         Catalog matching lets DollarLint infer schemas for well-known filenames
         — think <code>package.json</code>, <code>tsconfig.json</code>, and
-        friends — without anyone having to declare <code>$schema</code> by hand. SchemaStore
-        and RubySchema are the built-in catalog sources.
+        friends — without anyone having to declare <code>$schema</code> by hand.
+        SchemaStore and RubySchema are the built-in catalog sources.
       </p>
     </header>
 
     <h2>Enable catalog matching</h2>
     <pre><code>dollarlint validate . --catalogs</code></pre>
     <p>
-      Catalog matching is optional at runtime unless it is enabled in <code
-        >.dollarlint.toml</code
-      >. The starter config from <code>dollarlint init</code> enables the built-in
-      catalogs by default; pass <code>--catalogs=false</code> or set <code
-        >schemas.catalogs.enabled = false</code
-      > when you want catalog matching off. Explicit in-file schemas, config associations,
-      and DollarLint's built-in <code>.dollarlint.toml</code>
+      Catalog matching is optional at runtime unless it is enabled in{" "}
+      <code>.dollarlint.toml</code>. The starter config from{" "}
+      <code>dollarlint init</code> enables the built-in catalogs by default;
+      pass <code>--catalogs=false</code> or set{" "}
+      <code>schemas.catalogs.enabled = false</code> when you want catalog
+      matching off. Explicit in-file schemas, config associations, and
+      DollarLint's built-in <code>.dollarlint.toml</code>
       association still take precedence.
     </p>
     <p>
-      The default <code>schemas.catalogs.match = "auto"</code> skips low-confidence
-      generic bare filename matches such as <code>tasks.json</code>. Use <code
-        >"all"</code
-      > when you intentionally want every catalog filename match applied.
+      The default <code>schemas.catalogs.match = "auto"</code> skips
+      low-confidence generic bare filename matches such as{" "}
+      <code>tasks.json</code>. Use <code>"all"</code> when you intentionally
+      want every catalog filename match applied.
     </p>
     <p>
       When the built-in SchemaStore source is enabled, DollarLint supplements it
       with a small set of curated filename associations for known catalog gaps
-      and drift, including Rust's <code>rustfmt.toml</code> / <code
-        >.rustfmt.toml</code
-      >, <code>release-plz.toml</code> / <code>.release-plz.toml</code>, and
-      .NET's <code>launchSettings.json</code> / <code
-        >Properties/launchSettings.json</code
-      >.
+      and drift, including Rust's <code>rustfmt.toml</code> /{" "}
+      <code>.rustfmt.toml</code>, <code>release-plz.toml</code> /{" "}
+      <code>.release-plz.toml</code>, and .NET's{" "}
+      <code>launchSettings.json</code> /{" "}
+      <code>Properties/launchSettings.json</code>.
     </p>
     <p>
       The built-in RubySchema source covers Ruby and Rails project configs such
@@ -80,22 +79,21 @@ reason = "application data, not a tool config"`;
     <p>
       Some important config files do not currently have a built-in or catalog
       schema that DollarLint can use. When DollarLint recognizes one of those
-      known gaps, such as <code>netlify.toml</code>, <code
-        >.cargo/config.toml</code
-      >, <code>.terraform-docs.yml</code>, or <code>.asf.yaml</code>, JSON
-      output includes <code>schemaGap</code> context and skipped-file text explains
-      the gap instead of treating the file as an unknown blob.
+      known gaps, such as <code>netlify.toml</code>,{" "}
+      <code>.cargo/config.toml</code>, <code>.terraform-docs.yml</code>, or{" "}
+      <code>.asf.yaml</code>, JSON output includes <code>schemaGap</code>{" "}
+      context and skipped-file text explains the gap instead of treating the
+      file as an unknown blob.
     </p>
 
     <h2>Understand and lock in matches</h2>
     <p>
-      Catalog decisions are explainable. JSON output includes <code
-        >schemaMatch</code
-      > on files and catalog-backed issues, and text hints for catalog-sourced issues
-      include why DollarLint chose that schema. The explanation names the matched
-      catalog <code>fileMatch</code>, the confidence, and a suggested <code
-        >[[schemas.associations]]</code
-      > rule you can add when the match is correct.
+      Catalog decisions are explainable. JSON output includes{" "}
+      <code>schemaMatch</code> on files and catalog-backed issues, and text
+      hints for catalog-sourced issues include why DollarLint chose that schema.
+      The explanation names the matched catalog <code>fileMatch</code>, the
+      confidence, and a suggested <code>[[schemas.associations]]</code> rule you
+      can add when the match is correct.
     </p>
     <p>
       When a low-confidence catalog candidate is intentionally not a schema
@@ -108,11 +106,10 @@ reason = "application data, not a tool config"`;
     <h2>Use a custom catalog</h2>
     <pre><code>dollarlint validate . --catalog-source ./catalog.json</code></pre>
     <p>
-      In config, use <code>schemas.catalogs</code> and one or more <code
-        >schemas.catalogs.sources</code
-      >. Sources follow the SchemaStore catalog format, including a top-level <code
-        >schemas</code
-      > array with <code>fileMatch</code> and <code>url</code> entries.
+      In config, use <code>schemas.catalogs</code> and one or more{" "}
+      <code>schemas.catalogs.sources</code>. Sources follow the SchemaStore
+      catalog format, including a top-level <code>schemas</code> array with{" "}
+      <code>fileMatch</code> and <code>url</code> entries.
     </p>
 
     <CodeBlock code={catalogConfig} language="toml" />
@@ -120,8 +117,8 @@ reason = "application data, not a tool config"`;
     <p>
       A SchemaStore-shaped source must use exactly one of <code>url</code> or
       <code>path</code>. Relative schema URLs inside a catalog are resolved
-      relative to that catalog. The built-in <code>rubyschema</code> format is declared
-      without a URL or path because its catalog entries are bundled.
+      relative to that catalog. The built-in <code>rubyschema</code> format is
+      declared without a URL or path because its catalog entries are bundled.
     </p>
 
     <h2>Choose what happens when catalog validation can't run</h2>
@@ -134,24 +131,30 @@ reason = "application data, not a tool config"`;
       </thead>
       <tbody>
         <tr>
-          <td><code>warn</code></td>
-          <td
-            >Log a warning, skip catalog inference or catalog-inferred
-            validation, and keep validating explicit or configured schemas.</td
-          >
+          <td>
+            <code>warn</code>
+          </td>
+          <td>
+            Log a warning, skip catalog inference or catalog-inferred
+            validation, and keep validating explicit or configured schemas.
+          </td>
         </tr>
         <tr>
-          <td><code>error</code></td>
-          <td
-            >Stop the run — if you're counting on the catalog, this makes sure
-            it's non-negotiable.</td
-          >
+          <td>
+            <code>error</code>
+          </td>
+          <td>
+            Stop the run — if you're counting on the catalog, this makes sure
+            it's non-negotiable.
+          </td>
         </tr>
         <tr>
-          <td><code>skip</code></td>
-          <td
-            >Quietly move on without catalog inference. No news is good news.</td
-          >
+          <td>
+            <code>skip</code>
+          </td>
+          <td>
+            Quietly move on without catalog inference. No news is good news.
+          </td>
         </tr>
       </tbody>
     </table>
@@ -159,20 +162,19 @@ reason = "application data, not a tool config"`;
     <pre><code>dollarlint validate . --catalogs --catalog-failure error</code></pre>
     <p>
       If <code>schemas.fetch.enabled = false</code>, remote catalogs are
-      unavailable. With the default <code>warn</code> policy, DollarLint warns and
-      keeps validating explicit or configured local schemas. The same policy applies
-      when a catalog loads but the schema it matched cannot be fetched or compiled.
-      Files that explicitly declare remote schemas still report schema-loading issues
-      when remote fetching is disabled.
+      unavailable. With the default <code>warn</code> policy, DollarLint warns
+      and keeps validating explicit or configured local schemas. The same policy
+      applies when a catalog loads but the schema it matched cannot be fetched
+      or compiled. Files that explicitly declare remote schemas still report
+      schema-loading issues when remote fetching is disabled.
     </p>
 
     <div class="note">
       <p>
-        If you restrict remote domains while using SchemaStore, allow <code
-          >*.schemastore.org</code
-        > or include both <code>www.schemastore.org</code> and <code
-          >json.schemastore.org</code
-        >; many SchemaStore URLs resolve through the JSON host. If you use
+        If you restrict remote domains while using SchemaStore, allow{" "}
+        <code>*.schemastore.org</code> or include both{" "}
+        <code>www.schemastore.org</code> and <code>json.schemastore.org</code>;
+        many SchemaStore URLs resolve through the JSON host. If you use
         RubySchema with an allowlist, allow <code>www.rubyschema.org</code>.
       </p>
     </div>

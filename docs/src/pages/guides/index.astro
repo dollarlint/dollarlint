@@ -64,14 +64,12 @@ const guides = [
     </header>
 
     <div class="grid guide-grid">
-      {
-        guides.map((guide) => (
-          <a class="card guide-card" href={guide.href}>
-            <h3>{guide.title}</h3>
-            <p>{guide.description}</p>
-          </a>
-        ))
-      }
+      {guides.map((guide) => (
+        <a class="card guide-card" href={guide.href}>
+          <h3>{guide.title}</h3>
+          <p>{guide.description}</p>
+        </a>
+      ))}
     </div>
   </article>
 </DocsLayout>

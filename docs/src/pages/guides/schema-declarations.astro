@@ -41,9 +41,10 @@ schema = "./schemas/event.schema.json"`;
     <CodeBlock code={jsoncSchema} language="json" />
     <p>
       JSON, JSONC, and JSON5 use the conventional root <code>$schema</code>
-      property. JSON Lines files are validated one non-empty line at a time, so cover
-      <code>.jsonl</code> and <code>.ndjson</code> files with a config association,
-      CLI association, or catalog match.
+      property. JSON Lines files are validated one non-empty line at a time, so
+      cover
+      <code>.jsonl</code> and <code>.ndjson</code> files with a config
+      association, CLI association, or catalog match.
     </p>
 
     <h2>YAML</h2>
@@ -51,9 +52,8 @@ schema = "./schemas/event.schema.json"`;
     <CodeBlock code={yamlRoot} language="yaml" />
     <p>
       The comment directive follows the YAML Language Server convention.
-      DollarLint scans the first 25 lines for it before looking for a root <code
-        >$schema</code
-      > key.
+      DollarLint scans the first 25 lines for it before looking for a root{" "}
+      <code>$schema</code> key.
     </p>
 
     <h2>TOML</h2>
@@ -61,9 +61,8 @@ schema = "./schemas/event.schema.json"`;
     <CodeBlock code={tomlRoot} language="toml" />
     <p>
       The comment directive follows the Taplo and Even Better TOML convention. A
-      root <code>$schema</code> key also works, but it must be quoted because <code
-        >$</code
-      > is not a bare TOML key character.
+      root <code>$schema</code> key also works, but it must be quoted because{" "}
+      <code>$</code> is not a bare TOML key character.
     </p>
 
     <h2>Config associations</h2>
@@ -82,10 +81,9 @@ schema = "./schemas/event.schema.json"`;
     <div class="note">
       <p>
         Precedence order: in-file declaration first, then config association,
-        then DollarLint's built-in <code>.dollarlint.toml</code> association, then
-        catalog match. If none of those hit, the file gets skipped unless <code
-          >schemas.requireCoverage = true</code
-        >.
+        then DollarLint's built-in <code>.dollarlint.toml</code> association,
+        then catalog match. If none of those hit, the file gets skipped unless{" "}
+        <code>schemas.requireCoverage = true</code>.
       </p>
     </div>
   </article>

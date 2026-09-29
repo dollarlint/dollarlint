@@ -40,29 +40,29 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues (2 parsing, 6 validation
 
     <h2>Skipped Files</h2>
     <p>
-      <code>--show-skipped</code> adds skipped-file groups to text output by reason,
-      class, and coverage signal. Large low-signal groups such as fixtures, lockfiles,
-      and data files are summarized with a sample and an omitted count so terminal
-      output stays readable; JSON output keeps the full per-file list.
+      <code>--show-skipped</code> adds skipped-file groups to text output by
+      reason, class, and coverage signal. Large low-signal groups such as
+      fixtures, lockfiles, and data files are summarized with a sample and an
+      omitted count so terminal output stays readable; JSON output keeps the
+      full per-file list.
     </p>
 
     <h2>Issue Hints</h2>
     <p>
       Issue hints add curated context to recurring validation and parsing
-      patterns without changing pass/fail behavior. The default <code>auto</code
-      >
-      mode prints actionable hints and groups repeated hint patterns in human output.
-      Set <code>--issue-hints off</code> or <code
-        >output.issueHints = "off"</code
-      > for raw issues only, or use <code>verbose</code> to include rule IDs, confidence,
-      and source links.
+      patterns without changing pass/fail behavior. The default{" "}
+      <code>auto</code>
+      mode prints actionable hints and groups repeated hint patterns in human
+      output. Set <code>--issue-hints off</code> or{" "}
+      <code>output.issueHints = "off"</code> for raw issues only, or use{" "}
+      <code>verbose</code> to include rule IDs, confidence, and source links.
     </p>
 
     <h2>Quiet text</h2>
     <p>
-      <code>--quiet</code> keeps successful text output to a single pass line. On
-      failing runs, it still prints the headline and issue rows, but omits warnings,
-      skipped files, and the summary block.
+      <code>--quiet</code> keeps successful text output to a single pass line.
+      On failing runs, it still prints the headline and issue rows, but omits
+      warnings, skipped files, and the summary block.
     </p>
 
     <h2>JSON</h2>
@@ -71,31 +71,29 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues (2 parsing, 6 validation
       JSON output gives you the full accounting: run root, summary counts,
       numeric duration, per-file results, active issues, ignored issues, parsing
       hints, structured issue-hint metadata, warnings, schema locations, and
-      source positions when available. The top-level <code>$schema</code> field declares
-      the JSON Schema for the report, and <code>formatVersion</code> versions this
-      machine-readable contract.
+      source positions when available. The top-level <code>$schema</code> field
+      declares the JSON Schema for the report, and <code>formatVersion</code>{" "}
+      versions this machine-readable contract.
     </p>
     <p>
-      File and issue entries use <code>path</code> for the path relative to the validation
-      root; local file schemas under that root are reported as relative paths while
-      remote schemas remain URLs. Active findings live in
+      File and issue entries use <code>path</code> for the path relative to the
+      validation root; local file schemas under that root are reported as
+      relative paths while remote schemas remain URLs. Active findings live in
       <code>issues</code>; ignored findings live in <code>ignoredIssues</code>.
       Both arrays, plus <code>warnings</code>, are always present even when
-      empty. Each issue includes a <code>category</code> of <code>parsing</code
-      >, <code>validation</code>, <code>schema</code>, or
+      empty. Each issue includes a <code>category</code> of <code>parsing</code>
+      , <code>validation</code>, <code>schema</code>, or
       <code>coverage</code>. The summary's <code>issues</code> object includes
-      <code>total</code>, <code>parsing</code>, <code>validation</code>, <code
-        >schema</code
-      >, and <code>coverage</code> counts, and <code>durationNanos</code> is the stable
-      numeric duration field.
+      <code>total</code>, <code>parsing</code>, <code>validation</code>,{" "}
+      <code>schema</code>, and <code>coverage</code> counts, and{" "}
+      <code>durationNanos</code> is the stable numeric duration field.
     </p>
     <p>
-      Skipped file entries include <code>skipReason</code>, <code
-        >skipClass</code
-      >,
-      <code>skipImportance</code>, and <code>skipDetail</code> when DollarLint can
-      classify why a file was not validated. This separates low-value data or lockfile
-      skips from higher-signal unsupported project configuration and external schema
+      Skipped file entries include <code>skipReason</code>,{" "}
+      <code>skipClass</code>,<code>skipImportance</code>, and{" "}
+      <code>skipDetail</code> when DollarLint can classify why a file was not
+      validated. This separates low-value data or lockfile skips from
+      higher-signal unsupported project configuration and external schema
       availability problems.
     </p>
     <p>
@@ -105,17 +103,13 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues (2 parsing, 6 validation
       the same broken external schema.
     </p>
     <p>
-      Files and issues produced from catalog inference may also include <code
-        >schemaMatch</code
-      >. This object records whether the catalog candidate was <code
-        >matched</code
-      >,
-      <code>ignored</code>, <code>skippedLowConfidence</code>, or <code
-        >skippedMissingEvidence</code
-      >, the matched catalog pattern, confidence, a human-readable reason, and
-      suggested config snippets such as <code>[[schemas.associations]]</code> or <code
-        >[[schemas.catalogs.ignore]]</code
-      >.
+      Files and issues produced from catalog inference may also include{" "}
+      <code>schemaMatch</code>. This object records whether the catalog
+      candidate was <code>matched</code>,<code>ignored</code>,{" "}
+      <code>skippedLowConfidence</code>, or <code>skippedMissingEvidence</code>,
+      the matched catalog pattern, confidence, a human-readable reason, and
+      suggested config snippets such as <code>[[schemas.associations]]</code> or{" "}
+      <code>[[schemas.catalogs.ignore]]</code>.
     </p>
     <p>
       Files and coverage issues for recognized config files without a usable
@@ -130,9 +124,10 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues (2 parsing, 6 validation
       Inspect output is a discovery and association report, not a validation
       report. It lists every discovered file, its associated schema or
       <code>none</code>, the association source, and a human-readable reason.
-      Catalog-backed entries include <code>schemaMatch</code> and suggested config
-      snippets so you can turn inferred matches into explicit associations or catalog
-      ignore rules. Known unsupported configs include <code>schemaGap</code>
+      Catalog-backed entries include <code>schemaMatch</code> and suggested
+      config snippets so you can turn inferred matches into explicit
+      associations or catalog ignore rules. Known unsupported configs include{" "}
+      <code>schemaGap</code>
       metadata and documentation links.
     </p>
 
@@ -140,24 +135,23 @@ Summary: 8 discovered, 7 validated, 1 skipped, 8 issues (2 parsing, 6 validation
     <pre><code>dollarlint validate . --format bundle --locations --show-skipped --output dollarlint.bundle.json</code></pre>
     <p>
       Bundle output captures the JSON result, SARIF result, and styled text
-      output from one validation run. The top-level object has <code>json</code
-      >, <code>sarif</code>, and <code>styled</code> keys; <code>styled</code> includes
-      both ANSI and plain text so tools can inspect the same terminal experience a
-      user would see. If styled skipped-file text was summarized, <code
-        >styled.truncated</code
-      > is <code>true</code>; the bundle's <code>json</code> result still contains
-      the full skipped-file detail.
+      output from one validation run. The top-level object has <code>json</code>
+      , <code>sarif</code>, and <code>styled</code> keys; <code>styled</code>{" "}
+      includes both ANSI and plain text so tools can inspect the same terminal
+      experience a user would see. If styled skipped-file text was summarized,{" "}
+      <code>styled.truncated</code> is <code>true</code>; the bundle's{" "}
+      <code>json</code> result still contains the full skipped-file detail.
     </p>
 
     <h2>Branch errors</h2>
     <pre><code>[output]
 branchErrors = "best"</code></pre>
     <p>
-      Schemas that use <code>oneOf</code> or <code>anyOf</code> can produce many mutually
-      exclusive branch failures for one bad value. By default, DollarLint reports
-      the closest matching branch so the issue list stays focused. Set <code
-        >output.branchErrors = "all"</code
-      > in <code>.dollarlint.toml</code> when you need every failed branch leaf for
+      Schemas that use <code>oneOf</code> or <code>anyOf</code> can produce many
+      mutually exclusive branch failures for one bad value. By default,
+      DollarLint reports the closest matching branch so the issue list stays
+      focused. Set <code>output.branchErrors = "all"</code> in{" "}
+      <code>.dollarlint.toml</code> when you need every failed branch leaf for
       schema debugging or exact validator inspection.
     </p>
 
@@ -165,16 +159,16 @@ branchErrors = "best"</code></pre>
     <pre><code>dollarlint validate . --format sarif --output dollarlint.sarif</code></pre>
     <p>
       SARIF output is built for GitHub code scanning and similar tools. SARIF is
-      generated only when <code>--format sarif</code> is requested. Source locations
-      are best-effort: when a precise range isn't available, DollarLint falls back
-      to the nearest file or parent object.
+      generated only when <code>--format sarif</code> is requested. Source
+      locations are best-effort: when a precise range isn't available,
+      DollarLint falls back to the nearest file or parent object.
     </p>
 
     <h2>Warnings</h2>
     <p>
       Warnings are separate from validation issues. For example, a catalog
-      failure with <code>schemas.catalogs.failure = "warn"</code> appears as a warning
-      while explicit and configured schemas continue validating.
+      failure with <code>schemas.catalogs.failure = "warn"</code> appears as a
+      warning while explicit and configured schemas continue validating.
     </p>
   </article>
 </DocsLayout>

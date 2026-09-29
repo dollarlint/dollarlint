@@ -41,11 +41,10 @@ dollarlint --help`;
     <h2>Install with npm</h2>
     <CopyBlock code={npmInstall} />
     <p>
-      The npm package uses a <code>postinstall</code> script to fetch the matching
-      release binary for your platform. npm lifecycle scripts need to be allowed;
-      installs run with <code>--ignore-scripts</code> or <code
-        >ignore-scripts=true</code
-      >
+      The npm package uses a <code>postinstall</code> script to fetch the
+      matching release binary for your platform. npm lifecycle scripts need to
+      be allowed; installs run with <code>--ignore-scripts</code> or{" "}
+      <code>ignore-scripts=true</code>
       will not install the <code>dollarlint</code> binary.
     </p>
     <p>
@@ -55,18 +54,19 @@ dollarlint --help`;
 
     <h2>Release binaries</h2>
     <p>
-      Download the archive for your platform from <a
-        href="https://github.com/dollarlint/dollarlint/releases/latest"
-        >GitHub Releases</a
-      > when you want a standalone binary without installing through npm or building
-      from source.
+      Download the archive for your platform from{" "}
+      <a href="https://github.com/dollarlint/dollarlint/releases/latest">
+        GitHub Releases
+      </a>{" "}
+      when you want a standalone binary without installing through npm or
+      building from source.
     </p>
 
     <h2>Install from source with Go</h2>
     <CopyBlock code={goInstall} />
     <p>
-      This builds and installs the <code>dollarlint</code> command from the latest
-      module version available to your Go toolchain.
+      This builds and installs the <code>dollarlint</code> command from the
+      latest module version available to your Go toolchain.
     </p>
 
     <h2>Verify the install</h2>
@@ -74,10 +74,10 @@ dollarlint --help`;
 
     <h2>Run in CI</h2>
     <p>
-      To validate a repository in GitHub Actions, use the <a
-        href="/guides/github-action/">GitHub Action guide</a
-      >. The action installs a verified release archive and can upload SARIF
-      results to GitHub code scanning.
+      To validate a repository in GitHub Actions, use the{" "}
+      <a href="/guides/github-action/">GitHub Action guide</a>. The action
+      installs a verified release archive and can upload SARIF results to GitHub
+      code scanning.
     </p>
   </article>
 </DocsLayout>

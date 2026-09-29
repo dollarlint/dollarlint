@@ -48,50 +48,62 @@ reason = "fixture intentionally keeps the old shape"`;
         </tr>
       </thead>
       <tbody>
-        <tr
-          ><td><code>file</code></td><td
-            >A discovered file path relative to the config file's directory,
+        <tr>
+          <td>
+            <code>file</code>
+          </td>
+          <td>
+            A discovered file path relative to the config file's directory,
             using the same glob style as discovery. A pattern without a slash
-            can match a basename at any depth.</td
-          ></tr
-        >
-        <tr
-          ><td><code>keyword</code></td><td
-            >Either the JSON Schema keyword name, such as <code>required</code> or
-            <code>type</code>, or the full keyword location.</td
-          ></tr
-        >
-        <tr
-          ><td><code>schemaSource</code></td><td
-            >The source that selected the schema, such as <code>$schema</code>,
-            <code>config-association</code>, or a catalog source like <code
-              >catalog:schemastore:mkdocs.yml</code
-            >.</td
-          ></tr
-        >
-        <tr
-          ><td><code>property</code></td><td
-            >The affected property name, the instance pointer such as <code
-              >/name</code
-            >, or a glob when matching a bare property name.</td
-          ></tr
-        >
-        <tr
-          ><td><code>reason</code></td><td
-            >Human context for the report. If omitted, DollarLint records that
-            the issue matched an ignore rule.</td
-          ></tr
-        >
+            can match a basename at any depth.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>keyword</code>
+          </td>
+          <td>
+            Either the JSON Schema keyword name, such as <code>required</code>{" "}
+            or <code>type</code>, or the full keyword location.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>schemaSource</code>
+          </td>
+          <td>
+            The source that selected the schema, such as <code>$schema</code>,
+            <code>config-association</code>, or a catalog source like{" "}
+            <code>catalog:schemastore:mkdocs.yml</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>property</code>
+          </td>
+          <td>
+            The affected property name, the instance pointer such as{" "}
+            <code>/name</code>, or a glob when matching a bare property name.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>reason</code>
+          </td>
+          <td>
+            Human context for the report. If omitted, DollarLint records that
+            the issue matched an ignore rule.
+          </td>
+        </tr>
       </tbody>
     </table>
 
     <h2>Use verbose output for stable values</h2>
     <p>
-      When you are writing a precise rule, run validation with <code
-        >--verbose</code
-      >. Verbose text output shows metadata such as the schema URI, keyword,
-      keyword location, and property, which are better anchors than copying the
-      human-readable message.
+      When you are writing a precise rule, run validation with{" "}
+      <code>--verbose</code>. Verbose text output shows metadata such as the
+      schema URI, keyword, keyword location, and property, which are better
+      anchors than copying the human-readable message.
     </p>
     <pre><code>dollarlint validate . --verbose</code></pre>
 
@@ -105,8 +117,8 @@ reason = "fixture intentionally keeps the old shape"`;
     <h2>What ignored means</h2>
     <p>
       Ignored issues are still counted and reported as ignored, but they do not
-      make the run fail. Exit code <code>0</code> means there were no non-ignored
-      issues.
+      make the run fail. Exit code <code>0</code> means there were no
+      non-ignored issues.
     </p>
     <div class="note">
       <p>

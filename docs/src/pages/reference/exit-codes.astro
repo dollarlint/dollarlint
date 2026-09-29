@@ -23,32 +23,38 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
       </thead>
       <tbody>
         <tr>
-          <td><code>0</code></td>
+          <td>
+            <code>0</code>
+          </td>
           <td>Clean bill of health — no non-ignored issues found.</td>
         </tr>
         <tr>
-          <td><code>1</code></td>
-          <td
-            >Something's off — validation issues, parsing issues, schema loading
-            or compile issues, or coverage issues were found.</td
-          >
+          <td>
+            <code>1</code>
+          </td>
+          <td>
+            Something's off — validation issues, parsing issues, schema loading
+            or compile issues, or coverage issues were found.
+          </td>
         </tr>
         <tr>
-          <td><code>2</code></td>
-          <td
-            >Can't even get started — the command or configuration couldn't be
-            used.</td
-          >
+          <td>
+            <code>2</code>
+          </td>
+          <td>
+            Can't even get started — the command or configuration couldn't be
+            used.
+          </td>
         </tr>
       </tbody>
     </table>
 
     <div class="warning">
       <p>
-        If catalog availability is a deal-breaker, use <code
-          >--catalog-failure error</code
-        > or <code>schemas.catalogs.failure = "error"</code>. That turns catalog
-        load failures into command errors with exit code <code>2</code>.
+        If catalog availability is a deal-breaker, use{" "}
+        <code>--catalog-failure error</code> or{" "}
+        <code>schemas.catalogs.failure = "error"</code>. That turns catalog load
+        failures into command errors with exit code <code>2</code>.
       </p>
     </div>
   </article>

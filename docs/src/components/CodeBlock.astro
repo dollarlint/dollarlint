@@ -8,4 +8,5 @@ const { code, language } = Astro.props as {
 ---
 
 <pre
-  class={`code-block language-${language}`}><code set:html={highlightCode(code, language)} /></pre>
+  class={`code-block language-${language}`}
+><code set:html={highlightCode(code, language)} /></pre>

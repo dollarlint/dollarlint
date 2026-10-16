@@ -47,8 +47,8 @@ const validateArguments = `{
     </p>
     <pre><code>dollarlint serve mcp</code></pre>
     <p>
-      When developing from a checkout, use <code>go run</code> in the server command
-      until the binary is installed.
+      When developing from a checkout, use <code>go run</code> in the server
+      command until the binary is installed.
     </p>
     <pre><code>go run ./cmd/dollarlint serve mcp</code></pre>
 
@@ -64,10 +64,11 @@ const validateArguments = `{
 
     <h2>Use the validate tool</h2>
     <p>
-      The server exposes a single <code>validate</code> tool. It validates JSON, JSONC,
-      JSON5, JSON Lines, YAML, and TOML files using your DollarLint config, then returns
-      the same result shape as <code>dollarlint validate --format json</code>,
-      wrapped with a boolean <code>ok</code> field.
+      The server exposes a single <code>validate</code> tool. It validates JSON,
+      JSONC, JSON5, JSON Lines, YAML, and TOML files using your DollarLint
+      config, then returns the same result shape as{" "}
+      <code>dollarlint validate --format json</code>, wrapped with a boolean{" "}
+      <code>ok</code> field.
     </p>
     <CodeBlock code={validateArguments} language="json" />
 
@@ -87,10 +88,10 @@ const validateArguments = `{
     <p>
       Keep schema associations, discovery rules, fetch policy, excludes, and
       output preferences in <code>.dollarlint.toml</code>. This includes issue
-      reporting choices such as <code>output.branchErrors</code>. The <code
-        >include</code
-      > argument only narrows a tool call; it does not move the validation root. If
-      an MCP client needs a non-default config file, launch the server with the global
+      reporting choices such as <code>output.branchErrors</code>. The{" "}
+      <code>include</code> argument only narrows a tool call; it does not move
+      the validation root. If an MCP client needs a non-default config file,
+      launch the server with the global
       <code>--config</code> flag in its command arguments.
     </p>
   </article>

@@ -65,18 +65,18 @@ const argsWorkflow = `- uses: dollarlint/dollarlint@vX.Y.Z
     <h2>Basic workflow</h2>
     <CodeBlock code={basicWorkflow} language="yaml" />
     <p>
-      Pin <code>dollarlint/dollarlint</code> to a specific release tag. When the action
-      ref is a <code>vX.Y.Z</code> tag, the action downloads that version, verifies
-      it against <code>checksums.txt</code>, and runs
+      Pin <code>dollarlint/dollarlint</code> to a specific release tag. When the
+      action ref is a <code>vX.Y.Z</code> tag, the action downloads that
+      version, verifies it against <code>checksums.txt</code>, and runs
       <code>dollarlint validate</code>.
     </p>
 
     <h2>Upload SARIF</h2>
     <CodeBlock code={sarifWorkflow} language="yaml" />
     <p>
-      Set <code>upload-sarif: true</code> to generate SARIF output and upload it to
-      GitHub code scanning. Results are uploaded before the job fails, so any findings
-      still appear in the security tab.
+      Set <code>upload-sarif: true</code> to generate SARIF output and upload it
+      to GitHub code scanning. Results are uploaded before the job fails, so any
+      findings still appear in the security tab.
     </p>
 
     <h2>Pass validate flags</h2>
@@ -97,38 +97,55 @@ const argsWorkflow = `- uses: dollarlint/dollarlint@vX.Y.Z
       </thead>
       <tbody>
         <tr>
-          <td><code>path</code></td>
-          <td>File or directory to validate. Defaults to <code>.</code>.</td>
+          <td>
+            <code>path</code>
+          </td>
+          <td>
+            File or directory to validate. Defaults to <code>.</code>.
+          </td>
         </tr>
         <tr>
-          <td><code>working-directory</code></td>
+          <td>
+            <code>working-directory</code>
+          </td>
           <td>Directory to run DollarLint from.</td>
         </tr>
         <tr>
-          <td><code>config</code></td>
-          <td>Path to a specific <code>.dollarlint.toml</code> config.</td>
+          <td>
+            <code>config</code>
+          </td>
+          <td>
+            Path to a specific <code>.dollarlint.toml</code> config.
+          </td>
         </tr>
         <tr>
-          <td><code>version</code></td>
+          <td>
+            <code>version</code>
+          </td>
           <td>
             DollarLint version to install when the action ref is not the release
             tag you want.
           </td>
         </tr>
         <tr>
-          <td><code>upload-sarif</code></td>
+          <td>
+            <code>upload-sarif</code>
+          </td>
           <td>Upload SARIF results to GitHub code scanning.</td>
         </tr>
         <tr>
-          <td><code>fail-on-issues</code></td>
           <td>
-            Fail the job when validation issues are found. Defaults to <code
-              >true</code
-            >.
+            <code>fail-on-issues</code>
+          </td>
+          <td>
+            Fail the job when validation issues are found. Defaults to{" "}
+            <code>true</code>.
           </td>
         </tr>
         <tr>
-          <td><code>args</code></td>
+          <td>
+            <code>args</code>
+          </td>
           <td>Additional validate arguments, one argument per line.</td>
         </tr>
       </tbody>
@@ -137,11 +154,10 @@ const argsWorkflow = `- uses: dollarlint/dollarlint@vX.Y.Z
     <h2>Version behavior</h2>
     <p>
       The most reliable way to pin a version is to use a release tag directly:
-      <code>dollarlint/dollarlint@vX.Y.Z</code> installs exactly <code
-        >vX.Y.Z</code
-      >. If you use a branch or moving tag instead, set <code>version</code> explicitly
-      to fix the CLI version. Without either, the action installs the latest published
-      DollarLint release.
+      <code>dollarlint/dollarlint@vX.Y.Z</code> installs exactly{" "}
+      <code>vX.Y.Z</code>. If you use a branch or moving tag instead, set{" "}
+      <code>version</code> explicitly to fix the CLI version. Without either,
+      the action installs the latest published DollarLint release.
     </p>
   </article>
 </DocsLayout>

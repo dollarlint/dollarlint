@@ -127,10 +127,11 @@ func runMCPTestServer(t *testing.T, messages ...string) []map[string]any {
 	if err := inputWriter.Close(); err != nil {
 		t.Fatalf("close MCP input: %v", err)
 	}
-	if code := <-done; code != 0 {
+	code := <-done
+	finished = true
+	if code != 0 {
 		t.Fatalf("serve mcp exit = %d stdout=%s", code, stdout.String())
 	}
-	finished = true
 	return readMCPResponses(t, stdout.String())
 }
 

@@ -1,0 +1,447 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-06-22-agentic-product-testing",
+  "date": "2026-06-22",
+  "title": "Agentic Product Testing",
+  "dollarlintRevision": "9775b2ec8f53e5284ce584df37ea66f5e3f0a4ff",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.3492899147",
+  "cacheDir": "/tmp/dollarlint-cache.1827276593",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.3492899147\" cacheDir=\"/tmp/dollarlint-cache.1827276593\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-4024105637.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-4024105637.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-06-22-agentic-product-testing/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "9xn-auto-ovpn",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "boltzexchange-boltz-backend",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock, package-lock.json, tools/uv.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "chamilo-chamilo-lms",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: composer.lock, yarn.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "dotcms-core",
+      "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false OR npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts OR YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
+      "status": "needs-review",
+      "notes": "MCP first-pass scan found 12 local $schema refs, including core-web/apps/ai-evals/project.json:3 -\u003e ../../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+    },
+    {
+      "repository": "malbeclabs-doublezero",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock, controlplane/s3-uploader/go.sum, go.sum, and 7 more. Remote schema refs: 12."
+    },
+    {
+      "repository": "mlm-games-geotag-video-camera",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "mrabolfazlnorouzi-iran-configs",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "ruby-gnome-pkg-config",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "srcwr-maps-cstrike",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock, fastdlsite/fastdl-tun-but-h2/Cargo.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "suxrobgm-logistics-app",
+      "command": "bun install --frozen-lockfile --ignore-scripts",
+      "status": "needs-review",
+      "notes": "MCP first-pass scan found 3 local $schema refs, including src/Client/Logistics.Angular/angular.json:2 -\u003e ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "9xn-auto-ovpn",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated 2 of 3 discovered files and clearly reported the remaining JSON file as a schema-less skip rather than implying it was checked.",
+        "The CLI preview stays compact and readable, and the single skipped file does not create much ambiguity because it is presented as generic data rather than a clearly recognized configuration type."
+      ],
+      "productDecisions": [
+        "No product change from this repository result."
+      ],
+      "notes": "This run behaved reasonably for a developer. Coverage is not complete, but the skipped file is low-signal and the output is honest about what was and was not validated, so this result does not by itself suggest a product change."
+    },
+    {
+      "repository": "boltzexchange-boltz-backend",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated 17 of 21 discovered files with no issues or warnings and clearly separated the 4 skipped files by low- or medium-signal categories.",
+        "The skipped set consisted of generic schema-less files, a lockfile, and test data, so the incomplete coverage is understandable and not especially misleading in this run."
+      ],
+      "productDecisions": [
+        "No product change from this repository result."
+      ],
+      "notes": "This result behaved reasonably. The terminal output is still actionable despite some skipped files because the skip reasons are specific and low stakes, and the run does not suggest a concrete correctness or ergonomics product gap."
+    },
+    {
+      "repository": "chamilo-chamilo-lms",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint discovered 436 candidate files but validated only 16, skipping 420 files, including 343 unknown hand-authored YAML/JSON/TOML files that look like real project configuration.",
+        "The skipped-file details are explicit, but the terminal output is so skip-heavy that a developer mainly learns that the repository has broad uncovered configuration rather than getting strong validation confidence.",
+        "Many skipped examples are mainstream Symfony/PHP app configuration paths under `config/`, which makes the low-issue summary much less informative than it first appears."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Prominently summarize when validation coverage is very low, especially when most skipped files are high- or medium-signal project configuration files.",
+          "rationale": "A 'passed' result with 420 skipped files does not communicate confidence well enough unless the coverage caveat is elevated to a first-class takeaway."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Improve schema/catalog coverage or classification guidance for common Symfony/PHP application configuration files under `config/` and related YAML package files.",
+          "rationale": "The skipped set is dominated by ordinary app configuration, indicating a visible product gap for this ecosystem."
+        }
+      ],
+      "notes": "This result exposes a major coverage ergonomics issue for configuration-heavy repositories. DollarLint is transparent about the missing coverage, but a developer would still struggle to interpret a clean pass when over 96% of discovered files were skipped and hundreds of those files appear project-relevant."
+    },
+    {
+      "repository": "dotcms-core",
+      "outcome": "product-signal",
+      "findings": [
+        "DotCMS produced a high-noise result with 98 issues across 79 files, including 59 schema issues, 28 validation issues, and 11 parsing issues, so grouping and trust are central to the developer experience.",
+        "A large block of findings came from missing dependency-local schemas (especially Nx and ng-packagr files), and several other findings came from catalog-backed schemas that explicitly ask the developer to confirm schema applicability before acting.",
+        "Templated YAML and generated-looking JSON/JSONC files also contributed parse failures, which is informative but still leaves the user doing substantial interpretation to separate real repo bugs from unsupported or unprepared inputs."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Further group and prioritize mixed high-volume runs so dependency-prep blockers, templated-file parse failures, and catalog-backed findings are clearly separated into actionable buckets.",
+          "rationale": "This repo produced many different issue types at once, and developers need stronger hierarchy to understand what to fix first versus what to ignore or rerun after prep."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Improve automatic treatment of templated YAML and generated or domain-specific JSON/JSONC files so parse failures are more often classified as unsupported input or fixture-like data rather than raw parser noise.",
+          "rationale": "Several parse failures appear tied to templated Helm-style YAML and nonstandard JSON content, which are common in real repositories but not always actionable config bugs."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Strengthen dependency-prep summaries when many `$schema` references point into missing local tool packages.",
+          "rationale": "The current per-group hints are helpful, but the dominant cause of many findings is still something the developer must infer from repeated issue groups."
+        }
+      ],
+      "notes": "This repository reveals multiple product-signal themes at once: dependency-prep limitations, catalog-backed ambiguity, and noisy parsing on templated/generated files. DollarLint provides rich context, but a developer would still need significant judgment to decide which findings are actionable and which are artifacts of missing dependencies, templates, or schema/catalog mismatch."
+    },
+    {
+      "repository": "malbeclabs-doublezero",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint validated 86 of 165 discovered files, but 79 files were skipped, including 38 files behind the same remote Goreleaser schema compile failure and a high-signal example TOML configuration file.",
+        "The tool does explain that the remote schema failure is not a finding in user files, yet the warning is repeated and leaves a large portion of repository coverage unresolved.",
+        "The remaining skipped unknown files include hand-authored project configuration and dashboards, so the final '0 issues' outcome still comes with substantial coverage caveats."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Group repeated remote-schema compile failures into a single root-cause warning with the affected file count and validation impact summarized once.",
+          "rationale": "The same Goreleaser schema compile failure generated multiple warnings and contributed to dozens of skipped files, so grouping would reduce noise and improve comprehension."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Elevate high-signal skipped coverage into the top-level summary when a large fraction of discovered files could not be validated.",
+          "rationale": "A run with 79 skipped files and no issues can read cleaner than it really is unless the coverage caveat is made more prominent."
+        }
+      ],
+      "notes": "This run is informative, but the developer experience is weakened by repeated remote-schema compile warnings and a large skipped fraction. DollarLint is transparent about the limitation, yet the result still makes it hard to know whether the repo is mostly clean or mostly unexamined in important areas."
+    },
+    {
+      "repository": "mlm-games-geotag-video-camera",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint surfaced two concrete type errors in a GitHub Actions workflow and provided strong location context plus a catalog-validation hint, so the result is understandable rather than noisy.",
+        "The run still depends on the developer interpreting whether the catalog-backed GitHub Workflow schema matches the repository’s intended tool semantics, and the suggested explicit association does not fully resolve that uncertainty in the moment.",
+        "One additional TOML file was skipped as schema-less, but the larger signal here is the ambiguity around catalog-backed workflow validation rather than skipped coverage."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Make catalog-backed validation findings easier to trust by distinguishing likely real config errors from possible catalog-version or ecosystem-convention mismatches.",
+          "rationale": "The output is detailed, but it still asks the developer to manually confirm schema applicability before acting on a validation failure in a common GitHub Actions file."
+        },
+        {
+          "strength": "low",
+          "recommendation": "Clarify the remediation path for catalog-backed findings beyond suggesting an explicit association when the same catalog schema is already being used implicitly.",
+          "rationale": "The current hint is informative but not fully actionable when the issue may stem from schema semantics rather than missing association."
+        }
+      ],
+      "notes": "This is a useful result, but it highlights an ergonomics gap around third-party catalog schemas. A developer can see exactly where the type mismatch is, yet the output also tells them to verify external schema compatibility before trusting the issue, which weakens confidence in immediate actionability."
+    },
+    {
+      "repository": "mrabolfazlnorouzi-iran-configs",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint discovered the only matching file and validated it successfully with no skipped files, warnings, or issues.",
+        "The terminal preview stays readable and proportional on a tiny repository result, giving a complete summary without ambiguity about coverage."
+      ],
+      "productDecisions": [
+        "No product change from this repository result."
+      ],
+      "notes": "This repository produced a straightforward clean run with complete coverage of discovered files and no noisy diagnostics. Nothing in the output suggests a correctness or ergonomics gap for this case."
+    },
+    {
+      "repository": "ruby-gnome-pkg-config",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint discovered and validated all 3 schema-bearing files with no skips, warnings, or issues.",
+        "The CLI preview is concise and actionable for a clean repository run: it clearly reports full coverage and a zero-issue summary without extra noise."
+      ],
+      "productDecisions": [
+        "No product change from this repository result."
+      ],
+      "notes": "This result behaved like a developer would expect on a small repository with straightforward configuration files. Coverage was complete for the discovered files, nothing misleading appeared in classification or output, and there is no repo-specific product change suggested by this result."
+    },
+    {
+      "repository": "srcwr-maps-cstrike",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint skipped 5 of 13 discovered files, including a recognized `.cargo/config.toml` and several hand-authored JSON/TOML/YAML project configuration files.",
+        "The CLI output does surface skipped files and reasons, but a developer still ends the run with meaningful coverage holes on likely configuration files despite seeing a passing summary with zero issues."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve first-class handling or guidance for recognized Cargo config files such as `.cargo/config.toml`.",
+          "rationale": "DollarLint explicitly recognizes the file class but still leaves it unsupported, which is a visible product gap in a real Rust repository."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Make high-signal skipped configuration files more actionable in the summary, not only in the skipped details section.",
+          "rationale": "The run ends with a clean '0 issues' summary even though several likely project configuration files were skipped, which weakens coverage clarity for developers."
+        }
+      ],
+      "notes": "This result is not a correctness failure, but it does expose a product signal around actionable coverage. The current skipped reporting is honest enough to avoid being misleading, yet the skipped set includes real configuration files that a Rust project maintainer might expect the tool to understand or guide more strongly."
+    },
+    {
+      "repository": "suxrobgm-logistics-app",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint reported three schema-load failures for Angular-related files whose `$schema` targets dependency-local files under `node_modules`, and the tool explicitly told the developer that dependency prep is unavailable first.",
+        "The guidance is honest and better than a raw file-not-found error, but the run still mixes these prep-blocked findings with 15 skipped files and multiple hand-authored project JSON files that remain unvalidated.",
+        "One skipped file shows low-confidence auto catalog matching for `tasks.json`, which is informative but still leaves uncertainty about why common editor configuration files are not getting stronger treatment."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Provide a stronger top-level summary when results are limited by missing dependency-local schemas, including how many findings are prep-blocked versus intrinsic repo issues.",
+          "rationale": "The current per-file hints are helpful, but the developer still has to infer the overall reliability of the run from detailed issue text."
+        },
+        {
+          "strength": "low",
+          "recommendation": "Improve handling and messaging for common editor/project config files such as `tasks.json` and `.vscode` settings when automatic catalog association is low confidence or absent.",
+          "rationale": "These files appear hand-authored and project-relevant, so clearer treatment would reduce uncertainty about skipped coverage."
+        }
+      ],
+      "notes": "This repository is not blocked in the sense of being uninterpretable, but it reveals a product ergonomics gap around dependency-local schemas and configuration coverage. The tool explains the limitation clearly, yet a developer still has to decide whether to install dependencies, exclude files, or treat the run as partially actionable."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "boltzexchange-boltz-backend",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/BoltzExchange/boltz-backend.git",
+      "commit": "1e11c44491f633024e97ee44be7af72a0a1d63b4",
+      "path": "/tmp/dollarlint-corpus.3492899147/boltzexchange-boltz-backend",
+      "status": "cloned"
+    },
+    {
+      "name": "9xn-auto-ovpn",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/9xN/auto-ovpn.git",
+      "commit": "18191c9f18192a008e3c46d1a3caa7df4a525408",
+      "path": "/tmp/dollarlint-corpus.3492899147/9xn-auto-ovpn",
+      "status": "cloned"
+    },
+    {
+      "name": "mrabolfazlnorouzi-iran-configs",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/MrAbolfazlNorouzi/iran-configs.git",
+      "commit": "9e6094e922bea78ff148c49cdde2ce5557c1ad42",
+      "path": "/tmp/dollarlint-corpus.3492899147/mrabolfazlnorouzi-iran-configs",
+      "status": "cloned"
+    },
+    {
+      "name": "malbeclabs-doublezero",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/malbeclabs/doublezero.git",
+      "commit": "5521fc0790da3500c54ec5b7dd4878ffa1173726",
+      "path": "/tmp/dollarlint-corpus.3492899147/malbeclabs-doublezero",
+      "status": "cloned"
+    },
+    {
+      "name": "srcwr-maps-cstrike",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/srcwr/maps-cstrike.git",
+      "commit": "e8e98b89ec0e50f4945ef8565ddd401d7331a951",
+      "path": "/tmp/dollarlint-corpus.3492899147/srcwr-maps-cstrike",
+      "status": "cloned"
+    },
+    {
+      "name": "dotcms-core",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/dotCMS/core.git",
+      "commit": "cd72225d10dafad8a20dbd698e382f79a237ddd8",
+      "path": "/tmp/dollarlint-corpus.3492899147/dotcms-core",
+      "status": "cloned"
+    },
+    {
+      "name": "mlm-games-geotag-video-camera",
+      "ecosystem": "Kotlin",
+      "cloneURL": "https://github.com/mlm-games/geotag-video-camera.git",
+      "commit": "ce83af5c04a21c0b1cf4842cf43a3004b5be733c",
+      "path": "/tmp/dollarlint-corpus.3492899147/mlm-games-geotag-video-camera",
+      "status": "cloned"
+    },
+    {
+      "name": "ruby-gnome-pkg-config",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/ruby-gnome/pkg-config.git",
+      "commit": "9bb38774a970297be9bcc01bb01812a40ba8108c",
+      "path": "/tmp/dollarlint-corpus.3492899147/ruby-gnome-pkg-config",
+      "status": "cloned"
+    },
+    {
+      "name": "chamilo-chamilo-lms",
+      "ecosystem": "PHP",
+      "cloneURL": "https://github.com/chamilo/chamilo-lms.git",
+      "commit": "04d5e16a5c30da0f6b5fa4dc8299cad31fd95955",
+      "path": "/tmp/dollarlint-corpus.3492899147/chamilo-chamilo-lms",
+      "status": "cloned"
+    },
+    {
+      "name": "suxrobgm-logistics-app",
+      "ecosystem": "C#",
+      "cloneURL": "https://github.com/suxrobGM/logistics-app.git",
+      "commit": "6794932f871e638b1848781a5546057afb1e401c",
+      "path": "/tmp/dollarlint-corpus.3492899147/suxrobgm-logistics-app",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 1468,
+    "validated": 604,
+    "skipped": 853,
+    "failed": 11,
+    "issues": {
+      "total": 103,
+      "parsing": 11,
+      "validation": 30,
+      "schema": 62,
+      "coverage": 0
+    },
+    "warnings": 4,
+    "duration": {
+      "nanos": 23768147699
+    }
+  },
+  "findings": [
+    "Sweeping 10 mechanically discovered repositories produced strong product signals around low validation coverage, repeated remote-schema failures, dependency-local schema gaps, catalog-backed ambiguity, and noisy parsing on templated/generated inputs.",
+    "Four repositories behaved reasonably with clear, honest output and no compelling product changes, but six exposed actionable UX or coverage improvements worth prioritizing.",
+    "The largest confidence gap came from configuration-heavy repositories where a clean or low-issue summary coexisted with substantial skipped high-signal files."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider summarizing repeated catalog schema compile warnings by schema/source in real-world output and workflow summaries.",
+      "rationale": "The sweep emitted schema catalog warnings that are not file findings; grouping them keeps the user focused on product signals without hiding schema availability problems."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "This sweep skipped 853 of 1468 discovered files (58.1%), which is useful context when judging corpus coverage."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Investigate non-fixture parser compatibility failures from the real-world corpus.",
+      "rationale": "A parse failure outside fixture/test data is likely to affect normal users validating repository configuration files."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Prominently summarize when validation coverage is very low, especially when most skipped files are high- or medium-signal project configuration files.",
+      "rationale": "A 'passed' result with 420 skipped files does not communicate confidence well enough unless the coverage caveat is elevated to a first-class takeaway."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Improve schema/catalog coverage or classification guidance for common Symfony/PHP application configuration files under `config/` and related YAML package files.",
+      "rationale": "The skipped set is dominated by ordinary app configuration, indicating a visible product gap for this ecosystem."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Further group and prioritize mixed high-volume runs so dependency-prep blockers, templated-file parse failures, and catalog-backed findings are clearly separated into actionable buckets.",
+      "rationale": "This repo produced many different issue types at once, and developers need stronger hierarchy to understand what to fix first versus what to ignore or rerun after prep."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Improve automatic treatment of templated YAML and generated or domain-specific JSON/JSONC files so parse failures are more often classified as unsupported input or fixture-like data rather than raw parser noise.",
+      "rationale": "Several parse failures appear tied to templated Helm-style YAML and nonstandard JSON content, which are common in real repositories but not always actionable config bugs."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Strengthen dependency-prep summaries when many `$schema` references point into missing local tool packages.",
+      "rationale": "The current per-group hints are helpful, but the dominant cause of many findings is still something the developer must infer from repeated issue groups."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Group repeated remote-schema compile failures into a single root-cause warning with the affected file count and validation impact summarized once.",
+      "rationale": "The same Goreleaser schema compile failure generated multiple warnings and contributed to dozens of skipped files, so grouping would reduce noise and improve comprehension."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Elevate high-signal skipped coverage into the top-level summary when a large fraction of discovered files could not be validated.",
+      "rationale": "A run with 79 skipped files and no issues can read cleaner than it really is unless the coverage caveat is made more prominent."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Make catalog-backed validation findings easier to trust by distinguishing likely real config errors from possible catalog-version or ecosystem-convention mismatches.",
+      "rationale": "The output is detailed, but it still asks the developer to manually confirm schema applicability before acting on a validation failure in a common GitHub Actions file."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Clarify the remediation path for catalog-backed findings beyond suggesting an explicit association when the same catalog schema is already being used implicitly.",
+      "rationale": "The current hint is informative but not fully actionable when the issue may stem from schema semantics rather than missing association."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Improve first-class handling or guidance for recognized Cargo config files such as `.cargo/config.toml`.",
+      "rationale": "DollarLint explicitly recognizes the file class but still leaves it unsupported, which is a visible product gap in a real Rust repository."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Make high-signal skipped configuration files more actionable in the summary, not only in the skipped details section.",
+      "rationale": "The run ends with a clean '0 issues' summary even though several likely project configuration files were skipped, which weakens coverage clarity for developers."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Provide a stronger top-level summary when results are limited by missing dependency-local schemas, including how many findings are prep-blocked versus intrinsic repo issues.",
+      "rationale": "The current per-file hints are helpful, but the developer still has to infer the overall reliability of the run from detailed issue text."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Improve handling and messaging for common editor/project config files such as `tasks.json` and `.vscode` settings when automatic catalog association is low confidence or absent.",
+      "rationale": "These files appear hand-authored and project-relevant, so clearer treatment would reduce uncertainty about skipped coverage."
+    }
+  ],
+  "productDecisions": [
+    "No code changes were made in this sweep; treat the recorded recommendations as product backlog input for follow-up work rather than immediate behavior changes."
+  ],
+  "followUp": [
+    "Review the structured productRecommendations and decide whether to open implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting the same corpus by default."
+  ]
+}

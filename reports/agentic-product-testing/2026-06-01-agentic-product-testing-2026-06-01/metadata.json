@@ -1,0 +1,420 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-06-01-agentic-product-testing-2026-06-01",
+  "date": "2026-06-01",
+  "title": "Agentic product testing 2026-06-01",
+  "dollarlintRevision": "9775b2ec8f53e5284ce584df37ea66f5e3f0a4ff",
+  "workingTreeNote": "dirty working tree: ?? reports/agentic-product-testing/2026-06-01-agentic-product-testing-2026-06-01/; ?? reports/agentic-product-testing/latest-run.json",
+  "corpus": "/tmp/dollarlint-corpus.1217753158",
+  "cacheDir": "/tmp/dollarlint-cache.1388403383",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.1217753158\" cacheDir=\"/tmp/dollarlint-cache.1388403383\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-2026-06-01-2378552892.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-2026-06-01-2378552892.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-06-01-agentic-product-testing-2026-06-01/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "ansible-collections-servicenow-itsm",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "chromebrew-chromebrew",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "metrolistgroup-metrolist",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 1."
+    },
+    {
+      "repository": "openclaw-openclaw",
+      "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false",
+      "status": "needs-review",
+      "notes": "MCP first-pass scan found 3 local $schema refs, including .oxfmtrc.jsonc:2 -\u003e ./node_modules/oxfmt/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+    },
+    {
+      "repository": "opengeos-maplibre-gl-lidar",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: package-lock.json. Remote schema refs: 0."
+    },
+    {
+      "repository": "openshift-sippy",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: go.sum, sippy-ng/package-lock.json. Remote schema refs: 0."
+    },
+    {
+      "repository": "owncloud-core",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: composer.lock. Remote schema refs: 1."
+    },
+    {
+      "repository": "particular-nservicebus-rabbitmq",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "sirixdb-sirix",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "webkit-webkit",
+      "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false OR YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
+      "status": "needs-review",
+      "notes": "MCP first-pass scan found 6 local $schema refs, including PerformanceTests/Speedometer/resources/todomvc/architecture-examples/angular/.angular-cli.json:2 -\u003e ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "ansible-collections-servicenow-itsm",
+      "outcome": "product-signal",
+      "findings": [
+        "The only reported issue came from a catalog-backed Ansible tasks schema on a test fixture path, and the CLI had to include a long cautionary hint plus explicit-association suggestion before the user could judge whether it was real.",
+        "Skipped coverage was substantial (45 of 100 discovered files) and mixed real project config with tests, but the terminal output only showed a truncated sample and requires JSON output to inspect the rest by repository.",
+        "The skipped groups are helpful, but a developer still has to infer how much unvalidated repo configuration remains from scattered examples rather than a concise per-repo coverage summary."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Surface a compact per-repository skipped-coverage summary in CLI/triage output so users can immediately see how much real configuration remained unvalidated.",
+          "rationale": "This repo had 45 skipped files across multiple signal levels, but the text output only showed truncated examples and required JSON for the full picture."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Further compress catalog-backed mismatch hints for likely test/fixture paths while preserving provenance details.",
+          "rationale": "The single issue needed a long explanatory block and explicit-association suggestion before the user could assess it, which made the main finding harder to scan."
+        }
+      ],
+      "notes": "DollarLint was technically informative, but this result exposed an ergonomics gap: when many files are skipped and the lone issue is a likely fixture-or-version-mismatch catalog hit, the terminal experience leaves too much interpretation work to the developer. This is actionable product feedback rather than a correctness failure."
+    },
+    {
+      "repository": "chromebrew-chromebrew",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "Coverage was strong: 26 of 28 discovered files validated and only two medium-signal files were skipped.",
+        "The repeated GitHub workflow issues were grouped clearly, and the source excerpts made the likely problem easy to understand at a glance.",
+        "Even the RuboCop mismatch was presented with enough catalog provenance to let a developer sanity-check whether it reflected a real config bug or an external schema mismatch."
+      ],
+      "caveats": [
+        "Some findings may still depend on external catalog/schema versions, especially the RuboCop mismatch, so this single repo should not be treated as broad correctness proof."
+      ],
+      "notes": "This was a solid developer experience. DollarLint found concrete, understandable issues with high coverage and without burying the signal in noise, so I do not see a new product change implied by this result."
+    },
+    {
+      "repository": "metrolistgroup-metrolist",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint reported a clean pass, but it only validated 8 of 48 discovered files and skipped 40 hand-authored JSON/YAML/TOML files, including issue templates, Room schema snapshots, and a Gradle versions file.",
+        "The CLI listed every skipped file inline with one generic reason, which makes the terminal output long while still not helping the developer distinguish benign generated snapshots from higher-value uncovered config.",
+        "With more than 80% of discovered files skipped, the pass result is hard to interpret without a stronger coverage summary or grouping strategy."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Group large skipped sets by directory or file role and summarize counts before examples so high-skip repositories remain interpretable in the CLI.",
+          "rationale": "This repo printed 40 skipped files inline, dominated by one schema snapshot directory, which was noisy without clarifying whether those files were expected low-value coverage gaps."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Differentiate likely generated schema snapshots from ordinary unknown configuration files in skip classification.",
+          "rationale": "Room database schema snapshots and issue template YAMLs were both shown as generic unknown files, even though they have different developer expectations and urgency."
+        }
+      ],
+      "notes": "This is an ergonomics and coverage signal rather than a parser bug. The tool is honest about what it skipped, but the result still leaves too much uncertainty about whether the repository was meaningfully validated."
+    },
+    {
+      "repository": "openclaw-openclaw",
+      "outcome": "blocked",
+      "findings": [
+        "Two schema errors were caused by missing dependency-local schemas under node_modules, and the CLI explicitly said to treat them as dependency-prep unavailable first.",
+        "The repository also had substantial skipped coverage across many high- and medium-signal config files, so the result cannot cleanly distinguish product behavior from missing local-schema preparation.",
+        "The remaining fly.toml issue may be real or another catalog mismatch, but it is not interpretable enough in the presence of unresolved local-schema prerequisites."
+      ],
+      "followUp": [
+        "Re-run this repository after safe dependency preparation that installs the local oxfmt and oxlint schemas with lifecycle scripts disabled.",
+        "Treat current openclaw findings as coverage/prep caveats rather than product evidence."
+      ],
+      "notes": "This repo is blocked for product conclusions. DollarLint behaved reasonably by surfacing missing dependency-local schemas clearly, but the result is not a fair signal until local schema prep is resolved."
+    },
+    {
+      "repository": "opengeos-maplibre-gl-lidar",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "The CLI summary was compact and easy to trust: 9 files validated cleanly, the only skipped file was a package lockfile, and the skip reason was explicit and low signal.",
+        "There were no warnings or noisy caveats, so a developer can quickly conclude that DollarLint found no actionable problems in the repository's checked-in config files."
+      ],
+      "notes": "This is a good baseline result. DollarLint stayed quiet, classified the lone uncovered file appropriately, and gave enough coverage context to trust the pass without suggesting a product change."
+    },
+    {
+      "repository": "openshift-sippy",
+      "outcome": "product-signal",
+      "findings": [
+        "The only reported issue was a catalog-backed golangci-lint enum mismatch that already needed a long stale-schema caveat before it was actionable.",
+        "Coverage was low: 41 of 48 discovered files were skipped, including a high-signal .mcp.json plus many hand-authored TOML/YAML/JSON config and prompt files, so the pass/fail result is hard to trust as representative.",
+        "The CLI remained readable here, but the combination of a likely version-mismatch catalog error and broad uncovered config still leaves the developer uncertain what to fix first."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Add clearer next-step guidance when the only issue is a likely catalog/version mismatch and many project configs were skipped.",
+          "rationale": "This result combined one probably stale catalog hit with broad uncovered config, leaving ambiguity about whether the developer should trust the issue or focus on coverage gaps first."
+        }
+      ],
+      "notes": "This is mainly a coverage and schema-version ergonomics signal. DollarLint explained the likely stale catalog issue well, but the repo still shows too many important skipped files for the result to feel decisive."
+    },
+    {
+      "repository": "owncloud-core",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint surfaced real parse errors and catalog-backed validation findings, but the terminal output was dominated by a massive skipped-file dump of localization JSONs and other unknown files, making it hard to see the few actionable problems.",
+        "Two parse failures came from localization fixture-like JSON files, while the catalog-backed behat.yml validation required a long context block before the user could tell it might be a schema-version mismatch rather than a clear repository bug.",
+        "The skip list included at least one high-signal repo config file and many medium-signal JSON files, but the pass/fail story was obscured by the sheer volume of inline skipped output."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Collapse very large skipped-file sets behind grouped summaries with counts and a few examples in CLI output.",
+          "rationale": "This repository produced an enormous skipped section that overwhelmed the handful of actual parse and validation findings."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Group or down-rank localization/fixture parse failures separately from likely production config errors when they occur under testdata or translation directories.",
+          "rationale": "A developer seeing parse errors in theme/test localization JSONs needs faster cues about whether the failures are real product config problems or low-value fixture data."
+        }
+      ],
+      "notes": "This result contains actionable findings, but it also shows a significant ergonomics problem on large repositories: important issues are buried inside an overwhelming skipped section, and catalog-context hints are still verbose. That is product feedback, not just noisy repo data."
+    },
+    {
+      "repository": "particular-nservicebus-rabbitmq",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint validated most discovered files cleanly, but it still skipped two high-signal repository configuration files (.repointegrity.yml and .reposync.yml) plus three issue template YAMLs with no schema coverage.",
+        "The skip presentation is understandable, yet a developer is still left with unresolved questions about important repo-maintenance files even though the command ended as a pass."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "Improve coverage for common repository-maintenance configs or make it easier to suggest stable associations for them.",
+          "rationale": "High-signal repo config files were clearly surfaced as skipped, but there was no next-step guidance beyond recognizing that they were uncovered."
+        }
+      ],
+      "notes": "This is a modest but real coverage signal. The result is otherwise clean, but skipping clearly project-owned configuration files reduces confidence in the pass and suggests a catalog/association coverage opportunity."
+    },
+    {
+      "repository": "sirixdb-sirix",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint found a real-looking GitHub FUNDING.yml problem set and a test-resource parse failure, but the CLI output was again overwhelmed by an enormous skipped section spanning native-image configs, example JSON, and test fixtures.",
+        "More than 93% of discovered files were skipped, so the result reads less like a clear validation report and more like a dense inventory dump with a few issues embedded in it.",
+        "The grouped funding hint was useful and much easier to understand than raw repeated issues, which makes the contrast with the unbounded skipped output especially noticeable."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Apply the same grouping discipline used for repeated issue hints to skipped-file output, especially on very high skip-ratio repositories.",
+          "rationale": "The FUNDING.yml issues were concise and actionable, while the skipped section dominated the result and obscured coverage confidence."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Provide a stronger coverage caveat when skipped ratios are extreme, rather than presenting the result like a normal issue report.",
+          "rationale": "With roughly 94% of discovered files skipped, developers need a more prominent signal that the result is only a partial view of the repo."
+        }
+      ],
+      "notes": "This repo highlights both progress and remaining UX work. Grouped issue hints worked well for repeated FUNDING.yml failures, but the overall developer experience is still weakened by extreme skipped-file volume and unclear coverage confidence."
+    },
+    {
+      "repository": "webkit-webkit",
+      "outcome": "blocked",
+      "findings": [
+        "The repository produced 117 issues across 59 files, but many were in imported third-party or test fixture paths such as web-platform-tests, Speedometer resources, and vendored example projects rather than core project configuration.",
+        "Six schema failures were explicitly caused by missing dependency-local Angular schemas, and many other findings were catalog-backed mismatches in third-party content where the tool already warned about possible schema-version drift.",
+        "At this scale the result is difficult to interpret as a product signal for WebKit itself because imported fixture content, vendor trees, and unresolved local-schema prerequisites dominate the report."
+      ],
+      "followUp": [
+        "Treat this repository as blocked for product conclusions unless rerun with stronger exclusion/default-fixture handling and, if needed, safe dependency-local schema preparation.",
+        "Consider using future large-repo heuristics to de-emphasize imported third-party corpora before drawing conclusions from similar monorepos."
+      ],
+      "notes": "DollarLint surfaced real information, but this repo is not interpretable enough for product judgment in its current form. The result is dominated by third-party test corpora and local-schema availability issues, so it should be treated as blocked rather than as evidence for or against the current UX."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "opengeos-maplibre-gl-lidar",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/opengeos/maplibre-gl-lidar.git",
+      "commit": "b7345a589d84b2f0643a60d9fa169b06425c75b8",
+      "path": "/tmp/dollarlint-corpus.1217753158/opengeos-maplibre-gl-lidar",
+      "status": "cloned"
+    },
+    {
+      "name": "webkit-webkit",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/WebKit/WebKit.git",
+      "commit": "c58c8180245a031b9209d8718999b6a735ba4c06",
+      "path": "/tmp/dollarlint-corpus.1217753158/webkit-webkit",
+      "status": "cloned"
+    },
+    {
+      "name": "ansible-collections-servicenow-itsm",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/ansible-collections/servicenow.itsm.git",
+      "commit": "f1508c1df2971e7250f427961f05680671243124",
+      "path": "/tmp/dollarlint-corpus.1217753158/ansible-collections-servicenow-itsm",
+      "status": "cloned"
+    },
+    {
+      "name": "openshift-sippy",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/openshift/sippy.git",
+      "commit": "dfb36c52840f65860db7623ad58195956893cffd",
+      "path": "/tmp/dollarlint-corpus.1217753158/openshift-sippy",
+      "status": "cloned"
+    },
+    {
+      "name": "sirixdb-sirix",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/sirixdb/sirix.git",
+      "commit": "b41b5f7389a6f2570bb991d8651706e06a36f77e",
+      "path": "/tmp/dollarlint-corpus.1217753158/sirixdb-sirix",
+      "status": "cloned"
+    },
+    {
+      "name": "metrolistgroup-metrolist",
+      "ecosystem": "Kotlin",
+      "cloneURL": "https://github.com/MetrolistGroup/Metrolist.git",
+      "commit": "a6ff2974361250aa68032ae3af3f9bf1218025be",
+      "path": "/tmp/dollarlint-corpus.1217753158/metrolistgroup-metrolist",
+      "status": "cloned"
+    },
+    {
+      "name": "chromebrew-chromebrew",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/chromebrew/chromebrew.git",
+      "commit": "1ca967504d28c4a50b4a6e558d77bcd55a080ef6",
+      "path": "/tmp/dollarlint-corpus.1217753158/chromebrew-chromebrew",
+      "status": "cloned"
+    },
+    {
+      "name": "owncloud-core",
+      "ecosystem": "PHP",
+      "cloneURL": "https://github.com/owncloud/core.git",
+      "commit": "5f537a11964e70038c19297b21314f6333f8ab90",
+      "path": "/tmp/dollarlint-corpus.1217753158/owncloud-core",
+      "status": "cloned"
+    },
+    {
+      "name": "particular-nservicebus-rabbitmq",
+      "ecosystem": "C#",
+      "cloneURL": "https://github.com/Particular/NServiceBus.RabbitMQ.git",
+      "commit": "8bcd840a8b3aab7279db13b272fdee27fbcc8241",
+      "path": "/tmp/dollarlint-corpus.1217753158/particular-nservicebus-rabbitmq",
+      "status": "cloned"
+    },
+    {
+      "name": "openclaw-openclaw",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/openclaw/openclaw.git",
+      "commit": "2770aa5f4cf627070635c5875da594150806c39a",
+      "path": "/tmp/dollarlint-corpus.1217753158/openclaw-openclaw",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 5601,
+    "validated": 914,
+    "skipped": 4661,
+    "failed": 26,
+    "issues": {
+      "total": 143,
+      "parsing": 26,
+      "validation": 109,
+      "schema": 8,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 96667410326
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 2 repo(s) behaved reasonably, 6 repo(s) produced product signals, and 2 repo(s) were blocked or uninterpretable.",
+    "DollarLint discovered 5601 files, validated 914, skipped 4661, failed 26, reported 143 issues, and emitted 0 warnings.",
+    "Repository concentration: webkit-webkit: 117 issues, 0 warnings, 2456 skipped; sirixdb-sirix: 10 issues, 0 warnings, 159 skipped; chromebrew-chromebrew: 7 issues, 0 warnings, 2 skipped; owncloud-core: 4 issues, 0 warnings, 1541 skipped; openclaw-openclaw: 3 issues, 0 warnings, 371 skipped; ansible-collections-servicenow-itsm: 1 issues, 0 warnings, 45 skipped; openshift-sippy: 1 issues, 0 warnings, 41 skipped.",
+    "Issue groups: webkit-webkit parser-compatibility/parse: 19; webkit-webkit catalog-schema-validation/required: 18; webkit-webkit catalog-schema-validation/additionalProperties: 15; webkit-webkit catalog-schema-validation/type: 12.",
+    "Skipped coverage: 4661 of 5601 discovered files were skipped (83.2%)."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "This sweep skipped 4661 of 5601 discovered files (83.2%), which is useful context when judging corpus coverage."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Investigate non-fixture parser compatibility failures from the real-world corpus.",
+      "rationale": "A parse failure outside fixture/test data is likely to affect normal users validating repository configuration files."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Surface a compact per-repository skipped-coverage summary in CLI/triage output so users can immediately see how much real configuration remained unvalidated.",
+      "rationale": "This repo had 45 skipped files across multiple signal levels, but the text output only showed truncated examples and required JSON for the full picture."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Further compress catalog-backed mismatch hints for likely test/fixture paths while preserving provenance details.",
+      "rationale": "The single issue needed a long explanatory block and explicit-association suggestion before the user could assess it, which made the main finding harder to scan."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Group large skipped sets by directory or file role and summarize counts before examples so high-skip repositories remain interpretable in the CLI.",
+      "rationale": "This repo printed 40 skipped files inline, dominated by one schema snapshot directory, which was noisy without clarifying whether those files were expected low-value coverage gaps."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Differentiate likely generated schema snapshots from ordinary unknown configuration files in skip classification.",
+      "rationale": "Room database schema snapshots and issue template YAMLs were both shown as generic unknown files, even though they have different developer expectations and urgency."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Add clearer next-step guidance when the only issue is a likely catalog/version mismatch and many project configs were skipped.",
+      "rationale": "This result combined one probably stale catalog hit with broad uncovered config, leaving ambiguity about whether the developer should trust the issue or focus on coverage gaps first."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Collapse very large skipped-file sets behind grouped summaries with counts and a few examples in CLI output.",
+      "rationale": "This repository produced an enormous skipped section that overwhelmed the handful of actual parse and validation findings."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Group or down-rank localization/fixture parse failures separately from likely production config errors when they occur under testdata or translation directories.",
+      "rationale": "A developer seeing parse errors in theme/test localization JSONs needs faster cues about whether the failures are real product config problems or low-value fixture data."
+    },
+    {
+      "strength": "low",
+      "recommendation": "Improve coverage for common repository-maintenance configs or make it easier to suggest stable associations for them.",
+      "rationale": "High-signal repo config files were clearly surfaced as skipped, but there was no next-step guidance beyond recognizing that they were uncovered."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Apply the same grouping discipline used for repeated issue hints to skipped-file output, especially on very high skip-ratio repositories.",
+      "rationale": "The FUNDING.yml issues were concise and actionable, while the skipped section dominated the result and obscured coverage confidence."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Provide a stronger coverage caveat when skipped ratios are extreme, rather than presenting the result like a normal issue report.",
+      "rationale": "With roughly 94% of discovered files skipped, developers need a more prominent signal that the result is only a partial view of the repo."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; record the triage and decide follow-up from the structured result."
+  ],
+  "followUp": [
+    "Review the structured productRecommendations and decide whether to open implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting the same corpus by default.",
+    "Re-run openclaw-openclaw after safe dependency preparation that installs the local oxfmt and oxlint schemas with lifecycle scripts disabled.",
+    "Treat current openclaw findings as coverage/prep caveats rather than product evidence.",
+    "Treat webkit-webkit as blocked for product conclusions unless rerun with stronger exclusion/default-fixture handling and, if needed, safe dependency-local schema preparation.",
+    "Consider using future large-repo heuristics to de-emphasize imported third-party corpora before drawing conclusions from similar monorepos."
+  ]
+}

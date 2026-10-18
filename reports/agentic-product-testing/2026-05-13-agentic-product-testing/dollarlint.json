@@ -1,0 +1,73 @@
+{
+  "formatVersion": 1,
+  "json": {
+    "$schema": "https://raw.githubusercontent.com/dollarlint/dollarlint/main/schemas/dollarlint-result.schema.json",
+    "formatVersion": 1,
+    "root": "/tmp/dollarlint-corpus.3284310357",
+    "summary": {
+      "discovered": 2,
+      "validated": 1,
+      "skipped": 1,
+      "failed": 0,
+      "issues": {
+        "total": 0,
+        "parsing": 0,
+        "validation": 0,
+        "schema": 0,
+        "coverage": 0
+      },
+      "ignored": 0,
+      "warnings": 0,
+      "durationNanos": 466456669
+    },
+    "files": [
+      {
+        "path": "tomoemami-s1plaintextbackup/.github/workflows/top.yml",
+        "format": "yaml",
+        "schema": "https://www.schemastore.org/github-workflow.json",
+        "schemaSource": "catalog:schemastore:GitHub Workflow",
+        "status": "validated",
+        "issues": 0,
+        "ignored": 0
+      },
+      {
+        "path": "tomoemami-s1plaintextbackup/RefreshingData.json",
+        "format": "json",
+        "status": "skipped",
+        "issues": 0,
+        "ignored": 0,
+        "skipReason": "noSchema",
+        "skipClass": "unknown",
+        "skipImportance": "medium",
+        "skipDetail": "schema-less JSON/YAML/TOML file"
+      }
+    ],
+    "issues": [],
+    "ignoredIssues": [],
+    "warnings": []
+  },
+  "sarif": {
+    "version": "2.1.0",
+    "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+    "runs": [
+      {
+        "tool": {
+          "driver": {
+            "name": "dollarlint",
+            "informationUri": "https://github.com/dollarlint/dollarlint"
+          }
+        },
+        "results": []
+      }
+    ]
+  },
+  "styled": {
+    "plain": "dollarlint passed in 0s: 2 discovered, 1 validated, 1 skipped\n\nskipped files\n  medium signal: unknown/custom file (no schema)\n    why: schema-less JSON/YAML/TOML file\n    tomoemami-s1plaintextbackup/RefreshingData.json\n\nSummary: 2 discovered, 1 validated, 1 skipped, 0 issues in 0s\n",
+    "ansi": "dollarlint passed in 0s: 2 discovered, 1 validated, 1 skipped\n\nskipped files\n  medium signal: unknown/custom file (no schema)\n    why: schema-less JSON/YAML/TOML file\n    tomoemami-s1plaintextbackup/RefreshingData.json\n\nSummary: 2 discovered, 1 validated, 1 skipped, 0 issues in 0s\n",
+    "options": {
+      "showSkipped": true,
+      "locations": true
+    },
+    "truncated": false
+  }
+}

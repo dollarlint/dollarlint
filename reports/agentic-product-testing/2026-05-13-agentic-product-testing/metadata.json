@@ -1,0 +1,86 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-05-13-agentic-product-testing",
+  "date": "2026-05-13",
+  "title": "Agentic Product Testing",
+  "dollarlintRevision": "4c5c2df3816342f7a0d6583b2e9ff8855eebc7ea",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.3284310357",
+  "cacheDir": "/tmp/dollarlint-cache.3431733847",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.3284310357\" cacheDir=\"/tmp/dollarlint-cache.3431733847\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-2632667598.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-2632667598.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-13-agentic-product-testing/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "tomoemami-s1plaintextbackup",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "tomoemami-s1plaintextbackup",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "The CLI preview is concise and actionable: it reports 2 discovered files, validates 1, and explains the single skipped file with a clear 'schema-less JSON/YAML/TOML file' reason.",
+        "There were no crashes, warnings, or repeated issues, and the one skipped file was surfaced as medium-signal unknown coverage instead of being silently ignored."
+      ],
+      "caveats": [
+        "Coverage is small for this repository because only two candidate files were discovered, so this repo is weak evidence for broader product conclusions."
+      ],
+      "followUp": [
+        "Continue collecting more repositories to judge whether skipped coverage presentation stays clear when counts are larger."
+      ],
+      "notes": "DollarLint behaved reasonably for this repository. The developer experience is straightforward: one file validated cleanly, one schema-less JSON file was skipped with an understandable explanation, and the output makes it easy to see that there is no immediate action required beyond recognizing limited coverage."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "tomoemami-s1plaintextbackup",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/TomoeMami/S1PlainTextBackup.git",
+      "commit": "ceb5e2751152b37ea9696e40cff52267b863b5e5",
+      "path": "/tmp/dollarlint-corpus.3284310357/tomoemami-s1plaintextbackup",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 2,
+    "validated": 1,
+    "skipped": 1,
+    "failed": 0,
+    "issues": {
+      "total": 0,
+      "parsing": 0,
+      "validation": 0,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 466456669
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 1 repo(s) behaved reasonably, 0 repo(s) produced product signals, and 0 repo(s) were blocked or uninterpretable.",
+    "DollarLint discovered 2 files, validated 1, skipped 1, failed 0, reported 0 issues, and emitted 0 warnings.",
+    "Skipped coverage: 1 of 2 discovered files were skipped (50.0%).",
+    "No crashes, output-contract failures, validation issues, or warnings were observed."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "This sweep skipped 1 of 2 discovered files (50.0%), which is useful context when judging corpus coverage."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; record the triage and decide follow-up from the structured result."
+  ],
+  "followUp": [
+    "Review the structured productRecommendations and decide whether to open implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting the same corpus by default.",
+    "Continue collecting more repositories to judge whether skipped coverage presentation stays clear when counts are larger."
+  ]
+}

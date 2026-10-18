@@ -1555,8 +1555,8 @@ func realWorldDeveloperExperienceGuidance() map[string]any {
 			},
 			{
 				"outcome":        realWorldFeedbackProductSignal,
-				"finding":        "Most discovered files were skipped and the result did not make the skipped reasons easy to scan by repository.",
-				"recommendation": "Surface skipped-file coverage by repository and reason in triage/final output.",
+				"finding":        "Most discovered files were skipped and the skipped file classes in the triage output included common hand-authored configuration files without matched schemas.",
+				"recommendation": "Evaluate schema coverage for skipped configuration file classes to reduce user blind spots.",
 			},
 			{
 				"outcome":        realWorldFeedbackProductSignal,

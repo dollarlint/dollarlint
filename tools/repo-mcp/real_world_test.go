@@ -615,6 +615,18 @@ func TestTriageRealWorldOutputGroupsIssuesAndWarnings(t *testing.T) {
 	if len(triage.ProductRecommendations) == 0 || triage.FinalResponseContract["required"] == "" {
 		t.Fatalf("recommendations=%+v finalResponseContract=%+v", triage.ProductRecommendations, triage.FinalResponseContract)
 	}
+	if len(triage.SkippedGroups) == 0 {
+		t.Fatalf("skippedGroups should be populated: %+v", triage.SkippedGroups)
+	}
+	var hasClassFinding bool
+	for _, f := range triage.Findings {
+		if strings.Contains(f, "Skipped file classes:") {
+			hasClassFinding = true
+		}
+	}
+	if !hasClassFinding {
+		t.Fatalf("findings should include skipped class breakdown: %+v", triage.Findings)
+	}
 	discussionRepos, ok := triage.DiscussionPacket["repositories"].([]map[string]string)
 	if !ok {
 		t.Fatalf("discussion repositories = %#v", triage.DiscussionPacket["repositories"])
@@ -624,6 +636,93 @@ func TestTriageRealWorldOutputGroupsIssuesAndWarnings(t *testing.T) {
 	}
 	if discussionRepos[0]["markdown"] != "[hugo](https://github.com/gohugoio/hugo)" {
 		t.Fatalf("hugo discussion repo = %+v", discussionRepos[0])
+	}
+}
+
+func TestTriageRealWorldOutputSurfacesSkippedGroups(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "result.json")
+	data := `{
+  "summary": {
+    "discovered": 6,
+    "validated": 1,
+    "skipped": 5,
+    "failed": 0,
+    "issues": {"total": 0, "parsing": 0, "validation": 0, "schema": 0, "coverage": 0},
+    "ignored": 0,
+    "warnings": 0,
+    "durationNanos": 99
+  },
+  "files": [
+    {"path": "repo/pyproject.toml", "format": "toml", "status": "validated"},
+    {"path": "repo/.rubocop.yml", "format": "yaml", "status": "skipped"},
+    {"path": "repo/.rubocop_todo.yml", "format": "yaml", "status": "skipped"},
+    {"path": "repo/deny.toml", "format": "toml", "status": "skipped"},
+    {"path": "repo/data/users.json", "format": "json", "status": "skipped"},
+    {"path": "repo/test/fixtures/case.json", "format": "json", "status": "skipped"}
+  ],
+  "issues": [],
+  "warnings": []
+}`
+	if err := os.WriteFile(path, []byte(data), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	triage, err := triageRealWorldOutput(path, []realWorldRepository{
+		{Name: "repo", CloneURL: "https://github.com/example/repo.git", Path: filepath.Join(dir, "repo")},
+	})
+	if err != nil {
+		t.Fatalf("triage output: %v", err)
+	}
+
+	// SkippedGroups should be populated in the triage struct (top-level output)
+	if len(triage.SkippedGroups) == 0 {
+		t.Fatalf("skippedGroups should be populated: %+v", triage.SkippedGroups)
+	}
+
+	// tooling-config (rubocop + deny.toml) should be first since it is product-relevant
+	if triage.SkippedGroups[0].Class != "tooling-config" {
+		t.Fatalf("first skipped group should be tooling-config: %+v", triage.SkippedGroups)
+	}
+	if !triage.SkippedGroups[0].ProductSignal {
+		t.Fatalf("tooling-config group should have product signal: %+v", triage.SkippedGroups[0])
+	}
+	if len(triage.SkippedGroups[0].Reasons) == 0 {
+		t.Fatalf("tooling-config group should have reasons: %+v", triage.SkippedGroups[0])
+	}
+	if len(triage.SkippedGroups[0].Examples) == 0 {
+		t.Fatalf("tooling-config group should have examples: %+v", triage.SkippedGroups[0])
+	}
+
+	// Findings should include a grouped class breakdown
+	var classFinding string
+	for _, f := range triage.Findings {
+		if strings.Contains(f, "Skipped file classes:") {
+			classFinding = f
+		}
+	}
+	if classFinding == "" {
+		t.Fatalf("findings should include skipped class breakdown: %+v", triage.Findings)
+	}
+	if !strings.Contains(classFinding, "tooling-config") {
+		t.Fatalf("class finding should include tooling-config: %q", classFinding)
+	}
+	if !strings.Contains(classFinding, "product-relevant") {
+		t.Fatalf("class finding should mark product-relevant groups: %q", classFinding)
+	}
+
+	// Product recommendations should include a coverage gap recommendation for product-signal groups
+	var coverageRec *realWorldProductRecommendation
+	for i := range triage.ProductRecommendations {
+		if strings.Contains(triage.ProductRecommendations[i].Recommendation, "tooling-config") {
+			coverageRec = &triage.ProductRecommendations[i]
+		}
+	}
+	if coverageRec == nil {
+		t.Fatalf("product recommendations should include tooling-config coverage gap: %+v", triage.ProductRecommendations)
+	}
+	if coverageRec.Strength != "low" {
+		t.Fatalf("coverage gap recommendation strength = %q", coverageRec.Strength)
 	}
 }
 

@@ -73,6 +73,7 @@ type realWorldTriage struct {
 	PerRepository             []realWorldRepositoryTriage      `json:"perRepository"`
 	IssueGroups               []realWorldIssueGroup            `json:"issueGroups"`
 	WarningGroups             []realWorldWarningGroup          `json:"warningGroups"`
+	SkippedGroups             []realWorldSkippedFileGroup      `json:"skippedGroups"`
 	ValidationFeedback        []realWorldValidationFeedback    `json:"validationFeedback,omitempty"`
 	ValidationFeedbackSummary map[string]any                   `json:"validationFeedbackSummary,omitempty"`
 	Findings                  []string                         `json:"findings"`
@@ -322,6 +323,7 @@ func (s *repoServer) handleRealWorldTriageOutput(ctx context.Context, request mc
 		"perRepository":             realWorldPublicRepositoryTriage(triage.PerRepository),
 		"issueGroups":               triage.IssueGroups,
 		"warningGroups":             triage.WarningGroups,
+		"skippedGroups":             triage.SkippedGroups,
 		"discussionPacket":          triage.DiscussionPacket,
 		"validationFeedback":        triage.ValidationFeedback,
 		"validationFeedbackSummary": triage.ValidationFeedbackSummary,
@@ -349,8 +351,9 @@ func triageRealWorldOutput(outputArtifact string, repositories []realWorldReposi
 	perRepo := realWorldPerRepositoryTriage(details, repoIndex)
 	issueGroups := realWorldGroupIssues(details.Issues, repoIndex)
 	warningGroups := realWorldGroupWarnings(details.Warnings)
-	findings := realWorldDraftFindings(details, perRepo, issueGroups, warningGroups)
-	productRecommendations := realWorldDraftProductRecommendations(details, issueGroups, warningGroups)
+	skippedGroups := realWorldSkippedFileGroups(realWorldSkippedFileSignals(details.Files))
+	findings := realWorldDraftFindings(details, perRepo, issueGroups, warningGroups, skippedGroups)
+	productRecommendations := realWorldDraftProductRecommendations(details, issueGroups, warningGroups, skippedGroups)
 	productDecisions := []string{"No product changes were made during this sweep; record the triage and decide follow-up from the structured result."}
 	followUp := realWorldDraftFollowUp(details, productRecommendations)
 	discussionPacket := realWorldDiscussionPacket(details, perRepo, issueGroups, warningGroups, productRecommendations)
@@ -360,6 +363,7 @@ func triageRealWorldOutput(outputArtifact string, repositories []realWorldReposi
 		PerRepository:          perRepo,
 		IssueGroups:            issueGroups,
 		WarningGroups:          warningGroups,
+		SkippedGroups:          skippedGroups,
 		Findings:               findings,
 		ProductRecommendations: productRecommendations,
 		ProductDecisions:       productDecisions,
@@ -1105,7 +1109,7 @@ func realWorldGroupRepositoryIssues(repository string, issues []realWorldOutputI
 	return out
 }
 
-func realWorldDraftFindings(details realWorldOutputDetails, perRepo []realWorldRepositoryTriage, issueGroups []realWorldIssueGroup, warningGroups []realWorldWarningGroup) []string {
+func realWorldDraftFindings(details realWorldOutputDetails, perRepo []realWorldRepositoryTriage, issueGroups []realWorldIssueGroup, warningGroups []realWorldWarningGroup, skippedGroups []realWorldSkippedFileGroup) []string {
 	summary := details.Summary
 	findings := []string{
 		fmt.Sprintf("DollarLint discovered %d files, validated %d, skipped %d, failed %d, reported %d issues, and emitted %d warnings.",
@@ -1148,13 +1152,27 @@ func realWorldDraftFindings(details realWorldOutputDetails, perRepo []realWorldR
 	if summary.Discovered > 0 && summary.Skipped > 0 {
 		findings = append(findings, fmt.Sprintf("Skipped coverage: %d of %d discovered files were skipped (%s).", summary.Skipped, summary.Discovered, percentString(summary.Skipped, summary.Discovered)))
 	}
+	if len(skippedGroups) > 0 {
+		var parts []string
+		for _, group := range skippedGroups {
+			label := fmt.Sprintf("%s (%d)", group.Class, group.Count)
+			if group.ProductSignal {
+				label += ", product-relevant"
+			}
+			parts = append(parts, label)
+			if len(parts) == 5 { // cap at 5 classes to keep the finding scannable
+				break
+			}
+		}
+		findings = append(findings, "Skipped file classes: "+strings.Join(parts, "; ")+".")
+	}
 	if summary.Issues.Total == 0 && summary.Warnings == 0 && summary.Failed == 0 {
 		findings = append(findings, "No crashes, output-contract failures, validation issues, or warnings were observed.")
 	}
 	return findings
 }
 
-func realWorldDraftProductRecommendations(details realWorldOutputDetails, issueGroups []realWorldIssueGroup, warningGroups []realWorldWarningGroup) []realWorldProductRecommendation {
+func realWorldDraftProductRecommendations(details realWorldOutputDetails, issueGroups []realWorldIssueGroup, warningGroups []realWorldWarningGroup, skippedGroups []realWorldSkippedFileGroup) []realWorldProductRecommendation {
 	var recommendations []realWorldProductRecommendation
 	if len(warningGroups) > 0 {
 		recommendations = append(recommendations, realWorldProductRecommendation{
@@ -1163,12 +1181,15 @@ func realWorldDraftProductRecommendations(details realWorldOutputDetails, issueG
 			Rationale:      "The sweep emitted schema catalog warnings that are not file findings; grouping them keeps the user focused on product signals without hiding schema availability problems.",
 		})
 	}
-	if details.Summary != nil && details.Summary.Discovered > 0 && details.Summary.Skipped*100/details.Summary.Discovered >= 10 {
-		recommendations = append(recommendations, realWorldProductRecommendation{
-			Strength:       "low",
-			Recommendation: "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
-			Rationale:      fmt.Sprintf("This sweep skipped %d of %d discovered files (%s), which is useful context when judging corpus coverage.", details.Summary.Skipped, details.Summary.Discovered, percentString(details.Summary.Skipped, details.Summary.Discovered)),
-		})
+	for _, group := range skippedGroups {
+		if group.ProductSignal {
+			recommendations = append(recommendations, realWorldProductRecommendation{
+				Strength:       "low",
+				Recommendation: fmt.Sprintf("Evaluate schema coverage for skipped %s files.", group.Class),
+				Rationale:      fmt.Sprintf("%d %s file(s) were skipped without a matched schema; these are commonly hand-authored configuration files where DollarLint coverage could reduce user blind spots.", group.Count, group.Class),
+			})
+			break
+		}
 	}
 	for _, group := range issueGroups {
 		if group.Signal == "parser-compatibility" && group.ProductSignal {

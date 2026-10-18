@@ -1,0 +1,423 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-06-08-10-repo-real-world-validation-sweep",
+  "date": "2026-06-08",
+  "title": "10-repo real-world validation sweep",
+  "dollarlintRevision": "9775b2ec8f53e5284ce584df37ea66f5e3f0a4ff",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.1344492278",
+  "cacheDir": "/tmp/dollarlint-cache.2161281653",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.1344492278\" cacheDir=\"/tmp/dollarlint-cache.2161281653\" outputArtifact=\"/tmp/dollarlint-10-repo-real-world-validation-sweep-3625641460.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-10-repo-real-world-validation-sweep-3625641460.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-06-08-10-repo-real-world-validation-sweep/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "9xn-auto-ovpn",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "ai-sdlc-framework-ai-sdlc",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: ai-sdlc-plugin/mcp-server/npm-shrinkwrap.json, pnpm-lock.yaml, sdk-go/go.sum, and 1 more. Remote schema refs: 12."
+    },
+    {
+      "repository": "gastownhall-gascity",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: cmd/gc/dashboard/web/package-lock.json, go.sum. Remote schema refs: 12."
+    },
+    {
+      "repository": "greenriver-hmis-warehouse",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Gemfile.lock, yarn.lock. Remote schema refs: 4."
+    },
+    {
+      "repository": "laravel-cloud-cli",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: composer.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "lockss-lockss-daemon",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "nvidia-warp",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: uv.lock. Remote schema refs: 1."
+    },
+    {
+      "repository": "seqra-opentaint",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: cli/go.sum, github/zap/uv.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "vellum-ai-vellum-assistant",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: apps/macos/bun.lock, apps/web/bun.lock, assistant/bun.lock, and 9 more. Remote schema refs: 0."
+    },
+    {
+      "repository": "yarc-official-yarg-core",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "9xn-auto-ovpn",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint produced a concise terminal summary with no issues and clearly separated the one skipped JSON file from the two validated files.",
+        "The only skipped file was explained as schema-less JSON, which makes the limited coverage understandable instead of looking like a silent miss."
+      ],
+      "followUp": [
+        "Keep watching whether schema-less skips become hard to scan in larger repositories, but this result alone does not suggest a product change."
+      ],
+      "notes": "For this small repository, the output looks usable for a developer: no noisy warnings, no confusing classifications, and the skipped coverage was explicit enough to understand why one file was not validated."
+    },
+    {
+      "repository": "ai-sdlc-framework-ai-sdlc",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint produced 110+ catalog-backed validation findings against many `metadata.yaml` files that appear to share one underlying schema mismatch, so the raw output is technically rich but risks feeling repetitive rather than decisive.",
+        "The four Helm template files failed YAML parsing, but the grouped issue hints correctly recognized templated YAML and suggested excluding or rendering it first; that is useful guidance even though the files still show up as parse failures.",
+        "Coverage was heavily constrained: 757 files were skipped, including 111 hand-authored unknown config files, which makes it hard for a developer to judge how representative the validated subset is."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Collapse repeated catalog-backed validation failures that share the same schema/source mismatch into stronger grouped explanations with fewer per-file repetitions.",
+          "rationale": "Here, one apparent `metadata.yaml` schema mismatch generated 110 issues across many files, which overwhelms the developer more than it informs them."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Promote templated-YAML detection from a hint into a clearer classification so Helm template parse failures read as expected unsupported input rather than plain parse errors.",
+          "rationale": "The tool already detects the pattern and suggests rendering or excluding the files, so surfacing that earlier would reduce confusion."
+        },
+        {
+          "strength": "high",
+          "recommendation": "Improve reporting for very high skipped-coverage runs so developers can quickly understand whether skipped files are mostly fixtures, generated data, or important hand-authored configs.",
+          "rationale": "An 85%+ skipped rate with over 100 unknown config files materially changes how much confidence a developer should place in the validation result."
+        }
+      ],
+      "followUp": [
+        "Check whether the `metadata.yaml` matches across this and other repos indicate a systematic bad catalog association for that basename rather than repository-specific problems."
+      ],
+      "notes": "This is a valuable product-signal repository because it stresses both grouping and coverage UX. The tool already has enough metadata to explain the Helm-template problem well, but repeated catalog mismatches and a very high skipped ratio make the overall result harder to trust or act on quickly."
+    },
+    {
+      "repository": "gastownhall-gascity",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint surfaced concrete locations for real-looking schema issues in `docs/docs.json`, but also reported a `taplo.toml` catalog-backed validation that explicitly warns the external schema may not match the repository's conventions, which weakens confidence in the finding.",
+        "The repository had a very large skipped surface of hand-authored TOML/YAML/JSON configuration files and examples, including high-signal project configs like `.github/actionlint.yaml`, `.mcp.json`, and `.trivyignore.yaml`, so coverage feels materially incomplete even though many files validated.",
+        "The lone parsing failure came from a deliberately invalid fixture under `testdata`, and the tool classified it in a way that makes that caveat understandable rather than alarming."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Improve summarization and prioritization for large groups of skipped hand-authored config files so developers can quickly judge real coverage gaps by file family or repository area.",
+          "rationale": "This repository skipped 127 unknown config-like files, and the current presentation becomes hard to act on once many custom TOML/YAML files are involved."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Make catalog-backed validation issues easier to distinguish when they may reflect upstream schema/version drift rather than a repository defect.",
+          "rationale": "The `taplo.toml` issue is precise but still caveated by external schema compatibility, creating uncertainty about whether the finding should drive a code change."
+        }
+      ],
+      "followUp": [
+        "Check whether Mintlify `iconType` findings and Taplo `options` findings reproduce across other repositories or indicate stale/common schema mismatches rather than repo-specific errors."
+      ],
+      "notes": "This run demonstrates both strong raw diagnostics and an ergonomics gap: developers get actionable-looking issues, but they also have to mentally discount catalog/schema-version uncertainty and a huge volume of skipped custom config files. That combination points to product improvement rather than a clean pass/fail experience."
+    },
+    {
+      "repository": "greenriver-hmis-warehouse",
+      "outcome": "product-signal",
+      "findings": [
+        "Several of the reported validation issues look like likely schema/version mismatches rather than obvious repository defects, especially the Rails `config/storage.yml` findings and the RuboCop todo null-array complaints.",
+        "The five parse failures are all in Rails-style YAML configs that commonly contain ERB/template content, so treating them as plain parse errors is understandable but still leaves a developer wanting a clearer unsupported-input classification.",
+        "Coverage is very limited for this repo: 251 discovered files were skipped, including many hand-authored config and domain JSON files, which makes the validated subset feel narrow."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve templated-YAML detection and messaging for Rails-style config files so ERB-heavy YAML is classified more clearly than a generic parse failure.",
+          "rationale": "The current grouped hint helps, but repeated parse errors in common config files still read as harder failures than they likely are."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Refine or better caveat catalog-backed Rails/RuboCop findings when repository conventions commonly diverge from the referenced schema.",
+          "rationale": "The reported issues on `config/storage.yml` and `.rubocop_todo.yml` may be technically valid against the external schemas but are hard for developers to trust as actionable repo defects."
+        },
+        {
+          "strength": "high",
+          "recommendation": "Strengthen skipped-coverage reporting for repositories with many domain-specific JSON/YAML files so unknown config/data surfaces are easier to summarize by area.",
+          "rationale": "This repo skipped over 230 unknown files, and that volume materially affects confidence in the overall result."
+        }
+      ],
+      "followUp": [
+        "Check whether ERB/template signatures can be detected earlier in Rails config files and whether rubyschema-backed findings recur across other Rails repositories in the sweep history."
+      ],
+      "notes": "This run suggests DollarLint is finding real structure, but the developer experience is dominated by uncertainty: are these schema mismatches, templated-YAML limitations, or actual defects? The answer is not clear enough from the output alone, so this is better treated as a product-signal repository."
+    },
+    {
+      "repository": "laravel-cloud-cli",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated most of the discovered files cleanly and kept the output short, with only two schema-less JSON files called out as skipped.",
+        "The skipped files `box.json` and `pint.json` were surfaced explicitly, so the developer can see the modest coverage gap without wading through noise."
+      ],
+      "followUp": [
+        "No immediate product change from this repository; continue monitoring whether common tool config files like `box.json` and `pint.json` recur often enough to justify better schema coverage."
+      ],
+      "notes": "This is a good developer experience overall: high validation coverage, no warnings, no questionable findings, and just a small number of clearly explained skipped files."
+    },
+    {
+      "repository": "lockss-lockss-daemon",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint handled the small discovered set cleanly and explained every skip, but it validated nothing in this repository.",
+        "Two of the three discovered files were clearly low-signal test fixtures, yet the only non-test file (`turtles.yaml`) was also skipped with no schema, leaving the run with effectively no actionable coverage."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "Consider highlighting zero-validated runs more explicitly as coverage-limited outcomes in final triage output.",
+          "rationale": "When a repository finishes with only skipped files, the user should be able to recognize immediately that the result reflects lack of schema coverage rather than a clean validation pass."
+        }
+      ],
+      "followUp": [
+        "Track how often real-world runs end with zero validated files so coverage-limited outcomes can be summarized separately from behaved-reasonably passes."
+      ],
+      "notes": "This is not a correctness failure, but it is still a product signal because a developer learns almost nothing beyond 'no applicable schemas were found.' The output is honest, just not very useful for deciding what to do next."
+    },
+    {
+      "repository": "nvidia-warp",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint reported a GitLab CI format error for `$CI_PAGES_URL` with good location detail, but the message also has to hedge that the catalog-backed schema may not match the repository's GitLab conventions, which leaves the developer uncertain whether this is a real config problem.",
+        "The run skipped a broad set of hand-authored project config files such as `.github/.dco.yml`, `.greptile/config.json`, and `.nspect-allowlist.toml`, so the coverage gap is meaningful rather than just fixture noise."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve catalog-backed issue messaging so likely schema/tool-version mismatches are more clearly distinguished from repository defects.",
+          "rationale": "The current output gives a precise validation failure and then a caveat about external schema compatibility, which makes it hard to know whether to trust the issue."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Make high-signal skipped project configuration files easier to summarize and act on in final triage output.",
+          "rationale": "This repository had several hand-authored config files skipped with no schema, and that coverage gap materially affects how useful the validation result feels."
+        }
+      ],
+      "followUp": [
+        "Check whether GitLab CI variables like `$CI_PAGES_URL` frequently trigger format errors under the current catalog-backed schema and whether they should be specially explained or downgraded."
+      ],
+      "notes": "This result surfaces a real product ergonomics question: catalog-backed validation can produce actionable-looking failures while simultaneously telling the user the schema may not fit the repo's tool version, and the skipped-config list is large enough that a developer would want stronger coverage or clearer prioritization."
+    },
+    {
+      "repository": "seqra-opentaint",
+      "outcome": "product-signal",
+      "findings": [
+        "The GitHub Action issue on `.github/actions/cli/build-and-lint/action.yml` looks plausibly actionable, but the three `github/zap/template.yaml` findings appear tied to a likely incorrect SAM/CloudFormation catalog match rather than an obvious repo defect.",
+        "Coverage is again heavily limited: most discovered files were skipped, including many hand-authored YAML rules and configuration files, so the overall result is dominated by unknown coverage rather than validated content."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Reduce false-positive risk from broad basename-based catalog associations like `template.yaml` by requiring stronger contextual evidence or more explicit caveats.",
+          "rationale": "The `github/zap/template.yaml` findings look like a schema-selection mismatch, not a straightforward repository error, and they can distract from more credible issues in the same run."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Continue improving summaries for high-signal skipped custom YAML rule/config files so zero-schema coverage is easier to evaluate by subsystem.",
+          "rationale": "This repository skipped a large body of rule/config YAML, which meaningfully limits the usefulness of the run even though the skip reasons are explicit."
+        }
+      ],
+      "followUp": [
+        "Review whether `template.yaml` catalog associations should be more context-sensitive when the file content resembles tool/job configuration rather than CloudFormation."
+      ],
+      "notes": "This is a mixed but valuable product-signal result. DollarLint produced at least one credible schema finding, yet the run also shows how broad basename-based catalog matches and heavy skipped coverage can make the rest of the output hard to trust at face value."
+    },
+    {
+      "repository": "vellum-ai-vellum-assistant",
+      "outcome": "product-signal",
+      "findings": [
+        "All seven reported issues come from a single catalog-backed association that appears to treat `packages/environments/package.json` and `packages/environments/tsconfig.json` as `rc3 environment` files, which makes the type errors look more like a schema-selection problem than a repository defect.",
+        "The run also skipped 80 hand-authored unknown config files, including bundled `TOOLS.json` files, openapi schema files, and various app configuration assets, so developers would need better coverage framing before trusting the validated subset."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Tighten or better explain catalog matches for broad basename/path patterns so obviously non-matching files are less likely to inherit an unrelated schema.",
+          "rationale": "Here, normal `package.json` and `tsconfig.json` content under an `environments` directory appears to have been matched to an `rc3 environment` schema, yielding misleading type errors."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Improve skipped-coverage summaries for repositories with many custom JSON configuration files so important unknown configs are easier to understand at a glance.",
+          "rationale": "The repo has a broad mix of skipped hand-authored configs, and the current output shows the gap but not an especially actionable high-level breakdown."
+        }
+      ],
+      "followUp": [
+        "Review whether the `**/environments/*.json` catalog rule is too broad or needs stronger confidence checks before applying to common JSON files like `package.json` and `tsconfig.json`."
+      ],
+      "notes": "This repository highlights how a surprising catalog match can generate plausible-looking but likely misleading findings. The output is still informative, but the main developer task becomes deciding whether the inferred schema is sensible rather than acting on the reported type errors directly."
+    },
+    {
+      "repository": "yarc-official-yarg-core",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint kept the output compact and understandable: three files validated cleanly and the two skipped VS Code files were called out explicitly instead of disappearing from coverage.",
+        "The low-confidence catalog explanation for .vscode/tasks.json is useful because it tells the developer why matching was withheld instead of pretending the file had no candidate schema."
+      ],
+      "followUp": [
+        "Track whether low-confidence catalog skip messaging remains easy to scan when many editor configuration files are present in larger repositories."
+      ],
+      "notes": "This looks like reasonable behavior for a developer-facing run. Coverage is modest, but the skips are transparent and the messaging around low-confidence schema matching is clearer than a generic 'no schema' outcome."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "vellum-ai-vellum-assistant",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/vellum-ai/vellum-assistant.git",
+      "commit": "4252869cbde13e311b3668b99007b43e108d7da6",
+      "path": "/tmp/dollarlint-corpus.1344492278/vellum-ai-vellum-assistant",
+      "status": "cloned"
+    },
+    {
+      "name": "9xn-auto-ovpn",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/9xN/auto-ovpn.git",
+      "commit": "a2eea22ba605deec1da8deb5dfe013a3e7ad0198",
+      "path": "/tmp/dollarlint-corpus.1344492278/9xn-auto-ovpn",
+      "status": "cloned"
+    },
+    {
+      "name": "nvidia-warp",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/NVIDIA/warp.git",
+      "commit": "e08be5ca31e37da54543614e9635d713a0050032",
+      "path": "/tmp/dollarlint-corpus.1344492278/nvidia-warp",
+      "status": "cloned"
+    },
+    {
+      "name": "gastownhall-gascity",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/gastownhall/gascity.git",
+      "commit": "74477b71d7154193eb327ba3dcf37d5a07f86227",
+      "path": "/tmp/dollarlint-corpus.1344492278/gastownhall-gascity",
+      "status": "cloned"
+    },
+    {
+      "name": "lockss-lockss-daemon",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/lockss/lockss-daemon.git",
+      "commit": "e729ec984524798ea8fe6388215743783f08a169",
+      "path": "/tmp/dollarlint-corpus.1344492278/lockss-lockss-daemon",
+      "status": "cloned"
+    },
+    {
+      "name": "seqra-opentaint",
+      "ecosystem": "Kotlin",
+      "cloneURL": "https://github.com/seqra/opentaint.git",
+      "commit": "c8d8c1c5bb563839966e79268498019712152fba",
+      "path": "/tmp/dollarlint-corpus.1344492278/seqra-opentaint",
+      "status": "cloned"
+    },
+    {
+      "name": "greenriver-hmis-warehouse",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/greenriver/hmis-warehouse.git",
+      "commit": "5e3d4c7cbad6efac97a3921d20537c1c12f91396",
+      "path": "/tmp/dollarlint-corpus.1344492278/greenriver-hmis-warehouse",
+      "status": "cloned"
+    },
+    {
+      "name": "laravel-cloud-cli",
+      "ecosystem": "PHP",
+      "cloneURL": "https://github.com/laravel/cloud-cli.git",
+      "commit": "2ba78c3808ccb30246cbdbd85554d066d1bce9f3",
+      "path": "/tmp/dollarlint-corpus.1344492278/laravel-cloud-cli",
+      "status": "cloned"
+    },
+    {
+      "name": "yarc-official-yarg-core",
+      "ecosystem": "C#",
+      "cloneURL": "https://github.com/YARC-Official/YARG.Core.git",
+      "commit": "91bef6cef96022cecc367cfa013c86c390a0bf95",
+      "path": "/tmp/dollarlint-corpus.1344492278/yarc-official-yarg-core",
+      "status": "cloned"
+    },
+    {
+      "name": "ai-sdlc-framework-ai-sdlc",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/ai-sdlc-framework/ai-sdlc.git",
+      "commit": "addbbdd0fb5e1c51a3524d6507ae5c83e9bcc7aa",
+      "path": "/tmp/dollarlint-corpus.1344492278/ai-sdlc-framework-ai-sdlc",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 2019,
+    "validated": 497,
+    "skipped": 1512,
+    "failed": 10,
+    "issues": {
+      "total": 153,
+      "parsing": 10,
+      "validation": 143,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 32855750452
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 3 repos behaved reasonably, 7 repos produced product signals, and 0 repos were blocked.",
+    "DollarLint discovered 2019 files, validated 497, skipped 1512, failed 10, reported 153 issues, and emitted 0 warnings across the 10-repo sweep.",
+    "The strongest product signals were repeated catalog-backed schema mismatches (`metadata.yaml`, Rails/RuboCop configs, `template.yaml`, `environments/*.json`) and high skipped coverage in config-heavy repositories.",
+    "Templated YAML/Helm/Rails config parse failures were usually explainable, but the current classification still makes them feel more severe than they likely are for developers.",
+    "Three repositories (`9xn-auto-ovpn`, `laravel-cloud-cli`, `yarc-official-yarg-core`) behaved reasonably with clear skipped-file explanations and no evident product change request."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "high",
+      "recommendation": "Collapse repeated catalog-backed validation failures that share the same schema/source mismatch into stronger grouped explanations with fewer per-file repetitions.",
+      "rationale": "A single likely `metadata.yaml` schema mismatch generated 110 issues across many files, overwhelming the developer more than informing them."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Improve reporting for very high skipped-coverage runs so developers can quickly understand whether skipped files are mostly fixtures, generated data, or important hand-authored configs.",
+      "rationale": "74.9% of discovered files were skipped overall, and several repos exceeded 85% skipped coverage."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Tighten or better explain catalog matches for broad basename/path patterns so obviously non-matching files are less likely to inherit an unrelated schema.",
+      "rationale": "Broad matches such as `metadata.yaml`, `template.yaml`, and `**/environments/*.json` produced findings that looked more like schema-selection errors than repository defects."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Promote templated-YAML detection from a hint into a clearer classification so Helm- and ERB-style parse failures read as expected unsupported input rather than plain parse errors.",
+      "rationale": "The tool already recognized templated YAML in several repos, but the end-user experience still starts from raw parse failures."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Make catalog-backed validation issues easier to distinguish when they may reflect upstream schema/version drift rather than a repository defect.",
+      "rationale": "Several findings were precise but simultaneously caveated by external schema compatibility, leaving developers unsure whether to trust them."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; the result is recorded for follow-up triage and implementation decisions."
+  ],
+  "followUp": [
+    "Review the structured product recommendations and decide which ones should become implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting the same corpus by default.",
+    "Check whether the `metadata.yaml` matches across this and other repos indicate a systematic bad catalog association for that basename rather than repository-specific problems.",
+    "Check whether Mintlify `iconType` findings, Taplo `options` findings, and Rails/RuboCop schema mismatches recur enough to justify targeted heuristics or messaging changes.",
+    "Track zero-validated and high-skipped-coverage runs separately so coverage-limited outcomes are easier to interpret in future sweeps."
+  ]
+}

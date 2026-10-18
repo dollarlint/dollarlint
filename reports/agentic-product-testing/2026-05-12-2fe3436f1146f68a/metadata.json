@@ -1,0 +1,99 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-05-12-2fe3436f1146f68a",
+  "date": "2026-05-12",
+  "title": "Agentic Product Testing sweep",
+  "dollarlintRevision": "8e0d63b4431f4fd7819b9b78581195703a62d58d",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.3949612389",
+  "cacheDir": "/tmp/dollarlint-cache.2802127894",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.3949612389\" cacheDir=\"/tmp/dollarlint-cache.2802127894\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-sweep-2439432495.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-sweep-2439432495.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-12-2fe3436f1146f68a/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "dandavison/delta",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: Cargo.lock. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "dandavison/delta",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated 7 repository files with 0 issues and 0 warnings, and the CLI preview stayed concise and readable for a real developer workflow.",
+        "The 5 skipped files were grouped by clear no-schema/application-data reasons, so coverage caveats were visible instead of being mistaken for silent success.",
+        "Skipped examples such as .cargo/audit.toml, manual/book.toml, and performance data files look like expected schema-less or application-data inputs rather than missed high-value config coverage in this repository."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "No product change recommended from this repository result.",
+          "rationale": "The run was quiet and understandable, and the skipped files were explained clearly enough that the developer could judge coverage without extra interpretation."
+        }
+      ],
+      "productDecisions": [
+        "No product change recommended from this single-repository sweep."
+      ],
+      "caveats": [
+        "Coverage was partial: 5 of 12 discovered files were skipped because they had no applicable schema, so this single repo is useful as a spot check rather than broad evidence about TOML/YAML/JSON coverage."
+      ],
+      "notes": "From a developer-experience perspective, DollarLint behaved reasonably here: it surfaced validated coverage, clearly explained the skipped files, and did not generate confusing warnings or noisy false positives. This repository result does not suggest a product change on its own."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "dandavison/delta",
+      "ecosystem": "rust",
+      "cloneURL": "https://github.com/dandavison/delta.git",
+      "commit": "f85c46ba8b913aa3208af0f3573db90286e56e18",
+      "path": "/tmp/dollarlint-corpus.3949612389/dandavison-delta",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 12,
+    "validated": 7,
+    "skipped": 5,
+    "failed": 0,
+    "issues": {
+      "total": 0,
+      "parsing": 0,
+      "validation": 0,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 385969932
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 1 repo(s) behaved reasonably, 0 repo(s) produced product signals, and 0 repo(s) were blocked or uninterpretable.",
+    "DollarLint discovered 12 files, validated 7, skipped 5, failed 0, reported 0 issues, and emitted 0 warnings.",
+    "Skipped coverage: 5 of 12 discovered files were skipped (41.7%).",
+    "No crashes, output-contract failures, validation issues, or warnings were observed."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "This sweep skipped 5 of 12 discovered files (41.7%), which is useful context when judging corpus coverage."
+    },
+    {
+      "strength": "low",
+      "recommendation": "No product change recommended from this repository result.",
+      "rationale": "The run was quiet and understandable, and the skipped files were explained clearly enough that the developer could judge coverage without extra interpretation."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; record the triage and decide follow-up from the structured result.",
+    "No product change recommended from this single-repository sweep."
+  ],
+  "followUp": [
+    "Review the structured productRecommendations and decide whether to open implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting the same corpus by default."
+  ]
+}

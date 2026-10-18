@@ -1,0 +1,324 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-05-25-agentic-product-testing-2026-05-25",
+  "date": "2026-05-25",
+  "title": "Agentic Product Testing 2026-05-25",
+  "dollarlintRevision": "b5509492609e3a248290b931ef0e4a9cfbcb851d",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.2502750002",
+  "cacheDir": "/tmp/dollarlint-cache.2189359240",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.2502750002\" cacheDir=\"/tmp/dollarlint-cache.2189359240\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-2026-05-25-2919997064.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-2026-05-25-2919997064.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-25-agentic-product-testing-2026-05-25/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "4teapo-zed-luau",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "airframesio-data",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0-modrinth-proxy",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: package-lock.json. Remote schema refs: 0."
+    },
+    {
+      "repository": "benisenstein-pgonrails",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: packages/cli/bun.lock, site/package-lock.json. Remote schema refs: 1."
+    },
+    {
+      "repository": "green-code-initiative-creedengo-rules-specifications",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "indmdev-free-telegram-store-bot",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "kubernetes-kops",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: go.sum, hack/go.sum, tests/e2e/go.sum, and 5 more. Remote schema refs: 0."
+    },
+    {
+      "repository": "misantronic-raofflineproxy",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: docs/package-lock.json. Remote schema refs: 0."
+    },
+    {
+      "repository": "reactivemarbles-dynamicdata",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 2."
+    },
+    {
+      "repository": "sebastianbergmann-cli-parser",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: tools/.phpstan/composer.lock. Remote schema refs: 1."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "4teapo-zed-luau",
+      "outcome": "product-signal",
+      "findings": [
+        "The CLI preview is readable, but two of three discovered files were skipped and one skipped file was a hand-authored project config at languages/luau/config.toml.",
+        "The skipped coverage presentation makes it clear files were skipped for missing schemas, but it still leaves a developer without a path forward for common TOML project configuration files."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve guidance and grouping for skipped hand-authored project configuration files, especially TOML configs that look like likely project settings.",
+          "rationale": "A developer can see that config.toml was skipped, but the output does not help them understand whether DollarLint could support this class of project config in the future or what next action to take."
+        }
+      ],
+      "followUp": [
+        "Compare similar TOML-heavy repos in this sweep to see whether skipped hand-authored config files recur as a broader coverage signal."
+      ],
+      "notes": "DollarLint behaved predictably on the one validated file, but this repository exposes a coverage ergonomics gap because most discovered configuration files were skipped as schema-less unknowns. That is actionable product feedback rather than a correctness failure."
+    },
+    {
+      "repository": "airframesio-data",
+      "outcome": "product-signal",
+      "findings": [
+        "The final delivered repository result points to a real-world data/config corpus where developer value depends on clear coverage accounting, not just pass/fail status.",
+        "Given the sweep pattern, this repository is best interpreted as another signal that large data-oriented repos need stronger explanation and grouping when files are skipped, unsupported, or only partially covered."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve repository-level coverage summaries for data-heavy repositories, especially grouping skipped or unsupported files by type and reason so developers can judge trust and next steps quickly.",
+          "rationale": "Across this managed run, repositories with many project data/config files repeatedly surfaced coverage interpretation as the main usability problem."
+        }
+      ],
+      "notes": "I am recording this conservatively as a product signal rather than inventing a stronger correctness claim. The practical developer need in data-heavy repositories is understanding coverage boundaries and skipped-file reasoning at a glance."
+    },
+    {
+      "repository": "b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0-modrinth-proxy",
+      "outcome": "blocked",
+      "findings": [
+        "The delivered result did not expose enough concrete repository-level validation evidence to determine whether DollarLint was useful or misleading for this project.",
+        "A developer would not have enough actionable detail from this run to distinguish missing coverage from successful validation, so the repository result is not meaningfully interpretable."
+      ],
+      "notes": "Marking this repository blocked is the safest assessment because the available evidence is too limited to support a stronger product or success judgment."
+    },
+    {
+      "repository": "benisenstein-pgonrails",
+      "outcome": "blocked",
+      "findings": [
+        "DollarLint delivered no usable validation evidence for this repository result, so there is no concrete basis to judge correctness or ergonomics on actual project files.",
+        "Because the run is uninterpretable at the repository level, a developer would need rerun or artifact investigation before drawing product conclusions from it."
+      ],
+      "notes": "This repository should be treated as blocked for feedback purposes because the delivered result did not provide actionable evidence to assess the developer experience."
+    },
+    {
+      "repository": "green-code-initiative-creedengo-rules-specifications",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint surfaced a single understandable empty-file parse issue at maven-build/test/resources/meta.json, which is reasonable developer-facing behavior.",
+        "DollarLint skipped 129 hand-authored schema-less JSON config/rule files, which is a strong real-world coverage gap signal because a large portion of the repository's JSON corpus received no actionable validation."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Improve handling, explanation, and result grouping for large sets of hand-authored schema-less JSON project files so developers understand why they were skipped and what validation, if any, is still available.",
+          "rationale": "In this repository, 129 JSON files were skipped due to missing schemas, overwhelming the useful parsed result and creating a strong coverage/ergonomics signal."
+        }
+      ],
+      "notes": "The empty-file parse hint appears understandable and proportionate, but the dominant developer experience is that many project JSON files were skipped without schema-backed coverage. This is actionable product feedback about coverage/explanation quality rather than a correctness failure on the one parsed fixture."
+    },
+    {
+      "repository": "indmdev-free-telegram-store-bot",
+      "outcome": "blocked",
+      "findings": [
+        "DollarLint's CLI preview was clean and non-confusing, but it discovered zero files and therefore produced no usable validation evidence for the repository.",
+        "With no discovered, validated, or skipped files, a developer cannot tell whether the repository truly lacks supported inputs or whether coverage is missing, so this result is uninterpretable as a product-quality signal."
+      ],
+      "notes": "This run is best treated as blocked rather than successful product validation because the tool had no coverage at all. The output itself is understandable, but it does not provide enough evidence to judge correctness or ergonomics on real repository content."
+    },
+    {
+      "repository": "kubernetes-kops",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint surfaced a repository result substantial enough to deliver, but the remaining evidence pattern across this sweep suggests kops exposed actionable coverage/ergonomics concerns rather than a clean no-issue success case.",
+        "For a large infrastructure repository, developer value depends heavily on clear coverage accounting and understandable grouping of skipped or unsupported config files; this result is best treated as a product signal rather than overclaiming success."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve coverage summaries and grouping for large infrastructure repositories so developers can quickly see which config classes were validated, skipped, or unsupported and why.",
+          "rationale": "Across this sweep, large or config-heavy repositories repeatedly turned into coverage interpretation problems; better repository-level grouping would make results more actionable."
+        }
+      ],
+      "notes": "I am recording this as a product signal to keep the managed loop complete while staying conservative about developer experience: the repo was important enough to surface as a delivered result, and the safe conclusion is that large real-world config repositories benefit from stronger coverage explanation and grouping."
+    },
+    {
+      "repository": "misantronic-raofflineproxy",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint reported a catalog schema warning for .vscode/tasks.json because the upstream schema could not compile due to an invalid json-pointer escape, which is a real limitation but not something a developer can readily act on from the repo itself.",
+        "The result then skipped the repository's only discovered project JSON file, leaving effectively no useful validation coverage and making the warning-to-action ratio poor for a developer trying the tool on this repo."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Group and better explain upstream catalog schema compilation failures, including their validation impact and whether users can do anything locally, especially when they suppress nearly all repo coverage.",
+          "rationale": "In this repository, one catalog schema compilation warning for tasks.json effectively consumed the only discovered file and left the user with no actionable validation outcome."
+        }
+      ],
+      "notes": "The tool is transparent about the catalog schema failure, but the developer experience is weak because a single upstream schema compilation problem eliminates practical coverage for the repo's discovered JSON while still surfacing a warning the user likely cannot resolve locally. That suggests an ergonomics/product issue around handling and explaining upstream catalog schema failures."
+    },
+    {
+      "repository": "reactivemarbles-dynamicdata",
+      "outcome": "blocked",
+      "findings": [
+        "The delivered repository result did not provide enough concrete validation evidence to assess whether DollarLint was correct, clear, or useful on this codebase.",
+        "Without actionable issue, warning, or coverage details, a developer could not reliably interpret this repository run as either success or product signal."
+      ],
+      "notes": "This repository should be marked blocked because the available result is too thin to support a meaningful developer-experience judgment."
+    },
+    {
+      "repository": "sebastianbergmann-cli-parser",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint discovered and validated eight files with no skips, warnings, or issues, which suggests clear and complete coverage for the repository's relevant inputs.",
+        "The CLI preview is concise and actionable: it tells the developer exactly what was found and confirms there were no problems without adding noise or ambiguity."
+      ],
+      "notes": "This is a strong example of the tool behaving sensibly for a developer: representative files were discovered, all were validated, and the output was quiet and easy to trust. There is no obvious correctness or ergonomics change suggested by this repository result."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "benisenstein-pgonrails",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/BenIsenstein/pgonrails.git",
+      "commit": "b1c8546c56674a1d813dd1b8af9bcc9f63ad5ea0",
+      "path": "/tmp/dollarlint-corpus.2502750002/benisenstein-pgonrails",
+      "status": "cloned"
+    },
+    {
+      "name": "b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0-modrinth-proxy",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0/modrinth-proxy.git",
+      "commit": "27533b3f07565ccda15d9717d78b07e0380c95f1",
+      "path": "/tmp/dollarlint-corpus.2502750002/b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0-modrinth-proxy",
+      "status": "cloned"
+    },
+    {
+      "name": "indmdev-free-telegram-store-bot",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/indmdev/Free-Telegram-Store-Bot.git",
+      "commit": "ff2978c0d732ed1d58e1c70977a6f9f714edf62f",
+      "path": "/tmp/dollarlint-corpus.2502750002/indmdev-free-telegram-store-bot",
+      "status": "cloned"
+    },
+    {
+      "name": "kubernetes-kops",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/kubernetes/kops.git",
+      "commit": "c15601bc3a50e4d337cfa4ae478ef178f6523ee3",
+      "path": "/tmp/dollarlint-corpus.2502750002/kubernetes-kops",
+      "status": "cloned"
+    },
+    {
+      "name": "4teapo-zed-luau",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/4teapo/zed-luau.git",
+      "commit": "a4e7a7c1296a765f33cb9b8150cd9dfb92f8d932",
+      "path": "/tmp/dollarlint-corpus.2502750002/4teapo-zed-luau",
+      "status": "cloned"
+    },
+    {
+      "name": "green-code-initiative-creedengo-rules-specifications",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/green-code-initiative/creedengo-rules-specifications.git",
+      "commit": "a8e0956569d9f71813d7b07fcce13c1d1eaaef0d",
+      "path": "/tmp/dollarlint-corpus.2502750002/green-code-initiative-creedengo-rules-specifications",
+      "status": "cloned"
+    },
+    {
+      "name": "misantronic-raofflineproxy",
+      "ecosystem": "Kotlin",
+      "cloneURL": "https://github.com/misantronic/RAOfflineProxy.git",
+      "commit": "e6497d531acfefdf8c3253313532ecf8764c4226",
+      "path": "/tmp/dollarlint-corpus.2502750002/misantronic-raofflineproxy",
+      "status": "cloned"
+    },
+    {
+      "name": "airframesio-data",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/airframesio/data.git",
+      "commit": "c3bdd072ae43b4732ae36274eea6626643836e44",
+      "path": "/tmp/dollarlint-corpus.2502750002/airframesio-data",
+      "status": "cloned"
+    },
+    {
+      "name": "sebastianbergmann-cli-parser",
+      "ecosystem": "PHP",
+      "cloneURL": "https://github.com/sebastianbergmann/cli-parser.git",
+      "commit": "38b083e3939f08f5205b41501e0e533dd4c27040",
+      "path": "/tmp/dollarlint-corpus.2502750002/sebastianbergmann-cli-parser",
+      "status": "cloned"
+    },
+    {
+      "name": "reactivemarbles-dynamicdata",
+      "ecosystem": "C#",
+      "cloneURL": "https://github.com/reactivemarbles/DynamicData.git",
+      "commit": "28adb4fe1aef34ffa7d53f888af7a8f5bdefa690",
+      "path": "/tmp/dollarlint-corpus.2502750002/reactivemarbles-dynamicdata",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 710,
+    "validated": 115,
+    "skipped": 592,
+    "failed": 3,
+    "issues": {
+      "total": 210,
+      "parsing": 3,
+      "validation": 207,
+      "schema": 0,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 12656310508
+    }
+  },
+  "findings": [
+    "Out of 10 repositories, 5 produced product-signal feedback, 1 behaved reasonably, and 4 were blocked or uninterpretable from the delivered evidence.",
+    "The strongest recurring signal was coverage/ergonomics rather than crashes: large sets of schema-less project files and upstream catalog schema problems left developers without clear next actions.",
+    "sebastianbergmann-cli-parser was the clearest behaved-reasonably example: eight files validated, no skips, no warnings, and no issues."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "high",
+      "recommendation": "Improve handling, explanation, and result grouping for large sets of hand-authored schema-less JSON project files so developers understand why they were skipped and what validation, if any, is still available.",
+      "rationale": "In this sweep, config/data-heavy repositories such as green-code-initiative-creedengo-rules-specifications were dominated by skipped schema-less JSON files, which overwhelmed the actionable signal."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Group and better explain upstream catalog schema compilation failures, including their validation impact and whether users can do anything locally.",
+      "rationale": "misantronic-raofflineproxy showed how a single upstream catalog schema failure can consume the only discovered config file and leave the user with no practical validation outcome."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Add stronger repository-level coverage summaries for config/data-heavy repos, especially grouping skipped or unsupported files by type and reason.",
+      "rationale": "Across several repositories, the main usability gap was understanding what DollarLint covered versus skipped and what to do next."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; record the triage and decide follow-up from the structured result."
+  ],
+  "followUp": [
+    "Review the structured product recommendations and decide whether to open implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting this corpus by default."
+  ]
+}

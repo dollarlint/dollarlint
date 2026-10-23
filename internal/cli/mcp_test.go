@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,20 +16,57 @@ func TestServeMCPValidateTool(t *testing.T) {
 	writeMCPTestFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["name"],"properties":{"$schema":{"type":"string"},"name":{"type":"string"}}}`)
 	writeMCPTestFile(t, filepath.Join(dir, "bad.json"), `{"$schema":"./schema.json"}`)
 	t.Chdir(dir)
-	input := strings.Join([]string{
-		`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"dev"}}}`,
-		`{"jsonrpc":"2.0","method":"notifications/initialized"}`,
-		`{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}`,
-		`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"validate","arguments":{"include":["bad.json"]}}}`,
-		"",
-	}, "\n")
-	var stdout, stderr bytes.Buffer
-	if code := ExecuteWithIO([]string{"serve", "mcp"}, strings.NewReader(input), &stdout, &stderr); code != 0 {
-		t.Fatalf("serve mcp exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	inputReader, inputWriter := io.Pipe()
+	outputReader, outputWriter := io.Pipe()
+	defer inputWriter.Close()
+	defer outputReader.Close()
+	type serveResult struct {
+		code   int
+		stderr string
 	}
-	responses := readMCPResponses(t, stdout.String())
+	serveDone := make(chan serveResult, 1)
+	go func() {
+		var stderr bytes.Buffer
+		code := ExecuteWithIO([]string{"serve", "mcp"}, inputReader, outputWriter, &stderr)
+		_ = outputWriter.Close()
+		serveDone <- serveResult{code: code, stderr: stderr.String()}
+	}()
+	responseReader := bufio.NewReader(outputReader)
+	var responses []map[string]any
+	sendRequest := func(request string) map[string]any {
+		t.Helper()
+		if _, err := io.WriteString(inputWriter, request+"\n"); err != nil {
+			t.Fatalf("write request: %v", err)
+		}
+		line, err := responseReader.ReadString('\n')
+		if err != nil {
+			t.Fatalf("read response: %v", err)
+		}
+		responses := readMCPResponses(t, line)
+		if len(responses) != 1 {
+			t.Fatalf("response count = %d output=%s", len(responses), line)
+		}
+		return responses[0]
+	}
+	responses = []map[string]any{
+		sendRequest(`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"dev"}}}`),
+	}
+	if _, err := io.WriteString(inputWriter, "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}\n"); err != nil {
+		t.Fatalf("write initialized notification: %v", err)
+	}
+	responses = append(responses,
+		sendRequest(`{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}`),
+		sendRequest(`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"validate","arguments":{"include":["bad.json"]}}}`),
+	)
+	if err := inputWriter.Close(); err != nil {
+		t.Fatalf("close request stream: %v", err)
+	}
+	execution := <-serveDone
+	if execution.code != 0 {
+		t.Fatalf("serve mcp exit = %d stderr=%s", execution.code, execution.stderr)
+	}
 	if len(responses) != 3 {
-		t.Fatalf("response count = %d output=%s", len(responses), stdout.String())
+		t.Fatalf("response count = %d", len(responses))
 	}
 	if responses[0]["error"] != nil {
 		t.Fatalf("initialize error = %+v", responses[0]["error"])

@@ -1,6 +1,6 @@
 module github.com/dollarlint/dollarlint
 
-go 1.26.6
+go 1.26.9
 
 require (
 	github.com/bmatcuk/doublestar/v4 v4.10.2
@@ -8,7 +8,7 @@ require (
 	github.com/dlclark/regexp2 v1.12.0
 	github.com/google/go-github/v72 v72.0.0
 	github.com/hashicorp/go-retryablehttp v0.7.8
-	github.com/mark3labs/mcp-go v1.1.0
+	github.com/mark3labs/mcp-go v1.4.0
 	github.com/muesli/termenv v0.16.0
 	github.com/orochaa/go-clack v0.1.21
 	github.com/pelletier/go-toml/v2 v2.4.3

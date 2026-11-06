@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,29 +16,49 @@ func TestServeMCPValidateTool(t *testing.T) {
 	writeMCPTestFile(t, filepath.Join(dir, "schema.json"), `{"type":"object","required":["name"],"properties":{"$schema":{"type":"string"},"name":{"type":"string"}}}`)
 	writeMCPTestFile(t, filepath.Join(dir, "bad.json"), `{"$schema":"./schema.json"}`)
 	t.Chdir(dir)
-	input := strings.Join([]string{
+	inputText := strings.Join([]string{
 		`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"dev"}}}`,
 		`{"jsonrpc":"2.0","method":"notifications/initialized"}`,
 		`{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}`,
 		`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"validate","arguments":{"include":["bad.json"]}}}`,
 		"",
 	}, "\n")
+	input, inputWriter := io.Pipe()
+	defer inputWriter.Close()
+	go func() {
+		_, _ = io.WriteString(inputWriter, inputText)
+	}()
 	var stdout, stderr bytes.Buffer
-	if code := ExecuteWithIO([]string{"serve", "mcp"}, strings.NewReader(input), &stdout, &stderr); code != 0 {
+	output := closeInputOnMCPResponse{writer: &stdout, input: inputWriter, id: "3"}
+	if code := ExecuteWithIO([]string{"serve", "mcp"}, input, output, &stderr); code != 0 {
 		t.Fatalf("serve mcp exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	responses := readMCPResponses(t, stdout.String())
 	if len(responses) != 3 {
 		t.Fatalf("response count = %d output=%s", len(responses), stdout.String())
 	}
-	if responses[0]["error"] != nil {
-		t.Fatalf("initialize error = %+v", responses[0]["error"])
+	responsesByID := make(map[float64]map[string]any, len(responses))
+	for _, response := range responses {
+		if id, ok := response["id"].(float64); ok {
+			responsesByID[id] = response
+		}
 	}
-	initResult := responses[0]["result"].(map[string]any)
+	responseByID := func(id float64) map[string]any {
+		response, ok := responsesByID[id]
+		if !ok {
+			t.Fatalf("missing response for request %v: %s", id, stdout.String())
+		}
+		return response
+	}
+	initializeResponse := responseByID(1)
+	if initializeResponse["error"] != nil {
+		t.Fatalf("initialize error = %+v", initializeResponse["error"])
+	}
+	initResult := initializeResponse["result"].(map[string]any)
 	if initResult["protocolVersion"] != "2025-11-25" {
 		t.Fatalf("initialize protocol = %+v", initResult)
 	}
-	listResult := responses[1]["result"].(map[string]any)
+	listResult := responseByID(2)["result"].(map[string]any)
 	tools := listResult["tools"].([]any)
 	if len(tools) != 1 || tools[0].(map[string]any)["name"] != "validate" {
 		t.Fatalf("tools/list result = %+v", listResult)
@@ -47,7 +68,7 @@ func TestServeMCPValidateTool(t *testing.T) {
 	if len(properties) != 1 || properties["include"] == nil {
 		t.Fatalf("input schema properties = %+v", properties)
 	}
-	callResult := responses[2]["result"].(map[string]any)
+	callResult := responseByID(3)["result"].(map[string]any)
 	if callResult["isError"] == true {
 		t.Fatalf("validate tool returned execution error = %+v", callResult)
 	}
@@ -117,4 +138,21 @@ func writeMCPTestFile(t *testing.T, path, content string) {
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatalf("write: %v", err)
 	}
+}
+
+type closeInputOnMCPResponse struct {
+	writer io.Writer
+	input  io.Closer
+	id     string
+}
+
+func (w closeInputOnMCPResponse) Write(p []byte) (int, error) {
+	n, err := w.writer.Write(p)
+	var response struct {
+		ID json.RawMessage `json:"id"`
+	}
+	if err == nil && json.Unmarshal(p, &response) == nil && string(response.ID) == w.id {
+		_ = w.input.Close()
+	}
+	return n, err
 }

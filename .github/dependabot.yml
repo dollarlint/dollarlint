@@ -10,9 +10,12 @@ updates:
       security-updates:
         applies-to: security-updates
         patterns: ["*"]
+    # Compiler-owned workflows must be regenerated from their Markdown source.
+    exclude-paths:
+      - ".github/workflows/*.lock.yml"
     ignore:
-      # Regenerate with the matching gh-aw compiler; never bump its lock alone.
-      - dependency-name: "github/gh-aw-actions/*"
+      # Dependabot identifies actions by owner/repo, without the action subpath.
+      - dependency-name: "github/gh-aw-actions"
   - package-ecosystem: gomod
     directory: /
     schedule:

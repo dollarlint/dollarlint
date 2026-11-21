@@ -2,8 +2,10 @@ package engine
 
 import (
 	"encoding/json"
+	"math"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -52,6 +54,48 @@ func TestDurationEncoding(t *testing.T) {
 	zero, err := NewDuration(0).MarshalText()
 	if err != nil || string(zero) != "0s" {
 		t.Fatalf("zero duration = %q, %v", zero, err)
+	}
+}
+
+func TestDurationJSONNumericRange(t *testing.T) {
+	upperSeconds := float64(math.MaxInt64) / float64(time.Second)
+	lowerSeconds := float64(math.MinInt64) / float64(time.Second)
+	largestSeconds := math.Nextafter(upperSeconds, 0)
+	for _, tt := range []struct {
+		name    string
+		seconds float64
+		want    time.Duration
+		wantErr bool
+	}{
+		{name: "zero"},
+		{name: "fractional", seconds: 1.25, want: 1250 * time.Millisecond},
+		{name: "negative", seconds: -1.25, want: -1250 * time.Millisecond},
+		{name: "largest representable", seconds: largestSeconds, want: time.Duration(largestSeconds * float64(time.Second))},
+		{name: "minimum", seconds: lowerSeconds, want: time.Duration(math.MinInt64)},
+		{name: "upper boundary", seconds: upperSeconds, wantErr: true},
+		{name: "below minimum", seconds: math.Nextafter(lowerSeconds, math.Inf(-1)), wantErr: true},
+		{name: "positive overflow", seconds: 1e100, wantErr: true},
+		{name: "negative overflow", seconds: -1e100, wantErr: true},
+		{name: "positive multiplication overflow", seconds: 1e300, wantErr: true},
+		{name: "negative multiplication overflow", seconds: -1e300, wantErr: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			got := NewDuration(time.Second)
+			data := strconv.FormatFloat(tt.seconds, 'g', -1, 64)
+			err := json.Unmarshal([]byte(data), &got)
+			if tt.wantErr {
+				if err == nil || !strings.Contains(err.Error(), "out of range") {
+					t.Fatalf("UnmarshalJSON(%s) error = %v, want out-of-range error", data, err)
+				}
+				if got.Duration != time.Second {
+					t.Fatalf("failed decode mutated receiver: %v", got.Duration)
+				}
+				return
+			}
+			if err != nil || got.Duration != tt.want {
+				t.Fatalf("UnmarshalJSON(%s) = %v, %v; want %v", data, got.Duration, err, tt.want)
+			}
+		})
 	}
 }
 

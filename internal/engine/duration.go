@@ -3,6 +3,7 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -39,6 +40,12 @@ func (d *Duration) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &seconds); err != nil {
 		return fmt.Errorf("duration must be a Go duration string or seconds: %w", err)
 	}
-	d.Duration = time.Duration(seconds * float64(time.Second))
+	nanoseconds := seconds * float64(time.Second)
+	if math.IsInf(nanoseconds, 0) ||
+		nanoseconds >= float64(math.MaxInt64) ||
+		nanoseconds < float64(math.MinInt64) {
+		return fmt.Errorf("duration seconds out of range")
+	}
+	d.Duration = time.Duration(nanoseconds)
 	return nil
 }

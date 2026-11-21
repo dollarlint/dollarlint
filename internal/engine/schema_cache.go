@@ -206,6 +206,16 @@ func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error)
 	if err != nil {
 		return nil, fmt.Errorf("parse schema URI %s: %w", raw, err)
 	}
+	if local, ok, err := mappedSchemaPath(raw, c.cfg.Schemas.Mappings); ok {
+		if err != nil {
+			return nil, err
+		}
+		data, err := os.ReadFile(local)
+		if err != nil {
+			return nil, &schemaFileReadError{Path: local, Err: err}
+		}
+		return decodeSchemaDocument(data, local)
+	}
 	switch parsed.Scheme {
 	case "dollarlint":
 		return loadBuiltinSchema(raw)

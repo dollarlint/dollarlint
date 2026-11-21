@@ -143,6 +143,7 @@ type JSONParsingConfig struct {
 
 type SchemaConfig struct {
 	Associations    []SchemaAssociation `json:"associations,omitempty" yaml:"associations,omitempty" toml:"associations,omitempty"`
+	Mappings        []SchemaMapping     `json:"mappings,omitempty" yaml:"mappings,omitempty" toml:"mappings,omitempty"`
 	Catalogs        CatalogConfig       `json:"catalogs,omitempty" yaml:"catalogs,omitempty" toml:"catalogs,omitempty"`
 	Optimizations   OptimizationConfig  `json:"optimizations,omitempty" yaml:"optimizations,omitempty" toml:"optimizations,omitempty"`
 	Fetch           FetchConfig         `json:"fetch,omitempty" yaml:"fetch,omitempty" toml:"fetch,omitempty"`
@@ -191,6 +192,13 @@ type FetchConfig struct {
 type SchemaAssociation struct {
 	File   string `json:"file" yaml:"file" toml:"file"`
 	Schema string `json:"schema" yaml:"schema" toml:"schema"`
+}
+
+// SchemaMapping serves a remote schema URL, or every URL under a prefix ending
+// in "/", from a local file or directory instead of fetching it.
+type SchemaMapping struct {
+	URL  string `json:"url" yaml:"url" toml:"url"`
+	Path string `json:"path" yaml:"path" toml:"path"`
 }
 
 type CatalogIgnoreRule struct {

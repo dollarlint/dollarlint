@@ -79,7 +79,7 @@ func validateLineDelimitedDocument(ctx context.Context, cache *SchemaCache, cfg 
 func validationForSchemaFailure(document *Document, cfg Config, phase string, err error) documentValidation {
 	message := schemaFailureMessage(document, phase, err)
 	if !isCatalogSchemaSource(document.SchemaSource) {
-		if phase == "compile" && isRemoteURI(document.Schema) {
+		if phase == "compile" && isRemoteURI(document.Schema) && !isMappedSchemaURI(document.Schema, cfg.Schemas.Mappings) {
 			return documentValidation{
 				schemaWarning: newSchemaSourceFailureWarning(
 					"schemaRemoteSchemaUnavailable",

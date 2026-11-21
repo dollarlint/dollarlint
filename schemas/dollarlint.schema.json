@@ -108,6 +108,12 @@
             "$ref": "#/$defs/schemaAssociation"
           }
         },
+        "mappings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/schemaMapping"
+          }
+        },
         "catalogs": {
           "$ref": "#/$defs/catalogs"
         },
@@ -145,6 +151,23 @@
         }
       },
       "required": ["file", "schema"]
+    },
+    "schemaMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Serve a remote schema URL, or every URL below a prefix ending in /, from a local file or directory instead of fetching it.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://[^?#]+$"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Local filesystem file or directory path; URLs are not supported."
+        }
+      },
+      "required": ["url", "path"]
     },
     "catalogs": {
       "type": "object",

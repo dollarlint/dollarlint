@@ -84,6 +84,10 @@ const associationConfig = `[[schemas.associations]]
 file = "settings/*.toml"
 schema = "./schemas/settings.schema.json"`;
 
+const mappingConfig = `[[schemas.mappings]]
+url = "https://schemas.example.com/"
+path = "./schemas/"`;
+
 const ignoreConfig = `[[ignore]]
 file = "fixtures/*.json"
 keyword = "required"
@@ -229,8 +233,9 @@ reason = "legacy fixture kept for compatibility"`;
       <code>exclude</code>.
     </p>
     <p>
-      Relative schema paths in associations and local catalog source paths are
-      resolved from the directory containing <code>.dollarlint.toml</code>.
+      Relative schema paths in associations, mapping paths and local catalog
+      source paths are resolved from the directory containing{" "}
+      <code>.dollarlint.toml</code>.
     </p>
 
     <h2>Nested configs</h2>
@@ -327,6 +332,39 @@ extends = "../../.dollarlint.toml"</code></pre>
       Association globs in config are matched relative to the config file's
       directory and use the same basename-any-depth behavior as discovery globs.
       In-file declarations win over associations.
+    </p>
+
+    <h2>Mappings</h2>
+    <p>
+      Mappings serve remote schema URLs from local files instead of fetching
+      them. Use them when a project publishes its own schemas: the schemas
+      declare their published <code>$id</code> and refer to each other by URL,
+      and a mapping makes validation read the copies in the repository,
+      including a branch's unpublished changes.
+    </p>
+    <CodeBlock code={mappingConfig} language="toml" />
+    <p>
+      A <code>url</code> ending in <code>/</code> maps every URL below it to the
+      same relative path below <code>path</code>, a directory; any other
+      <code>url</code> maps exactly that URL to <code>path</code>, a file. The
+      longest matching <code>url</code> wins; later mappings win ties. Schemes
+      and hostnames match without regard to case, while URL paths remain
+      case-sensitive. Mappings apply wherever a schema URL appears: in-file
+      declarations, associations, catalog matches, catalog source URLs and
+      <code>$ref</code>s. Mapped URLs are never fetched, so fetch settings,
+      domain policy and the remote cache don't apply to them. Paths are resolved
+      from the directory containing <code>.dollarlint.toml</code>, and a URL
+      that would leave the mapped directory is an error. <code>path</code> must
+      be a filesystem path, not a URL. If the target already exists, it must be
+      a directory for a prefix mapping or a file for an exact mapping. Missing
+      generated targets are allowed until used. Missing or invalid mapped
+      schemas are reported as schema issues for in-file declarations and
+      explicit associations, including mapped dependencies of remote schemas.
+      For catalog-inferred schemas, <code>schemas.catalogs.failure</code> still
+      applies: mappings change where schema bytes come from, not how a schema is
+      selected. Load errors name both the mapped URL and the local file. Use{" "}
+      <code>dollarlint inspect</code> to see the mapped root file without
+      loading or compiling it.
     </p>
 
     <h2>Fetch and compile</h2>

@@ -278,3 +278,44 @@ func findInspectFile(files []InspectFile, path string) InspectFile {
 	}
 	return InspectFile{}
 }
+
+func TestInspectReportsMappedSchemaPath(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "data.json"), `{"$schema":"https://schemas.test/item.json#/$defs/value"}`)
+	cfg := DefaultConfig()
+	cfg.Discovery.Include = []string{"data.json"}
+	// Inspect resolves mappings without requiring the schema to have been generated.
+	cfg.Schemas.Mappings = []SchemaMapping{{URL: "https://schemas.test/", Path: filepath.Join(dir, "schemas")}}
+	result, err := Inspect(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatal(err)
+	}
+	file := findInspectFile(result.Files, "data.json")
+	want := filepath.Join(dir, "schemas", "item.json")
+	if file.MappedSchemaPath != want || file.Schema != "https://schemas.test/item.json#/$defs/value" || file.AssociationStatus != InspectAssociationStatusAssociated {
+		t.Fatalf("inspect=%+v", file)
+	}
+	if text := FormatInspectText(result); !strings.Contains(text, "mapped file:") || !strings.Contains(text, want) {
+		t.Fatalf("text=%s", text)
+	}
+	data, err := FormatInspectJSON(result)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded InspectResult
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	if decoded.Files[0].MappedSchemaPath != want {
+		t.Fatalf("JSON lost mapping: %s", data)
+	}
+	writeFile(t, filepath.Join(dir, "data.json"), `{"$schema":"https://schemas.test/a%5c..%5coutside.json"}`)
+	result, err = Inspect(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatal(err)
+	}
+	file = findInspectFile(result.Files, "data.json")
+	if file.AssociationStatus != InspectAssociationStatusError || file.Message == "" {
+		t.Fatalf("unsafe mapping not explained: %+v", file)
+	}
+}

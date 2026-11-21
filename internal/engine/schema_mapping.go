@@ -28,20 +28,19 @@ func validateSchemaMapping(mapping SchemaMapping) error {
 // every URL below that prefix, resolved below its directory; any other mapping
 // covers exactly its URL. The longest matching mapping URL wins, and of equal ones the last.
 func mappedSchemaPath(raw string, mappings []SchemaMapping) (string, bool, error) {
-	best := -1
+	best, bestPrefix := -1, ""
 	for i, mapping := range mappings {
-		prefix := strings.TrimSpace(mapping.URL)
+		prefix := normalizedMappingURL(mapping.URL)
 		matched := raw == prefix || (strings.HasSuffix(prefix, "/") && strings.HasPrefix(raw, prefix))
 		// Later mappings (a child config's, after `extends`) win ties, as associations do.
-		if matched && (best < 0 || len(prefix) >= len(strings.TrimSpace(mappings[best].URL))) {
-			best = i
+		if matched && (best < 0 || len(prefix) >= len(bestPrefix)) {
+			best, bestPrefix = i, prefix
 		}
 	}
 	if best < 0 {
 		return "", false, nil
 	}
-	mapping := mappings[best]
-	prefix := strings.TrimSpace(mapping.URL)
+	mapping, prefix := mappings[best], bestPrefix
 	if raw == prefix && !strings.HasSuffix(prefix, "/") {
 		return mapping.Path, true, nil
 	}
@@ -65,4 +64,14 @@ func isMappedSchemaURI(raw string, mappings []SchemaMapping) bool {
 	}
 	_, ok, _ := mappedSchemaPath(key, mappings)
 	return ok
+}
+
+// normalizedMappingURL spells a mapping URL as requested schema URLs are spelled (a lowercase scheme, for one), so
+// they compare equal.
+func normalizedMappingURL(raw string) string {
+	raw = strings.TrimSpace(raw)
+	if parsed, err := url.Parse(raw); err == nil {
+		return parsed.String()
+	}
+	return raw
 }

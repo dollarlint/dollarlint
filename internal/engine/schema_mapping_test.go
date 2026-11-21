@@ -108,6 +108,9 @@ func TestMappedSchemaPath(t *testing.T) {
 			t.Fatalf("mappedSchemaPath(%q) should refuse to leave the mapped directory, got ok=%v err=%v", raw, ok, err)
 		}
 	}
+	if got, ok, err := mappedSchemaPath("https://upper.test/a.json", []SchemaMapping{{URL: "HTTPS://upper.test/", Path: "/upper"}}); err != nil || !ok || got != filepath.Join("/upper", "a.json") {
+		t.Fatalf("an uppercase-scheme mapping should match: %q, %v, %v", got, ok, err)
+	}
 	if _, ok, _ := mappedSchemaPath("https://other.test/a.json", mappings); ok {
 		t.Fatalf("unmapped URL matched")
 	}

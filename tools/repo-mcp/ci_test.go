@@ -31,6 +31,8 @@ func TestCIReadinessCommandsMirrorCriticalCISteps(t *testing.T) {
 	assertCommand("test", "core coverage", "coverage + 0 < minimum")
 	assertCommand("docs", "install docs dependencies", "npm ci")
 	assertCommand("goreleaser-check", "check goreleaser config", "goreleaser")
+	assertCommand("goreleaser-check", "goreleaser snapshot", "--skip=winget,homebrew")
+	assertCommand("goreleaser-check", "audit generated npm wrapper", "npm audit --audit-level=high --prefix dist/npm/dollarlint")
 }
 
 func TestDiagnoseFailureLogMapsRecentFailureShapes(t *testing.T) {

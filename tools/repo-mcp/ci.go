@@ -110,7 +110,9 @@ fi`
 			)
 		case "goreleaser-check":
 			add(&commands, jobName,
-				namedCommand{Name: "check goreleaser config", Cmd: goreleaserCheckCommand, OptionalEnv: "GORELEASER_KEY", FailureHint: "Set GORELEASER_KEY to reproduce CI's GoReleaser Pro check locally, then fix .goreleaser.yaml diagnostics."},
+				namedCommand{Name: "check goreleaser config", Cmd: goreleaserCheckCommand, FailureHint: "Install GoReleaser Pro (the same distribution used by CI), then fix .goreleaser.yaml diagnostics."},
+				namedCommand{Name: "goreleaser snapshot", Cmd: goreleaserSnapshotCheckCommand, FailureHint: "Install GoReleaser Pro and fix snapshot build or packaging errors. Snapshot builds do not require a license key."},
+				namedCommand{Name: "audit generated npm wrapper", Cmd: "npm audit --audit-level=high --prefix dist/npm/dollarlint", FailureHint: "Update npm dependencies or overrides in .goreleaser.yaml and rebuild the snapshot."},
 			)
 		}
 	}

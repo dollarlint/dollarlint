@@ -159,7 +159,7 @@
       "properties": {
         "url": {
           "type": "string",
-          "pattern": "^https?://[^?#]+$"
+          "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://[^?#]+$"
         },
         "path": {
           "type": "string",

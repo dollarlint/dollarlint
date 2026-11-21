@@ -7,6 +7,10 @@ on:
         description: Release tag to create, for example v0.1.0
         required: true
         type: string
+      dry_run:
+        description: Validate release notes without creating a tag or publishing
+        type: boolean
+        default: false
 
 permissions:
   actions: write
@@ -45,7 +49,27 @@ jobs:
             exit 1
           fi
 
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # Validate the live provider before creating an immutable release tag.
+      # Snapshot builds skip AI changelog generation and cannot catch retired models.
+      - name: Validate release-note generation
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser-pro
+          version: "~> v2"
+          args: changelog --output "${{ runner.temp }}/release-notes.md"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
       - name: Create and push tag
+        if: ${{ !inputs.dry_run }}
         env:
           VERSION: ${{ inputs.version }}
         run: |
@@ -55,6 +79,7 @@ jobs:
           git push origin "refs/tags/$VERSION"
 
       - name: Dispatch release workflow
+        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}

@@ -82,3 +82,24 @@ func TestReleaseWingetValidationProgressRecognizesInstallerValidation(t *testing
 		t.Fatalf("progress = %d, want 75", got)
 	}
 }
+
+func TestReleaseExistenceHandlesMissingGitHubRelease(t *testing.T) {
+	var missing *ghRelease
+	for name, status := range map[string]map[string]any{
+		"unset":         {},
+		"null":          {"githubRelease": nil},
+		"failed lookup": {"githubRelease": missing},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if hasGitHubRelease(status) {
+				t.Fatal("missing release must not prevent dispatch or complete release_watch")
+			}
+		})
+	}
+	for _, draft := range []bool{false, true} {
+		status := map[string]any{"githubRelease": &ghRelease{TagName: "v0.1.28", IsDraft: draft}}
+		if !hasGitHubRelease(status) {
+			t.Fatal("existing release must prevent duplicate dispatch, including drafts")
+		}
+	}
+}

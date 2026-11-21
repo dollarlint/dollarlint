@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -90,6 +91,31 @@ func TestLintEndToEndWithIgnoresAndAssociations(t *testing.T) {
 	var decoded Result
 	if err := json.Unmarshal(data, &decoded); err != nil {
 		t.Fatalf("json output invalid: %v", err)
+	}
+}
+
+func TestLintResolvesRelativeInlineSchemaPathOnWindows(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("exercises Windows file URL to filesystem path conversion")
+	}
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Schemas", "x.json"), `{
+  "type": "object",
+  "required": ["name"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {"type": "string"},
+    "name": {"type": "string"}
+  }
+}`)
+	writeFile(t, filepath.Join(dir, "fixture.json"), `{"$schema":"./Schemas/x.json","name":"ok"}`)
+
+	result, err := Lint(context.Background(), Options{Root: dir, Config: configWithoutSchemaStore()})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if result.Summary.Validated != 1 || result.Summary.Failed != 0 || result.HasIssues() {
+		t.Fatalf("relative Windows schema should validate cleanly: summary=%+v issues=%+v files=%+v", result.Summary, result.Issues, result.Files)
 	}
 }
 
@@ -242,6 +268,44 @@ func TestLintRequiresSchemaCoverage(t *testing.T) {
 		}
 	}
 	t.Fatalf("missing uncovered file result: %+v", result.Files)
+}
+
+func TestLintReportsKnownSchemaGaps(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "netlify.toml"), "[build]\ncommand = \"npm test\"\n")
+	writeFile(t, filepath.Join(dir, ".terraform-docs.yml"), "formatter: markdown table\n")
+	writeFile(t, filepath.Join(dir, ".asf.yaml"), "github:\n  description: demo\n")
+	writeFile(t, filepath.Join(dir, ".cargo", "config.toml"), "[build]\ntarget-dir = \"target\"\n")
+
+	result, err := Lint(context.Background(), Options{Root: dir, Config: DefaultConfig()})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+
+	expected := map[string]string{
+		"netlify.toml":        "Netlify deploy config",
+		".terraform-docs.yml": "terraform-docs configuration",
+		".asf.yaml":           "Apache .asf.yaml configuration",
+		".cargo/config.toml":  "Cargo configuration",
+	}
+	for path, name := range expected {
+		file := findFileResult(result.Files, path)
+		if file.RelativePath == "" || file.Status != StatusSkipped || file.SchemaGap == nil || file.SchemaGap.Name != name {
+			t.Fatalf("known schema gap file %q = %+v", path, file)
+		}
+		if file.SkipClass != SkipClassUnsupportedConfig || file.SkipImportance != SkipImportanceHigh || !strings.Contains(file.SkipDetail, "no built-in or catalog schema") {
+			t.Fatalf("known schema gap skip classification %q = %+v", path, file)
+		}
+	}
+}
+
+func findFileResult(files []FileResult, path string) FileResult {
+	for _, file := range files {
+		if file.RelativePath == path {
+			return file
+		}
+	}
+	return FileResult{}
 }
 
 func TestLintAppliesBuiltinDollarlintConfigSchema(t *testing.T) {
@@ -434,6 +498,9 @@ func TestLintParseSchemaAndPrimeErrors(t *testing.T) {
 		}
 		if issue.Keyword == issueKeywordSchema && strings.Contains(issue.Message, "schema load failed") {
 			loadIssue = true
+			if !strings.Contains(issue.Message, "local schema file not found at missing.json") || strings.Contains(issue.Message, "read schema") || strings.Contains(issue.Message, "open ") {
+				t.Fatalf("schema load message should be compact: %q", issue.Message)
+			}
 		}
 		if issue.Keyword == issueKeywordSchema && strings.Contains(issue.Message, "schema compile failed") {
 			compileIssue = true
@@ -525,6 +592,9 @@ func TestLintMissingDependencySchemaHint(t *testing.T) {
 	for _, issue := range result.Issues {
 		if issue.Keyword != issueKeywordSchema || !strings.Contains(issue.Message, "schema load failed") {
 			t.Fatalf("schema issue = %+v", issue)
+		}
+		if strings.Contains(issue.Message, "read schema") || strings.Contains(issue.Message, "open ") || !strings.Contains(issue.Message, "node_modules/tool/schema.json") {
+			t.Fatalf("schema issue message should be compact: %q", issue.Message)
 		}
 		if issue.IssueHint == nil || issue.IssueHint.ID != "schema.local-dependency-unavailable" {
 			t.Fatalf("structured local schema hint = %+v", issue)
@@ -790,6 +860,9 @@ func TestSkipClassification(t *testing.T) {
 		{"package-lock.json", SkipClassLockfile, SkipImportanceLow},
 		{"grape/.coveralls.yml", SkipClassUnsupportedConfig, SkipImportanceHigh},
 		{"predicates-rs/.cargo/config.toml", SkipClassUnsupportedConfig, SkipImportanceHigh},
+		{"terraform-docs/examples/.terraform-docs.yml", SkipClassUnsupportedConfig, SkipImportanceHigh},
+		{"terraform-docs/netlify.toml", SkipClassUnsupportedConfig, SkipImportanceHigh},
+		{"commons-cli/.asf.yaml", SkipClassUnsupportedConfig, SkipImportanceHigh},
 		{"terraform-null-label/.github/settings.yml", SkipClassRepoManagement, SkipImportanceHigh},
 		{"grape/lib/grape/locale/en.yml", SkipClassLocaleData, SkipImportanceLow},
 		{"spectre-console/src/Spectre.Console.Tests/Data/example.json", SkipClassTestData, SkipImportanceLow},
@@ -910,6 +983,14 @@ func TestMissingSchemaCoverageIssueIncludesCatalogDecision(t *testing.T) {
 	}, OutputConfig{})
 	if issue.SchemaMatch == nil || !strings.Contains(issue.Hint, "Suggested explicit association") || !strings.Contains(issue.Hint, "Suggested catalog ignore") {
 		t.Fatalf("missing coverage issue = %+v", issue)
+	}
+	issue = issueForMissingSchemaCoverage(&Document{
+		Path:         "/repo/netlify.toml",
+		RelativePath: "netlify.toml",
+		SchemaGap:    &SchemaGap{Name: "Netlify deploy config", Reason: "DollarLint recognizes this Netlify deploy config, but has no built-in or catalog schema for it yet.", DocsURL: "https://docs.netlify.com/build/configure-builds/file-based-configuration/", FileMatch: "netlify.toml"},
+	}, OutputConfig{})
+	if issue.SchemaGap == nil || issue.IssueHint == nil || issue.IssueHint.ID != "schema-gap.known-unavailable" || !strings.Contains(issue.Hint, "Netlify deploy config") {
+		t.Fatalf("missing coverage schema gap issue = %+v", issue)
 	}
 	issue = issueForMissingSchemaCoverage(&Document{Path: "/repo/file.json", RelativePath: "file.json"}, OutputConfig{})
 	if issue.Hint != "" || issue.SchemaMatch != nil {

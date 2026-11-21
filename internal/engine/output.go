@@ -287,6 +287,9 @@ func writeVerboseIssueDetails(builder *strings.Builder, issue Issue) {
 	if issue.SchemaMatch != nil && issue.SchemaMatch.Reason != "" {
 		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("schemaMatch:"), issue.SchemaMatch.Reason)
 	}
+	if issue.SchemaGap != nil && issue.SchemaGap.Reason != "" {
+		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("schemaGap:"), issue.SchemaGap.Reason)
+	}
 	if issue.Schema != "" {
 		fmt.Fprintf(builder, "    %s %s\n", textStyleMuted.Render("schema:"), issue.Schema)
 	}

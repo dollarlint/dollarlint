@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -35,6 +36,11 @@ var curatedDefaultSchemaStoreAssociations = []schemaStoreEntry{
 		Name:      "release-plz.toml",
 		FileMatch: []string{"release-plz.toml", ".release-plz.toml"},
 		URL:       "https://raw.githubusercontent.com/MarcoIeni/release-plz/main/.schema/latest.json",
+	},
+	{
+		Name:      "launchSettings.json",
+		FileMatch: []string{"launchSettings.json", "Properties/launchSettings.json", "**/Properties/launchSettings.json"},
+		URL:       "https://www.schemastore.org/launchsettings.json",
 	},
 }
 
@@ -361,6 +367,10 @@ func resolveCatalogEntryURL(baseURL *url.URL, raw string) string {
 }
 
 func resolveCatalogURI(raw string) (string, error) {
+	if isLocalAbsolutePath(raw, runtime.GOOS) {
+		file, _ := fileURL(raw)
+		return file.String(), nil
+	}
 	parsed, err := url.Parse(raw)
 	if err != nil {
 		return "", fmt.Errorf("parse catalog URL %q: %w", raw, err)

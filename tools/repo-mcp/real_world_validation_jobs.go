@@ -365,6 +365,32 @@ func (s *repoServer) handleRealWorldFinishValidation(ctx context.Context, reques
 	})
 }
 
+func realWorldEnsureManagedOutputArtifact(run *realWorldValidationRun) error {
+	if run == nil {
+		return nil
+	}
+	if strings.TrimSpace(run.OutputArtifact) == "" {
+		return fmt.Errorf("validation run %q has no managed output artifact; call real_world_start_validation first", run.ID)
+	}
+	if _, err := os.Stat(run.OutputArtifact); err == nil {
+		return nil
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("stat managed output artifact %s: %w", run.OutputArtifact, err)
+	}
+
+	snapshot := run.snapshot()
+	if !snapshot.Complete || snapshot.Ready > 0 {
+		return fmt.Errorf("managed output artifact %s is missing and validation run %q is not finished; call real_world_next_validation_result until real_world_finish_validation is available", run.OutputArtifact, run.ID)
+	}
+	if missing := run.missingFeedback(); len(missing) > 0 {
+		return fmt.Errorf("managed output artifact %s is missing and validation run %q still needs feedback for %s; record feedback before triage or recording", run.OutputArtifact, run.ID, strings.Join(missing, ", "))
+	}
+	if _, err := realWorldMergeValidationArtifacts(run, run.OutputArtifact); err != nil {
+		return fmt.Errorf("regenerate managed output artifact %s: %w", run.OutputArtifact, err)
+	}
+	return nil
+}
+
 func (s *repoServer) handleRealWorldCancelValidation(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	var args realWorldNextValidationResultArgs
 	_ = request.BindArguments(&args)

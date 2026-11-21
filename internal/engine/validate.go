@@ -105,12 +105,14 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 		applySchemaAssociation(document, cfg.Schemas.Associations, "config-association")
 		applyBuiltinSchemaAssociation(document)
 		applySchemaStoreAssociation(document, schemaStoreCatalog, catalogConfig)
+		applyKnownSchemaGap(document)
 	}
 	for _, document := range documents {
 		index := fileIndexes[document.RelativePath]
 		result.Files[index].Schema = document.Schema
 		result.Files[index].SchemaSource = document.SchemaSource
 		result.Files[index].SchemaMatch = document.SchemaMatch
+		result.Files[index].SchemaGap = document.SchemaGap
 		parseIssues := issuesForDocumentParseErrors(document, cfg.Output)
 		for _, issue := range parseIssues {
 			addIssue(&result, issue)
@@ -125,7 +127,7 @@ func lintDiscoveredFiles(ctx context.Context, root string, files []DiscoveredFil
 				result.Files[index].Message = "file is not covered by an inline schema, config association, built-in association, or catalog match"
 				addIssue(&result, issueForMissingSchemaCoverage(document, cfg.Output))
 			} else if len(parseIssues) == 0 {
-				applySkippedFileClassification(&result.Files[index], document, SkipReasonNoSchema, schemaMatchSkipDetail(document.SchemaMatch))
+				applySkippedFileClassification(&result.Files[index], document, SkipReasonNoSchema, noSchemaSkipDetail(document))
 				result.Summary.Skipped++
 			}
 			continue
@@ -255,4 +257,17 @@ func schemaMatchSkipDetail(match *SchemaMatch) string {
 		return ""
 	}
 	return match.Reason
+}
+
+func noSchemaSkipDetail(document *Document) string {
+	if document == nil {
+		return ""
+	}
+	if detail := schemaMatchSkipDetail(document.SchemaMatch); detail != "" {
+		return detail
+	}
+	if document.SchemaGap != nil {
+		return document.SchemaGap.Reason
+	}
+	return ""
 }

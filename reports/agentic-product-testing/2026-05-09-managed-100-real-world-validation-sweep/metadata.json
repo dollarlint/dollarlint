@@ -16,7 +16,7 @@
       "repository": "FluidFramework",
       "command": "npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including biome.jsonc:2 -> ./node_modules/@biomejs/biome/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including biome.jsonc:2 -\u003e ./node_modules/@biomejs/biome/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "OpenSearch",
@@ -42,13 +42,13 @@
       "repository": "angular",
       "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false OR npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including adev/angular.json:2 -> ../node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including adev/angular.json:2 -\u003e ../node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "angular-cli",
       "command": "npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including docs/specifications/schematic-collections-config.md:7 -> ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including docs/specifications/schematic-collections-config.md:7 -\u003e ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "apisix",
@@ -64,7 +64,7 @@
       "repository": "aws-cdk",
       "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false OR bun install --frozen-lockfile --ignore-scripts OR npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts OR YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 2 local $schema refs, including lerna.json:30 -> node_modules/lerna/schemas/lerna-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 2 local $schema refs, including lerna.json:30 -\u003e node_modules/lerna/schemas/lerna-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "aws-cli",
@@ -130,7 +130,7 @@
       "repository": "cypress",
       "command": "YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including lerna.json:12 -> node_modules/lerna/schemas/lerna-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including lerna.json:12 -\u003e node_modules/lerna/schemas/lerna-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "datasets",
@@ -146,7 +146,7 @@
       "repository": "docusaurus",
       "command": "YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 1 local $schema refs, including .oxfmtrc.json:2 -> ./node_modules/oxfmt/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 1 local $schema refs, including .oxfmtrc.json:2 -\u003e ./node_modules/oxfmt/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "dubbo",
@@ -167,7 +167,7 @@
       "repository": "expo",
       "command": "YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts OR npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts OR bun install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including docs/.oxfmtrc.json:2 -> ./node_modules/oxfmt/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including docs/.oxfmtrc.json:2 -\u003e ./node_modules/oxfmt/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "fastapi",
@@ -188,19 +188,19 @@
       "repository": "firebase-tools",
       "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 1 local $schema refs, including scripts/webframeworks-deploy-tests/angular/angular.json:2 -> ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 1 local $schema refs, including scripts/webframeworks-deploy-tests/angular/angular.json:2 -\u003e ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "flink",
       "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 1 local $schema refs, including flink-runtime-web/web-dashboard/angular.json:2 -> ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 1 local $schema refs, including flink-runtime-web/web-dashboard/angular.json:2 -\u003e ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "fluentui",
       "command": "YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including .github/triage-bot.config.json:2 -> ../scripts/triage-bot/triage-bot.schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including .github/triage-bot.config.json:2 -\u003e ../scripts/triage-bot/triage-bot.schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "google-cloud-go",
@@ -221,7 +221,7 @@
       "repository": "graphql-engine",
       "command": "go mod download OR npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false OR YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including frontend/apps/console-ce/project.json:3 -> ../../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including frontend/apps/console-ce/project.json:3 -\u003e ../../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "grpc",
@@ -257,7 +257,7 @@
       "repository": "jupyterlab",
       "command": "YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 1 local $schema refs, including lerna.json:2 -> node_modules/lerna/schemas/lerna-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 1 local $schema refs, including lerna.json:2 -\u003e node_modules/lerna/schemas/lerna-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "kafka",
@@ -273,7 +273,7 @@
       "repository": "kibana",
       "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false OR YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 2 local $schema refs, including .oxlintrc.json:2 -> ./node_modules/oxlint/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 2 local $schema refs, including .oxlintrc.json:2 -\u003e ./node_modules/oxlint/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "koa",
@@ -294,7 +294,7 @@
       "repository": "lerna",
       "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including e2e/changed/project.json:3 -> ../../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including e2e/changed/project.json:3 -\u003e ../../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "localstack",
@@ -310,13 +310,13 @@
       "repository": "loki",
       "command": "go mod download",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 8 local $schema refs, including pkg/logql/bench/queries/exhaustive/aggregations.yaml:1 -> ../schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 8 local $schema refs, including pkg/logql/bench/queries/exhaustive/aggregations.yaml:1 -\u003e ../schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "material-ui",
       "command": "npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 2 local $schema refs, including lerna.json:2 -> node_modules/lerna/schemas/lerna-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 2 local $schema refs, including lerna.json:2 -\u003e node_modules/lerna/schemas/lerna-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "matplotlib",
@@ -327,7 +327,7 @@
       "repository": "medusa",
       "command": "YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including packages/admin/dashboard/src/i18n/translations/ar.json:2 -> ./$schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including packages/admin/dashboard/src/i18n/translations/ar.json:2 -\u003e ./$schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "mocha",
@@ -358,7 +358,7 @@
       "repository": "nx",
       "command": "cargo fetch --locked OR npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including astro-docs/project.json:3 -> ../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including astro-docs/project.json:3 -\u003e ../node_modules/nx/schemas/project-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "pandas",
@@ -374,7 +374,7 @@
       "repository": "payload",
       "command": "npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 4 local $schema refs, including templates/with-cloudflare-d1/wrangler.jsonc:2 -> node_modules/wrangler/config-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 4 local $schema refs, including templates/with-cloudflare-d1/wrangler.jsonc:2 -\u003e node_modules/wrangler/config-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "postcss",
@@ -395,7 +395,7 @@
       "repository": "query",
       "command": "npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including examples/angular/auto-refetching/angular.json:2 -> ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including examples/angular/auto-refetching/angular.json:2 -\u003e ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "react-hook-form",
@@ -421,13 +421,13 @@
       "repository": "remix",
       "command": "npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 2 local $schema refs, including .oxlintrc.json:2 -> ./node_modules/oxlint/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 2 local $schema refs, including .oxlintrc.json:2 -\u003e ./node_modules/oxlint/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "remotion",
       "command": "bun install --frozen-lockfile --ignore-scripts OR cargo fetch --locked OR go mod download OR composer install --no-scripts --no-plugins",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 1 local $schema refs, including .oxfmtrc.json:2 -> ./node_modules/oxfmt/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 1 local $schema refs, including .oxfmtrc.json:2 -\u003e ./node_modules/oxfmt/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "rollup",
@@ -463,7 +463,7 @@
       "repository": "socket.io",
       "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false OR YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 2 local $schema refs, including examples/angular-todomvc/angular.json:2 -> ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 2 local $schema refs, including examples/angular-todomvc/angular.json:2 -\u003e ./node_modules/@angular/cli/lib/config/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "spark",
@@ -479,7 +479,7 @@
       "repository": "storybook",
       "command": "npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts OR YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including .oxfmtrc.json:2 -> ./node_modules/oxfmt/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including .oxfmtrc.json:2 -\u003e ./node_modules/oxfmt/configuration_schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "strapi",
@@ -495,13 +495,13 @@
       "repository": "supabase",
       "command": "cargo fetch --locked OR npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 12 local $schema refs, including apps/design-system/turbo.jsonc:2 -> ./../../node_modules/turbo/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 12 local $schema refs, including apps/design-system/turbo.jsonc:2 -\u003e ./../../node_modules/turbo/schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "superset",
       "command": "YARN_ENABLE_SCRIPTS=false yarn install --frozen-lockfile --ignore-scripts OR npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 2 local $schema refs, including superset-frontend/lerna.json:25 -> node_modules/lerna/schemas/lerna-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 2 local $schema refs, including superset-frontend/lerna.json:25 -\u003e node_modules/lerna/schemas/lerna-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "tokenizers",
@@ -532,7 +532,7 @@
       "repository": "vscode",
       "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false OR cargo fetch --locked",
       "status": "needs-review",
-      "notes": "MCP first-pass scan found 1 local $schema refs, including test/componentFixtures/component-explorer.json:2 -> ../../node_modules/@vscode/component-explorer-cli/dist/component-explorer-config.schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+      "notes": "MCP first-pass scan found 1 local $schema refs, including test/componentFixtures/component-explorer.json:2 -\u003e ../../node_modules/@vscode/component-explorer-cli/dist/component-explorer-config.schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
     },
     {
       "repository": "webpack",
@@ -870,7 +870,7 @@
       "outcome": "product-signal",
       "findings": [
         "The only non-fixture issue family was schema resolution for root `lerna.json` and `nx.json`, both pointing at missing dependency-local schemas under `node_modules`. The hints are clear, but these should be grouped as dependency-prep unavailable rather than treated like repo defects.",
-        "All parsing issues were under package test fixtures and snapshots, including empty JSON placeholders, JSON files containing `<...>` substitution content, and intentionally invalid CloudFormation/YAML cases under `cloudformation-include` and S3 deployment tests. These are expected fixture/snapshot artifacts, not normal config files.",
+        "All parsing issues were under package test fixtures and snapshots, including empty JSON placeholders, JSON files containing `\u003c...\u003e` substitution content, and intentionally invalid CloudFormation/YAML cases under `cloudformation-include` and S3 deployment tests. These are expected fixture/snapshot artifacts, not normal config files.",
         "The templated-YAML hint is useful for the three substitution/template YAML files, and empty-JSON hints are useful, but the output should lean more on path context such as `test`, `.snapshot`, `test-templates`, and `invalid`.",
         "Coverage was extremely limited relative to the discovered surface: the result skipped a very large CDK snapshot/test artifact corpus, including many `*.template.json`, `*.assets.json`, `manifest.json`, `tree.json`, and package lockfiles, plus high-signal unknowns like GitHub issue templates, CodeQL config, VS Code launch config, and root/project tooling config.",
         "A CloudFormation/SAM external catalog warning skipped four template YAML files because the SAM schema failed to compile, repeating the need to group catalog-availability warnings separately from file findings.",
@@ -890,7 +890,7 @@
         {
           "strength": "med",
           "recommendation": "Improve fixture classification for JSON files containing substitution markers or HTML-like placeholders, especially under CDK deployment snapshots and test assets.",
-          "rationale": "Several `.json` files contain `<...>` placeholders by design and currently appear as plain parse errors."
+          "rationale": "Several `.json` files contain `\u003c...\u003e` placeholders by design and currently appear as plain parse errors."
         },
         {
           "strength": "med",

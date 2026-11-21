@@ -139,6 +139,9 @@
         "schemaMatch": {
           "$ref": "#/$defs/schemaMatch"
         },
+        "schemaGap": {
+          "$ref": "#/$defs/schemaGap"
+        },
         "status": {
           "type": "string",
           "enum": ["validated", "skipped", "error"]
@@ -195,6 +198,9 @@
         },
         "schemaMatch": {
           "$ref": "#/$defs/schemaMatch"
+        },
+        "schemaGap": {
+          "$ref": "#/$defs/schemaGap"
         },
         "category": {
           "type": "string",
@@ -290,6 +296,26 @@
           "type": "string"
         },
         "suggestedCatalogIgnore": {
+          "type": "string"
+        }
+      }
+    },
+    "schemaGap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "reason"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "docsUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "fileMatch": {
           "type": "string"
         }
       }

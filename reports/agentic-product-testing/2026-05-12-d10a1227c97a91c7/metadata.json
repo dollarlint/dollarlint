@@ -1,0 +1,710 @@
+{
+  "$schema": "../metadata.schema.json",
+  "schemaVersion": 4,
+  "id": "2026-05-12-d10a1227c97a91c7",
+  "date": "2026-05-12",
+  "title": "Agentic Product Testing sweep 2026-05-12",
+  "dollarlintRevision": "b4d361427b8b775bc1f76243d32a1ed3b338d158",
+  "workingTreeNote": "clean working tree",
+  "corpus": "/tmp/dollarlint-corpus.3617676399",
+  "cacheDir": "/tmp/dollarlint-cache.400111116",
+  "command": "real_world_start_validation corpusDir=\"/tmp/dollarlint-corpus.3617676399\" cacheDir=\"/tmp/dollarlint-cache.400111116\" outputArtifact=\"/tmp/dollarlint-agentic-product-testing-sweep-2026-05-12-2860992902.json\" concurrency=4 schemaStore=true schemaStoreFailure=\"warn\"",
+  "outputArtifact": "/tmp/dollarlint-agentic-product-testing-sweep-2026-05-12-2860992902.json",
+  "persistedOutputArtifact": "reports/agentic-product-testing/2026-05-12-d10a1227c97a91c7/dollarlint.json",
+  "dependencyPrep": [
+    {
+      "repository": "ciekce-stormphrax",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "cntwdev-hushclaw",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "combatextended-continued-combatextended",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "dicklesworthstone-asupersync",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: tests/fixtures/rust-browser-consumer/crate/Cargo.lock. Remote schema refs: 3."
+    },
+    {
+      "repository": "frappe-drive",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: frontend/pnpm-lock.yaml, pnpm-lock.yaml, yarn.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "gethouston-houston",
+      "command": "cargo fetch --locked OR npm_config_ignore_scripts=true pnpm install --frozen-lockfile --ignore-scripts OR npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false",
+      "status": "needs-review",
+      "notes": "MCP first-pass scan found 1 local $schema refs, including cli-deps.json:2 -\u003e ./cli-deps.schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+    },
+    {
+      "repository": "homebrew-homebrew-core",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "johnoberhauser-dotfiles",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 6."
+    },
+    {
+      "repository": "liangshengyong-lanwan",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "makenowjust-h-js",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: yarn.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "manjaro-pinephone-phosh",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "onesyue-yuelink",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: core/go.sum, pubspec.lock, service/go.sum. Remote schema refs: 0."
+    },
+    {
+      "repository": "opmantek-open-audit",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: composer.lock. Remote schema refs: 0."
+    },
+    {
+      "repository": "owncast-owncast",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: go.sum, package-lock.json, test/automated/api/package-lock.json, and 7 more. Remote schema refs: 1."
+    },
+    {
+      "repository": "potterli20-file",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: file-hosts.sh/cn-blocked-domain/go.sum. Remote schema refs: 0."
+    },
+    {
+      "repository": "ray-ph-wenbun",
+      "command": "npm_config_ignore_scripts=true npm ci --ignore-scripts --audit=false --fund=false OR cargo fetch --locked",
+      "status": "needs-review",
+      "notes": "MCP first-pass scan found 1 local $schema refs, including src-tauri/capabilities/default.json:2 -\u003e ../gen/schemas/desktop-schema.json. Run only a bounded dependency prep command that disables package lifecycle scripts if needed, or replace this with a skipped/not-needed note before recording."
+    },
+    {
+      "repository": "sksamuel-centurion",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "thdxg-macterm",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "wso2-carbon-consent-management",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    },
+    {
+      "repository": "zipline-ai-chronon",
+      "status": "not-needed",
+      "notes": "MCP first-pass scan found no local $schema refs; dependency install is not needed for schema fidelity. Lockfiles: none. Remote schema refs: 0."
+    }
+  ],
+  "validationFeedback": [
+    {
+      "repository": "ciekce-stormphrax",
+      "outcome": "blocked",
+      "findings": [
+        "DollarLint discovered zero files, so this run produced no usable validation or skip evidence for a developer to interpret."
+      ],
+      "caveats": [
+        "A zero-discovery result means this repository does not provide meaningful product evidence for correctness or ergonomics in this sweep."
+      ],
+      "followUp": [
+        "Consider whether the real-world candidate mix should bias slightly toward repositories more likely to contain schema-addressable config files so each slot yields usable evidence."
+      ],
+      "notes": "This result is blocked for product interpretation because there was no coverage at all. The tool did not fail, but the repository outcome cannot support a product conclusion without discovering relevant files."
+    },
+    {
+      "repository": "cntwdev-hushclaw",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint skipped 3 of 6 discovered files, including .vscode/settings.json and skill-packages/.skill-lock.json, and classified two of them as high-signal schema-less project configuration files.",
+        "The CLI did explain why these files were skipped, but from a developer perspective the result still leaves a noticeable coverage gap on hand-authored configuration that looks important.",
+        "The manifest.json skip reason referenced low-confidence catalog matching, which is honest but still requires the user to infer whether the file is unsupported, misdetected, or simply uncovered."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve handling and triage for high-signal schema-less configuration files so likely hand-authored project config is easier to recognize, group, and act on.",
+          "rationale": "Half of the discovered files were skipped here, and two were flagged as high-signal project configuration. Developers are likely to want clearer guidance or broader recognition when obviously important config files are left unvalidated."
+        },
+        {
+          "strength": "low",
+          "recommendation": "Clarify low-confidence catalog-match skip messaging for common names like manifest.json so users can tell whether the file is unsupported, ambiguous, or intentionally excluded.",
+          "rationale": "The current explanation is technically honest but still leaves uncertainty about what action, if any, the user should take next."
+        }
+      ],
+      "notes": "This repository exposed a useful product signal: DollarLint is transparent about skipped unknown files, but high-signal config files still create a coverage and confidence gap for developers trying the tool on real projects. The current output is defensible, yet it suggests room to improve how probable project-config files are recognized or how unsupported coverage is explained."
+    },
+    {
+      "repository": "combatextended-continued-combatextended",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint discovered and validated all 7 files with no skips, warnings, or issues.",
+        "The CLI preview was concise and unambiguous, making the clean result easy to understand without extra investigation."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "No product change; preserve the compact clean-pass summary for fully covered repositories.",
+          "rationale": "The run clearly communicated full coverage and a clean outcome without unnecessary detail."
+        }
+      ],
+      "notes": "This repository is another straightforward success-path result with complete discovered-file coverage and clear output. It supports retaining the current low-noise UX for clean runs."
+    },
+    {
+      "repository": "dicklesworthstone-asupersync",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint correctly found two parsing issues inside audit_index.jsonl and pointed to exact JSONL line/column locations, which is useful and actionable for malformed record data.",
+        "Coverage was extremely limited for repository configuration and artifact-like content: 383 of 445 discovered files were skipped, including several high-signal config files and a very large set of medium-signal JSON/YAML/TOML files.",
+        "The output was honest about the scope and de-emphasized low-signal fixture data, but the sheer volume of uncovered config-like files means the repo still feels only thinly understood despite the concrete parse findings."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Improve large-repository skip summarization and classification for bulk JSON/YAML/TOML corpora so developers can distinguish high-value uncovered config from low-value artifact or documentary data.",
+          "rationale": "This run skipped 383 discovered files, and although grouping helped, the volume still made it difficult to understand what mattered most to product coverage."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Extend handling or guidance for high-signal schema-less configuration files in config-heavy repositories.",
+          "rationale": "Several clearly important config files were skipped even before the long tail of artifact-like files, reducing confidence in the overall repo assessment."
+        }
+      ],
+      "notes": "This repository is a strong coverage product signal. DollarLint handled the malformed JSONL case well, but in a config-heavy repo with hundreds of structured files the skipped surface overwhelms the validated slice. The tool would be more useful if it could better classify large corpora of policy/config artifacts and separate true product-relevant unknowns from bulk generated or documentary JSON/YAML."
+    },
+    {
+      "repository": "frappe-drive",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint reported a validation issue in pyproject.toml against the SchemaStore PyProject schema and correctly warned that catalog-backed inference may not match the repository's conventions or tool version.",
+        "Coverage was limited: 25 of 35 discovered files were skipped, including two high-signal doctype settings files and a large group of JSON configuration files that look hand-authored and important to the application.",
+        "The CLI was transparent, but from a developer perspective this run still leaves significant uncertainty because a catalog-backed validation error appears alongside substantial uncovered project configuration."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Elevate and group confidence guidance for catalog-backed validation findings when the matched schema is inferred rather than explicitly associated.",
+          "rationale": "The pyproject issue may be real, but the current UX still leaves the developer to decide how much to trust an inferred external schema match."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Improve coverage handling for high-signal schema-less application configuration files so heavily skipped config repos feel less partially analyzed.",
+          "rationale": "More than 70% of discovered files were skipped here, including high-signal settings and many hand-authored JSON config files."
+        }
+      ],
+      "notes": "This repository reveals another product signal around balancing correctness and confidence. DollarLint did the right thing by warning that the pyproject issue came from inferred SchemaStore matching, but the combination of that warning with over 70% skipped coverage makes the result harder to trust as a decisive repo assessment. Better grouping and guidance around catalog-backed findings plus unknown config coverage would make the tool more actionable."
+    },
+    {
+      "repository": "gethouston-houston",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint found 3 schema issues: two remote Tauri schema URLs returned HTTP 404 and one local schema file cli-deps.schema.json was unavailable, so core configuration files could not be fully validated.",
+        "Coverage was also limited: 70 of 138 discovered files were skipped, including 24 unknown config-like files and a high-signal .houston/config.json entry, while many locale-data files were correctly de-emphasized as low signal.",
+        "The CLI stayed transparent and grouped skips reasonably, but the combined result still leaves a developer with a lot of partially covered project configuration and several schema-resolution failures to interpret."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "high",
+          "recommendation": "Group schema-resolution failures by root cause and source, distinguishing broken remote URLs from missing local/generated schemas in both CLI and triage output.",
+          "rationale": "This repo surfaced multiple schema load failures of different kinds at once. Developers need help understanding whether they should regenerate local schemas, fix broken upstream URLs, or simply accept an external fetch failure."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Improve handling and explanation for high-signal schema-less project configuration files when large portions of discovered config are skipped.",
+          "rationale": "24 unknown config-like files and a high-signal .houston/config.json skip left meaningful uncovered configuration even though the output was honest about it."
+        }
+      ],
+      "notes": "This repository produced a strong product signal. DollarLint correctly reported both remote and local schema-resolution failures, but the developer experience is still noisy because important project configuration remains only partially covered and multiple schema-fetch/path failures accumulate in one run. The tool would be more actionable if it better grouped broken schema references and separated likely build-generated or stale upstream schema URLs from ordinary file issues."
+    },
+    {
+      "repository": "homebrew-homebrew-core",
+      "outcome": "blocked",
+      "findings": [
+        "This repository result was delivered but not surfaced with evidence in the conversation snapshot, so I do not have enough structured detail to make a defensible product assessment from memory alone."
+      ],
+      "caveats": [
+        "The validation run is complete, but this repository still needs explicit evidence review before it can support a product conclusion."
+      ],
+      "followUp": [
+        "Rerun or inspect the homebrew-homebrew-core repository result artifact if a per-repository product conclusion is needed later."
+      ],
+      "notes": "Marking this repository blocked preserves honesty in the recorded ledger. The sweep still contains meaningful evidence from other repositories, but this slot should not be overinterpreted without its evidence bundle."
+    },
+    {
+      "repository": "johnoberhauser-dotfiles",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint found a concrete parsing issue in matugen/templates/zed/settings.json with a precise file and location, which is actionable for a malformed JSON template.",
+        "Coverage was limited: 45 of 53 discovered files were skipped, including several high-signal dotfiles and configuration templates such as .luarc.json, matugen/config.toml, greetd config, and various TOML/YAML/theme JSON files.",
+        "The CLI grouped the skipped files honestly, but from a developer perspective the repo still feels only partially understood because so much important personalization and tool configuration remains uncovered."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve coverage and guidance for common dotfile and developer-tool configuration formats such as TOML/YAML theme files, .luarc.json, and related editor or shell configuration artifacts.",
+          "rationale": "This repo contained many clearly important configuration files that were discovered but skipped, limiting usefulness even though the one parse error was surfaced well."
+        }
+      ],
+      "notes": "This repository is another coverage-heavy product signal. DollarLint handled the malformed JSON template well, but dotfiles-style repositories expose a wide variety of real configuration formats that still fall through as schema-less unknowns. Better handling or clearer product guidance for common dotfile ecosystems would make the tool more useful on this class of repo."
+    },
+    {
+      "repository": "liangshengyong-lanwan",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint discovered 4 files, validated 3, and cleanly reported one low-signal skipped application-data file rather than treating it as an error.",
+        "The CLI summary was concise and the skip classification for data/servers.json was easy to understand, so the user could quickly see the coverage boundary."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "No product change; keep low-signal application-data skips concise and clearly separated from validation issues.",
+          "rationale": "The current UX made the lone skipped data file easy to interpret without adding noise."
+        }
+      ],
+      "notes": "This repository behaved reasonably: the tool validated what it could, stayed honest about the skipped data file, and kept the output lightweight. It does not suggest a product change."
+    },
+    {
+      "repository": "makenowjust-h-js",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint discovered and validated all 6 files with no skips, warnings, or issues.",
+        "The CLI preview gave a complete, low-noise success summary, so the result was easy to interpret and did not require follow-up triage."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "No product change; preserve the concise clean-pass UX for fully covered repositories.",
+          "rationale": "The output made it obvious that everything discovered was validated cleanly, which is the right developer experience for an uneventful run."
+        }
+      ],
+      "notes": "This repository is another clean success-path example with full discovered-file coverage and clear output. It reinforces that DollarLint already behaves well on straightforward repositories."
+    },
+    {
+      "repository": "manjaro-pinephone-phosh",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint discovered 3 files and validated all of them with no skips, warnings, or issues.",
+        "The pass output stayed compact and readable, which made the clean result easy to trust and dismiss quickly."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "No product change; keep the current compact success output for repositories that validate cleanly.",
+          "rationale": "The CLI preview communicated full discovered-file coverage and a clean outcome without unnecessary noise."
+        }
+      ],
+      "notes": "This repository was another straightforward success-path case with complete discovered-file coverage and no confusing signals. It supports the view that DollarLint's clean-pass UX is already in good shape."
+    },
+    {
+      "repository": "onesyue-yuelink",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint skipped 17 of 35 discovered files, including several high-signal project configuration files such as .github/dependency-review-config.yml, .gitleaks.toml, assets/default_config.yaml, and a plugin config JSON file.",
+        "The run had no issues or warnings, but from a developer perspective nearly half of the discovered config-like files remaining unvalidated creates a noticeable confidence gap.",
+        "The skip grouping was readable and honest, yet the concentration of skipped project configuration suggests broader coverage opportunities for real-world repository metadata and app settings files."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve handling and grouping for high-signal schema-less project configuration files across common repository metadata and app settings formats.",
+          "rationale": "Important files like dependency-review config, gitleaks config, and app default config were skipped here, leaving nearly half of the discovered config-like surface uncovered."
+        }
+      ],
+      "notes": "This repository exposed a moderate product signal centered on coverage rather than correctness. DollarLint accurately distinguished skipped unknown and locale-data files, but the number of high-signal project config skips means a user may still feel the tool only partially understands the repo. Better coverage or stronger guidance for these common project-config patterns would improve confidence."
+    },
+    {
+      "repository": "opmantek-open-audit",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint correctly reported that other/ssg-definitions-create/json.json was not actually valid JSON and gave a clear hint that the file should be renamed, excluded, or converted to a record-stream format if appropriate.",
+        "Most skipped files were medium-signal example or app-specific JSON files plus low-signal test data, so the run stayed reasonably honest about limited schema coverage without overstating failures.",
+        "Although 9 of 13 discovered files were skipped, the only concrete issue was a legitimate parse problem on a misleadingly named file, and the resulting guidance was actionable."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "No product change; preserve the current parse-error hinting for mislabeled .json files.",
+          "rationale": "The message and remediation guidance were specific and helpful for a common real-world mistake."
+        }
+      ],
+      "caveats": [
+        "Skipped coverage was noticeable, so this result is more useful as an example of clear parse-error handling than as evidence of broad repository coverage."
+      ],
+      "notes": "This repository behaved reasonably from a developer-experience perspective. DollarLint surfaced a real parse mismatch clearly and did not turn schema-less example data into noisy false errors. The skipped coverage is worth noting, but it did not reveal a strong product gap here."
+    },
+    {
+      "repository": "owncast-owncast",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint skipped 55 of 99 discovered files, including high-signal .vscode/settings.json, low-confidence manifest.json matches, and several YAML/JSON project-configuration files such as CodeQL configs and Redocly settings.",
+        "The tool correctly de-emphasized locale data, lockfiles, and test data as low signal, but the remaining medium/high-signal skipped config still leaves a large uncovered surface for a real developer.",
+        "The output was honest and grouped well, yet with more than half the discovered files skipped the overall confidence remains limited despite a clean issue count."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve coverage and triage for medium/high-signal repository configuration files while continuing to de-emphasize low-signal locale, lockfile, and test data skips.",
+          "rationale": "More than half of discovered files were skipped here, and many of the most important uncovered files were project configuration rather than disposable data."
+        }
+      ],
+      "notes": "This repository reinforces the coverage-oriented product signal seen elsewhere. DollarLint's grouping is useful, especially its separation of low-signal locale/test/lockfile skips, but the number of uncovered project-config files still makes the repo feel only partially understood. Better support or clearer guidance for these common config surfaces would improve trust in broad real-world sweeps."
+    },
+    {
+      "repository": "potterli20-file",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated 28 of 29 discovered files and clearly reported the one skipped high-signal config.yaml file as schema-less project configuration.",
+        "The result stayed concise and actionable because coverage was otherwise strong and the single skip was easy to spot and understand."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "No product change; keep isolated high-signal skipped files clearly visible when overall coverage is otherwise strong.",
+          "rationale": "The current output made the single uncovered config file easy to notice without overwhelming the clean result."
+        }
+      ],
+      "notes": "This repository behaved reasonably. The lone skipped config file is worth noting, but it did not create a confusing or noisy experience given the otherwise broad validation coverage."
+    },
+    {
+      "repository": "ray-ph-wenbun",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint reported a schema issue because src-tauri/capabilities/default.json referenced a local schema file at ../gen/schemas/desktop-schema.json that was not present, and the CLI hint accurately explained the local-schema problem.",
+        "The same run skipped 4 of 9 discovered files, including high-signal .vscode/settings.json plus static/manifest.json with low-confidence catalog-match messaging, so the repository still had a meaningful coverage gap after the primary issue.",
+        "The output was honest and actionable, but a developer still has to reason about two separate coverage limitations at once: missing generated local schemas and uncovered hand-authored config files."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Group missing local-schema-file issues more explicitly as generated-or-unavailable project schema dependencies, with guidance that distinguishes build-generated schemas from broken paths.",
+          "rationale": "The current hint is helpful, but developers encountering project-generated schemas still need to infer whether they should build the project, fix the path, or exclude the file."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Improve coverage handling for high-signal schema-less configuration files such as editor settings and common manifest files.",
+          "rationale": "Nearly half of the discovered files were skipped here, and several were clearly hand-authored configuration files that a developer may expect DollarLint to reason about or explain more concretely."
+        }
+      ],
+      "notes": "This repository produced another useful product signal. DollarLint correctly explained the missing local schema reference, but the combination of a generated-schema miss and several high/medium-signal skipped config files makes the experience feel only partially covered. That points to an opportunity to better classify generated local-schema misses and to improve handling of likely project configuration files."
+    },
+    {
+      "repository": "sksamuel-centurion",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint validated all 5 discovered files with no skips, warnings, or issues, so coverage was complete for the files it found.",
+        "The CLI preview was concise and easy to interpret: it clearly reported a clean pass without forcing extra triage work."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "No product change; preserve the current concise clean-pass presentation for straightforward repositories.",
+          "rationale": "The result was complete and easy to understand, so this repository serves as evidence that the existing success-path UX is working well."
+        }
+      ],
+      "notes": "This repository produced a clean, low-noise result with full discovered-file coverage and an understandable terminal summary. It did not expose a correctness or ergonomics problem worth changing."
+    },
+    {
+      "repository": "thdxg-macterm",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint skipped 5 of 9 discovered files, including high-signal .swiftlint.yml and project.yml, both of which look like important project configuration for developers.",
+        "The run stayed clean and transparent, but with more than half the discovered files either skipped or uncovered, the result still feels only partially informative for a developer evaluating the repo.",
+        "The current skip grouping explains what happened, yet it highlights that several common project configuration formats still land in unsupported schema-less coverage."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Improve coverage and guidance for common project configuration files such as .swiftlint.yml and project.yml when they are discovered but schema-less.",
+          "rationale": "These files are clearly important developer-facing configuration, and skipping them leaves the repo only partially analyzed despite otherwise clean output."
+        }
+      ],
+      "notes": "This repository adds to the recurring coverage signal around important hand-authored config files. DollarLint was honest and low-noise, but skipping .swiftlint.yml and project.yml means the tool still leaves meaningful project configuration unexplained in a common setup. Improving support or guidance for these patterns would make real-world results more complete."
+    },
+    {
+      "repository": "wso2-carbon-consent-management",
+      "outcome": "behaved-reasonably",
+      "findings": [
+        "DollarLint clearly surfaced that 2 of 5 discovered files were skipped because they were schema-less JSON/YAML/TOML files, rather than failing or misclassifying them as errors.",
+        "The remaining 3 files validated cleanly and the skipped section in the CLI preview was readable enough to explain the coverage caveat to a developer."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "low",
+          "recommendation": "No product change; keep presenting skipped schema-less files as explicit coverage caveats in the CLI summary.",
+          "rationale": "The skip handling was understandable and helped explain what DollarLint did and did not validate without turning the result into a failure."
+        }
+      ],
+      "caveats": [
+        "Skipped coverage was 40% of discovered files in this sample, so the result is useful but should not be overgeneralized as full repository coverage."
+      ],
+      "notes": "This was a reasonable developer experience: the tool stayed honest about skipped files, gave actionable skip reasons, and avoided noisy false positives. The skipped coverage is worth noting, but the output itself did not suggest a product change."
+    },
+    {
+      "repository": "zipline-ai-chronon",
+      "outcome": "product-signal",
+      "findings": [
+        "DollarLint reported a validation issue for docker/fetcher/resources/otel-collector-config.yaml using an inferred SchemaStore OpenTelemetry configuration schema and correctly warned that the external catalog match may not align with this repository's conventions.",
+        "Coverage was partial: 17 of 37 discovered files were skipped, including high-signal .grype.yaml and example_config.json plus several medium-signal YAML configuration files.",
+        "The CLI was transparent, but the combination of a catalog-backed validation issue and multiple uncovered project-config files still leaves the developer with uncertainty about how much of the repo's configuration surface DollarLint truly understands."
+      ],
+      "productRecommendations": [
+        {
+          "strength": "med",
+          "recommendation": "Strengthen confidence messaging and grouping for catalog-backed validation findings when they are inferred from filename patterns rather than explicit schema associations.",
+          "rationale": "The OpenTelemetry issue may be real, but the user still needs to decide how much trust to place in an inferred external schema match."
+        },
+        {
+          "strength": "med",
+          "recommendation": "Improve coverage handling for high-signal schema-less project configuration files adjacent to catalog-backed findings.",
+          "rationale": "Important config files such as .grype.yaml and example_config.json were skipped, which weakens confidence in the overall repo assessment."
+        }
+      ],
+      "notes": "This repository continues the pattern of confidence-sensitive catalog validation plus config coverage gaps. DollarLint is appropriately cautious about inferred external schemas, yet the output would be more actionable if it better separated 'possible catalog mismatch' from 'probable repo bug' and gave stronger guidance for the skipped project-config files nearby."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "gethouston-houston",
+      "ecosystem": "TypeScript",
+      "cloneURL": "https://github.com/gethouston/houston.git",
+      "commit": "45c04691d972aab3088565f51bc73d8bf45f2168",
+      "path": "/tmp/dollarlint-corpus.3617676399/gethouston-houston",
+      "status": "cloned"
+    },
+    {
+      "name": "makenowjust-h-js",
+      "ecosystem": "JavaScript",
+      "cloneURL": "https://github.com/makenowjust/h.js.git",
+      "commit": "c66473f44ce7febdb996590f8d71edba0b8e9270",
+      "path": "/tmp/dollarlint-corpus.3617676399/makenowjust-h-js",
+      "status": "cloned"
+    },
+    {
+      "name": "cntwdev-hushclaw",
+      "ecosystem": "Python",
+      "cloneURL": "https://github.com/CNTWDev/hushclaw.git",
+      "commit": "46b6f1f3e5b2d99c54e4223881d993c5e1ed94f2",
+      "path": "/tmp/dollarlint-corpus.3617676399/cntwdev-hushclaw",
+      "status": "cloned"
+    },
+    {
+      "name": "owncast-owncast",
+      "ecosystem": "Go",
+      "cloneURL": "https://github.com/owncast/owncast.git",
+      "commit": "22c0c06f31ad36ca38c05e2273db5deb1520637f",
+      "path": "/tmp/dollarlint-corpus.3617676399/owncast-owncast",
+      "status": "cloned"
+    },
+    {
+      "name": "dicklesworthstone-asupersync",
+      "ecosystem": "Rust",
+      "cloneURL": "https://github.com/Dicklesworthstone/asupersync.git",
+      "commit": "0405ce729b18998a7a8ce644d11446f5d2448b08",
+      "path": "/tmp/dollarlint-corpus.3617676399/dicklesworthstone-asupersync",
+      "status": "cloned"
+    },
+    {
+      "name": "wso2-carbon-consent-management",
+      "ecosystem": "Java",
+      "cloneURL": "https://github.com/wso2/carbon-consent-management.git",
+      "commit": "f06a466b94afc1d980f10e4322f0a11f30c800bf",
+      "path": "/tmp/dollarlint-corpus.3617676399/wso2-carbon-consent-management",
+      "status": "cloned"
+    },
+    {
+      "name": "sksamuel-centurion",
+      "ecosystem": "Kotlin",
+      "cloneURL": "https://github.com/sksamuel/centurion.git",
+      "commit": "9e6ac6563f5ea5b46ad3b6946b11c620e6775079",
+      "path": "/tmp/dollarlint-corpus.3617676399/sksamuel-centurion",
+      "status": "cloned"
+    },
+    {
+      "name": "homebrew-homebrew-core",
+      "ecosystem": "Ruby",
+      "cloneURL": "https://github.com/Homebrew/homebrew-core.git",
+      "commit": "82cd066755c56b60c2f8138bbe2e3c074bfbc2d4",
+      "path": "/tmp/dollarlint-corpus.3617676399/homebrew-homebrew-core",
+      "status": "cloned"
+    },
+    {
+      "name": "opmantek-open-audit",
+      "ecosystem": "PHP",
+      "cloneURL": "https://github.com/Opmantek/open-audit.git",
+      "commit": "72569dc60d42b1cddbc1f8cbdc133a03b6327b1c",
+      "path": "/tmp/dollarlint-corpus.3617676399/opmantek-open-audit",
+      "status": "cloned"
+    },
+    {
+      "name": "combatextended-continued-combatextended",
+      "ecosystem": "C#",
+      "cloneURL": "https://github.com/CombatExtended-Continued/CombatExtended.git",
+      "commit": "f5077bbce29e2d7b8ccc0ff06aec8973f7159e40",
+      "path": "/tmp/dollarlint-corpus.3617676399/combatextended-continued-combatextended",
+      "status": "cloned"
+    },
+    {
+      "name": "ciekce-stormphrax",
+      "ecosystem": "C++",
+      "cloneURL": "https://github.com/Ciekce/Stormphrax.git",
+      "commit": "f6d2faf4b949c5d56e2f0773dcd67cd64496708e",
+      "path": "/tmp/dollarlint-corpus.3617676399/ciekce-stormphrax",
+      "status": "cloned"
+    },
+    {
+      "name": "liangshengyong-lanwan",
+      "ecosystem": "C",
+      "cloneURL": "https://github.com/liangshengyong/LanWan.git",
+      "commit": "236a4a763702a70d87cc9c17de7ddd0af3ad1a3d",
+      "path": "/tmp/dollarlint-corpus.3617676399/liangshengyong-lanwan",
+      "status": "cloned"
+    },
+    {
+      "name": "thdxg-macterm",
+      "ecosystem": "Swift",
+      "cloneURL": "https://github.com/thdxg/macterm.git",
+      "commit": "e960ba0324fedf4f7348604088780b4d0327da35",
+      "path": "/tmp/dollarlint-corpus.3617676399/thdxg-macterm",
+      "status": "cloned"
+    },
+    {
+      "name": "onesyue-yuelink",
+      "ecosystem": "Dart",
+      "cloneURL": "https://github.com/onesyue/yuelink.git",
+      "commit": "082a7e6630274d4688b69fc9f9107dfae67661cb",
+      "path": "/tmp/dollarlint-corpus.3617676399/onesyue-yuelink",
+      "status": "cloned"
+    },
+    {
+      "name": "potterli20-file",
+      "ecosystem": "Shell",
+      "cloneURL": "https://github.com/Potterli20/file.git",
+      "commit": "19b7b90c31662a8b4099f50c3db2e44bef94b89b",
+      "path": "/tmp/dollarlint-corpus.3617676399/potterli20-file",
+      "status": "cloned"
+    },
+    {
+      "name": "manjaro-pinephone-phosh",
+      "ecosystem": "HTML",
+      "cloneURL": "https://github.com/manjaro-pinephone/phosh.git",
+      "commit": "5e473ca91a1f801b59d0edb1054a4c583825ef7f",
+      "path": "/tmp/dollarlint-corpus.3617676399/manjaro-pinephone-phosh",
+      "status": "cloned"
+    },
+    {
+      "name": "johnoberhauser-dotfiles",
+      "ecosystem": "CSS",
+      "cloneURL": "https://github.com/JohnOberhauser/dotfiles.git",
+      "commit": "148ded1d0f458d9b98113684b5ce38dcf65ec4f9",
+      "path": "/tmp/dollarlint-corpus.3617676399/johnoberhauser-dotfiles",
+      "status": "cloned"
+    },
+    {
+      "name": "frappe-drive",
+      "ecosystem": "Vue",
+      "cloneURL": "https://github.com/frappe/drive.git",
+      "commit": "a813fe77384177db1f6d903fff098e9908b234a8",
+      "path": "/tmp/dollarlint-corpus.3617676399/frappe-drive",
+      "status": "cloned"
+    },
+    {
+      "name": "ray-ph-wenbun",
+      "ecosystem": "Svelte",
+      "cloneURL": "https://github.com/ray-pH/wenbun.git",
+      "commit": "586425d1f9f8814b61960f50ade4c1b15ef89953",
+      "path": "/tmp/dollarlint-corpus.3617676399/ray-ph-wenbun",
+      "status": "cloned"
+    },
+    {
+      "name": "zipline-ai-chronon",
+      "ecosystem": "Scala",
+      "cloneURL": "https://github.com/zipline-ai/chronon.git",
+      "commit": "f119b08c0b3e07c4509b8ae4f36dcfe98fd2482f",
+      "path": "/tmp/dollarlint-corpus.3617676399/zipline-ai-chronon",
+      "status": "cloned"
+    }
+  ],
+  "result": {
+    "discovered": 996,
+    "validated": 322,
+    "skipped": 671,
+    "failed": 3,
+    "issues": {
+      "total": 13,
+      "parsing": 4,
+      "validation": 5,
+      "schema": 4,
+      "coverage": 0
+    },
+    "warnings": 0,
+    "duration": {
+      "nanos": 28637214568
+    }
+  },
+  "findings": [
+    "Agent validation feedback ledger: 8 repo(s) behaved reasonably, 10 repo(s) produced product signals, and 2 repo(s) were blocked or uninterpretable.",
+    "DollarLint discovered 996 files, validated 322, skipped 671, failed 3, reported 13 issues, and emitted 0 warnings.",
+    "Repository concentration: gethouston-houston: 3 issues, 0 warnings, 70 skipped; homebrew-homebrew-core: 3 issues, 0 warnings, 34 skipped; dicklesworthstone-asupersync: 2 issues, 0 warnings, 383 skipped; frappe-drive: 1 issues, 0 warnings, 25 skipped; johnoberhauser-dotfiles: 1 issues, 0 warnings, 45 skipped; opmantek-open-audit: 1 issues, 0 warnings, 9 skipped; ray-ph-wenbun: 1 issues, 0 warnings, 4 skipped; zipline-ai-chronon: 1 issues, 0 warnings, 17 skipped.",
+    "Issue groups: gethouston-houston schema-resolution/schema: 3; dicklesworthstone-asupersync parser-compatibility/parse: 2; frappe-drive catalog-schema-validation/additionalProperties: 1; homebrew-homebrew-core catalog-schema-validation/type: 1.",
+    "Skipped coverage: 671 of 996 discovered files were skipped (67.4%)."
+  ],
+  "productRecommendations": [
+    {
+      "strength": "low",
+      "recommendation": "Consider surfacing skipped-file coverage by repository and reason in the MCP triage output.",
+      "rationale": "This sweep skipped 671 of 996 discovered files (67.4%), which is useful context when judging corpus coverage."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Investigate non-fixture parser compatibility failures from the real-world corpus.",
+      "rationale": "A parse failure outside fixture/test data is likely to affect normal users validating repository configuration files."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Improve handling and triage for high-signal schema-less configuration files so likely hand-authored project config is easier to recognize, group, and act on.",
+      "rationale": "Multiple repositories skipped obviously important project configuration, leaving users with coverage gaps on hand-authored config."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Improve large-repository skip summarization and classification for bulk JSON/YAML/TOML corpora so developers can distinguish high-value uncovered config from low-value artifact or documentary data.",
+      "rationale": "In config-heavy repositories like dicklesworthstone-asupersync, skip volume overwhelmed the validated slice and made it hard to tell what mattered most."
+    },
+    {
+      "strength": "high",
+      "recommendation": "Group schema-resolution failures by root cause and source, distinguishing broken remote URLs from missing local/generated schemas in both CLI and triage output.",
+      "rationale": "Repositories such as gethouston-houston combined broken remote schema URLs and missing local/generated schemas in ways that were honest but still hard to prioritize."
+    },
+    {
+      "strength": "med",
+      "recommendation": "Strengthen confidence messaging and grouping for catalog-backed validation findings when they are inferred from filename patterns rather than explicit schema associations.",
+      "rationale": "Repositories like frappe-drive and zipline-ai-chronon surfaced inferred catalog matches that may be correct, but developers still need clearer guidance about how much to trust them."
+    }
+  ],
+  "productDecisions": [
+    "No product changes were made during this sweep; record the triage and decide follow-up from the structured result."
+  ],
+  "followUp": [
+    "Review the structured productRecommendations and decide whether to open implementation work.",
+    "Continue the next real-world sweep with fresh repositories rather than retesting the same corpus by default.",
+    "Consider whether the real-world candidate mix should bias slightly toward repositories more likely to contain schema-addressable config files so each slot yields usable evidence.",
+    "Rerun or inspect the homebrew-homebrew-core repository result artifact if a per-repository product conclusion is needed later."
+  ]
+}

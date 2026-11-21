@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -23,6 +24,19 @@ import (
 const maxSchemaResponseBytes = 64 * 1024 * 1024
 
 const persistentSchemaCacheTTL = 24 * time.Hour
+
+type schemaFileReadError struct {
+	Path string
+	Err  error
+}
+
+func (err *schemaFileReadError) Error() string {
+	return fmt.Sprintf("read schema %s: %v", err.Path, err.Err)
+}
+
+func (err *schemaFileReadError) Unwrap() error {
+	return err.Err
+}
 
 type SchemaCache struct {
 	cfg      Config
@@ -204,7 +218,7 @@ func (c *SchemaCache) loadUncached(ctx context.Context, raw string) (any, error)
 		}
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return nil, fmt.Errorf("read schema %s: %w", path, err)
+			return nil, &schemaFileReadError{Path: path, Err: err}
 		}
 		return decodeSchemaDocument(data, path)
 	case "http", "https":
@@ -347,12 +361,29 @@ func defaultPersistentSchemaCacheDir() string {
 }
 
 func filePathFromURL(parsed *url.URL) (string, error) {
+	return filePathFromURLForOS(parsed, runtime.GOOS)
+}
+
+func filePathFromURLForOS(parsed *url.URL, goos string) (string, error) {
 	path, err := url.PathUnescape(parsed.Path)
 	if err != nil {
 		return "", err
 	}
 	if path == "" {
 		return "", fmt.Errorf("empty file URL path")
+	}
+	if goos == "windows" {
+		switch host := parsed.Host; {
+		case host == "" || strings.EqualFold(host, "localhost"):
+			if strings.HasPrefix(path, "/") && isWindowsDriveAbsolutePath(path[1:]) {
+				path = path[1:]
+			}
+		case isWindowsDrive(host):
+			path = host + path
+		default:
+			path = `\\` + host + path
+		}
+		return strings.ReplaceAll(path, "/", `\`), nil
 	}
 	return filepath.FromSlash(path), nil
 }

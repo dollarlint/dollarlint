@@ -230,6 +230,10 @@ func (s *repoServer) handleRealWorldTriageOutput(ctx context.Context, request mc
 		if len(args.ValidationFeedback) == 0 {
 			args.ValidationFeedback = run.validationFeedback()
 		}
+		if err := realWorldEnsureManagedOutputArtifact(run); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
+		args.OutputArtifact = run.OutputArtifact
 	}
 
 	manifestPath := args.ManifestPath
@@ -755,6 +759,7 @@ func realWorldValidationEvidence(repository, outputArtifact string) (map[string]
 	warningGroups := realWorldGroupWarnings(details.Warnings)
 	issueExamples := realWorldIssueExamples(details, 6)
 	skippedSignals := realWorldSkippedFileSignals(details.Files)
+	skippedSignalExamples := realWorldLimitSkippedFileSignals(skippedSignals, 20)
 	skippedGroups := realWorldSkippedFileGroups(skippedSignals)
 	if len(issueGroups) > 6 {
 		issueGroups = issueGroups[:6]
@@ -764,19 +769,21 @@ func realWorldValidationEvidence(repository, outputArtifact string) (map[string]
 	}
 	cliPreview := realWorldCLIPreview(details.Styled)
 	return map[string]any{
-		"summary":              details.Summary,
-		"statusCounts":         statusCounts,
-		"skippedCoverageRatio": realWorldSkippedCoverageRatio(details.Summary),
-		"skippedExamples":      skippedExamples,
-		"skippedSignals":       skippedSignals,
-		"skippedGroups":        skippedGroups,
-		"failedExamples":       failedExamples,
-		"topIssueGroups":       issueGroups,
-		"exampleIssues":        issueExamples,
-		"topWarningGroups":     warningGroups,
-		"cliPreview":           cliPreview,
-		"uxSignals":            realWorldUXSignals(details, issueExamples, skippedGroups),
-		"outcomeHint":          realWorldEvidenceOutcomeHint(details.Summary, issueGroups, warningGroups, skippedGroups, issueExamples),
+		"summary":                 details.Summary,
+		"statusCounts":            statusCounts,
+		"skippedCoverageRatio":    realWorldSkippedCoverageRatio(details.Summary),
+		"skippedExamples":         skippedExamples,
+		"skippedSignals":          skippedSignalExamples,
+		"skippedSignalsTotal":     len(skippedSignals),
+		"skippedSignalsTruncated": len(skippedSignalExamples) < len(skippedSignals),
+		"skippedGroups":           skippedGroups,
+		"failedExamples":          failedExamples,
+		"topIssueGroups":          issueGroups,
+		"exampleIssues":           issueExamples,
+		"topWarningGroups":        warningGroups,
+		"cliPreview":              cliPreview,
+		"uxSignals":               realWorldUXSignals(details, issueExamples, skippedGroups),
+		"outcomeHint":             realWorldEvidenceOutcomeHint(details.Summary, issueGroups, warningGroups, skippedGroups, issueExamples),
 		"assessmentChecklist": []string{
 			"Did DollarLint parse and classify files in a way a developer would understand?",
 			"Does cliPreview.plain look like a useful terminal experience for a real user?",
@@ -891,6 +898,16 @@ func realWorldSkippedFileSignals(files []realWorldOutputFile) []realWorldSkipped
 		})
 	}
 	return out
+}
+
+func realWorldLimitSkippedFileSignals(signals []realWorldSkippedFileSignal, limit int) []realWorldSkippedFileSignal {
+	if limit <= 0 || len(signals) == 0 {
+		return nil
+	}
+	if len(signals) <= limit {
+		return append([]realWorldSkippedFileSignal{}, signals...)
+	}
+	return append([]realWorldSkippedFileSignal{}, signals[:limit]...)
 }
 
 func realWorldClassifySkippedFile(file realWorldOutputFile) (string, string, bool) {

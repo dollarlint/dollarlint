@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release tag to publish, for example v0.1.10
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -14,18 +20,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: true
 
       - name: Set up Node for npm publishing
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
@@ -43,3 +50,178 @@ jobs:
           WINGET_GITHUB_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+  winget-manifest-validation:
+    name: WinGet manifest validation
+    needs: goreleaser
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Resolve WinGet release branch
+        id: release
+        env:
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          if ($env:TAG -notmatch "^v(?<version>\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$") {
+            throw "Release tag '$env:TAG' does not look like a DollarLint release tag."
+          }
+
+          $packageVersion = $Matches.version
+          $branch = "dollarlint-$packageVersion"
+
+          "package_version=$packageVersion" >> $env:GITHUB_OUTPUT
+          "branch=$branch" >> $env:GITHUB_OUTPUT
+          "tag=$env:TAG" >> $env:GITHUB_OUTPUT
+
+          Write-Host "package_version=$packageVersion"
+          Write-Host "branch=$branch"
+
+      - name: Wait for GoReleaser WinGet branch
+        env:
+          BRANCH: ${{ steps.release.outputs.branch }}
+          GH_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $headers = @{
+            Accept = "application/vnd.github+json"
+            "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          if ($env:GH_TOKEN) {
+            $headers.Authorization = "Bearer $env:GH_TOKEN"
+          }
+
+          $uri = "https://api.github.com/repos/dollarlint/winget-pkgs/branches/$env:BRANCH"
+          for ($attempt = 1; $attempt -le 30; $attempt++) {
+            try {
+              $branch = Invoke-RestMethod -Uri $uri -Headers $headers
+              Write-Host "Found $($branch.name) at $($branch.commit.sha)"
+              exit 0
+            }
+            catch {
+              $statusCode = $null
+              if ($_.Exception.Response) {
+                $statusCode = [int]$_.Exception.Response.StatusCode
+              }
+              if ($statusCode -and $statusCode -ne 404) {
+                throw
+              }
+
+              Write-Host "Waiting for dollarlint/winget-pkgs@$env:BRANCH ($attempt/30)"
+              Start-Sleep -Seconds 10
+            }
+          }
+
+          throw "Timed out waiting for dollarlint/winget-pkgs@$env:BRANCH."
+
+      - name: Inspect Windows and WinGet
+        run: |
+          $ErrorActionPreference = "Stop"
+          Write-Host "Runner OS: $env:ImageOS"
+          Write-Host "Processor architecture: $env:PROCESSOR_ARCHITECTURE"
+          if ($env:PROCESSOR_ARCHITEW6432) {
+            Write-Host "Native processor architecture: $env:PROCESSOR_ARCHITEW6432"
+          }
+          Get-ComputerInfo -Property OsName, OsVersion, OsBuildNumber, WindowsVersion | Format-List
+          Get-Command winget | Format-List Source, Version
+          winget --version
+          winget source list
+
+      - name: Test generated WinGet manifest branch
+        env:
+          PACKAGE_VERSION: ${{ steps.release.outputs.package_version }}
+          BRANCH: ${{ steps.release.outputs.branch }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          Write-Host ".\scripts\test-winget-manifest.ps1 -PackageVersion $env:PACKAGE_VERSION -Branch $env:BRANCH -AllowManualFallback -UninstallAfter"
+          .\scripts\test-winget-manifest.ps1 `
+            -PackageVersion $env:PACKAGE_VERSION `
+            -Branch $env:BRANCH `
+            -AllowManualFallback `
+            -UninstallAfter
+
+      - name: Update WinGet PR description
+        env:
+          GH_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
+          PACKAGE_VERSION: ${{ steps.release.outputs.package_version }}
+          BRANCH: ${{ steps.release.outputs.branch }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          VALIDATION_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $pr = gh pr list `
+            --repo microsoft/winget-pkgs `
+            --head "$env:BRANCH" `
+            --state open `
+            --json number,url,isDraft `
+            --jq ".[0]"
+
+          if (-not $pr) {
+            throw "Could not find an open WinGet PR for dollarlint:$env:BRANCH."
+          }
+
+          $prInfo = $pr | ConvertFrom-Json
+          $currentBody = gh pr view $prInfo.number --repo microsoft/winget-pkgs --json body --jq ".body"
+          Write-Host "Updating WinGet PR #$($prInfo.number): $($prInfo.url)"
+          Write-Host "Current PR body length: $($currentBody.Length)"
+
+          $bodyTemplate = @'
+          <!-- PR Title Format: "New package: Publisher.Name version X.Y.Z" or "Update: Publisher.Name to X.Y.Z" -->
+
+          ## 📖 Description
+
+          Updates `DollarLint.DollarLint` to version `__PACKAGE_VERSION__`.
+
+          DollarLint is a CLI tool for validating JSON-family, YAML, and TOML files against their declared JSON Schemas. The product site is located at <https://dollarlint.dev>.
+
+          - Package identifier: `DollarLint.DollarLint`
+          - Package version: `__PACKAGE_VERSION__`
+          - Installer type: portable ZIP
+          - Architectures: x64, arm64
+          - Source release: https://github.com/dollarlint/dollarlint/releases/tag/__RELEASE_TAG__
+          - Automated Windows validation: __VALIDATION_RUN_URL__
+
+          ## ✅ Checklist
+
+          - [x] Signed the [Contributor License Agreement](https://cla.opensource.microsoft.com)
+          - [x] Linked to an issue (if applicable)
+            - Not applicable; this is a routine manifest update.
+
+          ## 📦 Manifest Checklist
+
+          - [x] Checked that there aren't other open [pull requests](https://github.com/microsoft/winget-pkgs/pulls) for the same manifest update/change
+          - [x] This PR only modifies one (1) manifest
+          - [x] Validated manifest with `winget validate --manifest <path>` ([validation guide](https://github.com/microsoft/winget-pkgs/blob/master/doc/ValidationFailureGuide.md))
+          - [x] Tested manifest with `winget install --manifest <path>`
+          - [x] Manifest conforms to the [1.12 schema](https://github.com/microsoft/winget-pkgs/tree/master/doc/manifest/schema/1.12.0)
+
+          > **Note:** `<path>` is the directory containing the manifest you're submitting.
+
+          Automated validation ran in the DollarLint release workflow after GoReleaser generated this manifest branch. The workflow validated the manifest, installed from the generated local manifest on `windows-latest`, verified the `dollarlint` command, and uninstalled it afterward.
+
+          ###### Automated with [GoReleaser](https://goreleaser.com)
+          ###### Microsoft Reviewers: [Open in CodeFlow](https://microsoft.github.io/open-pr/?codeflow=https://github.com/microsoft/winget-pkgs/pull/__PR_NUMBER__)
+          '@
+
+          $body = $bodyTemplate.Trim()
+          $body = $body.Replace("__PACKAGE_VERSION__", $env:PACKAGE_VERSION)
+          $body = $body.Replace("__RELEASE_TAG__", $env:RELEASE_TAG)
+          $body = $body.Replace("__VALIDATION_RUN_URL__", $env:VALIDATION_RUN_URL)
+          $body = $body.Replace("__PR_NUMBER__", [string]$prInfo.number)
+
+          $bodyPath = Join-Path $env:RUNNER_TEMP "winget-pr-body.md"
+          Set-Content -Path $bodyPath -Value $body -Encoding utf8
+          gh pr edit $prInfo.number `
+            --repo microsoft/winget-pkgs `
+            --title "Update: DollarLint.DollarLint to $env:PACKAGE_VERSION" `
+            --body-file $bodyPath
+
+          if ($prInfo.isDraft) {
+            gh pr ready $prInfo.number --repo microsoft/winget-pkgs
+          }

@@ -40,8 +40,8 @@ type validateOptions struct {
 	noGitIgnore       bool
 	forceExclude      bool
 	associations      []string
-	schemaStore       bool
-	schemaStoreURL    string
+	catalogs          bool
+	catalogSource     string
 	catalogFailure    string
 	maxDepth          int
 	fetchRemote       bool
@@ -69,8 +69,8 @@ type runConfigOptions struct {
 	noGitIgnore       bool
 	forceExclude      bool
 	associations      []string
-	schemaStore       bool
-	schemaStoreURL    string
+	catalogs          bool
+	catalogSource     string
 	catalogFailure    string
 	maxDepth          int
 	fetchRemote       bool
@@ -187,9 +187,9 @@ func addValidateFlags(cmd *cobra.Command, opts *validateOptions) {
 	cmd.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "Do not apply .gitignore patterns during discovery")
 	cmd.Flags().BoolVar(&opts.forceExclude, "force-exclude", false, "Apply discovery excludes even to explicitly passed files")
 	cmd.Flags().StringArrayVar(&opts.associations, "schema", nil, "Associate a file glob with a schema as glob=uri; repeatable")
-	cmd.Flags().BoolVar(&opts.schemaStore, "schema-store", false, "Match conventional filenames using built-in catalog sources")
-	cmd.Flags().StringVar(&opts.schemaStoreURL, "schema-store-url", "", "SchemaStore catalog URL or local path")
-	cmd.Flags().StringVar(&opts.catalogFailure, "schema-store-failure", "", "Catalog failure policy: warn, error, or skip")
+	cmd.Flags().BoolVar(&opts.catalogs, "catalogs", false, "Match conventional filenames using configured catalog sources")
+	cmd.Flags().StringVar(&opts.catalogSource, "catalog-source", "", "SchemaStore-format catalog URL or local path")
+	cmd.Flags().StringVar(&opts.catalogFailure, "catalog-failure", "", "Catalog failure policy: warn, error, or skip")
 	cmd.Flags().IntVar(&opts.maxDepth, "max-depth", 0, "Maximum external schema reference depth")
 	cmd.Flags().BoolVar(&opts.fetchRemote, "fetch-remote", true, "Allow fetching http(s) schemas")
 	cmd.Flags().BoolVar(&opts.noSchemaCache, "no-schema-cache", false, "Disable disk cache for remote schemas and catalogs")
@@ -212,9 +212,9 @@ func addInspectFlags(cmd *cobra.Command, opts *inspectOptions) {
 	cmd.Flags().BoolVar(&opts.run.noGitIgnore, "no-gitignore", false, "Do not apply .gitignore patterns during discovery")
 	cmd.Flags().BoolVar(&opts.run.forceExclude, "force-exclude", false, "Apply discovery excludes even to explicitly passed files")
 	cmd.Flags().StringArrayVar(&opts.run.associations, "schema", nil, "Associate a file glob with a schema as glob=uri; repeatable")
-	cmd.Flags().BoolVar(&opts.run.schemaStore, "schema-store", false, "Match conventional filenames using built-in catalog sources")
-	cmd.Flags().StringVar(&opts.run.schemaStoreURL, "schema-store-url", "", "SchemaStore catalog URL or local path")
-	cmd.Flags().StringVar(&opts.run.catalogFailure, "schema-store-failure", "", "Catalog failure policy: warn, error, or skip")
+	cmd.Flags().BoolVar(&opts.run.catalogs, "catalogs", false, "Match conventional filenames using configured catalog sources")
+	cmd.Flags().StringVar(&opts.run.catalogSource, "catalog-source", "", "SchemaStore-format catalog URL or local path")
+	cmd.Flags().StringVar(&opts.run.catalogFailure, "catalog-failure", "", "Catalog failure policy: warn, error, or skip")
 	cmd.Flags().BoolVar(&opts.run.fetchRemote, "fetch-remote", true, "Allow fetching http(s) catalogs")
 	cmd.Flags().BoolVar(&opts.run.noSchemaCache, "no-schema-cache", false, "Disable disk cache for remote catalogs")
 	cmd.Flags().IntVar(&opts.run.fetchRetries, "fetch-retries", defaultFetchRetries, "Number of retries for transient remote catalog fetch failures")
@@ -337,8 +337,8 @@ func runConfigOptionsFromValidate(opts *validateOptions) runConfigOptions {
 		noGitIgnore:       opts.noGitIgnore,
 		forceExclude:      opts.forceExclude,
 		associations:      opts.associations,
-		schemaStore:       opts.schemaStore,
-		schemaStoreURL:    opts.schemaStoreURL,
+		catalogs:          opts.catalogs,
+		catalogSource:     opts.catalogSource,
 		catalogFailure:    opts.catalogFailure,
 		maxDepth:          opts.maxDepth,
 		fetchRemote:       opts.fetchRemote,
@@ -378,12 +378,12 @@ func applyRunConfigOptions(cmd *cobra.Command, opts runConfigOptions, cfg *dolla
 		}
 		cfg.Schemas.Associations = append(cfg.Schemas.Associations, association)
 	}
-	if cmd.Flags().Changed("schema-store") {
-		cfg.Schemas.Catalogs.Enabled = opts.schemaStore
+	if cmd.Flags().Changed("catalogs") {
+		cfg.Schemas.Catalogs.Enabled = opts.catalogs
 	}
-	if opts.schemaStoreURL != "" {
+	if opts.catalogSource != "" {
 		cfg.Schemas.Catalogs.Enabled = true
-		cfg.Schemas.Catalogs.Sources = setSchemaStoreCatalogURL(cfg.Schemas.Catalogs.Sources, opts.schemaStoreURL)
+		cfg.Schemas.Catalogs.Sources = setSchemaStoreCatalogSource(cfg.Schemas.Catalogs.Sources, opts.catalogSource)
 	}
 	if opts.catalogFailure != "" {
 		cfg.Schemas.Catalogs.Failure = opts.catalogFailure
@@ -534,13 +534,13 @@ func writeValidateOutput(stdout io.Writer, outputPath string, data []byte) error
 	return os.WriteFile(outputPath, data, 0o644)
 }
 
-func setSchemaStoreCatalogURL(sources []dollarlint.CatalogSource, catalogURL string) []dollarlint.CatalogSource {
+func setSchemaStoreCatalogSource(sources []dollarlint.CatalogSource, catalogSource string) []dollarlint.CatalogSource {
 	enabled := true
 	for i := range sources {
 		if sources[i].Name == "schemastore" || sources[i].Format == "schemastore" {
 			sources[i].Name = "schemastore"
 			sources[i].Format = "schemastore"
-			sources[i].URL = catalogURL
+			sources[i].URL = catalogSource
 			sources[i].Path = ""
 			sources[i].Enabled = &enabled
 			return sources
@@ -549,7 +549,7 @@ func setSchemaStoreCatalogURL(sources []dollarlint.CatalogSource, catalogURL str
 	return append(sources, dollarlint.CatalogSource{
 		Name:    "schemastore",
 		Format:  "schemastore",
-		URL:     catalogURL,
+		URL:     catalogSource,
 		Enabled: &enabled,
 	})
 }

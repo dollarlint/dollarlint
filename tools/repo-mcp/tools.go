@@ -50,15 +50,35 @@ func (s *repoServer) addTools() {
 		"includeNoChange": map[string]any{"type": "boolean", "description": "Include explicit no-product-change recommendations. Defaults to false."},
 		"topic":           map[string]any{"type": "string", "description": "Optional exact cluster key or title substring to filter."},
 	}), s.handleRealWorldRecommendationBacklog, true)
+	s.addToolWithHints("real_world_remote_runs", "List recent remote GitHub Agentic Product Testing workflow runs and optionally correlate them with durable-memory PRs, Discussions, and recorded entries.", schemaObject(map[string]any{
+		"limit":        map[string]any{"type": "integer", "description": "Maximum workflow runs to return. Defaults to 10; capped at 50."},
+		"branch":       map[string]any{"type": "string", "description": "Optional branch filter passed to gh run list."},
+		"status":       map[string]any{"type": "string", "description": "Optional GitHub Actions status or conclusion filter accepted by gh run list, such as success, failure, or in_progress."},
+		"event":        map[string]any{"type": "string", "description": "Optional event filter passed to gh run list, such as workflow_dispatch or schedule."},
+		"includeLinks": map[string]any{"type": "boolean", "description": "When true, query GitHub PRs and Discussions for durable-memory links for each listed run. Defaults to false."},
+	}), s.handleRealWorldRemoteRuns, toolHints{ReadOnly: true, OpenWorld: true})
+	s.addToolWithHints("real_world_remote_run", "Inspect one remote GitHub Agentic Product Testing workflow run, including job status, artifacts, durable-memory links, and recorded entry hints.", schemaObject(map[string]any{
+		"runID":        map[string]any{"type": "string", "description": "GitHub Actions numeric run id, or a run URL containing /actions/runs/<id>."},
+		"includeSteps": map[string]any{"type": "boolean", "description": "Include per-step job details. Defaults to false to keep responses compact."},
+	}), s.handleRealWorldRemoteRun, toolHints{ReadOnly: true, OpenWorld: true})
 	s.addTool("real_world_start_testing", "Start a guided real-world validation sweep, check structured history and candidate duplicates, and return the next MCP tool to call.", schemaObject(map[string]any{
 		"title":                 map[string]any{"type": "string", "description": "Short sweep title."},
 		"repositories":          realWorldRepositoryArraySchema("Candidate repositories to check before preparing the corpus."),
+		"targetCount":           map[string]any{"type": "integer", "description": "Requested repository count when repositories are omitted. Defaults to 10; capped at 2000."},
 		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Allow intentional reruns of repositories already present in real-world history."},
 		"includeTestedRepos":    map[string]any{"type": "boolean", "description": "Include a capped tested repository list. Defaults to false to keep responses compact."},
 		"testedRepoLimit":       map[string]any{"type": "integer", "description": "Maximum tested repositories to include when includeTestedRepos=true. Defaults to 25; capped at 200."},
 	}), s.handleRealWorldStartTesting, true)
+	s.addToolWithHints("real_world_discover_candidates", "Mechanically discover a broad public real-world repository candidate set through GitHub search, de-duplicate it against structured history, and save it as a candidateSetID.", schemaObject(map[string]any{
+		"title":                 map[string]any{"type": "string", "description": "Short sweep title stored with the generated candidate set."},
+		"targetCount":           map[string]any{"type": "integer", "description": "Requested repository count. Defaults to 10; capped at 2000."},
+		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Allow intentional reruns of repositories already present in real-world history. Defaults to false."},
+		"ecosystems":            arrayStringSchema("Optional ecosystem/language names to search. Defaults to a broad, deterministic language plan."),
+		"minStars":              map[string]any{"type": "integer", "description": "Minimum GitHub stars for discovered repositories. Defaults to 25."},
+		"perQueryLimit":         map[string]any{"type": "integer", "description": "GitHub API result limit per ecosystem query. Defaults based on targetCount; capped at 100."},
+	}), s.handleRealWorldDiscoverCandidates, toolHints{ReadOnly: false, OpenWorld: true})
 	s.addTool("real_world_update_candidates", "Apply an add/remove/replace diff to a stored real-world candidate repository set, then recheck duplicate history.", schemaObject(map[string]any{
-		"candidateSetID":        map[string]any{"type": "string", "description": "Candidate set id returned by real_world_start_testing or real_world_update_candidates."},
+		"candidateSetID":        map[string]any{"type": "string", "description": "Candidate set id returned by real_world_start_testing, real_world_discover_candidates, or real_world_update_candidates."},
 		"diff":                  realWorldCandidateDiffSchema("Small repository-list edit to apply without resubmitting the full candidate set."),
 		"expectedCount":         map[string]any{"type": "integer", "description": "Optional guardrail: expected repository count after applying the diff."},
 		"allowPreviouslyTested": map[string]any{"type": "boolean", "description": "Optionally update whether intentional reruns are allowed."},
@@ -67,7 +87,7 @@ func (s *repoServer) addTools() {
 	s.addToolWithHints("real_world_prepare_corpus", "Start managed real-world corpus preparation, flag previously tested repositories, optionally clone repos, and write an internal manifest.", schemaObject(map[string]any{
 		"title":                 map[string]any{"type": "string", "description": "Short sweep title used for the managed run."},
 		"repositories":          realWorldRepositoryArraySchema("Repositories planned for the corpus."),
-		"candidateSetID":        map[string]any{"type": "string", "description": "Candidate set id returned by real_world_start_testing or real_world_update_candidates. Prefer this over resubmitting repositories."},
+		"candidateSetID":        map[string]any{"type": "string", "description": "Candidate set id returned by real_world_start_testing, real_world_discover_candidates, or real_world_update_candidates. Prefer this over resubmitting repositories."},
 		"candidateDiff":         realWorldCandidateDiffSchema("Optional final small edit to apply to candidateSetID before preparing."),
 		"expectedCount":         map[string]any{"type": "integer", "description": "Optional guardrail: expected repository count before preparation starts."},
 		"clone":                 map[string]any{"type": "boolean", "description": "When true, start managed shallow git clones in the background and write incremental manifest updates. Defaults to false."},
@@ -159,9 +179,34 @@ func (s *repoServer) addTools() {
 	s.addTool("release_readiness", "Run release-readiness checks without publishing anything.", schemaObject(map[string]any{
 		"snapshot": map[string]any{"type": "boolean", "description": "Deprecated; GoReleaser snapshot validation always runs for the Pro config."},
 	}), s.handleReleaseReadiness, false)
-	s.addTool("release_status", "Inspect recent release-related workflow runs and tags.", schemaObject(nil), s.handleReleaseStatus, true)
+	s.addToolWithHints("release_status", "Inspect structured release state: suggested next tag, tag/release existence, recent workflow runs, and the matching WinGet PR.", schemaObject(map[string]any{
+		"version": map[string]any{"type": "string", "description": "Optional release tag to inspect, such as v0.1.10. Defaults to the next patch tag when no release is in progress."},
+	}), s.handleReleaseStatus, toolHints{ReadOnly: true, OpenWorld: true})
+	s.addToolWithHints("release_start", "Start the guided release flow. Infers the next patch tag when version is omitted; dryRun defaults to true. With dryRun=false, triggers Prepare Release when the tag is missing or Release when the tag already exists.", schemaObject(map[string]any{
+		"version": map[string]any{"type": "string", "description": "Optional release tag, such as v0.1.10. Defaults to the next patch tag."},
+		"dryRun":  map[string]any{"type": "boolean", "description": "When true, inspect what would happen without triggering GitHub Actions. Defaults to true."},
+	}), s.handleReleaseStart, toolHints{ReadOnly: false, OpenWorld: true})
+	s.addToolWithHints("release_watch", "Wait with MCP progress notifications for a release to finish. It can dispatch the Release workflow after Prepare Release creates the tag, then inspect the final GitHub release and WinGet PR.", schemaObject(map[string]any{
+		"version":             map[string]any{"type": "string", "description": "Release tag to watch, such as v0.1.10. Defaults to the next patch tag."},
+		"runID":               map[string]any{"type": "string", "description": "Optional GitHub Actions run id returned by release_start."},
+		"autoDispatchRelease": map[string]any{"type": "boolean", "description": "When true, dispatch Release manually once the tag exists and no release exists yet. Defaults to true."},
+		"timeoutSeconds":      map[string]any{"type": "integer", "description": "Maximum wait time. Defaults to 1800; capped at 7200."},
+	}), s.handleReleaseWatch, toolHints{ReadOnly: false, OpenWorld: true})
+	s.addToolWithHints("release_winget_pr", "Inspect the Microsoft winget-pkgs PR for a DollarLint release and sanity-check the filled PR body and draft state.", schemaObject(map[string]any{
+		"version":     map[string]any{"type": "string", "description": "Release tag to inspect, such as v0.1.10. Defaults to the latest local release tag."},
+		"includeBody": map[string]any{"type": "boolean", "description": "Include PR body text and check for required body signals. Defaults to false."},
+	}), s.handleReleaseWingetPR, toolHints{ReadOnly: true, OpenWorld: true})
+	s.addToolWithHints("release_winget_watch", "Wait with MCP progress notifications for Microsoft winget-pkgs Azure validation. Infers the build from wingetbot PR comments and returns timeline status plus failed logs.", schemaObject(map[string]any{
+		"version":        map[string]any{"type": "string", "description": "Release tag to watch, such as v0.1.10. Defaults to the latest local release tag."},
+		"prNumber":       map[string]any{"type": "integer", "description": "Optional Microsoft winget-pkgs PR number. If omitted, the tool finds the PR from the release branch."},
+		"buildID":        map[string]any{"type": "string", "description": "Optional Azure build id to watch directly."},
+		"buildURL":       map[string]any{"type": "string", "description": "Optional Azure build URL to watch directly."},
+		"timeoutSeconds": map[string]any{"type": "integer", "description": "Maximum wait time. Defaults to 5400; capped at 14400."},
+		"pollSeconds":    map[string]any{"type": "integer", "description": "Polling interval. Defaults to 30; clamped between 5 and 120."},
+		"includeLogs":    map[string]any{"type": "boolean", "description": "Include relevant Azure logs even when validation succeeds. Failed logs are always included on failure."},
+	}), s.handleReleaseWingetWatch, toolHints{ReadOnly: true, OpenWorld: true})
 	s.addTool("prepare_release", "Dry-run or trigger the Prepare Release workflow. dryRun defaults to true; dryRun=false triggers an externally visible GitHub workflow.", schemaObject(map[string]any{
-		"version": map[string]any{"type": "string", "description": "Release tag to create, for example v0.1.2."},
+		"version": map[string]any{"type": "string", "description": "Release tag to create, for example v0.1.2. Defaults to the next patch tag."},
 		"dryRun":  map[string]any{"type": "boolean", "description": "When true, validate readiness without triggering GitHub Actions. Defaults to true."},
 	}), s.handlePrepareRelease, false)
 }
@@ -201,8 +246,8 @@ func realWorldValidationToolSchema(extra map[string]any) map[string]any {
 		"repositories":       realWorldRepositoryArraySchema("Repositories included in the sweep. Defaults from manifestPath when available."),
 		"dependencyPrep":     realWorldDependencyPrepArraySchema("Dependency-prep notes from real_world_inspect_corpus, carried forward to triage. Do not run dependency lifecycle scripts during prep."),
 		"build":              map[string]any{"type": "boolean", "description": "Build bin/dollarlint before validating. Defaults to true."},
-		"schemaStore":        map[string]any{"type": "boolean", "description": "Enable SchemaStore catalog matching. Defaults to true."},
-		"schemaStoreFailure": enumSchema([]string{"warn", "error", "skip"}, "SchemaStore catalog failure policy. Defaults to warn."),
+		"schemaStore":        map[string]any{"type": "boolean", "description": "Enable catalog matching. Defaults to true."},
+		"schemaStoreFailure": enumSchema([]string{"warn", "error", "skip"}, "Catalog failure policy. Defaults to warn."),
 		"fetchRetries":       map[string]any{"type": "integer", "description": "Remote schema fetch retries. Defaults to 1."},
 		"fetchRetryMinWait":  map[string]any{"type": "string", "description": "Minimum retry wait. Defaults to 1ms."},
 		"fetchRetryMaxWait":  map[string]any{"type": "string", "description": "Maximum retry wait. Defaults to 1ms."},

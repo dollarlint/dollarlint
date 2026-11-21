@@ -25,6 +25,9 @@ func primeableDocumentSchemaRoots(cfg Config, document *Document) []string {
 	if shouldPruneRefs(cfg, document.Schema, document.azureResourceRefs()) {
 		return nil
 	}
+	if shouldPruneAzureARMDeploymentParameters(cfg, document.Schema) {
+		return nil
+	}
 	return []string{document.Schema}
 }
 
@@ -36,6 +39,10 @@ func shouldPruneRefs(cfg Config, schemaURI string, refs []azureARMResourceRef) b
 
 func shouldPruneAzureARMResources(cfg Config, schemaURI string, documentData any) bool {
 	return shouldPruneRefs(cfg, schemaURI, collectAzureARMResourceRefs(documentData))
+}
+
+func shouldPruneAzureARMDeploymentParameters(cfg Config, schemaURI string) bool {
+	return azureResourcePruningEnabled(cfg.Schemas) && isAzureARMDeploymentParametersSchema(schemaURI)
 }
 
 func addPrunedAzureARMResources(ctx context.Context, compiler *jsonschema.Compiler, cache *SchemaCache, cfg Config, schemaURI string, documentData any) error {
@@ -78,6 +85,44 @@ func addPrunedAzureARMResourcesWithRefs(ctx context.Context, compiler *jsonschem
 	return nil
 }
 
+func addPrunedAzureARMDeploymentParametersTemplate(ctx context.Context, compiler *jsonschema.Compiler, cache *SchemaCache, cfg Config, schemaURI string) error {
+	if !shouldPruneAzureARMDeploymentParameters(cfg, schemaURI) {
+		return nil
+	}
+	rootDoc, err := cache.LoadContext(ctx, schemaURI)
+	if err != nil {
+		return err
+	}
+	rootMap, ok := cloneJSONValue(rootDoc).(map[string]any)
+	if !ok {
+		return nil
+	}
+	rootURL := withoutFragmentMust(schemaURI)
+	templateURL := findAzureARMDeploymentTemplateURL(rootMap, rootURL)
+	if templateURL == "" {
+		templateURL = azureARMDeploymentTemplateSiblingURL(schemaURI)
+	}
+	if templateURL == "" {
+		return nil
+	}
+	templateDoc, err := cache.LoadContext(ctx, templateURL)
+	if err != nil {
+		return err
+	}
+	templateMap, ok := cloneJSONValue(templateDoc).(map[string]any)
+	if !ok {
+		return nil
+	}
+	pruned := pruneAzureARMDeploymentTemplateForParameters(templateMap)
+	if pruned == nil {
+		return nil
+	}
+	if err := compiler.AddResource(withoutFragmentMust(templateURL), pruned); err != nil {
+		return fmt.Errorf("add pruned Azure ARM deployment template parameter definitions %s: %w", withoutFragmentMust(templateURL), err)
+	}
+	return nil
+}
+
 func isAzureARMDeploymentTemplateSchema(raw string) bool {
 	parsed, err := url.Parse(raw)
 	if err != nil {
@@ -88,6 +133,69 @@ func isAzureARMDeploymentTemplateSchema(raw string) bool {
 		parts[0] == "schemas" &&
 		parts[2] == "deploymentTemplate.json" &&
 		parts[1] != ""
+}
+
+func isAzureARMDeploymentParametersSchema(raw string) bool {
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	return len(parts) == 3 &&
+		parts[0] == "schemas" &&
+		parts[2] == "deploymentParameters.json" &&
+		parts[1] != ""
+}
+
+func findAzureARMDeploymentTemplateURL(schema map[string]any, rootURL string) string {
+	base, err := url.Parse(rootURL)
+	if err != nil {
+		return ""
+	}
+	for _, ref := range walkSchemaReferences(schema, base, nil) {
+		if isAzureARMDeploymentTemplateSchema(ref) {
+			return withoutFragmentMust(ref)
+		}
+	}
+	return ""
+}
+
+func azureARMDeploymentTemplateSiblingURL(raw string) string {
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return ""
+	}
+	if !isAzureARMDeploymentParametersSchema(raw) {
+		return ""
+	}
+	parsed.Fragment = ""
+	parsed.RawQuery = ""
+	parsed.Path = strings.TrimSuffix(parsed.Path, "deploymentParameters.json") + "deploymentTemplate.json"
+	return parsed.String()
+}
+
+func pruneAzureARMDeploymentTemplateForParameters(schema map[string]any) map[string]any {
+	definitions, ok := schema["definitions"].(map[string]any)
+	if !ok {
+		return nil
+	}
+	prunedDefinitions := map[string]any{}
+	for _, name := range []string{"parameterValueTypes", "keyVaultReference"} {
+		definition, ok := definitions[name]
+		if !ok {
+			return nil
+		}
+		prunedDefinitions[name] = definition
+	}
+	pruned := map[string]any{
+		"definitions": prunedDefinitions,
+	}
+	for _, key := range []string{"$schema", "$id", "id"} {
+		if value, ok := schema[key]; ok {
+			pruned[key] = value
+		}
+	}
+	return pruned
 }
 
 func collectAzureARMResourceRefs(template any) []azureARMResourceRef {

@@ -179,6 +179,16 @@ func loadGitIgnoreRules(root string) ([]gitIgnoreRule, error) {
 }
 
 func loadGitIgnoreRulesAt(root, base string) ([]gitIgnoreRule, error) {
+	info, err := os.Stat(root)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("read gitignore root %s: %w", root, err)
+	}
+	if !info.IsDir() {
+		return nil, fmt.Errorf("read gitignore root %s: not a directory", root)
+	}
 	path := filepath.Join(root, ".gitignore")
 	file, err := os.Open(path)
 	if err != nil {

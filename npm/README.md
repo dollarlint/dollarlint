@@ -25,7 +25,7 @@ dollarlint validate ./config --locations
 dollarlint validate ./config --verbose
 dollarlint validate ./config --format json
 dollarlint validate ./config --format sarif --output dollarlint.sarif
-dollarlint validate . --schema-store
+dollarlint validate . --catalogs
 ```
 
 Use `dollarlint validate <path>` for validation runs. Bare paths are not accepted.

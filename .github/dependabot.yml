@@ -1,16 +1,38 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "gomod"
-    directory: "/"
+      interval: weekly
+    groups:
+      routine-updates:
+        update-types: [minor, patch]
+      security-updates:
+        applies-to: security-updates
+        patterns: ["*"]
+    # Compiler-owned workflows must be regenerated from their Markdown source.
+    exclude-paths:
+      - ".github/workflows/*.lock.yml"
+    ignore:
+      # Dependabot identifies actions by owner/repo, without the action subpath.
+      - dependency-name: "github/gh-aw-actions"
+  - package-ecosystem: gomod
+    directory: /
     schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "npm"
-    directory: "/docs"
+      interval: weekly
+    groups:
+      routine-updates:
+        update-types: [minor, patch]
+      security-updates:
+        applies-to: security-updates
+        patterns: ["*"]
+  - package-ecosystem: npm
+    directory: /docs
     schedule:
-      interval: "weekly"
+      interval: weekly
+    groups:
+      routine-updates:
+        update-types: [minor, patch]
+      security-updates:
+        applies-to: security-updates
+        patterns: ["*"]

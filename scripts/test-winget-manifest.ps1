@@ -62,6 +62,7 @@ $WinGetErrors = @{
     "8A15002B" = "Portable package already exists"
     "8A15002F" = "Portable install failed"
     "8A150035" = "Archive malware scan failed - rerun as admin or pass --ignore-local-archive-malware-scan"
+    "8A150028" = "Manifest validation completed with warnings"
 }
 $script:FailureReported = $false
 
@@ -183,6 +184,12 @@ function Invoke-Checked {
         $hint = $WinGetErrors[$hexCode]
         $detail = if ($hint) { "$hint (0x$hexCode)" } else { "exit code $LASTEXITCODE (0x$hexCode)" }
 
+        if ($FilePath -eq "winget" -and $Arguments.Count -gt 0 -and $Arguments[0] -eq "validate" -and $hexCode -eq "8A150028") {
+            Write-Host ""
+            Write-Host "Command completed with accepted warning: $detail" -ForegroundColor Yellow
+            return
+        }
+
         Write-Host ""
         Write-Host "Command failed: $detail" -ForegroundColor Red
         Write-Host "Command: $FilePath $($Arguments -join ' ')"
@@ -200,8 +207,10 @@ function Invoke-Checked {
 
                     if ($lastLogLine -like "*IAttachmentExecute*") {
                         Write-Host "Hint: WinGet failed while applying Mark-of-the-Web with IAttachmentExecute after the installer hash was verified." -ForegroundColor Yellow
-                        Write-Host "      This is the upstream WinGet MOTW bug (microsoft/winget-cli#4046)," -ForegroundColor Yellow
-                        Write-Host "      not a DollarLint manifest, archive, or binary issue." -ForegroundColor Yellow
+                        Write-Host "      This resembles the WinGet MOTW behavior discussed in microsoft/winget-cli#4046," -ForegroundColor Yellow
+                        Write-Host "      but local-manifest installs may be a separate variant. The failure happens" -ForegroundColor Yellow
+                        Write-Host "      after hash verification and before archive extraction, which points away from" -ForegroundColor Yellow
+                        Write-Host "      the DollarLint manifest, archive layout, or binary." -ForegroundColor Yellow
                         Write-Host "      Re-run with -AllowManualFallback to skip WinGet's install and verify the portable layout manually." -ForegroundColor Yellow
                     }
                 }
@@ -474,13 +483,13 @@ catch {
     }
 
     Write-Host ""
-    Write-Step "Falling back to manual portable install (WinGet MOTW bug, microsoft/winget-cli#4046)"
+    Write-Step "Falling back to manual portable install (WinGet MOTW local-manifest failure)"
     Invoke-ManualPortableFallback -ManifestPath $ManifestPath -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
     $script:UsedManualFallback = $true
 }
 
 Write-Step "Checking installed package"
-Invoke-Checked winget list --id $PackageIdentifier
+Invoke-Checked winget list --id $PackageIdentifier --source winget --accept-source-agreements
 
 if (-not $SkipCommandCheck) {
     Write-Step "Checking dollarlint command"
@@ -500,7 +509,7 @@ if ($UninstallAfter) {
         Remove-ManualPortableInstall -PackageIdentifier $PackageIdentifier
     }
     else {
-        Invoke-Checked winget uninstall --id $PackageIdentifier --disable-interactivity
+        Invoke-Checked winget uninstall --id $PackageIdentifier --source winget --accept-source-agreements --disable-interactivity
     }
 }
 

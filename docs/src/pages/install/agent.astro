@@ -64,7 +64,7 @@ Use that generated config as the starting point, then edit it for this repositor
 
        dollarlint validate . --format json --locations --show-skipped
 
-   Use JSON fields such as schemaMatch, suggestedAssociation, suggestedCatalogIgnore, warnings, skipReason, skipClass, category, line, and column. Do not write JSON output artifacts into the repository unless the user asks; use stdout or a temporary file.
+   Use JSON fields such as schemaMatch, schemaGap, suggestedAssociation, suggestedCatalogIgnore, warnings, skipReason, skipClass, category, line, and column. Do not write JSON output artifacts into the repository unless the user asks; use stdout or a temporary file.
 
 3. When inspect shows a correct catalog match for an important first-party config file, make it explicit in .dollarlint.toml with [[schemas.associations]]. Prefer explicit associations for project-owned configs that should keep being validated even if catalog behavior changes.
 

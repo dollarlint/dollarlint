@@ -263,6 +263,7 @@ type InspectFile struct {
 	Schema                 string       `json:"schema,omitempty"`
 	SchemaSource           string       `json:"schemaSource,omitempty"`
 	SchemaMatch            *SchemaMatch `json:"schemaMatch,omitempty"`
+	SchemaGap              *SchemaGap   `json:"schemaGap,omitempty"`
 	AssociationStatus      string       `json:"associationStatus"`
 	Reason                 string       `json:"reason"`
 	SuggestedAssociation   string       `json:"suggestedAssociation,omitempty"`
@@ -297,6 +298,7 @@ type FileResult struct {
 	Schema         string       `json:"schema,omitempty"`
 	SchemaSource   string       `json:"schemaSource,omitempty"`
 	SchemaMatch    *SchemaMatch `json:"schemaMatch,omitempty"`
+	SchemaGap      *SchemaGap   `json:"schemaGap,omitempty"`
 	Status         string       `json:"status"`
 	Issues         int          `json:"issues"`
 	Ignored        int          `json:"ignored"`
@@ -313,6 +315,7 @@ type Issue struct {
 	Schema           string       `json:"schema,omitempty"`
 	SchemaSource     string       `json:"schemaSource,omitempty"`
 	SchemaMatch      *SchemaMatch `json:"schemaMatch,omitempty"`
+	SchemaGap        *SchemaGap   `json:"schemaGap,omitempty"`
 	Keyword          string       `json:"keyword,omitempty"`
 	KeywordLocation  string       `json:"keywordLocation,omitempty"`
 	Property         string       `json:"property,omitempty"`
@@ -345,6 +348,13 @@ type SchemaMatch struct {
 	IgnorePattern          string `json:"ignorePattern,omitempty"`
 	SuggestedAssociation   string `json:"suggestedAssociation,omitempty"`
 	SuggestedCatalogIgnore string `json:"suggestedCatalogIgnore,omitempty"`
+}
+
+type SchemaGap struct {
+	Name      string `json:"name"`
+	Reason    string `json:"reason"`
+	DocsURL   string `json:"docsUrl,omitempty"`
+	FileMatch string `json:"fileMatch,omitempty"`
 }
 
 type Warning struct {

@@ -297,6 +297,20 @@ func TestDecodeSchemaDocumentFallbacks(t *testing.T) {
 	}
 }
 
+func TestFilePathFromURLWindowsDrivePath(t *testing.T) {
+	parsed, err := url.Parse("file:///C:/Users/alice/project/Schemas/x.json")
+	if err != nil {
+		t.Fatalf("parse URL: %v", err)
+	}
+	path, err := filePathFromURLForOS(parsed, "windows")
+	if err != nil {
+		t.Fatalf("filePathFromURLForOS: %v", err)
+	}
+	if path != `C:\Users\alice\project\Schemas\x.json` {
+		t.Fatalf("windows file URL path = %q", path)
+	}
+}
+
 func TestSchemaReferencesRespectIDAndSkipFragments(t *testing.T) {
 	doc := map[string]any{
 		"$id": "https://example.com/schemas/root.json",

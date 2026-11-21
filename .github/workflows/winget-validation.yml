@@ -1,0 +1,166 @@
+name: WinGet Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Which WinGet path to test"
+        required: true
+        default: official-source
+        type: choice
+        options:
+          - official-source
+          - manifest-branch
+          - both
+      package_version:
+        description: "Expected/tested DollarLint version, e.g. 0.1.5. Leave empty for manifest auto-discovery."
+        required: false
+        default: ""
+      branch:
+        description: "dollarlint/winget-pkgs branch for manifest testing, e.g. dollarlint-0.1.9. Leave empty to derive from package_version or auto-discover."
+        required: false
+        default: ""
+      allow_manual_fallback:
+        description: "Allow manual portable fallback if local-manifest install hits the WinGet MOTW failure"
+        required: true
+        default: true
+        type: boolean
+      runner:
+        description: "Windows runner label"
+        required: true
+        default: windows-latest
+        type: choice
+        options:
+          - windows-latest
+          - windows-11-arm
+
+permissions:
+  contents: read
+
+jobs:
+  winget-validation:
+    name: ${{ format('{0} on {1}', inputs.mode, inputs.runner) }}
+    runs-on: ${{ inputs.runner }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Resolve validation inputs
+        id: resolve
+        env:
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_PACKAGE_VERSION: ${{ inputs.package_version }}
+          INPUT_BRANCH: ${{ inputs.branch }}
+          INPUT_ALLOW_MANUAL_FALLBACK: ${{ inputs.allow_manual_fallback }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $mode = $env:INPUT_MODE
+          $packageVersion = $env:INPUT_PACKAGE_VERSION
+          $branch = $env:INPUT_BRANCH
+          $allowManualFallback = $env:INPUT_ALLOW_MANUAL_FALLBACK
+
+          "mode=$mode" >> $env:GITHUB_OUTPUT
+          "package_version=$packageVersion" >> $env:GITHUB_OUTPUT
+          "branch=$branch" >> $env:GITHUB_OUTPUT
+          "allow_manual_fallback=$allowManualFallback" >> $env:GITHUB_OUTPUT
+
+          Write-Host "mode=$mode"
+          Write-Host "package_version=$packageVersion"
+          Write-Host "branch=$branch"
+          Write-Host "allow_manual_fallback=$allowManualFallback"
+
+      - name: Inspect Windows and WinGet
+        run: |
+          $ErrorActionPreference = "Stop"
+          Write-Host "Runner OS: $env:ImageOS"
+          Write-Host "Processor architecture: $env:PROCESSOR_ARCHITECTURE"
+          if ($env:PROCESSOR_ARCHITEW6432) {
+            Write-Host "Native processor architecture: $env:PROCESSOR_ARCHITEW6432"
+          }
+          Get-ComputerInfo -Property OsName, OsVersion, OsBuildNumber, WindowsVersion | Format-List
+          Get-Command winget | Format-List Source, Version
+          winget --version
+          winget source list
+
+      - name: Test Microsoft WinGet source package
+        if: ${{ steps.resolve.outputs.mode == 'official-source' || steps.resolve.outputs.mode == 'both' }}
+        env:
+          EXPECTED_VERSION: ${{ steps.resolve.outputs.package_version }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          winget source update
+          winget install `
+            --id DollarLint.DollarLint `
+            --exact `
+            --source winget `
+            --accept-source-agreements `
+            --accept-package-agreements `
+            --disable-interactivity `
+            --verbose-logs
+
+          $command = Get-Command dollarlint -ErrorAction SilentlyContinue
+          if (-not $command) {
+            $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+            $command = Get-Command dollarlint -ErrorAction Stop
+          }
+          Write-Host "dollarlint: $($command.Source)"
+
+          $versionOutput = (& dollarlint version) | Out-String
+          $versionOutput = $versionOutput.Trim()
+          Write-Host $versionOutput
+
+          if ($env:EXPECTED_VERSION -ne "" -and $versionOutput -notmatch [regex]::Escape($env:EXPECTED_VERSION)) {
+            throw "Expected dollarlint version '$env:EXPECTED_VERSION', got '$versionOutput'."
+          }
+
+          winget list `
+            --id DollarLint.DollarLint `
+            --source winget `
+            --accept-source-agreements
+
+      - name: Uninstall Microsoft WinGet source package
+        if: ${{ always() && (steps.resolve.outputs.mode == 'official-source' || steps.resolve.outputs.mode == 'both') }}
+        run: |
+          winget uninstall `
+            --id DollarLint.DollarLint `
+            --source winget `
+            --accept-source-agreements `
+            --disable-interactivity
+
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -ne 0) {
+            Write-Warning "winget uninstall returned $exitCode; package may not have been installed."
+            exit 0
+          }
+
+      - name: Test manifest branch
+        if: ${{ steps.resolve.outputs.mode == 'manifest-branch' || steps.resolve.outputs.mode == 'both' }}
+        env:
+          PACKAGE_VERSION: ${{ steps.resolve.outputs.package_version }}
+          BRANCH: ${{ steps.resolve.outputs.branch }}
+          ALLOW_MANUAL_FALLBACK: ${{ steps.resolve.outputs.allow_manual_fallback }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $scriptParams = @{
+            UninstallAfter = $true
+          }
+          $displayArgs = @("-UninstallAfter")
+
+          if ($env:PACKAGE_VERSION -ne "") {
+            $scriptParams.PackageVersion = $env:PACKAGE_VERSION
+            $displayArgs += @("-PackageVersion", $env:PACKAGE_VERSION)
+          }
+          if ($env:BRANCH -ne "") {
+            $scriptParams.Branch = $env:BRANCH
+            $displayArgs += @("-Branch", $env:BRANCH)
+          }
+          if ($env:ALLOW_MANUAL_FALLBACK -eq "true") {
+            $scriptParams.AllowManualFallback = $true
+            $displayArgs += "-AllowManualFallback"
+          }
+
+          Write-Host ".\scripts\test-winget-manifest.ps1 $($displayArgs -join ' ')"
+          .\scripts\test-winget-manifest.ps1 @scriptParams

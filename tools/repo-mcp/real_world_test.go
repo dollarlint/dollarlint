@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"testing"
@@ -85,6 +88,13 @@ func TestRealWorldStartTestingOmitsFullHistoryByDefault(t *testing.T) {
 	if _, ok := out["testedReposOmitted"]; !ok {
 		t.Fatalf("missing testedReposOmitted hint: %+v", out)
 	}
+	if out["ok"].(bool) {
+		t.Fatalf("start without candidates should route to discovery before reporting ok: %+v", out)
+	}
+	next := out["nextStep"].(map[string]any)
+	if next["tool"] != "real_world_discover_candidates" {
+		t.Fatalf("start without candidates next step = %+v", next)
+	}
 
 	withRepos, err := server.realWorldStartTesting(context.Background(), realWorldStartTestingArgs{Title: "Compact", IncludeTestedRepos: true, TestedRepoLimit: 3})
 	if err != nil {
@@ -93,6 +103,55 @@ func TestRealWorldStartTestingOmitsFullHistoryByDefault(t *testing.T) {
 	testedRepos := withRepos["testedRepos"].([]realWorldTestedRepo)
 	if len(testedRepos) != 3 || withRepos["testedReposTruncated"] != true {
 		t.Fatalf("tested repo sample len/truncated = %d/%v", len(testedRepos), withRepos["testedReposTruncated"])
+	}
+}
+
+func TestRealWorldSearchGitHubRepositoriesUsesGitHubSDK(t *testing.T) {
+	var sawRequest bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sawRequest = true
+		if r.URL.Path != "/search/repositories" {
+			t.Errorf("path = %q, want /search/repositories", r.URL.Path)
+		}
+		if got := r.URL.Query().Get("q"); got != "language:Go stars:>=10" {
+			t.Errorf("q = %q", got)
+		}
+		if got := r.URL.Query().Get("per_page"); got != "2" {
+			t.Errorf("per_page = %q", got)
+		}
+		if got := r.URL.Query().Get("sort"); got != "updated" {
+			t.Errorf("sort = %q", got)
+		}
+		if got := r.Header.Get("Authorization"); got != "Bearer test-token" {
+			t.Errorf("Authorization = %q", got)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"items": []map[string]any{
+				{"full_name": "owner/project", "clone_url": "https://github.com/owner/project.git", "language": "Go"},
+				{"full_name": "owner/fork", "clone_url": "https://github.com/owner/fork.git", "language": "Go", "fork": true},
+			},
+		})
+	}))
+	defer server.Close()
+	t.Setenv("DOLLARLINT_GITHUB_API_URL", server.URL)
+	t.Setenv("GITHUB_TOKEN", "test-token")
+
+	repositories, err := realWorldSearchGitHubRepositories(context.Background(), t.TempDir(), realWorldCandidateSearchSpec{
+		Ecosystem: "Go",
+		Query:     "language:Go stars:>=10",
+	}, 2)
+	if err != nil {
+		t.Fatalf("search repositories: %v", err)
+	}
+	if !sawRequest {
+		t.Fatal("server did not receive request")
+	}
+	if len(repositories) != 1 {
+		t.Fatalf("repositories = %+v", repositories)
+	}
+	if repositories[0].Name != "owner-project" || repositories[0].CloneURL != "https://github.com/owner/project.git" || repositories[0].Ecosystem != "Go" {
+		t.Fatalf("repository = %+v", repositories[0])
 	}
 }
 
@@ -133,6 +192,62 @@ func TestRealWorldHistoryDefaultsToCompactQueries(t *testing.T) {
 	testedRepos := withRepos["testedRepos"].([]realWorldTestedRepo)
 	if len(testedRepos) != 1 || withRepos["testedReposTruncated"] != true {
 		t.Fatalf("tested repo sample len/truncated = %d/%v", len(testedRepos), withRepos["testedReposTruncated"])
+	}
+}
+
+func TestRealWorldSelectDiscoveredCandidatesSkipsHistoryAndBatchDuplicates(t *testing.T) {
+	history := realWorldHistory{Entries: []realWorldEntry{{
+		ID:    "old-run",
+		Date:  "2026-05-01",
+		Title: "Old",
+		Repositories: []realWorldRepository{{
+			Name:     "cargo",
+			CloneURL: "https://github.com/rust-lang/cargo.git",
+		}},
+	}}}
+	groups := [][]realWorldRepository{
+		{
+			{Name: "cargo", Ecosystem: "Rust", CloneURL: "https://github.com/rust-lang/cargo.git"},
+			{Name: "django", Ecosystem: "Python", CloneURL: "https://github.com/django/django.git"},
+		},
+		{
+			{Name: "django-copy", Ecosystem: "Python", CloneURL: "https://github.com/django/django.git"},
+			{Name: "pnpm", Ecosystem: "TypeScript", CloneURL: "https://github.com/pnpm/pnpm.git"},
+		},
+	}
+
+	selected, omittedHistory, omittedBatchDuplicates := realWorldSelectDiscoveredCandidates(history, groups, 2, false)
+	if len(selected) != 2 || normalizedRepoKey(selected[0]) != "django/django" || normalizedRepoKey(selected[1]) != "pnpm/pnpm" {
+		t.Fatalf("selected = %+v", selected)
+	}
+	if len(omittedHistory) != 1 || omittedHistory[0].Name != "cargo" || !omittedHistory[0].AlreadyTested {
+		t.Fatalf("omitted history = %+v", omittedHistory)
+	}
+	if omittedBatchDuplicates != 1 {
+		t.Fatalf("omitted batch duplicates = %d", omittedBatchDuplicates)
+	}
+}
+
+func TestRealWorldSelectDiscoveredCandidatesAllowsIntentionalReruns(t *testing.T) {
+	history := realWorldHistory{Entries: []realWorldEntry{{
+		ID:    "old-run",
+		Date:  "2026-05-01",
+		Title: "Old",
+		Repositories: []realWorldRepository{{
+			Name:     "cargo",
+			CloneURL: "https://github.com/rust-lang/cargo.git",
+		}},
+	}}}
+	groups := [][]realWorldRepository{{
+		{Name: "cargo", Ecosystem: "Rust", CloneURL: "https://github.com/rust-lang/cargo.git"},
+	}}
+
+	selected, omittedHistory, _ := realWorldSelectDiscoveredCandidates(history, groups, 1, true)
+	if len(selected) != 1 || selected[0].Name != "cargo" || !selected[0].AlreadyTested {
+		t.Fatalf("selected rerun = %+v", selected)
+	}
+	if len(omittedHistory) != 0 {
+		t.Fatalf("omitted history with reruns allowed = %+v", omittedHistory)
 	}
 }
 
@@ -379,6 +494,48 @@ func TestRealWorldValidationEvidenceIncludesBundleUXCollateral(t *testing.T) {
 	signals := evidence["uxSignals"].([]string)
 	if !containsString(signals, "large-enum-message") {
 		t.Fatalf("ux signals = %+v", signals)
+	}
+}
+
+func TestRealWorldValidationEvidenceCapsSkippedSignals(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "bundle.json")
+	files := make([]map[string]any, 0, 30)
+	for i := 0; i < 30; i++ {
+		files = append(files, map[string]any{
+			"path":   fmt.Sprintf("config-%02d.yml", i),
+			"format": "yaml",
+			"status": "skipped",
+		})
+	}
+	bundle := map[string]any{
+		"json": map[string]any{
+			"summary": map[string]any{
+				"discovered": 30,
+				"validated":  0,
+				"skipped":    30,
+				"failed":     0,
+				"issues":     map[string]any{"total": 0, "parsing": 0, "validation": 0, "schema": 0, "coverage": 0},
+				"ignored":    0,
+				"warnings":   0,
+			},
+			"files":    files,
+			"issues":   []map[string]any{},
+			"warnings": []map[string]any{},
+		},
+		"sarif":  map[string]any{"version": "2.1.0", "runs": []any{}},
+		"styled": map[string]any{"plain": "dollarlint skipped 30 files\n"},
+	}
+	if err := writeJSONFile(path, bundle); err != nil {
+		t.Fatal(err)
+	}
+	evidence, err := realWorldValidationEvidence("repo", path)
+	if err != nil {
+		t.Fatalf("validation evidence: %v", err)
+	}
+	signals := evidence["skippedSignals"].([]realWorldSkippedFileSignal)
+	if len(signals) != 20 || evidence["skippedSignalsTotal"].(int) != 30 || evidence["skippedSignalsTruncated"].(bool) != true {
+		t.Fatalf("skipped signal cap = len %d total %+v truncated %+v", len(signals), evidence["skippedSignalsTotal"], evidence["skippedSignalsTruncated"])
 	}
 }
 
@@ -886,6 +1043,26 @@ if [ "$1" = "rev-parse" ]; then
 fi
 exit 1
 `
+	if runtime.GOOS == "windows" {
+		fakeGit = filepath.Join(fakeBin, "git.cmd")
+		fakeGitScript = `@echo off
+setlocal enabledelayedexpansion
+if "%1"=="clone" (
+  set "target="
+  for %%A in (%*) do set "target=%%~A"
+  mkdir "!target!\config"
+  > "!target!\package.json" echo {"name":"fake"}
+  > "!target!\config\tool.json" echo {"$schema":"./schema.json"}
+  > "!target!\config\schema.json" echo {"type":"object"}
+  exit /b 0
+)
+if "%1"=="rev-parse" (
+  echo deadbeef
+  exit /b 0
+)
+exit /b 1
+`
+	}
 	if err := os.WriteFile(fakeGit, []byte(fakeGitScript), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -1299,9 +1476,32 @@ func TestRealWorldNextAfterRecordOnlyMentionsDiscussionInAgenticWorkflow(t *test
 	}
 
 	t.Setenv("GH_AW_WORKFLOW_ID", "agentic-product-testing")
+	t.Setenv("GITHUB_SERVER_URL", "https://github.example")
+	t.Setenv("GITHUB_REPOSITORY", "dollarlint/dollarlint")
+	t.Setenv("GITHUB_RUN_ID", "12345")
 	next = realWorldNextAfterRecord(realWorldEntry{ID: "sample"})
 	if _, ok := next["discussion"]; !ok {
 		t.Fatalf("GitHub Agentic Workflow run should include discussion guidance: %+v", next)
+	}
+	if next["workflowRunURL"] != "https://github.example/dollarlint/dollarlint/actions/runs/12345" {
+		t.Fatalf("workflowRunURL = %v", next["workflowRunURL"])
+	}
+}
+
+func TestRealWorldNextFixBuildMentionsSafeOutputsInAgenticWorkflow(t *testing.T) {
+	t.Setenv("GITHUB_ACTIONS", "true")
+	next := realWorldNextFixBuild()
+	if _, ok := next["safeOutputs"]; ok {
+		t.Fatalf("generic GitHub Actions run should not include safe output guidance: %+v", next)
+	}
+
+	t.Setenv("GH_AW_WORKFLOW_ID", "agentic-product-testing")
+	next = realWorldNextFixBuild()
+	if _, ok := next["safeOutputs"]; !ok {
+		t.Fatalf("GitHub Agentic Workflow run should include safe output guidance: %+v", next)
+	}
+	if _, ok := next["blockedRun"]; !ok {
+		t.Fatalf("GitHub Agentic Workflow run should include blocker guidance: %+v", next)
 	}
 }
 
@@ -1469,5 +1669,58 @@ func TestRealWorldMergeValidationArtifactsPrefixesRepoPaths(t *testing.T) {
 		if paths[i] != want[i] {
 			t.Fatalf("paths = %+v, want %+v", paths, want)
 		}
+	}
+}
+
+func TestRealWorldEnsureManagedOutputArtifactRegeneratesMissingMerge(t *testing.T) {
+	root := t.TempDir()
+	repo := filepath.Join(root, "repo-a")
+	if err := os.MkdirAll(repo, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	perRepoOutput := filepath.Join(root, "repo-a.json")
+	if err := writeJSONFile(perRepoOutput, realWorldMergedOutput{
+		Schema:        "https://example.test/result.schema.json",
+		FormatVersion: 1,
+		Root:          repo,
+		Summary: realWorldMergedSummary{
+			Discovered: 1,
+			Validated:  1,
+			Issues:     realWorldIssueSummary{},
+		},
+		Files: []map[string]any{{"path": "dollarlint.json", "format": "json", "status": "validated"}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	now := time.Now()
+	mergedPath := filepath.Join(root, "missing-merged.json")
+	result := realWorldRepoValidationResult{Repository: "repo-a", Path: repo, OutputArtifact: perRepoOutput, Accepted: true}
+	run := &realWorldValidationRun{
+		ID:             "run",
+		CorpusDir:      root,
+		OutputArtifact: mergedPath,
+		Repositories:   []realWorldRepository{{Name: "repo-a", Path: repo}},
+		StartedAt:      now,
+		completedAt:    &now,
+		completed:      1,
+		results:        make(chan realWorldRepoValidationResult, 1),
+		resultsByID:    map[string]realWorldRepoValidationResult{"repo-a": result},
+		deliveredByID:  map[string]realWorldRepoValidationResult{"repo-a": result},
+		feedbackByID: map[string]realWorldValidationFeedback{"repo-a": {
+			Repository: "repo-a",
+			Outcome:    realWorldFeedbackBehavedReasonably,
+			Findings:   []string{"Validated cleanly with clear output."},
+		}},
+	}
+	if err := realWorldEnsureManagedOutputArtifact(run); err != nil {
+		t.Fatalf("ensure managed output artifact: %v", err)
+	}
+	summary, _, err := readRealWorldOutputSummary(mergedPath)
+	if err != nil {
+		t.Fatalf("read regenerated artifact: %v", err)
+	}
+	if summary.Discovered != 1 || summary.Validated != 1 {
+		t.Fatalf("summary = %+v", summary)
 	}
 }

@@ -3,7 +3,6 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -187,6 +186,7 @@ func TestFormatJSONContract(t *testing.T) {
 				Path:           "/tmp/repo/package-lock.json",
 				RelativePath:   "package-lock.json",
 				Format:         DocumentFormatJSON,
+				SchemaGap:      &SchemaGap{Name: "Example gap", Reason: "recognized but unsupported", DocsURL: "https://example.com/docs", FileMatch: "package-lock.json"},
 				Status:         StatusSkipped,
 				SkipReason:     SkipReasonNoSchema,
 				SkipClass:      SkipClassLockfile,
@@ -250,6 +250,7 @@ func TestFormatJSONContract(t *testing.T) {
 			Schema         string       `json:"schema"`
 			SchemaSource   string       `json:"schemaSource"`
 			SchemaMatch    *SchemaMatch `json:"schemaMatch"`
+			SchemaGap      *SchemaGap   `json:"schemaGap"`
 			Issues         int          `json:"issues"`
 			Ignored        int          `json:"ignored"`
 			SkipReason     string       `json:"skipReason"`
@@ -263,6 +264,7 @@ func TestFormatJSONContract(t *testing.T) {
 			Category     string       `json:"category"`
 			SchemaSource string       `json:"schemaSource"`
 			SchemaMatch  *SchemaMatch `json:"schemaMatch"`
+			SchemaGap    *SchemaGap   `json:"schemaGap"`
 			Line         int          `json:"line"`
 			Column       int          `json:"column"`
 		} `json:"issues"`
@@ -293,6 +295,9 @@ func TestFormatJSONContract(t *testing.T) {
 	}
 	if decoded.Files[1].Path != "package-lock.json" || decoded.Files[1].SkipReason != SkipReasonNoSchema || decoded.Files[1].SkipClass != SkipClassLockfile || decoded.Files[1].SkipImportance != SkipImportanceLow || decoded.Files[1].SkipDetail == "" {
 		t.Fatalf("json skipped file = %+v", decoded.Files[1])
+	}
+	if decoded.Files[1].SchemaGap == nil || decoded.Files[1].SchemaGap.Name != "Example gap" || decoded.Files[1].SchemaGap.DocsURL == "" {
+		t.Fatalf("json skipped file schema gap = %+v", decoded.Files[1].SchemaGap)
 	}
 	if len(decoded.Issues) != 1 || decoded.Issues[0].Path != "config.json" || decoded.Issues[0].Schema != "schema.json" || decoded.Issues[0].Category != "validation" || decoded.Issues[0].SchemaSource != "$schema" || decoded.Issues[0].Line != 2 || decoded.Issues[0].Column != 11 {
 		t.Fatalf("json issues = %+v", decoded.Issues)
@@ -327,7 +332,11 @@ func validateResultSchema(t *testing.T, data []byte) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	schemaURI := (&url.URL{Scheme: "file", Path: filepath.ToSlash(schemaPath)}).String()
+	schemaURL, err := fileURL(schemaPath)
+	if err != nil {
+		t.Fatalf("schema file URL: %v", err)
+	}
+	schemaURI := schemaURL.String()
 	schema, err := jsonschema.NewCompiler().Compile(schemaURI)
 	if err != nil {
 		t.Fatalf("compile result schema: %v", err)

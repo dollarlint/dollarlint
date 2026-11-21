@@ -22,11 +22,11 @@ func matchPattern(pattern, rel string) bool {
 	if pattern == "" {
 		return false
 	}
-	if ok, _ := doublestar.PathMatch(pattern, rel); ok {
+	if ok, _ := doublestar.Match(pattern, rel); ok {
 		return true
 	}
 	if !strings.Contains(pattern, "/") {
-		if ok, _ := doublestar.PathMatch(pattern, path.Base(rel)); ok {
+		if ok, _ := doublestar.Match(pattern, path.Base(rel)); ok {
 			return true
 		}
 	}

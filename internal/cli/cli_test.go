@@ -396,17 +396,28 @@ func TestExecuteDiscoveryFlags(t *testing.T) {
 	}
 }
 
-func TestExecuteSchemaStoreFlags(t *testing.T) {
+func TestExecuteCatalogFlags(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "catalog.json"), `{"schemas":[{"name":"Custom","fileMatch":["custom.json"],"url":"./custom.schema.json"}]}`)
 	writeFile(t, filepath.Join(dir, "custom.schema.json"), `{"type":"object","required":["ok"],"properties":{"ok":{"type":"boolean"}}}`)
 	writeFile(t, filepath.Join(dir, "custom.json"), `{"ok":true}`)
 	var stdout, stderr bytes.Buffer
-	if code := Execute([]string{"validate", dir, "--schema-store-url", filepath.Join(dir, "catalog.json"), "--schema-store-failure", "warn", "--fetch-retries", "1", "--fetch-retry-min-wait", "1ms", "--fetch-retry-max-wait", "1ms", "--show-skipped"}, &stdout, &stderr); code != 0 {
-		t.Fatalf("schema-store run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	if code := Execute([]string{"validate", dir, "--catalog-source", filepath.Join(dir, "catalog.json"), "--catalog-failure", "warn", "--fetch-retries", "1", "--fetch-retry-min-wait", "1ms", "--fetch-retry-max-wait", "1ms", "--show-skipped"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("catalog run exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), "1 validated") || !strings.Contains(stdout.String(), "2 skipped") {
-		t.Fatalf("schema-store output = %s", stdout.String())
+		t.Fatalf("catalog output = %s", stdout.String())
+	}
+}
+
+func TestExecuteRejectsOldSchemaStoreFlags(t *testing.T) {
+	dir := t.TempDir()
+	var stdout, stderr bytes.Buffer
+	if code := Execute([]string{"validate", dir, "--schema-store"}, &stdout, &stderr); code != 2 {
+		t.Fatalf("old schema-store flag exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "unknown flag: --schema-store") {
+		t.Fatalf("old schema-store stderr = %s", stderr.String())
 	}
 }
 
@@ -440,7 +451,7 @@ func TestExecuteRejectsNegativeNumericOptions(t *testing.T) {
 func TestInitCommandCreatesStarterConfig(t *testing.T) {
 	dir := t.TempDir()
 	var stdout, stderr bytes.Buffer
-	if code := Execute([]string{"init", dir, "--schema-store"}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"init", dir, "--catalogs"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("init exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), "No interactive terminal detected") {
@@ -468,7 +479,7 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 	}
 	stdout.Reset()
 	stderr.Reset()
-	if code := Execute([]string{"init", dir, "--force", "--schema-store-failure", "error"}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"init", dir, "--force", "--catalog-failure", "error"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("force init exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	data, err = os.ReadFile(configPath)
@@ -489,11 +500,46 @@ func TestInitCommandCreatesStarterConfig(t *testing.T) {
 	}
 }
 
+func TestInitCommandCreatesCommentedStarterConfigWithDefaults(t *testing.T) {
+	dir := t.TempDir()
+	var stdout, stderr bytes.Buffer
+	if code := Execute([]string{"init", dir, "--defaults", "--comments", "--catalogs=false", "--fetch-retries", "4"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("commented defaults init exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if strings.Contains(stdout.String(), "No interactive terminal detected") {
+		t.Fatalf("--defaults should silence noninteractive explanation with comments: %s", stdout.String())
+	}
+	configPath := filepath.Join(dir, ".dollarlint.toml")
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatalf("read commented config: %v", err)
+	}
+	config := string(data)
+	for _, expected := range []string{
+		"version = 1 # Config schema version.",
+		`mode = "auto" # Parse .json as strict JSON first, then allow JSONC-style comments and trailing commas when needed.`,
+		"retries = 4 # Retry transient remote fetch failures this many times.",
+		"enabled = false # Infer schemas for conventional config filenames from configured catalogs.",
+		`# file = "settings/*.toml" # File glob to match.`,
+	} {
+		if !strings.Contains(config, expected) {
+			t.Fatalf("commented config missing %q:\n%s", expected, config)
+		}
+	}
+	loaded, _, err := dollarlint.LoadConfig(dir, "")
+	if err != nil {
+		t.Fatalf("load commented config: %v\n%s", err, config)
+	}
+	if loaded.Schemas.Fetch.Retries == nil || *loaded.Schemas.Fetch.Retries != 4 || loaded.Schemas.Catalogs.Enabled {
+		t.Fatalf("loaded commented config = %+v", loaded)
+	}
+}
+
 func TestInitCommandRequiresTOML(t *testing.T) {
 	dir := t.TempDir()
 	var stdout, stderr bytes.Buffer
 	tomlPath := filepath.Join(dir, "nested", ".dollarlint.toml")
-	if code := Execute([]string{"init", "--output", tomlPath, "--schema-store-failure", "error"}, &stdout, &stderr); code != 0 {
+	if code := Execute([]string{"init", "--output", tomlPath, "--catalog-failure", "error"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("toml init exit = %d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	data, err := os.ReadFile(tomlPath)
@@ -523,7 +569,7 @@ func TestInitPlainPrompts(t *testing.T) {
 	if err := interviewInitWithPrompter(&prompter, &opts); err != nil {
 		t.Fatalf("interviewInit: %v", err)
 	}
-	if opts.fetchRemote || opts.fetchRetries != 4 || !opts.schemaStore || opts.catalogFailure != "error" {
+	if opts.fetchRemote || opts.fetchRetries != 4 || !opts.catalogs || opts.catalogFailure != "error" {
 		t.Fatalf("opts = %+v", opts)
 	}
 	if strings.Join(prompter.questions, "|") != "Allow remote http(s) schema fetching?|Retries for transient schema fetch failures|Enable catalog filename matching?|catalogFailure" {
@@ -540,7 +586,7 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 	if err := interviewInitWithPrompter(&prompter, &opts); err != nil {
 		t.Fatalf("interviewInit: %v", err)
 	}
-	if !opts.fetchRemote || opts.fetchRetries != defaultFetchRetries || opts.schemaStore {
+	if !opts.fetchRemote || opts.fetchRetries != defaultFetchRetries || opts.catalogs {
 		t.Fatalf("opts after prompts = %+v", opts)
 	}
 	data, err := renderStarterConfig(defaultInitOptions())
@@ -569,6 +615,9 @@ func TestDefaultInitOptionsDrivePromptsAndConfig(t *testing.T) {
 	}
 	if strings.Contains(config, "fetchRemote") || strings.Contains(config, "strict =") || strings.Contains(config, "[timeouts]") || strings.Contains(config, "include = [") {
 		t.Fatalf("default config contains removed keys:\n%s", config)
+	}
+	if strings.Contains(config, "Config schema version.") || strings.Contains(config, "Retry transient remote fetch failures") {
+		t.Fatalf("default config should not include explanatory comments without --comments:\n%s", config)
 	}
 }
 

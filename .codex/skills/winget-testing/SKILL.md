@@ -7,10 +7,18 @@ description: DollarLint WinGet validation workflow. Use when Codex is asked to t
 
 ## Core Workflow
 
+Prefer the DollarLint repo MCP release tools over raw `gh` calls when they are available:
+
+- Use `release_status` to inspect tags, release runs, GitHub releases, and matching WinGet PRs.
+- Use `release_start` to infer or trigger the next release.
+- Use `release_watch` instead of shell sleep loops or `gh run watch`; keep the tool call open for progress.
+- Use `release_winget_pr` to inspect the Microsoft PR body/draft state.
+- Use `release_winget_watch` instead of manual Azure/curl polling; it infers the linked Microsoft validation build from `wingetbot` comments and streams progress while it waits.
+
 1. Check the DollarLint release and WinGet PR context first.
    - Confirm the package version under discussion.
    - Confirm the manifest branch in `dollarlint/winget-pkgs`; release branches are normally named `dollarlint-x.y.z`.
-   - If checking a Microsoft PR, inspect the PR checks, labels, comments, and the linked Azure validation run before drawing conclusions.
+   - If checking a Microsoft PR, use `release_winget_watch` for the linked Azure validation run before drawing conclusions.
 
 2. Use `scripts/test-winget-manifest.ps1` for local Windows validation.
    - The script validates the manifest, enables required local-manifest admin settings, installs from the local manifest, checks `winget list`, checks `dollarlint --version`, and can uninstall afterward.

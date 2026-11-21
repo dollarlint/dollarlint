@@ -31,6 +31,8 @@ func TestCIReadinessCommandsMirrorCriticalCISteps(t *testing.T) {
 	assertCommand("test", "core coverage", "coverage + 0 < minimum")
 	assertCommand("docs", "install docs dependencies", "npm ci")
 	assertCommand("goreleaser-check", "check goreleaser config", "goreleaser")
+	assertCommand("goreleaser-check", "goreleaser snapshot", "--skip=winget,homebrew")
+	assertCommand("goreleaser-check", "audit generated npm wrapper", "npm audit --audit-level=high --prefix dist/npm/dollarlint")
 }
 
 func TestDiagnoseFailureLogMapsRecentFailureShapes(t *testing.T) {
@@ -102,7 +104,7 @@ func TestMissingWorkflowToolsAcceptsServerSideRealWorldFilter(t *testing.T) {
 mcp-servers:
   dollarlint-repo:
     env:
-      DOLLARLINT_MCP_TOOLS: "real_world_*"
+      DOLLARLINT_MCP_TOOLS: "real_world_* !real_world_remote_*"
     allowed:
       - "*"
 `
@@ -110,11 +112,22 @@ mcp-servers:
 "tools": [
                   "*"
                 ],
-"env": {"DOLLARLINT_MCP_TOOLS": "real_world_*"}
+"env": {"DOLLARLINT_MCP_TOOLS": "real_world_* !real_world_remote_*"}
 --allow-tool dollarlint-repo --allow-tool github
 `
 	if missing := missingWorkflowTools(source, lock, required); len(missing) != 0 {
 		t.Fatalf("missing = %v, want none", missing)
+	}
+	if !hasServerSideRealWorldRemoteToolExclusion(source, lock) {
+		t.Fatalf("expected remote real-world tool exclusion")
+	}
+}
+
+func TestServerSideRealWorldRemoteToolExclusionRequiresSourceAndLock(t *testing.T) {
+	source := `DOLLARLINT_MCP_TOOLS: "real_world_* !real_world_remote_*"`
+	lock := `"env": {"DOLLARLINT_MCP_TOOLS": "real_world_*"}`
+	if hasServerSideRealWorldRemoteToolExclusion(source, lock) {
+		t.Fatalf("remote tool exclusion should require source and lock")
 	}
 }
 
@@ -128,22 +141,22 @@ func TestMissingWorkflowToolsRequiresToolInSourceAndLock(t *testing.T) {
 }
 
 func TestRealWorldSafeOutputPolicyIssuesRequirePRAndLinker(t *testing.T) {
-	source := "tools:\n  bash:\n    - printf\nmentions:\n  allowed: [agorischek]\ncreate-discussion:\n  category: agentic-product-testing\ncreate-pull-request:\n  if-no-changes: error\n  allowed-files:\n    - reports/agentic-product-testing/**\n  max-patch-size: 8192\njobs:\n  link-outputs:\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n@agorischek\n"
-	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]}}`
+	source := "tools:\n  bash:\n    - printf\nmentions:\n  allowed: [agorischek]\ncreate-discussion:\n  category: agentic-product-testing\ncreate-pull-request:\n  if-no-changes: error\n  allowed-files:\n    - reports/agentic-product-testing/**\n  max-patch-size: 8192\njobs:\n  link-outputs:\nFail incomplete Agentic Product Testing run\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n@agorischek\npatch artifact\nDo not call `report_incomplete`\n"
+	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]},"step":"Fail incomplete Agentic Product Testing run","jq":"report_incomplete"}`
 	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 0 {
 		t.Fatalf("issues = %+v, want none", issues)
 	}
 
 	source = "create-pull-request:\n"
 	lock = `{"create_pull_request":{}}`
-	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 8 {
-		t.Fatalf("issues = %+v, want missing PR policy, linker, dispatch inputs, Discussion retention text, Discussion category, owner mention, allowed files, and patch limit", issues)
+	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 7 {
+		t.Fatalf("issues = %+v, want missing PR policy, linker, incomplete-failure job, Discussion category, owner mention, allowed files, and patch limit", issues)
 	}
 }
 
 func TestRealWorldSafeOutputPolicyIssuesRequirePrintfForSafeoutputsCLI(t *testing.T) {
-	source := "mentions:\n  allowed: [agorischek]\ncreate-discussion:\n  category: agentic-product-testing\ncreate-pull-request:\n  if-no-changes: error\n  allowed-files:\n    - reports/agentic-product-testing/**\n  max-patch-size: 8192\njobs:\n  link-outputs:\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n@agorischek\n"
-	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]}}`
+	source := "mentions:\n  allowed: [agorischek]\ncreate-discussion:\n  category: agentic-product-testing\ncreate-pull-request:\n  if-no-changes: error\n  allowed-files:\n    - reports/agentic-product-testing/**\n  max-patch-size: 8192\njobs:\n  link-outputs:\nFail incomplete Agentic Product Testing run\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n@agorischek\npatch artifact\nDo not call `report_incomplete`\n"
+	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]},"step":"Fail incomplete Agentic Product Testing run","jq":"report_incomplete"}`
 	issues := realWorldSafeOutputPolicyIssues(source, lock)
 	if len(issues) != 1 || !strings.Contains(issues[0].Message, "printf") {
 		t.Fatalf("issues = %+v, want printf issue", issues)
@@ -151,8 +164,8 @@ func TestRealWorldSafeOutputPolicyIssuesRequirePrintfForSafeoutputsCLI(t *testin
 }
 
 func TestRealWorldSafeOutputPolicyIssuesRejectPackageManagerShell(t *testing.T) {
-	source := "tools:\n  bash:\n    - printf\n    - npm ci --ignore-scripts\nmentions:\n  allowed: [agorischek]\ncreate-discussion:\n  category: agentic-product-testing\ncreate-pull-request:\n  if-no-changes: error\n  allowed-files:\n    - reports/agentic-product-testing/**\n  max-patch-size: 8192\njobs:\n  link-outputs:\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n@agorischek\n"
-	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(npm ci --ignore-scripts)":true,"shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]}}`
+	source := "tools:\n  bash:\n    - printf\n    - npm ci --ignore-scripts\nmentions:\n  allowed: [agorischek]\ncreate-discussion:\n  category: agentic-product-testing\ncreate-pull-request:\n  if-no-changes: error\n  allowed-files:\n    - reports/agentic-product-testing/**\n  max-patch-size: 8192\njobs:\n  link-outputs:\nFail incomplete Agentic Product Testing run\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n@agorischek\npatch artifact\nDo not call `report_incomplete`\n"
+	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(npm ci --ignore-scripts)":true,"shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]},"step":"Fail incomplete Agentic Product Testing run","jq":"report_incomplete"}`
 	issues := realWorldSafeOutputPolicyIssues(source, lock)
 	if len(issues) != 1 || !strings.Contains(issues[0].Message, "package-manager shell") {
 		t.Fatalf("issues = %+v, want package-manager shell issue", issues)
@@ -160,8 +173,8 @@ func TestRealWorldSafeOutputPolicyIssuesRejectPackageManagerShell(t *testing.T) 
 }
 
 func TestRealWorldSafeOutputPolicyIssuesRejectPackageManagerShellWildcard(t *testing.T) {
-	source := "tools:\n  bash:\n    - printf\n    - npm:*\nmentions:\n  allowed: [agorischek]\ncreate-discussion:\n  category: agentic-product-testing\ncreate-pull-request:\n  if-no-changes: error\n  allowed-files:\n    - reports/agentic-product-testing/**\n  max-patch-size: 8192\njobs:\n  link-outputs:\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n@agorischek\n"
-	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]}}`
+	source := "tools:\n  bash:\n    - printf\n    - npm:*\nmentions:\n  allowed: [agorischek]\ncreate-discussion:\n  category: agentic-product-testing\ncreate-pull-request:\n  if-no-changes: error\n  allowed-files:\n    - reports/agentic-product-testing/**\n  max-patch-size: 8192\njobs:\n  link-outputs:\nFail incomplete Agentic Product Testing run\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n@agorischek\npatch artifact\nDo not call `report_incomplete`\n"
+	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]},"step":"Fail incomplete Agentic Product Testing run","jq":"report_incomplete"}`
 	issues := realWorldSafeOutputPolicyIssues(source, lock)
 	if len(issues) != 1 || !strings.Contains(issues[0].Message, "package-manager shell") {
 		t.Fatalf("issues = %+v, want package-manager shell wildcard issue", issues)
@@ -169,8 +182,8 @@ func TestRealWorldSafeOutputPolicyIssuesRejectPackageManagerShellWildcard(t *tes
 }
 
 func TestRealWorldSafeOutputPolicyIssuesIgnoreNetworkPackageNames(t *testing.T) {
-	source := "network:\n  allowed:\n    - dotnet\n    - terraform\ntools:\n  bash:\n    - printf\nmentions:\n  allowed: [agorischek]\ncreate-discussion:\n  category: agentic-product-testing\ncreate-pull-request:\n  if-no-changes: error\n  allowed-files:\n    - reports/agentic-product-testing/**\n  max-patch-size: 8192\njobs:\n  link-outputs:\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n@agorischek\n"
-	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]}}`
+	source := "network:\n  allowed:\n    - dotnet\n    - terraform\ntools:\n  bash:\n    - printf\nmentions:\n  allowed: [agorischek]\ncreate-discussion:\n  category: agentic-product-testing\ncreate-pull-request:\n  if-no-changes: error\n  allowed-files:\n    - reports/agentic-product-testing/**\n  max-patch-size: 8192\njobs:\n  link-outputs:\nFail incomplete Agentic Product Testing run\n${{ github.event.inputs.max_repos }}\n${{ github.event.inputs.candidate_repos }}\nshould be merged in order to retain\n@agorischek\npatch artifact\nDo not call `report_incomplete`\n"
+	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]},"step":"Fail incomplete Agentic Product Testing run","jq":"report_incomplete"}`
 	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 0 {
 		t.Fatalf("issues = %+v, want none", issues)
 	}

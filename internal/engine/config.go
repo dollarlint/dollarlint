@@ -226,6 +226,11 @@ func validateConfigValues(cfg Config) error {
 	if cfg.Schemas.Compile.Timeout.Duration < 0 {
 		return fmt.Errorf("schemas.compile.timeout must be >= 0")
 	}
+	for _, mapping := range cfg.Schemas.Mappings {
+		if err := validateSchemaMapping(mapping); err != nil {
+			return err
+		}
+	}
 	if cfg.Schemas.Catalogs.Failure != "" {
 		if _, err := catalogFailureMode(cfg.Schemas); err != nil {
 			return err
@@ -457,6 +462,9 @@ func mergeSchemaConfig(parent *SchemaConfig, child SchemaConfig, presence config
 	if presence.has("schemas.associations") {
 		parent.Associations = append(append([]SchemaAssociation(nil), parent.Associations...), child.Associations...)
 	}
+	if presence.has("schemas.mappings") {
+		parent.Mappings = append(append([]SchemaMapping(nil), parent.Mappings...), child.Mappings...)
+	}
 	if presence.has("schemas.catalogs.enabled") {
 		parent.Catalogs.Enabled = child.Catalogs.Enabled
 	}
@@ -612,6 +620,9 @@ func normalizeConfigAuthoredPaths(cfg *Config, root, configPath string) {
 	for i := range cfg.Schemas.Associations {
 		cfg.Schemas.Associations[i].File = configRelativeGlob(root, configDir, cfg.Schemas.Associations[i].File)
 		cfg.Schemas.Associations[i].Schema = configRelativeSchemaURI(configDir, cfg.Schemas.Associations[i].Schema)
+	}
+	for i := range cfg.Schemas.Mappings {
+		cfg.Schemas.Mappings[i].Path = configRelativeLocalPath(configDir, cfg.Schemas.Mappings[i].Path)
 	}
 	for i := range cfg.Schemas.Catalogs.Sources {
 		cfg.Schemas.Catalogs.Sources[i].Path = configRelativeLocalPath(configDir, cfg.Schemas.Catalogs.Sources[i].Path)

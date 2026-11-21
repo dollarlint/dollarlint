@@ -1183,10 +1183,14 @@ func realWorldDraftProductRecommendations(details realWorldOutputDetails, issueG
 	}
 	for _, group := range skippedGroups {
 		if group.ProductSignal {
+			recommendation := fmt.Sprintf("Evaluate schema coverage for skipped %s files.", group.Class)
+			if group.Class == "external-catalog" || group.Class == "external-schema" {
+				recommendation = fmt.Sprintf("Investigate schema availability for skipped %s files.", group.Class)
+			}
 			recommendations = append(recommendations, realWorldProductRecommendation{
 				Strength:       "low",
-				Recommendation: fmt.Sprintf("Evaluate schema coverage for skipped %s files.", group.Class),
-				Rationale:      fmt.Sprintf("%d %s file(s) were skipped without a matched schema; these are commonly hand-authored configuration files where DollarLint coverage could reduce user blind spots.", group.Count, group.Class),
+				Recommendation: recommendation,
+				Rationale:      fmt.Sprintf("%d %s file(s) were skipped. Recorded reasons: %s", group.Count, group.Class, strings.Join(group.Reasons, "; ")),
 			})
 			break
 		}

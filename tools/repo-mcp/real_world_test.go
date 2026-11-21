@@ -726,6 +726,33 @@ func TestTriageRealWorldOutputSurfacesSkippedGroups(t *testing.T) {
 	}
 }
 
+func TestTriageSkippedRecommendationsPreserveClassifiedReasons(t *testing.T) {
+	for _, tc := range []struct {
+		name, class, reason, detail, recommendation string
+	}{
+		{"catalog unavailable", "external-catalog", "catalogSchemaUnavailable", "catalog schema fetch returned HTTP 503", "schema availability"},
+		{"unsupported config", "unsupported-config", "noSchema", "recognized configuration without schema support", "schema coverage"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			files := []realWorldOutputFile{{
+				Path: "repo/config.yaml", Status: "skipped", SkipClass: tc.class,
+				SkipReason: tc.reason, SkipDetail: tc.detail,
+			}}
+			groups := realWorldSkippedFileGroups(realWorldSkippedFileSignals(files))
+			recommendations := realWorldDraftProductRecommendations(realWorldOutputDetails{}, nil, nil, groups)
+			if len(recommendations) != 1 || !strings.Contains(recommendations[0].Recommendation, tc.recommendation) {
+				t.Fatalf("recommendations = %+v", recommendations)
+			}
+			if !strings.Contains(recommendations[0].Rationale, tc.detail) {
+				t.Fatalf("recommendation lost the recorded skip reason: %+v", recommendations[0])
+			}
+			if strings.Contains(recommendations[0].Rationale, "without a matched schema") {
+				t.Fatalf("recommendation inferred a reason instead of preserving it: %+v", recommendations[0])
+			}
+		})
+	}
+}
+
 func TestTriageRealWorldOutputRejectsCountMismatch(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "result.json")

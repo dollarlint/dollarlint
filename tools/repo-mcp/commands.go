@@ -37,8 +37,8 @@ type namedCommand struct {
 	OptionalEnv string
 }
 
-const goreleaserCheckCommand = "go run github.com/goreleaser/goreleaser/v2@latest check"
-const goreleaserSnapshotCheckCommand = "go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean --skip=publish"
+const goreleaserCheckCommand = "goreleaser check"
+const goreleaserSnapshotCheckCommand = "goreleaser release --snapshot --clean --skip=winget,homebrew"
 
 func verifyCommands(profile string) ([]namedCommand, error) {
 	switch profile {

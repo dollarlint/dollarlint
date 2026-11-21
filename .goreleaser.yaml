@@ -112,11 +112,11 @@ npms:
     bugs: https://github.com/dollarlint/dollarlint/issues
     extra:
       dependencies:
-        jszip: 3.10.1
-        proxy-agent: 8.0.2
-        tar: 7.5.22
+        jszip: 3.10.2
+        proxy-agent: 8.0.3
+        tar: 7.5.23
       overrides:
-        ip-address: ^10.3.1
+        ip-address: ^10.7.6
     files:
       - glob: npm/README.md
         name_template: README.md

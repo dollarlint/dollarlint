@@ -263,7 +263,7 @@ func (s *repoServer) handleReleaseStart(ctx context.Context, request mcp.CallToo
 		status["nextStep"] = releaseNextStep("release_start", version, "", false)
 		return structured(status)
 	}
-	if status["githubRelease"] != nil {
+	if hasGitHubRelease(status) {
 		status["ok"] = false
 		status["message"] = "GitHub release already exists; use release_status to inspect it instead of starting another release."
 		return structured(status)
@@ -324,7 +324,7 @@ func (s *repoServer) handleReleaseWatch(ctx context.Context, request mcp.CallToo
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
-		if status["githubRelease"] != nil {
+		if hasGitHubRelease(status) {
 			pr, prErr := s.wingetPR(ctx, version, true)
 			if prErr == nil && pr != nil {
 				check := releaseWingetPRCheck(*pr, version)
@@ -582,6 +582,13 @@ func (s *repoServer) releaseVersionOrLatest(ctx context.Context, version string)
 		return "v0.1.0", nil
 	}
 	return tags[0], nil
+}
+
+// A missing release is stored as a typed nil pointer in the status map.
+// Comparing the interface itself to nil incorrectly treats it as a release.
+func hasGitHubRelease(status map[string]any) bool {
+	release, _ := status["githubRelease"].(*ghRelease)
+	return release != nil
 }
 
 func (s *repoServer) releaseStatus(ctx context.Context, version string) (map[string]any, error) {

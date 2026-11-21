@@ -67,6 +67,7 @@ changelog:
   sort: asc
   ai:
     use: openai
+    model: gpt-6-luna
     prompt: |
       Write user-facing release notes for this release.
 

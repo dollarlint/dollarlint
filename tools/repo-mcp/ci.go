@@ -439,17 +439,6 @@ func hasServerSideRealWorldRemoteToolExclusion(source, lock string) bool {
 }
 
 func realWorldSafeOutputPolicyIssues(source, lock string, linkerSources ...string) []readinessIssue {
-	// Newer gh-aw versions emit the JSON policy only as a YAML-quoted value.
-	// Decode quoted scalars before checking the same policy fields.
-	for _, line := range strings.Split(lock, "\n") {
-		_, value, ok := strings.Cut(strings.TrimSpace(line), ": ")
-		if ok && strings.HasPrefix(value, `"`) {
-			if decoded, err := strconv.Unquote(value); err == nil {
-				lock += "\n" + decoded
-			}
-		}
-	}
-
 	var issues []readinessIssue
 	linker := ""
 	if len(linkerSources) > 0 {
@@ -475,17 +464,12 @@ func realWorldSafeOutputPolicyIssues(source, lock string, linkerSources ...strin
 			Recommendation: "Configure the deterministic link-agentic-product-testing-outputs workflow, or restore a safe-outputs linker job and regenerate the lock file.",
 		})
 	}
-	legacyIncompleteCheck := strings.Contains(source, "Fail incomplete Agentic Product Testing run") && strings.Contains(source, "report_incomplete") &&
-		strings.Contains(lock, "Fail incomplete Agentic Product Testing run") && strings.Contains(lock, "report_incomplete")
-	// gh-aw v1.3 rejects direct safe-output access in post-steps and makes
-	// report_incomplete fail the generated conclusion job itself.
-	nativeIncompleteCheck := strings.Contains(lock, "id: handle_agent_failure") &&
-		strings.Contains(lock, "handle_agent_failure.cjs") && strings.Contains(lock, "report_incomplete")
-	if !legacyIncompleteCheck && !nativeIncompleteCheck {
+	if !strings.Contains(source, "Fail incomplete Agentic Product Testing run") || !strings.Contains(source, "report_incomplete") ||
+		!strings.Contains(lock, "Fail incomplete Agentic Product Testing run") || !strings.Contains(lock, "report_incomplete") {
 		issues = append(issues, readinessIssue{
 			Severity:       "error",
 			Message:        "Agentic Product Testing workflow does not fail when the agent reports an incomplete run",
-			Recommendation: "Regenerate with gh-aw v1.3 or later and confirm the conclusion job includes its report_incomplete failure handler.",
+			Recommendation: "Add a source-level post-step that checks GH_AW_SAFE_OUTPUTS for report_incomplete and exits non-zero, then regenerate the lock file.",
 		})
 	}
 	if hasCustomLinker && !strings.Contains(lock, "created_pr_url") {

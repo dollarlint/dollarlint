@@ -33,13 +33,3 @@ updates:
       security-updates:
         applies-to: security-updates
         patterns: ["*"]
-  - package-ecosystem: npm
-    directory: /.github/workflows
-    schedule:
-      interval: weekly
-    groups:
-      routine-updates:
-        update-types: [minor, patch]
-      security-updates:
-        applies-to: security-updates
-        patterns: ["*"]

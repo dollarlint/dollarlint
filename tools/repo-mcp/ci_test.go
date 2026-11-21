@@ -147,16 +147,6 @@ func TestRealWorldSafeOutputPolicyIssuesRequirePRAndLinker(t *testing.T) {
 		t.Fatalf("issues = %+v, want none", issues)
 	}
 
-	nativeSource := strings.ReplaceAll(source, "Fail incomplete Agentic Product Testing run", "")
-	nativeLock := strings.ReplaceAll(lock, "Fail incomplete Agentic Product Testing run", "") + "\nid: handle_agent_failure\nscript: handle_agent_failure.cjs\n"
-	if issues := realWorldSafeOutputPolicyIssues(nativeSource, nativeLock); len(issues) != 0 {
-		t.Fatalf("native gh-aw incomplete handler issues = %+v, want none", issues)
-	}
-	missingHandler := strings.ReplaceAll(nativeLock, "handle_agent_failure.cjs", "other.cjs")
-	if issues := realWorldSafeOutputPolicyIssues(nativeSource, missingHandler); len(issues) != 1 || !strings.Contains(issues[0].Message, "incomplete") {
-		t.Fatalf("missing native incomplete handler issues = %+v", issues)
-	}
-
 	source = "create-pull-request:\n"
 	lock = `{"create_pull_request":{}}`
 	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 7 {

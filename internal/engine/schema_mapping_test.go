@@ -95,7 +95,15 @@ func TestMappedSchemaPath(t *testing.T) {
 			t.Fatalf("mappedSchemaPath(%q) = %q, %v, %v; want %q", raw, got, ok, err, want)
 		}
 	}
-	for _, raw := range []string{"https://example.test/../x.json", "https://example.test/a/./b.json", "https://example.test/", "https://example.test/a//b.json"} {
+	for _, raw := range []string{
+		"https://example.test/../x.json",
+		"https://example.test/a/./b.json",
+		"https://example.test/",
+		"https://example.test/a//b.json",
+		"https://example.test/%2e%2e%5coutside.json",
+		"https://example.test/a%5c..%5c..%5coutside.json",
+		"https://example.test/C:%5coutside.json",
+	} {
 		if _, ok, err := mappedSchemaPath(raw, mappings); !ok || err == nil {
 			t.Fatalf("mappedSchemaPath(%q) should refuse to leave the mapped directory, got ok=%v err=%v", raw, ok, err)
 		}
@@ -129,5 +137,32 @@ func TestLoadConfigExtendsAppendsSchemaMappings(t *testing.T) {
 	}
 	if len(cfg.Schemas.Mappings) != 2 || filepath.Base(cfg.Schemas.Mappings[0].Path) != "a" || filepath.Dir(cfg.Schemas.Mappings[0].Path) != filepath.Join(dir, "base") || filepath.Base(cfg.Schemas.Mappings[1].Path) != "b" {
 		t.Fatalf("mappings = %+v", cfg.Schemas.Mappings)
+	}
+}
+
+func TestLintReportsMappedRootSchemaCompileFailureAsIssue(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "schemas", "broken.json"), `{"type": 42}`)
+	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), `
+[[schemas.associations]]
+file = "data/*.json"
+schema = "https://schemas.example.test/broken.json"
+
+[[schemas.mappings]]
+url = "https://schemas.example.test/"
+path = "schemas"
+`)
+	writeFile(t, filepath.Join(dir, "data", "file.json"), `{}`)
+	cfg, _, err := LoadConfig(dir, "")
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	cfg.Discovery.Include = []string{"data/*.json"}
+	result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if len(result.Warnings) != 0 || result.Summary.Skipped != 0 || result.Summary.Issues.Schema != 1 {
+		t.Fatalf("a mapped schema that fails to compile should be a schema issue, not a warning or skip: summary %+v warnings %+v issues %+v", result.Summary, result.Warnings, result.Issues)
 	}
 }

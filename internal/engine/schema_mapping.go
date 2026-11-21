@@ -50,7 +50,8 @@ func mappedSchemaPath(raw string, mappings []SchemaMapping) (string, bool, error
 		return "", true, fmt.Errorf("mapped schema URL %s has no local path below %s", raw, prefix)
 	}
 	clean := path.Clean("/" + parsed.Path)
-	if rest == "" || clean == "/" || clean != "/"+parsed.Path {
+	// Backslashes and colons would let a decoded path leave the directory on Windows (`..\`, `C:`).
+	if rest == "" || clean == "/" || clean != "/"+parsed.Path || strings.ContainsAny(parsed.Path, "\\:\x00") {
 		return "", true, fmt.Errorf("mapped schema URL %s has no local path below %s", raw, prefix)
 	}
 	return filepath.Join(mapping.Path, filepath.FromSlash(strings.TrimPrefix(clean, "/"))), true, nil

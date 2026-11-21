@@ -26,13 +26,14 @@ func validateSchemaMapping(mapping SchemaMapping) error {
 // mappedSchemaPath returns the local file serving a schema URL (without
 // fragment) when a mapping covers it. A mapping whose URL ends in "/" covers
 // every URL below that prefix, resolved below its directory; any other mapping
-// covers exactly its URL. The longest matching mapping URL wins.
+// covers exactly its URL. The longest matching mapping URL wins, and of equal ones the last.
 func mappedSchemaPath(raw string, mappings []SchemaMapping) (string, bool, error) {
 	best := -1
 	for i, mapping := range mappings {
 		prefix := strings.TrimSpace(mapping.URL)
 		matched := raw == prefix || (strings.HasSuffix(prefix, "/") && strings.HasPrefix(raw, prefix))
-		if matched && (best < 0 || len(prefix) > len(strings.TrimSpace(mappings[best].URL))) {
+		// Later mappings (a child config's, after `extends`) win ties, as associations do.
+		if matched && (best < 0 || len(prefix) >= len(strings.TrimSpace(mappings[best].URL))) {
 			best = i
 		}
 	}

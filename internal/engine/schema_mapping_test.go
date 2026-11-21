@@ -166,3 +166,17 @@ path = "schemas"
 		t.Fatalf("a mapped schema that fails to compile should be a schema issue, not a warning or skip: summary %+v warnings %+v issues %+v", result.Summary, result.Warnings, result.Issues)
 	}
 }
+
+func TestLoadConfigChildSchemaMappingWinsOverParentForTheSameURL(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "base", ".dollarlint.toml"), "[[schemas.mappings]]\nurl = \"https://a.test/\"\npath = \"parent\"\n")
+	writeFile(t, filepath.Join(dir, ".dollarlint.toml"), "extends = \"base/.dollarlint.toml\"\n[[schemas.mappings]]\nurl = \"https://a.test/\"\npath = \"child\"\n")
+	cfg, _, err := LoadConfig(dir, "")
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	got, ok, err := mappedSchemaPath("https://a.test/x.json", cfg.Schemas.Mappings)
+	if err != nil || !ok || got != filepath.Join(dir, "child", "x.json") {
+		t.Fatalf("mappedSchemaPath = %q, %v, %v; want the child's mapping", got, ok, err)
+	}
+}

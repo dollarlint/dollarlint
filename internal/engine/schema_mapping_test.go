@@ -420,11 +420,13 @@ func TestMappedSchemaLoadErrorsIdentifySource(t *testing.T) {
 	}
 }
 
+// Names with extensions depend on the Windows version; bare device names
+// remain reserved and must never be opened through a prefix mapping.
 func TestMappedWindowsReservedPaths(t *testing.T) {
 	if runtime.GOOS != "windows" {
 		t.Skip("Windows reserved filenames")
 	}
-	for _, name := range []string{"CON", "NUL.json", "sub/COM1", "LPT1.txt"} {
+	for _, name := range []string{"CON", "NUL", "sub/COM1", "LPT1", "CONIN$", "sub/LPT²"} {
 		if _, matched, err := mappedSchemaPath("https://schemas.test/"+name, []SchemaMapping{{URL: "https://schemas.test/", Path: t.TempDir()}}); !matched || err == nil {
 			t.Fatalf("reserved path %s accepted: %v %v", name, matched, err)
 		}

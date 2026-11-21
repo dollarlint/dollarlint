@@ -31,6 +31,8 @@ func TestCIReadinessCommandsMirrorCriticalCISteps(t *testing.T) {
 	assertCommand("test", "core coverage", "coverage + 0 < minimum")
 	assertCommand("docs", "install docs dependencies", "npm ci")
 	assertCommand("goreleaser-check", "check goreleaser config", "goreleaser")
+	assertCommand("goreleaser-check", "goreleaser snapshot", "--skip=winget,homebrew")
+	assertCommand("goreleaser-check", "audit generated npm wrapper", "npm audit --audit-level=high --prefix dist/npm/dollarlint")
 }
 
 func TestDiagnoseFailureLogMapsRecentFailureShapes(t *testing.T) {
@@ -143,6 +145,16 @@ func TestRealWorldSafeOutputPolicyIssuesRequirePRAndLinker(t *testing.T) {
 	lock := `{"create_discussion":{"category":"agentic-product-testing"},"create_pull_request":{"allowed_files":["reports/agentic-product-testing/**"],"if_no_changes":"error","max_patch_size":8192},"link_outputs":true,"created_pr_url":"${{ steps.outputs.url }}","shell(printf)":true,"shell(safeoutputs:*)":true,"prompt":"should be merged in order to retain @agorischek","mentions":{"allowed":["agorischek"]},"step":"Fail incomplete Agentic Product Testing run","jq":"report_incomplete"}`
 	if issues := realWorldSafeOutputPolicyIssues(source, lock); len(issues) != 0 {
 		t.Fatalf("issues = %+v, want none", issues)
+	}
+
+	nativeSource := strings.ReplaceAll(source, "Fail incomplete Agentic Product Testing run", "")
+	nativeLock := strings.ReplaceAll(lock, "Fail incomplete Agentic Product Testing run", "") + "\nid: handle_agent_failure\nscript: handle_agent_failure.cjs\n"
+	if issues := realWorldSafeOutputPolicyIssues(nativeSource, nativeLock); len(issues) != 0 {
+		t.Fatalf("native gh-aw incomplete handler issues = %+v, want none", issues)
+	}
+	missingHandler := strings.ReplaceAll(nativeLock, "handle_agent_failure.cjs", "other.cjs")
+	if issues := realWorldSafeOutputPolicyIssues(nativeSource, missingHandler); len(issues) != 1 || !strings.Contains(issues[0].Message, "incomplete") {
+		t.Fatalf("missing native incomplete handler issues = %+v", issues)
 	}
 
 	source = "create-pull-request:\n"

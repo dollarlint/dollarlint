@@ -1,0 +1,10 @@
+# actionlint v1.7.12 predates these GitHub.com features emitted by gh-aw v1.3.
+# Keep all other checks enabled; remove these exceptions when actionlint supports
+# https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
+# and https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#job-context.
+paths:
+  .github/workflows/agentic-product-testing.lock.yml:
+    ignore:
+      - 'unexpected key "queue" for "concurrency" section'
+      - 'unexpected key "cache-mode" for "job" section'
+      - 'property "workflow_(ref|sha)" is not defined in object type'

@@ -1,16 +1,45 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "gomod"
-    directory: "/"
+      interval: weekly
+    groups:
+      routine-updates:
+        update-types: [minor, patch]
+      security-updates:
+        applies-to: security-updates
+        patterns: ["*"]
+    ignore:
+      # Regenerate with the matching gh-aw compiler; never bump its lock alone.
+      - dependency-name: "github/gh-aw-actions/*"
+  - package-ecosystem: gomod
+    directory: /
     schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "npm"
-    directory: "/docs"
+      interval: weekly
+    groups:
+      routine-updates:
+        update-types: [minor, patch]
+      security-updates:
+        applies-to: security-updates
+        patterns: ["*"]
+  - package-ecosystem: npm
+    directory: /docs
     schedule:
-      interval: "weekly"
+      interval: weekly
+    groups:
+      routine-updates:
+        update-types: [minor, patch]
+      security-updates:
+        applies-to: security-updates
+        patterns: ["*"]
+  - package-ecosystem: npm
+    directory: /.github/workflows
+    schedule:
+      interval: weekly
+    groups:
+      routine-updates:
+        update-types: [minor, patch]
+      security-updates:
+        applies-to: security-updates
+        patterns: ["*"]

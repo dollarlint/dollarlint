@@ -19,7 +19,7 @@ engine: copilot
 
 runtimes:
   go:
-    version: "1.26.3"
+    version: "1.26.11"
 
 network:
   allowed:
@@ -61,7 +61,7 @@ tools:
 mcp-servers:
   dollarlint-repo:
     container: golang
-    version: "1.26.3@sha256:2981696eed011d747340d7252620932677929cce7d2d539602f56a8d7e9b660b"
+    version: "1.26.11@sha256:4165ee6bf3b7811fd7b40373290405c83d0167dcb87ee5f29c427cdcef45ff8f"
     entrypoint: /bin/sh
     entrypointArgs:
       - -lc
@@ -93,7 +93,7 @@ pre-agent-steps:
 safe-outputs:
   max-patch-size: 8192
   mentions:
-    allow-team-members: false
+    allowed-collaborators: false
     allow-context: false
     allowed: [agorischek]
     max: 2
@@ -115,14 +115,7 @@ safe-outputs:
     protected-files: fallback-to-issue
     draft: false
 
-post-steps:
-  - name: Fail incomplete Agentic Product Testing run
-    if: always()
-    run: |
-      if [ -f "${GH_AW_SAFE_OUTPUTS}" ] && jq -e 'select(.type == "report_incomplete")' "${GH_AW_SAFE_OUTPUTS}" >/dev/null; then
-        echo "::error::Agent reported the Agentic Product Testing run incomplete."
-        exit 1
-      fi
+# gh-aw v1.3 handles report_incomplete in its generated conclusion job.
 
 timeout-minutes: 90
 ---

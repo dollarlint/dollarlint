@@ -163,7 +163,8 @@
         },
         "path": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Local filesystem file or directory path; URLs are not supported."
         }
       },
       "required": ["url", "path"]

@@ -181,6 +181,14 @@ func inspectDocumentAssociation(out *InspectFile, document *Document, cfg Config
 	out.AssociationStatus = InspectAssociationStatusAssociated
 	out.Schema = displaySchema(resolved, displayRoot)
 	out.Reason = fallback(reason, schemaDeclarationReason(document.SchemaSource))
+	if local, matched, err := mappedSchemaPath(withoutFragmentMust(resolved), cfg.Schemas.Mappings); matched {
+		if err != nil {
+			out.AssociationStatus = InspectAssociationStatusError
+			out.Message = err.Error()
+			return
+		}
+		out.MappedSchemaPath = local
+	}
 }
 
 func schemaDeclarationReason(source string) string {
@@ -266,6 +274,9 @@ func FormatInspectText(result InspectResult) string {
 			fmt.Fprintf(&builder, "  %s %s\n", textStyleMuted.Render("schema:"), file.Schema)
 		} else {
 			fmt.Fprintf(&builder, "  %s %s\n", textStyleMuted.Render("schema:"), "none")
+		}
+		if file.MappedSchemaPath != "" {
+			fmt.Fprintf(&builder, "  %s %s\n", textStyleMuted.Render("mapped file:"), file.MappedSchemaPath)
 		}
 		if file.SchemaSource != "" {
 			fmt.Fprintf(&builder, "  %s %s\n", textStyleMuted.Render("source:"), file.SchemaSource)

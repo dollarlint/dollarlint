@@ -222,6 +222,10 @@ reason = "application data, not a tool config"
 file = "settings/*.toml"
 schema = "./schemas/settings.schema.json"
 
+[[schemas.mappings]]
+url = "https://schemas.example.com/"
+path = "./schemas/"
+
 [[ignore]]
 file = "fixtures/*.json"
 keyword = "required"
@@ -278,9 +282,23 @@ In nearest mode, each file uses the closest `.dollarlint.toml` at or above its d
 - Use `"jsonc"` to allow JSONC syntax in every `.json` file.
 - Files ending in `.jsonc` always use JSONC parsing.
 
+### Local copies of published schemas
+
+Use `[[schemas.mappings]]` to serve published schema URLs from files in your checkout. This lets a branch validate against its unpublished schema changes while preserving `$id` and relative `$ref` resolution:
+
+```toml
+[[schemas.mappings]]
+url = "https://schemas.example.com/"
+path = "./schemas/"
+```
+
+A URL ending in `/` maps to a directory; any other URL maps exactly to a file. The longest matching URL wins, with later mappings winning ties. Schemes and hostnames are case-insensitive; URL paths are case-sensitive. Paths are filesystem paths relative to the config file, not `file://` URLs. Existing targets must agree with the URL's file/directory form; missing generated targets are allowed until used.
+
+Mappings cover schema declarations, associations, references, catalog-selected schemas, and catalog source URLs. Mapped URLs bypass fetching, its cache, and domain policies, including when `schemas.fetch.enabled = false`. For explicitly selected schemas, mapped load and compile failures are schema issues; catalog-inferred schemas retain `schemas.catalogs.failure` behavior. Load errors identify the URL and local file. `dollarlint inspect` shows the mapped root file as `mapped file:` in text and `mappedSchemaPath` in JSON without loading the schema.
+
 ### Remote schema fetching
 
-Remote `http(s)` schema fetching is enabled by default, and successful schemas/catalogs are cached on disk.
+Remote `http(s)` schema fetching is enabled by default, and successful schemas/catalogs are cached on disk. URLs served by `schemas.mappings` use local files instead and bypass these fetch and domain settings.
 
 - Set `schemas.fetch.cache = false` or pass `--no-schema-cache` to disable caching.
 - Transient network failures (`408`, `425`, `429`, retryable `5xx`) are retried with bounded backoff.

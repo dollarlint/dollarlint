@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -17,11 +18,23 @@ func validateSchemaMapping(mapping SchemaMapping) error {
 	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
 		return fmt.Errorf("schemas.mappings url %q must be an absolute http or https URL", mapping.URL)
 	}
-	if parsed.RawQuery != "" || parsed.Fragment != "" || strings.HasSuffix(raw, "#") {
+	if parsed.ForceQuery || parsed.RawQuery != "" || parsed.Fragment != "" || strings.HasSuffix(raw, "#") {
 		return fmt.Errorf("schemas.mappings url %q must not have a query or fragment", mapping.URL)
 	}
 	if strings.TrimSpace(mapping.Path) == "" {
 		return fmt.Errorf("schemas.mappings path is required for url %q", mapping.URL)
+	}
+	local := strings.TrimSpace(mapping.Path)
+	if pathURL, err := url.Parse(local); err == nil && pathURL.IsAbs() && !isWindowsDriveAbsolutePath(local) {
+		return fmt.Errorf("schemas.mappings path %q must be a filesystem path, not a URL", mapping.Path)
+	}
+	if info, err := os.Stat(local); err == nil {
+		if info.IsDir() && !strings.HasSuffix(raw, "/") {
+			return fmt.Errorf("schemas.mappings url %q must end in / when path %q is a directory", mapping.URL, mapping.Path)
+		}
+		if !info.IsDir() && strings.HasSuffix(raw, "/") {
+			return fmt.Errorf("schemas.mappings path %q must be a directory when url %q ends in /", mapping.Path, mapping.URL)
+		}
 	}
 	return nil
 }
@@ -58,7 +71,11 @@ func mappedSchemaPath(raw string, mappings []SchemaMapping) (string, bool, error
 	if rest == "" || clean == "/" || clean != "/"+parsed.Path || strings.ContainsAny(parsed.Path, "\\:\x00") {
 		return "", true, fmt.Errorf("mapped schema URL %s has no local path below %s", raw, prefix)
 	}
-	return filepath.Join(mapping.Path, filepath.FromSlash(strings.TrimPrefix(clean, "/"))), true, nil
+	relative := filepath.FromSlash(strings.TrimPrefix(clean, "/"))
+	if !filepath.IsLocal(relative) {
+		return "", true, fmt.Errorf("mapped schema URL %s has an invalid local path below %s", raw, prefix)
+	}
+	return filepath.Join(mapping.Path, relative), true, nil
 }
 
 func isMappedSchemaURI(raw string, mappings []SchemaMapping) bool {
@@ -84,10 +101,14 @@ func normalizedMappingURL(raw string) string {
 // isMappedSchemaFailure identifies the resource that actually failed, which can
 // be a mapped dependency of an unmapped remote or catalog schema. Compiler
 // errors retain resource URLs even after the document has loaded successfully.
+// The cases below cover jsonschema v6.0.3's URL-bearing compiler errors; review
+// new error types and the mapped-dependency regression tests when upgrading.
 func isMappedSchemaFailure(err error, mappings []SchemaMapping) bool {
 	for ; err != nil; err = errors.Unwrap(err) {
 		var uri string
 		switch e := err.(type) {
+		case *mappedSchemaLoadError:
+			return true
 		case interface{ Unwrap() []error }:
 			for _, cause := range e.Unwrap() {
 				if isMappedSchemaFailure(cause, mappings) {
@@ -132,4 +153,31 @@ func isMappedSchemaFailure(err error, mappings []SchemaMapping) bool {
 		}
 	}
 	return false
+}
+
+// mappedSchemaLoadError keeps the public URI and its local source together,
+// including in optimized loaders that run before the schema compiler.
+type mappedSchemaLoadError struct {
+	URI  string
+	Path string
+	Err  error
+}
+
+func (e *mappedSchemaLoadError) Error() string {
+	return fmt.Sprintf("mapped schema %s (from %s): %v", e.URI, e.Path, e.Err)
+}
+
+func (e *mappedSchemaLoadError) Unwrap() error { return e.Err }
+
+func mappedSchemaLoadFailure(err error) *mappedSchemaLoadError {
+	var mapped *mappedSchemaLoadError
+	if errors.As(err, &mapped) {
+		return mapped
+	}
+	// jsonschema's LoadURLError exposes Err but does not implement Unwrap.
+	var load *jsonschema.LoadURLError
+	if errors.As(err, &load) {
+		return mappedSchemaLoadFailure(load.Err)
+	}
+	return nil
 }

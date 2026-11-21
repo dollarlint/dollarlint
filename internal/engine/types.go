@@ -269,6 +269,7 @@ type InspectFile struct {
 	Path                   string       `json:"path"`
 	Format                 string       `json:"format,omitempty"`
 	Schema                 string       `json:"schema,omitempty"`
+	MappedSchemaPath       string       `json:"mappedSchemaPath,omitempty"`
 	SchemaSource           string       `json:"schemaSource,omitempty"`
 	SchemaMatch            *SchemaMatch `json:"schemaMatch,omitempty"`
 	SchemaGap              *SchemaGap   `json:"schemaGap,omitempty"`

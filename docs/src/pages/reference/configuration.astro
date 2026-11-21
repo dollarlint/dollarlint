@@ -350,16 +350,21 @@ extends = "../../.dollarlint.toml"</code></pre>
       longest matching <code>url</code> wins; later mappings win ties. Schemes
       and hostnames match without regard to case, while URL paths remain
       case-sensitive. Mappings apply wherever a schema URL appears: in-file
-      declarations, associations, catalog matches and
+      declarations, associations, catalog matches, catalog source URLs and
       <code>$ref</code>s. Mapped URLs are never fetched, so fetch settings,
       domain policy and the remote cache don't apply to them. Paths are resolved
       from the directory containing <code>.dollarlint.toml</code>, and a URL
-      that would leave the mapped directory is an error. Missing or invalid
-      mapped schemas are reported as schema issues for in-file declarations and
+      that would leave the mapped directory is an error. <code>path</code> must
+      be a filesystem path, not a URL. If the target already exists, it must be
+      a directory for a prefix mapping or a file for an exact mapping. Missing
+      generated targets are allowed until used. Missing or invalid mapped
+      schemas are reported as schema issues for in-file declarations and
       explicit associations, including mapped dependencies of remote schemas.
       For catalog-inferred schemas, <code>schemas.catalogs.failure</code> still
       applies: mappings change where schema bytes come from, not how a schema is
-      selected.
+      selected. Load errors name both the mapped URL and the local file. Use{" "}
+      <code>dollarlint inspect</code> to see the mapped root file without
+      loading or compiling it.
     </p>
 
     <h2>Fetch and compile</h2>

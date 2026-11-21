@@ -158,6 +158,9 @@ func schemaSourceFailureDetail(label, phase, schema string, err error) string {
 }
 
 func schemaFailureMessage(document *Document, phase string, err error) string {
+	if mapped := mappedSchemaLoadFailure(err); mapped != nil {
+		return fmt.Sprintf("schema %s failed: %v", phase, mapped)
+	}
 	if info, ok := classifyLocalSchemaFailure(document, err); ok {
 		if errors.Is(err, os.ErrNotExist) {
 			return fmt.Sprintf("schema %s failed: local schema file not found at %s", phase, info.DisplayPath)
@@ -317,6 +320,16 @@ type localSchemaFailureInfo struct {
 }
 
 func schemaFailureIssueHint(document *Document, err error) (IssueHint, bool) {
+	if mapped := mappedSchemaLoadFailure(err); mapped != nil {
+		return IssueHint{
+			ID:         "schema.mapped-schema-unavailable",
+			Title:      "Mapped schema could not be loaded.",
+			Detail:     fmt.Sprintf("schemas.mappings serves %s from %s, but DollarLint could not read or parse that file.", mapped.URI, mapped.Path),
+			Suggestion: "Check the schemas.mappings path and the local schema file; generate the file first if needed.",
+			Confidence: IssueHintConfidenceHigh,
+			GroupKey:   "schema:mapped-schema-unavailable:" + mapped.Path,
+		}, true
+	}
 	info, ok := classifyLocalSchemaFailure(document, err)
 	if !ok {
 		return IssueHint{}, false
@@ -359,6 +372,9 @@ func classifyLocalSchemaFailure(document *Document, err error) (localSchemaFailu
 }
 
 func legacyHintForSchemaFailure(document *Document, err error) string {
+	if mappedSchemaLoadFailure(err) != nil {
+		return "Check schemas.mappings and the mapped local schema file; generate the file first if needed."
+	}
 	info, ok := classifyLocalSchemaFailure(document, err)
 	if !ok {
 		return ""

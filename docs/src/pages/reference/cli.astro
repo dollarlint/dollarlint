@@ -358,7 +358,10 @@ const mcpConfig = `{
       association, catalog, catalog-fetch, and domain flags as{" "}
       <code>validate</code>. It does not validate file contents or compile
       schemas; it stops after discovery, parsing enough to find in-file
-      declarations, and schema association.
+      declarations, and schema association. For a mapped root schema, text
+      output includes <code>mapped file:</code>, and JSON includes
+      <code>mappedSchemaPath</code>, while <code>schema</code> keeps the
+      canonical URI. The mapped file does not need to exist for inspection.
     </p>
     <table>
       <thead>

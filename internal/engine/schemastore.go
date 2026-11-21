@@ -267,7 +267,7 @@ func loadSchemaStoreCatalogSource(ctx context.Context, cache *SchemaCache, cfg C
 	if catalogURL == "" {
 		return nil, nil, nil
 	}
-	if !remoteFetchEnabled(cfg.Schemas) && isRemoteURI(catalogURL) {
+	if !remoteFetchEnabled(cfg.Schemas) && isRemoteURI(catalogURL) && !isMappedSchemaURI(catalogURL, cfg.Schemas.Mappings) {
 		return schemaStoreCatalogError(cfg, source, "catalog %s requires remote schema fetching", catalogURL)
 	}
 	resolved, err := resolveCatalogURI(catalogURL)

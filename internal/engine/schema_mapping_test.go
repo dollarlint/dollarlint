@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -322,5 +323,133 @@ func TestMappedDependencyDoesNotChangeUnmappedRemoteFailurePolicy(t *testing.T) 
 	}
 	if result.HasIssues() || result.Summary.Skipped != 1 || len(result.Warnings) != 1 {
 		t.Fatalf("unmapped remote failure must retain availability policy: summary=%+v warnings=%+v", result.Summary, result.Warnings)
+	}
+}
+
+func TestLoadConfigValidatesMappingTargets(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "schemas", "item.json"), `{}`)
+	for _, tc := range []struct{ name, uri, local, want string }{
+		{"missing slash", "https://schemas.test", "schemas", "must end in /"},
+		{"exact directory", "https://schemas.test/item.json", "schemas", "must end in /"},
+		{"prefix file", "https://schemas.test/", "schemas/item.json", "must be a directory"},
+		{"empty query", "https://schemas.test/?", "schemas", "query or fragment"},
+		{"file URL", "https://schemas.test/item.json", "file:///schemas/item.json", "filesystem path"},
+		{"remote URL", "https://schemas.test/item.json", "https://other.test/item.json", "filesystem path"},
+		{"opaque URL", "https://schemas.test/item.json", "file:schemas/item.json", "filesystem path"},
+		{"prefix directory", "https://schemas.test/", "schemas", ""},
+		{"exact file", "https://schemas.test/item.json", "schemas/item.json", ""},
+		{"not generated yet", "https://schemas.test/", "generated", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			writeFile(t, filepath.Join(dir, ".dollarlint.toml"), fmt.Sprintf("[[schemas.mappings]]\nurl = %q\npath = %q\n", tc.uri, tc.local))
+			_, _, err := LoadConfig(dir, "")
+			if tc.want == "" {
+				if err != nil {
+					t.Fatal(err)
+				}
+			} else if err == nil || !strings.Contains(err.Error(), tc.want) {
+				t.Fatalf("got %v, want %q", err, tc.want)
+			}
+		})
+	}
+	if err := validateSchemaMapping(SchemaMapping{URL: "https://schemas.test/", Path: `C:\schemas`}); err != nil {
+		t.Fatalf("native Windows path rejected: %v", err)
+	}
+}
+
+func TestMappedCatalogWorksWithoutRemoteFetching(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "catalog.json"), `{"schemas":[{"name":"Mapped","fileMatch":["data.json"],"url":"https://schemas.test/item.json"}]}`)
+	writeFile(t, filepath.Join(dir, "item.json"), `{"type":"string"}`)
+	writeFile(t, filepath.Join(dir, "data.json"), `42`)
+	for _, enabled := range []bool{true, false} {
+		cfg := DefaultConfig()
+		cfg.Discovery.Include = []string{"data.json"}
+		cfg.Schemas.Fetch.Enabled = &enabled
+		cfg.Schemas.Fetch.AllowedDomains = []string{"unrelated.test"}
+		cfg.Schemas.Fetch.BlockedDomains = []string{"schemas.test"}
+		cfg.Schemas.Catalogs = CatalogConfig{Enabled: true, Failure: CatalogFailureError, Sources: []CatalogSource{{Name: "mapped", URL: "https://schemas.test/catalog.json"}}}
+		cfg.Schemas.Mappings = []SchemaMapping{{URL: "https://schemas.test/", Path: dir}}
+		result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if result.Summary.Issues.Validation != 1 || result.Summary.Skipped != 0 || len(result.Warnings) != 0 {
+			t.Fatalf("fetch=%v summary=%+v warnings=%+v", enabled, result.Summary, result.Warnings)
+		}
+	}
+}
+
+func TestMappedSchemaLoadErrorsIdentifySource(t *testing.T) {
+	for _, hintMode := range []string{IssueHintsAuto, IssueHintsOff} {
+		for _, content := range []string{"", "{"} {
+			dir := t.TempDir()
+			local := filepath.Join(dir, "broken.json")
+			if content != "" {
+				writeFile(t, local, content)
+			}
+			writeFile(t, filepath.Join(dir, "root.schema"), `{"$ref":"https://schemas.test/broken.json"}`)
+			writeFile(t, filepath.Join(dir, "data.json"), `{}`)
+			cfg := DefaultConfig()
+			cfg.Discovery.Include = []string{"data.json"}
+			cfg.Output.IssueHints = hintMode
+			cfg.Schemas.Associations = []SchemaAssociation{{File: "data.json", Schema: "./root.schema"}}
+			cfg.Schemas.Mappings = []SchemaMapping{{URL: "https://schemas.test/broken.json", Path: local}}
+			result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(result.Issues) != 1 {
+				t.Fatalf("issues=%+v", result.Issues)
+			}
+			issue := result.Issues[0]
+			if !strings.Contains(issue.Message, local) || !strings.Contains(issue.Message, "https://schemas.test/broken.json") || !strings.Contains(issue.Hint, "schemas.mappings") || strings.Contains(issue.Hint, "$schema points") {
+				t.Fatalf("mapped diagnostic lost source: %+v", issue)
+			}
+			// Compiling directly exercises the compiler's non-unwrapping LoadURLError.
+			_, err = compileSchema(context.Background(), NewSchemaCache(cfg), cfg, "https://schemas.test/broken.json", nil)
+			if err == nil {
+				t.Fatal("expected compile failure")
+			}
+			failure := validationForSchemaFailure(&Document{Schema: "https://remote.test/root.json", SchemaSource: "$schema"}, cfg, "compile", err)
+			if len(failure.issues) != 1 || !strings.Contains(failure.issues[0].Message, local) || !strings.Contains(failure.issues[0].Hint, "schemas.mappings") {
+				t.Fatalf("compiler diagnostic=%+v", failure)
+			}
+		}
+	}
+}
+
+func TestMappedWindowsReservedPaths(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("Windows reserved filenames")
+	}
+	for _, name := range []string{"CON", "NUL.json", "sub/COM1", "LPT1.txt"} {
+		if _, matched, err := mappedSchemaPath("https://schemas.test/"+name, []SchemaMapping{{URL: "https://schemas.test/", Path: t.TempDir()}}); !matched || err == nil {
+			t.Fatalf("reserved path %s accepted: %v %v", name, matched, err)
+		}
+	}
+}
+
+func TestMappedAzureDependencyLoadFailureIsIssue(t *testing.T) {
+	server, _ := newAzureARMParametersFixtureServer(t)
+	defer server.Close()
+	for _, content := range []string{"", "{"} {
+		dir := t.TempDir()
+		local := filepath.Join(dir, "template.json")
+		if content != "" {
+			writeFile(t, local, content)
+		}
+		writeFile(t, filepath.Join(dir, "parameters.json"), azureARMParametersFixture(server.URL))
+		cfg := DefaultConfig()
+		cfg.Discovery.Include = []string{"parameters.json"}
+		cfg.Schemas.Mappings = []SchemaMapping{{URL: server.URL + "/schemas/2015-01-01/deploymentTemplate.json", Path: local}}
+		result, err := Lint(context.Background(), Options{Root: dir, Config: cfg})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if result.Summary.Issues.Schema != 1 || result.Summary.Skipped != 0 || len(result.Warnings) != 0 || !strings.Contains(result.Issues[0].Message, local) {
+			t.Fatalf("optimized mapped dependency failure: summary=%+v issues=%+v warnings=%+v", result.Summary, result.Issues, result.Warnings)
+		}
 	}
 }

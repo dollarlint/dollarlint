@@ -1,11 +1,14 @@
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 func validateSchemaMapping(mapping SchemaMapping) error {
@@ -28,6 +31,7 @@ func validateSchemaMapping(mapping SchemaMapping) error {
 // every URL below that prefix, resolved below its directory; any other mapping
 // covers exactly its URL. The longest matching mapping URL wins, and of equal ones the last.
 func mappedSchemaPath(raw string, mappings []SchemaMapping) (string, bool, error) {
+	raw = normalizedMappingURL(raw)
 	best, bestPrefix := -1, ""
 	for i, mapping := range mappings {
 		prefix := normalizedMappingURL(mapping.URL)
@@ -66,12 +70,66 @@ func isMappedSchemaURI(raw string, mappings []SchemaMapping) bool {
 	return ok
 }
 
-// normalizedMappingURL spells a mapping URL as requested schema URLs are spelled (a lowercase scheme, for one), so
-// they compare equal.
+// normalizedMappingURL compares schemes and hosts case-insensitively while
+// preserving case-sensitive paths and the original URI used by the compiler.
 func normalizedMappingURL(raw string) string {
 	raw = strings.TrimSpace(raw)
 	if parsed, err := url.Parse(raw); err == nil {
+		parsed.Host = strings.ToLower(parsed.Host)
 		return parsed.String()
 	}
 	return raw
+}
+
+// isMappedSchemaFailure identifies the resource that actually failed, which can
+// be a mapped dependency of an unmapped remote or catalog schema. Compiler
+// errors retain resource URLs even after the document has loaded successfully.
+func isMappedSchemaFailure(err error, mappings []SchemaMapping) bool {
+	for ; err != nil; err = errors.Unwrap(err) {
+		var uri string
+		switch e := err.(type) {
+		case interface{ Unwrap() []error }:
+			for _, cause := range e.Unwrap() {
+				if isMappedSchemaFailure(cause, mappings) {
+					return true
+				}
+			}
+		case *jsonschema.LoadURLError:
+			uri = e.URL
+		case *jsonschema.SchemaValidationError:
+			uri = e.URL
+		case *jsonschema.InvalidRegexError:
+			uri = e.URL
+		case *jsonschema.InvalidMetaSchemaURLError:
+			uri = e.URL
+		case *jsonschema.UnsupportedDraftError:
+			uri = e.URL
+		case *jsonschema.MetaSchemaCycleError:
+			uri = e.URL
+		case *jsonschema.MetaSchemaMismatchError:
+			uri = e.URL
+		case *jsonschema.ParseIDError:
+			uri = e.URL
+		case *jsonschema.ParseAnchorError:
+			uri = e.URL
+		case *jsonschema.DuplicateIDError:
+			uri = e.URL
+		case *jsonschema.DuplicateAnchorError:
+			uri = e.URL
+		case *jsonschema.UnsupportedVocabularyError:
+			uri = e.URL
+		case *jsonschema.AnchorNotFoundError:
+			uri = e.URL
+		case *jsonschema.ParseURLError:
+			uri = e.URL
+		case *jsonschema.InvalidJsonPointerError:
+			uri = e.URL
+		case *jsonschema.JSONPointerNotFoundError:
+			uri = e.URL
+		}
+		if uri != "" && isMappedSchemaURI(uri, mappings) {
+			return true
+		}
+	}
+	return false
 }

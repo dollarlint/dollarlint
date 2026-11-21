@@ -91,6 +91,7 @@ type OptimizationConfig = engine.OptimizationConfig
 type AzureOptimization = engine.AzureOptimization
 type FetchConfig = engine.FetchConfig
 type SchemaAssociation = engine.SchemaAssociation
+type SchemaMapping = engine.SchemaMapping
 type CompileConfig = engine.CompileConfig
 type OutputConfig = engine.OutputConfig
 type IgnoreRule = engine.IgnoreRule
